@@ -148,7 +148,10 @@ def fetch_hour(symbol: str, hour: datetime) -> tuple[datetime, Path | None, str]
         try:
             if shutil.disk_usage(MAIN).free < MIN_FREE_BYTES:
                 raise OSError("free disk below 15 GiB")
-            for endpoint in (source, mirror):
+            # The public datafeed host often throttles while www serves the
+            # same archive; try the verified mirror first to avoid a timeout
+            # on every one of hundreds of thousands of hourly files.
+            for endpoint in (mirror, source):
                 try:
                     with urlopen(Request(endpoint, headers=HEADERS), timeout=20) as response:
                         expected = response.headers.get("Content-Length")
@@ -157,10 +160,10 @@ def fetch_hour(symbol: str, hour: datetime) -> tuple[datetime, Path | None, str]
                 except HTTPError as error:
                     if error.code == 404:
                         return hour, None, "HTTP 404"
-                    if endpoint == mirror:
+                    if endpoint == source:
                         raise
                 except (OSError, TimeoutError):
-                    if endpoint == mirror:
+                    if endpoint == source:
                         raise
             if expected and len(raw) != int(expected):
                 raise OSError("BI5 Content-Length mismatch")
@@ -236,6 +239,7 @@ def ohlc_match_rate(symbol: str, month: str, flow: pd.DataFrame) -> tuple[int, i
 
 
 def process_month(symbol: str, month: str, hours: list[datetime], through: date) -> None:
+    print(f"START ticks {symbol} {month}: {len(hours)} candidate hours", flush=True)
     flow_target = FLOW / symbol / f"{month}.parquet"
     second_target = SECONDS / symbol / f"{month}.parquet"
     if _complete(flow_target, through) and _complete(second_target, through):
