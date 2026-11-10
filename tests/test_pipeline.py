@@ -383,6 +383,47 @@ def test_feature_store_keeps_close_time_metadata_and_float32_features():
     assert len(features.select_dtypes("float64").columns)==0
 
 
+def test_level_feature_join_normalizes_object_timestamp_columns():
+    from msd.processing.features import build_features
+    ts=pd.date_range("2024-01-01",periods=100,freq="min",tz="UTC")
+    bars=_bars(ts)
+    levels=pd.DataFrame({"price":[101.0],"type":["prior_day_high"],
+                         "timeframe":["1d"],"created_at":[ts[0].isoformat()],
+                         "known_at":[ts[0].isoformat()],"invalidated_at":[None],
+                         "direction":[0],"strength":[1.0]})
+    features=build_features(bars,"BTCUSDT",timeframes={},levels=levels)
+    assert len(features)==len(bars)
+    assert features.known_at.dtype=="datetime64[ns, UTC]"
+
+
+def test_zero_spread_dukas_ticks_get_nearest_valid_annual_spread():
+    from msd.processing.pipeline import _modelled_spread
+    ts=pd.date_range("2024-01-01",periods=3,freq="min",tz="UTC")
+    frame=pd.DataFrame({"ts":ts})
+    for field in "ohlc":
+        frame[f"bid_{field}"]=[100.,101.,102.]
+        frame[f"ask_{field}"]=[100.2,101.,102.4]
+    result=_modelled_spread(frame,"XAUUSD")
+    assert result.loc[1,"ask_o"]-result.loc[1,"bid_o"]==pytest.approx(0.3)
+    assert result.loc[0,"ask_o"]-result.loc[0,"bid_o"]==pytest.approx(0.2)
+    assert result.spread_modeled.tolist()==[False,True,False]
+
+
+def test_spread_modeled_bars_keep_label_costs_but_mask_spread_features():
+    from msd.processing.pipeline import _modelled_spread
+    from msd.processing.features import build_features
+    ts=pd.date_range("2024-01-01",periods=40,freq="min",tz="UTC")
+    bars=_bars(ts)
+    bars["spread_modeled"]=[False,True]*20
+    executable=_modelled_spread(bars,"BTCUSDT")
+    assert executable.spread_modeled.all()
+    assert (executable.ask_o>executable.bid_o).all()
+    features=build_features(executable,"BTCUSDT",timeframes={})
+    assert features.spread_modeled.dtype==bool
+    assert features.spread_modeled.all()
+    assert features.spread_atr.isna().all()
+
+
 def test_month_window_features_match_full_history_rows():
     from msd.processing.features import build_features,prepare_feature_cache
     ts=pd.date_range("2024-01-01",periods=2400,freq="min",tz="UTC")
@@ -499,6 +540,7 @@ def test_data_load_is_executable_by_default_and_raw_is_available(monkeypatch):
     raw=load("BTCUSDT",ts[0],ts[-1],raw=True)
     assert (executable.ask_o>executable.bid_o).all()
     assert np.allclose(executable.ask_o-executable.bid_o,BTC_SPREAD[2024])
+    assert executable.spread_modeled.dtype==bool and executable.spread_modeled.all()
     assert (raw.ask_o==raw.bid_o).all()
 
 

@@ -348,6 +348,12 @@ def build_features(bars: pd.DataFrame, symbol: str, timeframes: dict[str,pd.Data
                    output_start=None, output_end=None, cache: dict | None=None) -> pd.DataFrame:
     """Build rows for an optional output window using full causal warm-up input."""
     cache=cache or prepare_feature_cache(bars,symbol,timeframes)
+    if levels is not None and not levels.empty:
+        levels=levels.copy()
+        if "known_at" in levels:
+            levels["known_at"]=pd.to_datetime(levels.known_at,utc=True,errors="coerce").astype("datetime64[ns, UTC]")
+        if "invalidated_at" in levels:
+            levels["invalidated_at"]=pd.to_datetime(levels.invalidated_at,utc=True,errors="coerce").astype("datetime64[ns, UTC]")
     history=cache["history"]
     if history.empty: return pd.DataFrame(columns=["ts","known_at"])
     tfs=cache["timeframes"]
@@ -361,9 +367,12 @@ def build_features(bars: pd.DataFrame, symbol: str, timeframes: dict[str,pd.Data
     source=history.loc[output_mask].reset_index(drop=True)
     base_ind=base_ind_history.loc[output_mask].reset_index(drop=True)
     if source.empty:return pd.DataFrame(columns=["ts","known_at"])
+    spread_modeled=(source.spread_modeled.fillna(False).astype(bool).to_numpy()
+                    if "spread_modeled" in source else np.zeros(len(source),dtype=bool))
     out=pd.DataFrame({"ts":source.ts,"known_at":source.ts+pd.Timedelta(minutes=1),
                       "mid_close":((source.bid_c+source.ask_c)/2).to_numpy(float),
-                      "spread":(source.ask_o-source.bid_o).to_numpy(float)})
+                      "spread":(source.ask_o-source.bid_o).to_numpy(float),
+                      "spread_modeled":spread_modeled})
     for col in base_ind: out[f"1m_{col}"]=base_ind[col].to_numpy()
     for tf,merged in cache["merged"].items():
         if merged.empty: continue
@@ -402,6 +411,7 @@ def build_features(bars: pd.DataFrame, symbol: str, timeframes: dict[str,pd.Data
     if "duka_spread" in source: spread=source.duka_spread.to_numpy(float)
     else: spread=out.spread.to_numpy(float)
     out["spread_atr"]=np.divide(spread,safe_atr,out=np.full(len(out),np.nan),where=np.isfinite(safe_atr))
+    out.loc[spread_modeled,"spread_atr"] = np.nan
     volume_column = "duka_volume" if "duka_volume" in history and history.duka_volume.notna().any() else "volume"
     volume_history=history[volume_column].to_numpy(float) if volume_column in history else np.full(len(history),np.nan)
     volume=volume_history[output_mask]
@@ -557,7 +567,7 @@ def build_features(bars: pd.DataFrame, symbol: str, timeframes: dict[str,pd.Data
     out=out.drop(columns=[c for c in ("mid_close","spread","base_atr14") if c in out])
     for redundant in ("1m_atr14_price","1m_atr50_price","1m_realized_vol50","1m_parkinson_vol50","1m_volume_ratio20"):
         if redundant in out: out=out.drop(columns=redundant)
-    feature_cols=[c for c in out if c not in {"ts", "known_at"} and not c.endswith("_bar_known_at")]
+    feature_cols=[c for c in out if c not in {"ts", "known_at", "spread_modeled"} and not c.endswith("_bar_known_at")]
     out[feature_cols]=out[feature_cols].replace([np.inf,-np.inf],np.nan).astype("float32")
     return out
 

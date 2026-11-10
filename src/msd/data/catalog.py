@@ -181,6 +181,7 @@ def build_catalog() -> str:
     ]
     lines.extend(f"| {a} | {b} | {c} | {d} |" for a, b, c, d in primary)
     lines += _gold_bars_per_day_lines()
+    lines += _spread_modeled_feature_lines()
     lines += ["", "NQ/SPX HistData feed switch was measured at the first exact cash-price bar on 2018-12-16 23:00 UTC. Before it, HistData is a futures-continuous feed: `feed=futures_cont`, quarter rolls are flagged, and `adj_bid_*` applies additive backward adjustments. After it, the primary series is Dukascopy (`feed=cash_cfd`). The switch is intentionally not hidden by source blending. A homogeneous real-volume alternative is CME futures through Databento (paid; $125 credit); no account was created.",
               "", "HistData GRXEUR can be checked against only one Dukascopy DEUIDXEUR month (2014-01), and no LIGHTCMDUSD overlap is present for WTIUSD. Their feed regime and DST behavior therefore remain unverified against a second source; the files are marked `unclassified` rather than assumed to be cash or futures."]
     lines += ["", "## Quality and coverage", "", "Per-source/year coverage and recurring gaps are in `reports/data/data_quality_<SYMBOL>.md`; HistData/Dukascopy cross-validation is in `reports/data/histdata_vs_dukascopy.md`.", ""]
@@ -202,6 +203,38 @@ def _gold_bars_per_day_lines() -> list[str]:
     for year,values in daily.groupby(level="year"):
         arr=values.to_numpy(float)
         lines.append(f"| {year} | {len(arr):,} | {np.median(arr):.0f} | {np.percentile(arr,10):.0f} | {np.percentile(arr,90):.0f} | {int((arr>=1000).sum()):,} |")
+    lines.append("")
+    return lines
+
+
+def _spread_modeled_feature_lines() -> list[str]:
+    """Summarize feature rows whose executable spread is modeled, by year."""
+    root=Path("data/features")
+    if not root.exists():
+        return ["", "## Modeled-spread feature coverage", "", "No feature files are available yet.", ""]
+    rows=[]
+    for directory in sorted(path for path in root.iterdir() if path.is_dir()):
+        files=sorted(directory.glob("[0-9][0-9][0-9][0-9]-[0-9][0-9].parquet"))
+        for path in files:
+            schema=pq.read_schema(path).names
+            if "spread_modeled" not in schema: continue
+            frame=pd.read_parquet(path,columns=["ts","spread_modeled"])
+            if frame.empty: continue
+            frame["ts"]=pd.to_datetime(frame.ts,utc=True)
+            if directory.name in {"USATECHIDXUSD","USA500IDXUSD"}:
+                frame=frame[frame.ts>=pd.Timestamp("2018-12-16 23:00",tz="UTC")]
+            if frame.empty: continue
+            frame["year"]=frame.ts.dt.year
+            summary=frame.groupby("year").spread_modeled.agg(["size","sum"])
+            rows.extend((directory.name,int(year),int(values["size"]),int(values["sum"]))
+                        for year,values in summary.iterrows())
+    lines=["", "## Modeled-spread feature coverage", "",
+           "Share of persisted feature rows whose bid/ask spread was modeled for execution costs. "
+           "Spread-derived predictor columns are NaN on these rows; the flag remains available for QA.", "",
+           "| Symbol | Year | Feature rows | Modeled-spread rows | Share |",
+           "|---|---:|---:|---:|---:|"]
+    for symbol,year,total,modeled in rows:
+        lines.append(f"| {symbol} | {year} | {total:,} | {modeled:,} | {modeled/total:.2%} |")
     lines.append("")
     return lines
 

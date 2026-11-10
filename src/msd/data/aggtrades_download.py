@@ -21,7 +21,7 @@ from urllib.request import Request, urlopen
 ROOT = Path("data/raw/binance/aggTrades")
 INVENTORY = Path("data/tmp/aggtrades_head_sizes.json")
 MISSING = Path("data/logs/missing_aggtrades.csv")
-MIN_FREE_BYTES = 65 * 1024**3
+MIN_FREE_BYTES = 15 * 1024**3  # user: keep >=10 GB free; 15 GiB leaves system headroom
 BASE = {"spot": "https://data.binance.vision/data/spot/monthly/aggTrades",
         "um": "https://data.binance.vision/data/futures/um/monthly/aggTrades"}
 CHUNK = 8 * 1024**2
@@ -48,7 +48,7 @@ def download_one(market: str, symbol: str, month: str, expected_bytes: int, retr
         tmp = target.with_suffix(f".zip.part{os.getpid()}")
         try:
             if shutil.disk_usage(".").free - expected_bytes < MIN_FREE_BYTES:
-                raise OSError("free disk would drop below 65 GiB")
+                raise OSError("free disk would drop below 15 GiB")
             expected_sha = _read(url + ".CHECKSUM", 60).decode("ascii").split()[0].lower()
             digest, size = hashlib.sha256(), 0
             with urlopen(Request(url, headers=UA), timeout=120) as response, tmp.open("wb") as out:

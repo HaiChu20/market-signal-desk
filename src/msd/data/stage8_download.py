@@ -4,6 +4,7 @@ from __future__ import annotations
 from datetime import date, datetime, timezone
 from pathlib import Path
 import argparse
+import os
 import pyarrow.parquet as pq
 
 from .binance_lake import download_klines
@@ -92,7 +93,7 @@ def _finalize_dukascopy_symbol(symbol: str) -> None:
 def run(task_name: str) -> None:
     if task_name == "dukascopy":
         tasks = [(f"Dukascopy {symbol}", lambda symbol=symbol: download_dukas(
-                    symbol, DUKASCOPY_START[symbol], datetime.now(timezone.utc).date(), workers=4))
+                    symbol, DUKASCOPY_START[symbol], datetime.now(timezone.utc).date(), workers=int(os.environ.get("MSD_DUKA_WORKERS", "4"))))
                  for symbol in DUKASCOPY_ORDER]
     elif task_name == "histdata":
         tasks = [(f"HistData {symbol}", lambda symbol=symbol: download_histdata(symbol, date(2010, 11, 1))) for symbol in ("GRXEUR", "WTIUSD")]

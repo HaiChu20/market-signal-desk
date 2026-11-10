@@ -510,7 +510,7 @@ def download(symbol: str, start: date, end: date, root: Path = ROOT, workers: in
     month = start.replace(day=1)
     with ThreadPoolExecutor(max_workers=workers) as pool:
         while month <= end:
-            if shutil.disk_usage(".").free < 65 * 1024**3:
+            if shutil.disk_usage(".").free < 15 * 1024**3:
                 raise OSError("Stopping Dukascopy download: less than 65 GiB free")
             next_month = (month.replace(day=28) + timedelta(days=4)).replace(day=1)
             last = min(end, next_month - timedelta(days=1))

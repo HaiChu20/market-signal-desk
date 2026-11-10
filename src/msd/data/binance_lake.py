@@ -25,13 +25,13 @@ import pyarrow.parquet as pq
 FUTURE = {"BTCUSDT": date(2019, 9, 1), "ETHUSDT": date(2019, 9, 1)}
 SPOT = {"BTCUSDT": date(2017, 8, 1), "ETHUSDT": date(2017, 8, 1)}
 KLINE_COLUMNS = ["ts", "bid_o", "bid_h", "bid_l", "bid_c", "ask_o", "ask_h", "ask_l", "ask_c", "volume", "quote_volume", "trades", "taker_buy_base", "taker_buy_quote"]
-MIN_FREE_BYTES = 65 * 1024**3
+MIN_FREE_BYTES = 15 * 1024**3  # user: keep >=10 GB free; 15 GiB leaves system headroom
 
 
 def ensure_disk_space() -> None:
     free = shutil.disk_usage(".").free
     if free < MIN_FREE_BYTES:
-        raise OSError(f"Stopping data downloads: only {free / 1024**3:.1f} GiB free (65 GiB minimum)")
+        raise OSError(f"Stopping data downloads: only {free / 1024**3:.1f} GiB free (15 GiB minimum)")
 
 
 def parse_kline_rows(rows: list[list[str]]) -> pd.DataFrame:
