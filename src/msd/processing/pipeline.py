@@ -498,7 +498,13 @@ def label_method_events(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.D
             state_out[method.NAME]=next_state
             touch_rows.extend(method_touches)
         else:
-            events=method.detect(scan_features,levels,scan_bars)
+            if return_states:
+                events,next_state,_=method.detect(
+                    scan_features,levels,scan_bars,
+                    state=(method_states or {}).get(method.NAME),return_state=True)
+                state_out[method.NAME]=next_state
+            else:
+                events=method.detect(scan_features,levels,scan_bars)
         if event_start is not None:
             events=[event for event in events if pd.Timestamp(event["ts"]) >= pd.Timestamp(event_start)]
         if event_end is not None:
