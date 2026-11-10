@@ -135,7 +135,10 @@ def fetch_hour(symbol: str, hour: datetime) -> tuple[datetime, Path | None, str]
         raw = target.read_bytes()
         digest = hashlib.sha256(raw).hexdigest()
         if digest == sidecar.read_text().split()[0]:
-            decode_ticks(raw, symbol, hour)
+            try:
+                decode_ticks(raw, symbol, hour)
+            except Exception as error:
+                raise ValueError(f"retained raw decode failed: {error}") from error
             return hour, target, "resume verified"
         raise ValueError(f"retained raw SHA256 mismatch: {target}")
     source = url(symbol, hour)
@@ -160,7 +163,7 @@ def fetch_hour(symbol: str, hour: datetime) -> tuple[datetime, Path | None, str]
                     if endpoint == mirror:
                         raise
             if expected and len(raw) != int(expected):
-                raise ValueError("BI5 Content-Length mismatch")
+                raise OSError("BI5 Content-Length mismatch")
             decode_ticks(raw, symbol, hour)
             digest = hashlib.sha256(raw).hexdigest()
             target.parent.mkdir(parents=True, exist_ok=True)
@@ -181,6 +184,8 @@ def fetch_hour(symbol: str, hour: datetime) -> tuple[datetime, Path | None, str]
             if "15 GiB" in str(error):
                 raise
             last = error
+        except ValueError:
+            raise
         except Exception as error:
             last = error
         if attempt < 4:

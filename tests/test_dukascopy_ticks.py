@@ -3,6 +3,7 @@ import lzma
 import struct
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.error import HTTPError
 
 import pandas as pd
 import pytest
@@ -93,3 +94,19 @@ def test_fetch_resume(monkeypatch, tmp_path):
     assert Path(str(path) + ".sha256").read_text().split()[0] == hashlib.sha256(raw).hexdigest()
     assert ticks.fetch_hour("USA500IDXUSD", HOUR)[2] == "resume verified"
     assert len(calls) == 1
+
+
+def test_primary_503_uses_public_mirror(monkeypatch, tmp_path):
+    monkeypatch.setattr(ticks, "RAW", tmp_path / "raw")
+    monkeypatch.setattr(ticks.shutil, "disk_usage", lambda _: type("Space", (), {"free": 100 * 1024**3})())
+    calls = []
+    def open_(request, timeout):
+        calls.append(request.full_url)
+        if "datafeed.dukascopy.com" in request.full_url:
+            raise HTTPError(request.full_url, 503, "throttled", {}, None)
+        return Response(sample())
+    monkeypatch.setattr(ticks, "urlopen", open_)
+    _, path, _ = ticks.fetch_hour("USA500IDXUSD", HOUR)
+    assert path.exists()
+    assert len(calls) == 2
+    assert "www.dukascopy.com" in calls[1]
