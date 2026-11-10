@@ -10,7 +10,7 @@ import pandas as pd
 
 from .timeframes import INDEX_SYMBOLS
 
-LEVEL_COLUMNS = ["level_id", "price", "type", "timeframe", "created_at", "known_at", "touches_so_far", "invalidated_at", "strength", "direction"]
+LEVEL_COLUMNS = ["level_id", "price", "type", "timeframe", "created_at", "known_at", "invalidated_at", "strength", "direction"]
 PIVOT_TFS = ("5m", "15m", "1h", "4h", "1d")
 PIVOT_K = (3, 5)
 NY = ZoneInfo("America/New_York")
@@ -325,6 +325,14 @@ def _touch_updates(bars: pd.DataFrame, levels: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows, columns=LEVEL_COLUMNS)
 
 
+def _stable_level_ids(levels: pd.DataFrame) -> np.ndarray:
+    identity = levels[["price", "type", "timeframe", "created_at", "known_at", "direction"]].copy()
+    for column in ("created_at", "known_at"):
+        identity[column] = pd.to_datetime(identity[column], utc=True).astype("datetime64[ns, UTC]")
+    hashes = pd.util.hash_pandas_object(identity, index=False).to_numpy(dtype=np.uint64)
+    return (hashes & np.uint64(0x7FFFFFFFFFFFFFFF)).astype(np.int64)
+
+
 def build_levels(bars: pd.DataFrame, symbol: str, timeframes: dict[str, pd.DataFrame]) -> pd.DataFrame:
     parts = []
     daily = timeframes.get("1d", pd.DataFrame())
@@ -349,9 +357,11 @@ def build_levels(bars: pd.DataFrame, symbol: str, timeframes: dict[str, pd.DataF
     if not parts:
         return pd.DataFrame(columns=LEVEL_COLUMNS)
     levels = pd.concat(parts, ignore_index=True, sort=False)
-    levels["level_id"] = np.arange(len(levels), dtype=np.int64)
-    levels["touches_so_far"] = 0
     levels["invalidated_at"] = pd.NaT
     levels["strength"] = pd.to_numeric(levels.get("strength", 1.0), errors="coerce").fillna(1.0)
     levels["direction"] = pd.to_numeric(levels.get("direction", 0), errors="coerce").fillna(0).astype(np.int8)
+    # IDs are carried into touch/cooldown checkpoints. Sequential IDs change
+    # when a later chunk adds rows to an earlier category; a content-derived
+    # stable ID keeps the same causal level addressable across chunking.
+    levels["level_id"] = _stable_level_ids(levels)
     return levels[LEVEL_COLUMNS].sort_values("known_at").reset_index(drop=True)

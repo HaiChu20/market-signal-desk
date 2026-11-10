@@ -23,9 +23,10 @@ from .level_clusters import bar_clusters, eligible_level_arrays, update_touches
 from msd.processing.levels import levels_asof
 
 
-def detect(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.DataFrame) -> list[dict]:
+def detect(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.DataFrame, *, state: dict | None = None,
+           return_state: bool = False):
     if bars.empty or features.empty or levels.empty:
-        return []
+        return ([], state or {}, []) if return_state else []
     frame = bars.sort_values("ts").reset_index(drop=True)
     atr = (features.set_index("ts")["1h_atr14"].reindex(frame.ts).to_numpy(float)
            if "1h_atr14" in features else np.full(len(frame), np.nan))
@@ -36,12 +37,20 @@ def detect(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.DataFrame) -> 
     lows, highs, closes = (frame[c].to_numpy(float) for c in ("bid_l", "bid_h", "bid_c"))
     stamps = pd.to_datetime(frame.ts, utc=True).astype("datetime64[ns, UTC]").astype("int64").to_numpy() + 60_000_000_000
     bar_ts = frame.ts.array
-    touches = np.zeros(len(prices), dtype=np.int32)
+    state = state or {}
+    state_counts = state.get("touch_counts", {})
+    touches = np.asarray([int(state_counts.get(str(level_id), 0)) for level_id in ids], dtype=np.int64)
     touch_state = np.zeros(len(prices), dtype=bool)
-    previous_touching = np.empty(0, dtype=np.int64)
+    touching_ids = set(map(int, state.get("touching_ids", [])))
+    previous_touching = np.asarray([i for i, level_id in enumerate(ids) if int(level_id) in touching_ids], dtype=np.int64)
+    touch_state[previous_touching] = True
     pending: dict[int, tuple[int, float, int]] = {}
-    last_emit: dict[int, int] = {}
+    for key, value in state.get("pending", {}).items():
+        age = int(value.get("age", 0))
+        pending[int(key)] = (-age-1, float(value["extreme"]), int(value["side"]))
+    last_emit: dict[int, int] = {int(k): int(v) for k,v in state.get("last_emit", {}).items()}
     events: list[dict] = []
+    touch_rows: list[tuple] = []
     for i in range(len(frame)):
         a = atr[i]
         if not np.isfinite(a) or a <= 0:
@@ -53,6 +62,7 @@ def detect(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.DataFrame) -> 
                                           lows[i], highs[i], touch_state, previous_touching)
         if len(newly):
             touches[newly] += 1
+            touch_rows.extend((NAME, int(ids[j]), bar_ts[i], pd.Timestamp(now, tz="UTC")) for j in newly)
         previous_touching = touching
         clusters = bar_clusters(prices, known, invalid, ids, types, created, price_order,
                                 now, lows[i] - 0.6*a, highs[i] + 0.6*a, a, touches, CLUSTER_ATR)
@@ -89,4 +99,17 @@ def detect(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.DataFrame) -> 
                            "method": NAME, "cluster_id": key, "cluster_price": level,
                            "cluster_strength": cluster["touches"], "cluster_types": cluster["types"],
                            "cluster_age_minutes": cluster["age_minutes"], "known_at": pd.Timestamp(now, tz="UTC")})
-    return events
+    if not return_state:
+        return events
+    pending_out = {}
+    for key,(sweep_i,extreme,side) in pending.items():
+        age = max(0, len(frame)-1-sweep_i)
+        if age <= RETURN_WINDOW_BARS:
+            pending_out[str(key)] = {"age":int(age),"extreme":float(extreme),"side":int(side)}
+    state_out = {
+        "touch_counts": {str(int(level_id)): int(touches[i]) for i,level_id in enumerate(ids) if touches[i]},
+        "touching_ids": [int(ids[i]) for i in previous_touching],
+        "pending": pending_out,
+        "last_emit": {str(k): int(v) for k,v in last_emit.items()},
+    }
+    return events, state_out, touch_rows

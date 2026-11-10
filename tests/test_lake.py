@@ -32,6 +32,35 @@ def test_binance_funding_metrics_and_cboe_parsers():
     assert cboe.close.iloc[0] == 12.5
 
 
+def test_squeezemetrics_dix_parser_sets_next_ny_day_known_at():
+    from msd.data.auxiliary import parse_squeezemetrics_csv
+    frame=parse_squeezemetrics_csv(b"date,price,dix,gex\n2024-03-08,5100,0.42,-12.5\n")
+    assert frame.iloc[0].dix==.42 and frame.iloc[0].gex==-12.5
+    # Friday's after-close publication is only available from Saturday local midnight.
+    assert frame.iloc[0].known_at==pd.Timestamp("2024-03-09T05:00:00Z")
+
+
+def test_deribit_dvol_response_parses_hourly_close():
+    from msd.data.auxiliary import parse_deribit_dvol_response
+    stamp=int(pd.Timestamp("2024-01-01T00:00Z").timestamp()*1000)
+    raw=(f'{{"result":{{"data":[[{stamp},50,52,49,51]]}}}}').encode()
+    frame=parse_deribit_dvol_response(raw,"BTC",date(2024,1,1))
+    assert frame.iloc[0].ts==pd.Timestamp("2024-01-01T00:00Z") and frame.iloc[0].close==51
+    assert frame.iloc[0].known_at==pd.Timestamp("2024-01-01T01:00Z")
+    assert frame.iloc[0].resolution_seconds==3600
+
+
+def test_sec_submissions_parser_selects_8k_item_202():
+    from msd.data.auxiliary import parse_edgar_submissions
+    payload={"filings":{"recent":{"form":["8-K","8-K","10-Q"],"items":["2.02, 9.01","1.01","2.02"],
+              "acceptanceDateTime":["20240102140500","20240103120000","20240104120000"],
+              "filingDate":["2024-01-02","2024-01-03","2024-01-04"],
+              "accessionNumber":["a","b","c"],"primaryDocument":["a.htm","b.htm","c.htm"]}}}
+    frame=parse_edgar_submissions(payload,"AAPL")
+    assert len(frame)==1 and frame.iloc[0].accessionNumber=="a"
+    assert frame.iloc[0].datetime_utc=="20240102140500"
+
+
 def test_binance_funding_vision_calc_time_format():
     from msd.data.binance_lake import parse_funding_csv
     frame = parse_funding_csv(b"calc_time,funding_interval_hours,last_funding_rate\n1577836800000,8,-0.00012359\n", "BTCUSDT")
@@ -90,6 +119,39 @@ def test_manifest_and_source_routing(tmp_path, monkeypatch):
     assert calls == [("SPXUSD", "histdata")]
 
 
+def test_rebuild_manifest_recomputes_files_rows_completeness_and_checksums(tmp_path, monkeypatch):
+    import hashlib
+    import json
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    from msd.data import catalog
+
+    root = tmp_path / "dukascopy"
+    directory = root / "TEST"
+    directory.mkdir(parents=True)
+    for month, stamp, complete in (
+        ("2024-01", "2024-01-03T00:00:00Z", b"1"),
+        ("2024-02", "2024-02-05T00:00:00Z", b"0"),
+    ):
+        table = pa.table({"ts": [pd.Timestamp(stamp)], "bid_c": [1.0]})
+        table = table.replace_schema_metadata({b"msd_complete": complete})
+        pq.write_table(table, directory / f"{month}.parquet")
+    (directory / "manifest.json").write_text(json.dumps({"months": {"2013-01": {"bars": 999}}}))
+    monkeypatch.setitem(catalog.SOURCE_DIRS, "dukascopy", root)
+
+    path = catalog.rebuild_manifest("dukascopy", "TEST")
+    result = json.loads(path.read_text())
+    assert set(result["months"]) == {"2024-01", "2024-02"}
+    assert result["months"]["2024-01"]["complete"] is True
+    assert result["months"]["2024-02"]["complete"] is False
+    assert all(item["bars"] == 1 and len(item["sha256"]) == 64 for item in result["months"].values())
+    for month in result["months"]:
+        parquet_path = directory / f"{month}.parquet"
+        assert result["months"][month]["sha256"] == hashlib.sha256(parquet_path.read_bytes()).hexdigest()
+    assert result["bars"] == 2
+    assert result["first_ts"] == "2024-01-03 00:00:00+00:00"
+
+
 def test_explicit_dukascopy_keeps_cfd_epic(monkeypatch):
     from msd.data import load
     from msd.data import catalog
@@ -122,6 +184,26 @@ def test_default_index_loader_switches_from_histdata_to_dukascopy(monkeypatch):
     assert result.ts.tolist()==[switch-pd.Timedelta(minutes=1),switch]
     assert result.feed.tolist()==["futures_cont","cash_cfd"]
     assert calls[0]==("NSXUSD","histdata") and all(source=="dukascopy" for _,source in calls[1:])
+
+
+def test_default_index_loader_applies_start_bound_to_cash_dukas(monkeypatch):
+    import numpy as np
+    from msd.data import load
+    from msd.data import catalog
+    switch=pd.Timestamp("2018-12-16 23:00",tz="UTC")
+    start=pd.Timestamp("2019-01-01",tz="UTC")
+    ts=pd.DatetimeIndex([switch-pd.Timedelta(minutes=1),switch,start])
+    duka=pd.DataFrame({"ts":ts,"bid_o":[1.,2.,3.],"bid_h":[1.,2.,3.],"bid_l":[1.,2.,3.],"bid_c":[1.,2.,3.],
+                       "ask_o":[1.2,2.2,3.2],"ask_h":[1.2,2.2,3.2],"ask_l":[1.2,2.2,3.2],"ask_c":[1.2,2.2,3.2],"volume":[1.,1.,1.]})
+    calls=[]
+    def fake(symbol,lo,hi,source):
+        calls.append((symbol,pd.Timestamp(lo),source))
+        return duka.copy() if source=="dukascopy" else duka.iloc[0:0].copy()
+    monkeypatch.setattr(catalog,"load_source",fake)
+    result=load("USATECHIDXUSD",start,"2019-01-01",raw=True)
+    assert result.ts.tolist()==[start]
+    duka_call=next(call for call in calls if call[2]=="dukascopy")
+    assert duka_call[1]==start
 
 
 def test_missing_requested_source_raises():

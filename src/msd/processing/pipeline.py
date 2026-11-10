@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 
 from msd.data import load
-from .features import build_features, feature_qa
+from .features import build_features, external_feature_frame, feature_qa_files, prepare_feature_cache
 from .labels import label_grid
 from .levels import build_levels
 from .timeframes import INDEX_SYMBOLS, TIMEFRAMES, build_all_timeframes
@@ -194,6 +194,78 @@ def _write_monthly(frame: pd.DataFrame, directory: Path, symbol: str, compressio
     return len(work)
 
 
+def _merge_levels_year(level_temp: Path, symbol: str, start_year: int, replace_existing: bool = False) -> None:
+    """Atomically merge this year's levels with only earlier completed years."""
+    target=LEVEL_DIR/f"{symbol}.parquet"
+    current=pd.read_parquet(level_temp)
+    if target.exists() and not replace_existing:
+        previous=pd.read_parquet(target)
+        # Older level files had a misleading all-zero touch counter. Touch
+        # counts are recomputed from causal price bars by the event detectors.
+        previous=previous.drop(columns=["touches_so_far"],errors="ignore")
+        current=current.drop(columns=["touches_so_far"],errors="ignore")
+        cutoff=pd.Timestamp(start_year,1,1,tz="UTC")
+        previous=previous[pd.to_datetime(previous.known_at,utc=True)<cutoff]
+        current=pd.concat([previous,current],ignore_index=True).sort_values("known_at").reset_index(drop=True)
+    _check_disk()
+    with tempfile.NamedTemporaryFile(dir=LEVEL_DIR,suffix=".parquet",delete=False) as handle:
+        merged_temp=Path(handle.name)
+    current.to_parquet(merged_temp,index=False,compression="zstd")
+    os.replace(merged_temp,target)
+
+
+def _timeframes_with_history(symbol: str, current: dict[str,pd.DataFrame], year_start: pd.Timestamp) -> dict[str,pd.DataFrame]:
+    """Join stored completed HTF bars before the current warm-up window."""
+    result={}
+    for tf,frame in current.items():
+        root=BAR_DIR/f"bars_{tf}"/symbol
+        prior_paths=sorted(root.glob("[0-9][0-9][0-9][0-9]-[0-9][0-9].parquet")) if root.exists() else []
+        parts=[]
+        for path in prior_paths:
+            if path.stem >= year_start.strftime("%Y-%m"):
+                continue
+            old=pd.read_parquet(path)
+            if symbol in INDEX_SYMBOLS:
+                old=old[pd.to_datetime(old.ts,utc=True)>=CASH_ERA_START]
+            if len(old): parts.append(old)
+        if len(frame): parts.append(frame)
+        if parts:
+            result[tf]=(pd.concat(parts,ignore_index=True).sort_values("ts")
+                        .drop_duplicates("ts",keep="last").reset_index(drop=True))
+        else:
+            result[tf]=frame
+    return result
+
+
+def _load_year_level_history(symbol: str, year_start: pd.Timestamp) -> pd.DataFrame:
+    path=LEVEL_DIR/f"{symbol}.parquet"
+    if not path.exists(): return pd.DataFrame()
+    levels=pd.read_parquet(path)
+    levels=levels.drop(columns=["touches_so_far"],errors="ignore")
+    levels=levels[pd.to_datetime(levels.known_at,utc=True)<year_start]
+    if symbol in INDEX_SYMBOLS:
+        levels=levels[pd.to_datetime(levels.known_at,utc=True)>=CASH_ERA_START]
+    return levels.reset_index(drop=True)
+
+
+def _save_event_state(symbol: str, year: int, state: dict, touch_rows: list[tuple]) -> None:
+    import json
+    root=Path("data/state/pipeline")/symbol
+    root.mkdir(parents=True,exist_ok=True)
+    target=root/f"{year}.json"
+    with tempfile.NamedTemporaryFile(mode="w",dir=root,suffix=".json",delete=False) as handle:
+        temp=Path(handle.name);json.dump(state,handle,separators=(",",":"))
+    os.replace(temp,target)
+    if touch_rows:
+        touch_root=Path("data/levels/touches")/symbol;touch_root.mkdir(parents=True,exist_ok=True)
+        touch_path=touch_root/f"{year}.parquet"
+        frame=pd.DataFrame(touch_rows,columns=["method","level_id","touch_ts","known_at"])
+        frame=frame.drop_duplicates(["method","level_id","touch_ts","known_at"])
+        with tempfile.NamedTemporaryFile(dir=touch_root,suffix=".parquet",delete=False) as handle:
+            tmp=Path(handle.name)
+        frame.to_parquet(tmp,index=False,compression="zstd");os.replace(tmp,touch_path)
+
+
 def _first_year(symbol: str) -> int:
     root = {
         "USATECHIDXUSD": Path("data/bars/histdata/NSXUSD"),
@@ -204,6 +276,22 @@ def _first_year(symbol: str) -> int:
     }[symbol]
     files = sorted(root.glob("[0-9][0-9][0-9][0-9]-[0-9][0-9].parquet"))
     return int(files[0].stem[:4]) if files else datetime.now(timezone.utc).year
+
+
+def _history_start(symbol: str) -> pd.Timestamp:
+    """Earliest permitted source timestamp used to seed cumulative state."""
+    if symbol in INDEX_SYMBOLS:
+        return CASH_ERA_START
+    roots = {
+        "BTCUSDT": Path("data/bars/binance_spot/BTCUSDT"),
+        "ETHUSDT": Path("data/bars/binance_spot/ETHUSDT"),
+        "XAUUSD": Path("data/bars/dukascopy/XAUUSD"),
+    }
+    files = sorted(roots.get(symbol, Path("data/bars/dukascopy") / symbol).glob("[0-9][0-9][0-9][0-9]-[0-9][0-9].parquet"))
+    if not files:
+        return pd.Timestamp(_first_year(symbol), 1, 1, tz="UTC")
+    first = pd.read_parquet(files[0], columns=["ts"]).ts
+    return pd.to_datetime(first, utc=True).min().floor("min")
 
 
 def _active_mask(bars: pd.DataFrame, symbol: str) -> np.ndarray:
@@ -231,8 +319,59 @@ def _auxiliary_inputs() -> dict[str,pd.DataFrame]:
     macro=Path("data/aux/macro_events.csv")
     if macro.exists(): auxiliary["macro_events"]=pd.read_csv(macro)
     earnings=_parquet_union(Path("data/aux/earnings"))
+    earnings_csv=Path("data/aux/earnings/sec_8k_item_2_02.csv")
+    if earnings_csv.exists():
+        try:
+            filings=pd.read_csv(earnings_csv)
+            if "acceptanceDateTime" in filings:
+                stamp=filings.acceptanceDateTime.astype(str).str.replace(r"\.\d+$","",regex=True)
+                parsed=pd.to_datetime(stamp,utc=True,errors="coerce")
+                compact=stamp.str.fullmatch(r"\d{14}")
+                parsed.loc[compact]=pd.to_datetime(stamp.loc[compact],format="%Y%m%d%H%M%S",utc=True,errors="coerce")
+                filings["datetime_utc"]=parsed
+            elif "filingDate" in filings:
+                filings["datetime_utc"]=pd.to_datetime(filings.filingDate,utc=True,errors="coerce")
+            if "ticker" in filings:
+                filings["event"]="earnings_"+filings.ticker.astype(str).str.lower()
+            earnings=pd.concat([earnings,filings],ignore_index=True) if not earnings.empty else filings
+        except (OSError,ValueError,pd.errors.ParserError):
+            pass
     if not earnings.empty: auxiliary["earnings"]=earnings
+    dix=Path("data/aux/squeezemetrics/DIX.parquet")
+    if dix.exists(): auxiliary["dix_gex"]=pd.read_parquet(dix)
+    for currency in ("BTC","ETH"):
+        dvol=_parquet_union(Path("data/aux/dvol")/currency)
+        if not dvol.empty: auxiliary[f"dvol_{currency.lower()}"]=dvol
     return auxiliary
+
+
+def augment_external_feature_store(symbol: str) -> dict:
+    """Attach newly downloaded DIX/DVOL/calendar data to existing monthly features."""
+    root=FEATURE_DIR/symbol
+    files=sorted(root.glob("[0-9][0-9][0-9][0-9]-[0-9][0-9].parquet"))
+    if not files: raise FileNotFoundError(f"no monthly feature files for {symbol}: {root}")
+    auxiliary=_auxiliary_inputs()
+    hourly_root=BAR_DIR/"bars_1h"/symbol
+    hourly_files=sorted(hourly_root.glob("*.parquet")) if hourly_root.exists() else []
+    hourly=pd.concat([pd.read_parquet(path) for path in hourly_files],ignore_index=True) if hourly_files else pd.DataFrame()
+    written=0
+    for path in files:
+        _check_disk()
+        frame=pd.read_parquet(path)
+        extra=external_feature_frame(frame.known_at,auxiliary,hourly)
+        for column in extra.columns:
+            if column!="known_at": frame[column]=pd.to_numeric(extra[column],errors="coerce").astype("float32")
+        external_columns=[column for column in extra if column!="known_at"]
+        if external_columns: frame[external_columns]=frame[external_columns].replace([np.inf,-np.inf],np.nan)
+        temp=path.with_suffix(".tmp.parquet")
+        frame.to_parquet(temp,index=False,compression="zstd")
+        os.replace(temp,path)
+        written+=len(frame)
+    qa=feature_qa_files(files,symbol)
+    feature_names=[c for c in pd.read_parquet(files[0]).columns if c not in {"ts","known_at"}]
+    dictionary=write_feature_dictionary(feature_names)
+    return {"symbol":symbol,"months":len(files),"rows":written,"features":len(feature_names),
+            "qa":str(qa),"dictionary":str(dictionary)}
 
 
 def _attach_market_auxiliary(bars: pd.DataFrame, symbol: str) -> pd.DataFrame:
@@ -240,6 +379,9 @@ def _attach_market_auxiliary(bars: pd.DataFrame, symbol: str) -> pd.DataFrame:
     if symbol not in {"BTCUSDT","ETHUSDT"}: return result
     funding=_parquet_union(Path("data/aux/funding")/symbol)
     if not funding.empty and ("funding_time" in funding or "ts" in funding):
+        # Binance funding archive calc_time is the observation/publication
+        # timestamp; legacy fundingTime is the settlement instant. Both are
+        # joined only at or after that timestamp.
         time_col="funding_time" if "funding_time" in funding else "ts"
         funding["known_at"]=pd.to_datetime(funding[time_col],utc=True).astype("datetime64[ns, UTC]")
         funding=funding.sort_values("known_at").drop_duplicates("known_at",keep="last")
@@ -251,6 +393,8 @@ def _attach_market_auxiliary(bars: pd.DataFrame, symbol: str) -> pd.DataFrame:
         result["funding_z20"]=aligned.funding_z20.to_numpy()
     metrics=_parquet_union(Path("data/aux/metrics")/symbol)
     if not metrics.empty and "create_time" in metrics:
+        # Binance metrics create_time labels an instantaneous snapshot, not a
+        # candle open, so it is available at that timestamp.
         metrics["known_at"]=pd.to_datetime(metrics.create_time,utc=True).astype("datetime64[ns, UTC]")
         cols=[c for c in ("sum_open_interest","count_long_short_ratio","sum_taker_long_short_vol_ratio") if c in metrics]
         metrics=metrics[["known_at",*cols]].sort_values("known_at")
@@ -267,6 +411,26 @@ def _attach_market_auxiliary(bars: pd.DataFrame, symbol: str) -> pd.DataFrame:
     return result
 
 
+def _event_feature_frame(bars: pd.DataFrame, timeframes: dict[str,pd.DataFrame]) -> pd.DataFrame:
+    """Minimal causal feature columns needed to scan events over warm-up bars."""
+    from .features import indicator_frame
+    history=bars.sort_values("ts").reset_index(drop=True)
+    result=pd.DataFrame({"ts":pd.to_datetime(history.ts,utc=True).astype("datetime64[ns, UTC]"),
+                         "known_at":pd.to_datetime(history.ts,utc=True)+pd.Timedelta(minutes=1),
+                         "1m_atr14":indicator_frame(history,"1m").atr14.to_numpy(float)})
+    for tf, wanted in (("1h",("atr14",)),("1d",("rsi2","ema200_distance_atr"))):
+        frame=timeframes.get(tf,pd.DataFrame())
+        if frame.empty: continue
+        ind=indicator_frame(frame,tf)
+        cols=[col for col in wanted if col in ind]
+        htf=frame[["known_at"]].copy()
+        htf[f"{tf}_bar_known_at"]=pd.to_datetime(frame.known_at,utc=True).to_numpy()
+        for col in cols: htf[f"{tf}_{col}"]=ind[col].to_numpy(float)
+        result=pd.merge_asof(result.sort_values("known_at"),htf.sort_values("known_at"),
+                             on="known_at",direction="backward")
+    return result
+
+
 def write_feature_dictionary(columns: list[str]) -> Path:
     prefixes = {
         "return_": "Trailing close-to-close fractional return over the named bar window.",
@@ -279,9 +443,12 @@ def write_feature_dictionary(columns: list[str]) -> Path:
         "vwap_": "Cumulative session VWAP distance; NaN when volume is unavailable.",
         "volume": "Trailing volume statistic; NaN when source volume is unavailable.",
         "taker_": "Binance taker-buy base volume divided by total base volume.",
-        "minutes_": "Minutes to or since a published event timestamp.",
+        "minutes_": "Minutes since an observed event; minutes_to_* is emitted only for future dates in a pre-published schedule (CPI/NFP/FOMC/GDP/ISM), never for unscheduled actions or EDGAR acceptance times.",
         "cross_": "Other instrument's trailing return as-of its completed bar close.",
         "vix": "Daily Cboe volatility-index observation, available after source close.",
+        "dix_": "SqueezeMetrics dealer-positioning series as-of the next New York day after publication.",
+        "gex_": "SqueezeMetrics gamma exposure as-of the next New York day after publication.",
+        "dvol_": "Deribit DVOL level/change and trailing 24-hour realized-volatility premium, as-of the published observation.",
         "spread_": "Bid/ask spread divided by trailing ATR.",
     }
     rows = ["# Feature dictionary", "", "Every row carries ts (bar open) and known_at (bar close). Values use observations known at or before known_at; joined higher-timeframe values appear only after that timeframe closes.", "",
@@ -296,7 +463,10 @@ def write_feature_dictionary(columns: list[str]) -> Path:
 
 
 def label_method_events(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.DataFrame, symbol: str,
-                        *, return_event_counts: bool = False, event_start=None, event_end=None):
+                        *, return_event_counts: bool = False, event_start=None, event_end=None,
+                        method_states: dict | None = None, return_states: bool = False,
+                        detector_features: pd.DataFrame | None = None,
+                        detector_bars: pd.DataFrame | None = None):
     try:
         from msd._msd_kernels import first_hit_batch
     except ImportError:
@@ -305,21 +475,29 @@ def label_method_events(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.D
     instrument_class="index" if symbol in INDEX_SYMBOLS else "crypto" if symbol in {"BTCUSDT","ETHUSDT"} else "index"
     finance=.0002 if symbol in INDEX_SYMBOLS else .0006 if symbol in {"BTCUSDT","ETHUSDT"} else .00015
     event_bars=bars.sort_values("ts").reset_index(drop=True)
+    scan_bars=(detector_bars if detector_bars is not None else event_bars).sort_values("ts").reset_index(drop=True)
+    scan_features=detector_features if detector_features is not None else features
     atr_map=features.set_index("ts")["1m_atr14"] if "1m_atr14" in features else pd.Series(dtype=float)
     close_mid=(event_bars.bid_c.to_numpy(float)+event_bars.ask_c.to_numpy(float))/2
     ts_pos=pd.Series(np.arange(len(event_bars)),index=event_bars.ts)
-    jobs=[]; metadata=[]; detected_counts={}
+    jobs=[]; metadata=[]; detected_counts={}; state_out={}; touch_rows=[]
     prepared_levels=prepare_exit_levels(levels)
     for method in methods:
         method_started=time.perf_counter()
-        events=method.detect(features,levels,event_bars)
+        if method.NAME in {"sr_touch","liquidity_sweep"}:
+            events,next_state,method_touches=method.detect(
+                scan_features,levels,scan_bars,state=(method_states or {}).get(method.NAME),return_state=True)
+            state_out[method.NAME]=next_state
+            touch_rows.extend(method_touches)
+        else:
+            events=method.detect(scan_features,levels,scan_bars)
         if event_start is not None:
             events=[event for event in events if pd.Timestamp(event["ts"]) >= pd.Timestamp(event_start)]
         if event_end is not None:
             events=[event for event in events if pd.Timestamp(event["ts"]) < pd.Timestamp(event_end)]
         detected_counts[method.NAME] = len(events)
         if symbol in INDEX_SYMBOLS:
-            day_features=features
+            day_features=scan_features
             if event_start is not None: day_features=day_features[day_features.ts>=pd.Timestamp(event_start)]
             if event_end is not None: day_features=day_features[day_features.ts<pd.Timestamp(event_end)]
             local_event = pd.to_datetime(day_features.ts,utc=True).dt.tz_convert("America/New_York")
@@ -327,7 +505,7 @@ def label_method_events(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.D
             session_day += (local_event.dt.hour.to_numpy() >= 18).astype("timedelta64[D]")
             day_count = max(1, len(np.unique(session_day)))
         else:
-            day_features=features
+            day_features=scan_features
             if event_start is not None: day_features=day_features[day_features.ts>=pd.Timestamp(event_start)]
             if event_end is not None: day_features=day_features[day_features.ts<pd.Timestamp(event_end)]
             day_count = max(1, pd.to_datetime(day_features.ts,utc=True).dt.floor("D").nunique())
@@ -359,6 +537,8 @@ def label_method_events(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.D
                                      "deadline_ts":deadline})
     if not jobs:
         empty = pd.DataFrame()
+        if return_states:
+            return empty, detected_counts, state_out, touch_rows
         return (empty, detected_counts) if return_event_counts else empty
     matrix=event_bars[["bid_o","bid_h","bid_l","bid_c","ask_o","ask_h","ask_l","ask_c"]].to_numpy(dtype="<f8")
     stamps=pd.to_datetime(event_bars.ts,utc=True).astype("datetime64[ns, UTC]").astype("int64").to_numpy()//1_000_000_000
@@ -388,6 +568,8 @@ def label_method_events(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.D
                 "financing_nights":int(nights)}
         labels.append(record)
     result = pd.DataFrame(labels)
+    if return_states:
+        return result, detected_counts, state_out, touch_rows
     return (result, detected_counts) if return_event_counts else result
 
 
@@ -396,13 +578,24 @@ def run_symbol(symbol: str, start_year: int | None = None, end_year: int | None 
     started = time.perf_counter()
     end_year = min(end_year or datetime.now(timezone.utc).year, datetime.now(timezone.utc).year)
     timeframes_written = features_written = labels_written = events_written = 0
-    level_parts = []
+    level_rows=0
     timings=[]
     event_year_counts=[]
     bad_tick_count=0
+    state_root=Path("data/state/pipeline")/symbol
+    first_state_path=state_root/f"{start_year-1}.json"
+    replace_levels_on_start=not first_state_path.exists()
     for year in range(start_year, end_year+1):
         year_started=time.perf_counter()
-        left = pd.Timestamp(year=year, month=1, day=1, tz="UTC") - pd.Timedelta(days=MAX_LOOKBACK_DAYS)
+        year_start=pd.Timestamp(year,1,1,tz="UTC")
+        year_end = pd.Timestamp(year+1, month=1, day=1, tz="UTC")
+        state_root=Path("data/state/pipeline")/symbol
+        previous_state_path=state_root/f"{year-1}.json"
+        bootstrap=not previous_state_path.exists() or not (LEVEL_DIR/f"{symbol}.parquet").exists()
+        # First chunk bootstraps from the permitted source start. Later chunks
+        # use bounded 370-day price warm-up plus persisted levels, HTF history,
+        # and the prior year's exact event-state checkpoint.
+        left = _history_start(symbol) if bootstrap else year_start-pd.Timedelta(days=MAX_LOOKBACK_DAYS)
         right = pd.Timestamp(year=year+1, month=1, day=1, tz="UTC") + pd.Timedelta(days=8)
         bars = load(symbol, left, right)
         if bars.empty:
@@ -418,16 +611,37 @@ def run_symbol(symbol: str, start_year: int | None = None, end_year: int | None 
         bars = _modelled_spread(bars, symbol)
         assert_executable_spread(bars,symbol)
         bars = _attach_market_auxiliary(bars,symbol)
+        keep=["ts",*[f"{side}_{field}" for side in ("bid","ask") for field in "ohlc"],"volume"]
+        keep += [name for name in ("duka_spread","duka_volume","taker_buy_base","trades","quote_volume",
+                                    "funding_z20","open_interest","feed","roll") if name in bars]
+        bars=bars.loc[:,keep].copy()
         active_bars=bars.loc[_active_mask(bars,symbol)].reset_index(drop=True)
-        tfs = build_all_timeframes(bars, symbol)
-        year_end = pd.Timestamp(year=year+1, month=1, day=1, tz="UTC")
-        year_start=pd.Timestamp(year,1,1,tz="UTC")
-        selected_tfs = {tf: frame[(frame.ts >= year_start) & (frame.ts < year_end)].copy() for tf, frame in tfs.items()}
-        for tf, frame in selected_tfs.items():
-            timeframes_written += _write_monthly(frame, BAR_DIR / f"bars_{tf}", symbol)
-        levels = build_levels(active_bars, symbol, tfs)
-        levels=levels[levels.known_at < year_end]
-        level_parts.append(levels[levels.known_at>=year_start])
+        tfs_current = build_all_timeframes(bars, symbol)
+        for tf, frame in tfs_current.items():
+            selected=frame[(frame.ts>=year_start)&(frame.ts<year_end)]
+            timeframes_written += _write_monthly(selected,BAR_DIR/f"bars_{tf}",symbol)
+        tfs=_timeframes_with_history(symbol,tfs_current,year_start)
+        prior_levels=pd.DataFrame() if bootstrap else _load_year_level_history(symbol,year_start)
+        current_levels=build_levels(active_bars,symbol,tfs).drop(columns=["touches_so_far"],errors="ignore")
+        current_levels=current_levels[pd.to_datetime(current_levels.known_at,utc=True)<year_end]
+        if not bootstrap:
+            current_levels=current_levels[pd.to_datetime(current_levels.known_at,utc=True)>=year_start]
+        if len(current_levels):
+            current_levels=current_levels.drop_duplicates(["price","type","timeframe","created_at","known_at","direction"],keep="last")
+        levels=pd.concat([prior_levels,current_levels],ignore_index=True,sort=False)
+        levels=levels.drop_duplicates(["price","type","timeframe","created_at","known_at","direction"],keep="last")
+        level_output_start=left if bootstrap else year_start
+        year_levels=levels[(pd.to_datetime(levels.known_at,utc=True)>=level_output_start)&
+                           (pd.to_datetime(levels.known_at,utc=True)<year_end)]
+        if len(year_levels):
+            _check_disk();LEVEL_DIR.mkdir(parents=True,exist_ok=True)
+            Path("data/tmp").mkdir(parents=True,exist_ok=True)
+            level_temp=Path("data/tmp")/f"levels_year_{symbol}_{year}.parquet"
+            year_levels.to_parquet(level_temp,index=False,compression="zstd")
+            _merge_levels_year(level_temp,symbol,year,
+                               replace_existing=replace_levels_on_start and year==start_year)
+            level_rows+=len(year_levels)
+        del year_levels
         auxiliary=_auxiliary_inputs()
         cross={}
         for other in TIER1:
@@ -441,36 +655,60 @@ def run_symbol(symbol: str, start_year: int | None = None, end_year: int | None 
             if not other_bars.empty:
                 other_bars=_feature_label_bars(other_bars)
                 cross[other]=other_bars[["ts","bid_c",*( ["feed"] if "feed" in other_bars else [] )]]
-        # Keep one causal predecessor row for event detectors that need to
-        # recognize an as-of HTF transition at the first row of a year.
-        feature_history = build_features(bars, symbol, tfs, levels, auxiliary=auxiliary, cross_asset=cross,
-                                         output_start=year_start-pd.Timedelta(minutes=1),output_end=year_end)
-        feature_mask=(feature_history.ts >= pd.Timestamp(year, 1, 1, tz="UTC")) & (feature_history.ts < year_end)
-        features=feature_history.loc[feature_mask]
-        features=features.replace([np.inf,-np.inf],np.nan)
-        write_feature_dictionary(features.columns.tolist())
-        features_written += _write_monthly(features, FEATURE_DIR, symbol)
-        feature_qa(features,symbol,append=True)
-        # Preserve the bar alignment directly.  Building a Python set of
-        # hundreds of thousands of Timestamps and probing it row-wise is
-        # expensive and unnecessary because features retain the input order.
-        method_mask=(feature_history.ts>=year_start-pd.Timedelta(minutes=1))&(feature_history.ts<year_end)
-        method_features=feature_history.loc[method_mask]
+        feature_cache=prepare_feature_cache(bars,symbol,tfs)
+        feature_names=None
+        month_cursor=year_start
+        if symbol in INDEX_SYMBOLS: month_cursor=max(month_cursor,CASH_ERA_START.floor("D"))
+        year_feature_rows=year_label_rows=0
+        while month_cursor<year_end:
+            month_end=min(year_end,month_cursor+pd.offsets.MonthBegin(1))
+            features=build_features(bars,symbol,tfs,levels,auxiliary=auxiliary,cross_asset=cross,
+                                    output_start=month_cursor,output_end=month_end,cache=feature_cache)
+            features=features.replace([np.inf,-np.inf],np.nan)
+            if len(features):
+                feature_names=features.columns.tolist()
+                if feature_names: write_feature_dictionary(feature_names)
+                count=_write_monthly(features,FEATURE_DIR,symbol)
+                features_written+=count;year_feature_rows+=count
+            month_cursor=month_end
+        # QA reads a single year's persisted feature chunks after generation,
+        # avoiding a year-sized dense feature frame during calculation.
+        del feature_cache
+        import gc
+        gc.collect()
+        year_feature_paths=sorted((FEATURE_DIR/symbol).glob(f"{year}-*.parquet"))
+        if year_feature_paths: feature_qa_files(year_feature_paths,symbol,append=True)
+        gc.collect()
+        method_features=_event_feature_frame(bars,tfs)
         method_features=method_features.loc[_active_mask(method_features,symbol)]
-        events, unique_events = label_method_events(method_features,levels,active_bars,symbol,
-                                                    return_event_counts=True,event_start=year_start,event_end=year_end)
-        if len(events):
-            events=events[events.ts < year_end]
-            candidate_counts=events.groupby("method",dropna=False).size()
-            event_year_counts.extend({"symbol":symbol,"year":year,"method":str(method),
-                                      "unique_events":int(unique_events.get(str(method),0)),
-                                      "candidate_rows":int(candidate_counts.get(method,0))}
-                                     for method in sorted(set(unique_events)|set(candidate_counts.index)))
-            print({"symbol":symbol,"year":year,"phase":"event_counts",
-                   "counts":{str(method):{"unique_events":int(unique_events.get(str(method),0)),
-                                          "candidate_rows":int(candidate_counts.get(method,0))}
-                            for method in sorted(set(unique_events)|set(candidate_counts.index))}},flush=True)
-            events_written += _write_monthly(events,Path("data/events"),symbol)
+        scan_start=left if bootstrap else year_start
+        scan_features=method_features[(method_features.ts>=scan_start)&(method_features.ts<year_end)]
+        scan_bars=active_bars[(active_bars.ts>=scan_start)&(active_bars.ts<year_end)]
+        if bootstrap:
+            method_states={}
+        elif previous_state_path.exists():
+            import json
+            method_states=json.loads(previous_state_path.read_text())
+        else:
+            method_states={}
+        events, unique_events, next_states, touch_rows = label_method_events(
+            method_features,levels,active_bars,symbol,return_event_counts=True,
+            event_start=year_start,event_end=year_end,method_states=method_states,return_states=True,
+            detector_features=scan_features,detector_bars=scan_bars)
+        candidate_counts=events.groupby("method",dropna=False).size() if len(events) else pd.Series(dtype=int)
+        methods=methods_for_symbol(symbol)
+        yearly_counts=[]
+        for method in methods:
+            name=method.NAME
+            row={"symbol":symbol,"year":year,"method":name,
+                 "unique_events":int(unique_events.get(name,0)),
+                 "candidate_rows":int(candidate_counts.get(name,0))}
+            event_year_counts.append(row);yearly_counts.append(row)
+        print({"symbol":symbol,"year":year,"phase":"event_counts",
+               "counts":{row["method"]:{"unique_events":row["unique_events"],
+                                           "candidate_rows":row["candidate_rows"]}
+                         for row in yearly_counts}},flush=True)
+        if len(events): events_written+=_write_monthly(events,Path("data/events"),symbol)
         # ATR(1h) is joined by its completed-bar timestamp; no in-progress HTF value is used.
         if not tfs["1h"].empty:
             atr = tfs["1h"][["known_at"]].copy()
@@ -479,31 +717,32 @@ def run_symbol(symbol: str, start_year: int | None = None, end_year: int | None 
                                        atr.sort_values("known_at"), on="known_at", direction="backward").atr
         else:
             per_minute = pd.Series(np.nan, index=bars.index)
-        label_mask = (bars.ts >= pd.Timestamp(year, 1, 1, tz="UTC")) & (bars.ts < right) & _active_mask(bars,symbol)
-        label_bars = bars.loc[label_mask].reset_index(drop=True)
-        label_atr = per_minute.loc[label_mask].reset_index(drop=True)
         label_started=time.perf_counter()
         instrument_class="index" if symbol in INDEX_SYMBOLS else "crypto" if symbol in {"BTCUSDT","ETHUSDT"} else "index"
-        labels = label_grid(label_bars, label_atr, max_trading_days=MAX_HOLD_TRADING_DAYS,
-                            instrument_class=instrument_class)
-        print({"symbol":symbol,"year":year,"phase":"grid_labels",
-               "rows":len(labels),"elapsed_seconds":time.perf_counter()-label_started},flush=True)
-        if len(labels):
-            labels["ts"] = label_bars.ts.iloc[labels.signal_index.to_numpy()].to_numpy()
-            labels = labels[labels.ts < year_end]
-            labels_written += _write_monthly(labels, LABEL_DIR, symbol)
-        timings.append((year,len(bars),len(features),len(labels),time.perf_counter()-year_started))
-        print({"symbol":symbol,"year":year,"input_bars":len(bars),"feature_rows":len(features),
-               "label_rows":len(labels),"elapsed_seconds":timings[-1][-1]},flush=True)
-    if level_parts:
-        levels = pd.concat(level_parts, ignore_index=True).drop_duplicates(
-            ["price", "type", "timeframe", "known_at"], keep="last").sort_values("known_at")
-        _check_disk()
-        LEVEL_DIR.mkdir(parents=True, exist_ok=True)
-        target=LEVEL_DIR/f"{symbol}.parquet"
-        with tempfile.NamedTemporaryFile(dir=LEVEL_DIR,suffix=".parquet",delete=False) as handle: temp=Path(handle.name)
-        levels.to_parquet(temp,index=False,compression="zstd"); os.replace(temp,target)
-    result={"symbol": symbol, "features": features_written, "levels": sum(map(len, level_parts)),
+        month_cursor=year_start
+        if symbol in INDEX_SYMBOLS: month_cursor=max(month_cursor,CASH_ERA_START.floor("D"))
+        while month_cursor<year_end:
+            month_end=min(year_end,month_cursor+pd.offsets.MonthBegin(1))
+            label_mask=(bars.ts>=month_cursor)&(bars.ts<min(right,month_end+pd.Timedelta(days=8)))&_active_mask(bars,symbol)
+            label_bars=bars.loc[label_mask].reset_index(drop=True)
+            label_atr=per_minute.loc[label_mask].reset_index(drop=True)
+            labels=label_grid(label_bars,label_atr,max_trading_days=MAX_HOLD_TRADING_DAYS,
+                              instrument_class=instrument_class)
+            if len(labels):
+                labels["ts"]=label_bars.ts.iloc[labels.signal_index.to_numpy()].to_numpy()
+                labels=labels[labels.ts<month_end]
+                if len(labels):
+                    count=_write_monthly(labels,LABEL_DIR,symbol)
+                    labels_written+=count;year_label_rows+=count
+            month_cursor=month_end
+        elapsed=time.perf_counter()-year_started
+        _save_event_state(symbol,year,next_states,touch_rows)
+        timings.append((year,len(bars),year_feature_rows,year_label_rows,elapsed))
+        print({"symbol":symbol,"year":year,"input_bars":len(bars),"feature_rows":year_feature_rows,
+               "event_unique":sum(x["unique_events"] for x in yearly_counts),
+               "event_candidate_rows":sum(x["candidate_rows"] for x in yearly_counts),
+               "label_rows":year_label_rows,"elapsed_seconds":elapsed},flush=True)
+    result={"symbol": symbol, "features": features_written, "levels": level_rows,
             "bars": timeframes_written, "labels": labels_written,"events":events_written,
             "unique_events":sum(row["unique_events"] for row in event_year_counts),
             "event_year_counts":event_year_counts,"bad_ticks_excluded":bad_tick_count,
@@ -535,14 +774,14 @@ def write_pipeline_report(results: list[dict]) -> Path:
            "## Fixed processing constants", "", "| Constant | Value |", "|---|---:|", 
            f"| Index input boundary | {CASH_ERA_START} (futures era excluded) |",
            "| Index development period | 2019-01-01 through 2022-12-31 |",
-           f"| Maximum HTF warm-up | {MAX_LOOKBACK_DAYS} calendar days |", "| Label entry delay | 2 bars after signal bar |", 
+           "| HTF/level/event warm-up | full permitted source history (replayed for each output year) |", "| Label entry delay | 2 bars after signal bar |", 
            f"| Maximum label holding window | {MAX_HOLD_TRADING_DAYS} weekdays (non-crypto; deadline at first bar open at/after timestamp) or {MAX_HOLD_TRADING_DAYS}×24h (crypto) |", 
            "| Label cadence | every 15 UTC minutes; both sides |", "| S/R touch | level clusters within 0.25 ATR(1h), >=2 touches; edge-trigger within 0.1 ATR, 0.5 ATR re-arm; 4h cooldown |", "| Liquidity sweep | clustered 15m+ levels; 0.1 ATR wick, close-back within 3 bars; 4h cooldown |", "| SL ATR grid | 0.5, 1, 1.5, 2, 3 |", 
            "| TP ATR grid | 0.5, 1, 1.5, 2, 3, 4, 6 |", "| ATR source | 14-period ATR on completed 1h bars |", "",
            "## Output inventory", "", "| Root | Parquet files | Bytes |", "|---|---:|---:|"]
     lines += [f"| {root} | {count:,} | {size:,} |" for root,count,size in inventory]
-    lines += ["", "## Processing runs", "", "| Symbol | Feature rows | Level rows | HTF rows | Unique events | Event candidate rows | Grid labels | Bad ticks excluded | Runtime (s) |", "|---|---:|---:|---:|---:|---:|---:|---:|---:|"]
-    lines += [f"| {r['symbol']} | {r['features']:,} | {r['levels']:,} | {r['bars']:,} | {r.get('unique_events',0):,} | {r.get('events',0):,} | {r['labels']:,} | {r.get('bad_ticks_excluded',0):,} | {r['runtime_seconds']:.1f} |" for r in results]
+    lines += ["", "## Processing runs", "", "| Symbol | Feature rows | Level rows | HTF rows | Unique events | Event candidate rows | Grid labels | Bad ticks excluded | Runtime (s) | Peak RSS (GiB) |", "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|"]
+    lines += [f"| {r['symbol']} | {r['features']:,} | {r['levels']:,} | {r['bars']:,} | {r.get('unique_events',0):,} | {r.get('events',0):,} | {r['labels']:,} | {r.get('bad_ticks_excluded',0):,} | {r['runtime_seconds']:.1f} | {r.get('peak_rss_gib',float('nan')):.2f} |" for r in results]
     if not results: lines.append("| No production symbol batch completed yet | 0 | 0 | 0 | 0 | 0 | 0 |" )
     lines += ["", "## Events per year", "", "| Symbol | Year | Method | Unique events | Candidate rows |", "|---|---:|---|---:|---:|"]
     event_rows=[row for result in results for row in result.get("event_year_counts",[])]
@@ -558,7 +797,12 @@ def main() -> None:
     parser.add_argument("--symbol", choices=TIER1)
     parser.add_argument("--start-year", type=int)
     parser.add_argument("--end-year", type=int)
+    parser.add_argument("--augment-external", action="store_true", help="attach downloaded external sources to existing feature files only")
     args = parser.parse_args()
+    if args.augment_external:
+        if not args.symbol: parser.error("--augment-external requires --symbol")
+        print(augment_external_feature_store(args.symbol),flush=True)
+        return
     report = []
     for symbol in ((args.symbol,) if args.symbol else TIER1):
         result = run_symbol(symbol, args.start_year, args.end_year)

@@ -212,6 +212,28 @@ def test_stage8_dukascopy_tier_order_starts_with_gold_then_crypto():
     assert set(DUKASCOPY_ORDER)==set(DUKASCOPY_START)
 
 
+def test_stage8_dukascopy_output_audit_is_per_symbol_then_final(monkeypatch):
+    from msd.data import stage8_download
+    monkeypatch.setattr(stage8_download,"_nonempty_parquet_count",lambda root: 1 if str(root).endswith("XAUUSD") else 0)
+    assert stage8_download._verify_task_outputs("dukascopy","XAUUSD")==[]
+    incomplete=stage8_download._verify_task_outputs("dukascopy")
+    assert incomplete==[symbol for symbol in stage8_download.DUKASCOPY_ORDER if symbol!="XAUUSD"]
+
+
+def test_stage8_action_exception_still_runs_symbol_finalizer(tmp_path,monkeypatch):
+    from msd.data import stage8_download
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(stage8_download,"DUKASCOPY_ORDER",("XAUUSD",))
+    monkeypatch.setattr(stage8_download,"DUKASCOPY_START",{"XAUUSD":date(2003,1,1)})
+    monkeypatch.setattr(stage8_download,"download_dukas",lambda *_args,**_kwargs: (_ for _ in ()).throw(RuntimeError("transient")))
+    monkeypatch.setattr(stage8_download,"_nonempty_parquet_count",lambda _root:0)
+    finalized=[]
+    monkeypatch.setattr(stage8_download,"_finalize_dukascopy_symbol",lambda symbol: finalized.append(symbol))
+    stage8_download.run("dukascopy")
+    assert finalized==["XAUUSD"]
+    assert "BLOCKED Dukascopy XAUUSD" in (tmp_path/"data/logs/stage8_failures.txt").read_text()
+
+
 def test_gold_point_scale_covers_2003_history_when_raw_sample_available():
     from pathlib import Path
     from msd.data.dukascopy import PRICE_BANDS, SCALES

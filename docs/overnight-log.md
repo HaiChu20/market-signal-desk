@@ -130,3 +130,47 @@ Append-only notes from the autonomous review loop while the user sleeps.
   - (1) RSI(2) emits 0 events for indices: the detector requires known_at == 1d_bar_known_at (17:00 ET CME close), but index data has no bars 16:15–17:00, so it can never fire. Fix sent (as-of transition trigger + gap test + grep for the same pattern).
   - (2) The "event_counts" log reports candidate rows (×~42), not events; unique events are sane (SPX 2022: 4,216 sweeps, 256 S/R). Asked to rename the field and make guards use unique events, and for SPX events through 2026 like NQ.
   The user is awake (asked status 13:43): morning summary given; pending answers on git commit, /tmp file, tick data.
+- 14:05: USER (awake): approved the git commit and more data; wants buyer/seller info.
+  - Committed cba6045 on new branch data-lake-pipeline (60 files; added Rust target/.so/.dylib to .gitignore; secret scan clean, placeholders only).
+  - Sent stage 10 (msg 446):
+    - (A) Binance aggTrades streamed in memory → per-minute buy/sell flow + 1s bars; bookTicker/bookDepth availability report;
+    - (B) Dukascopy tick data (NQ/SPX cash era, gold 2010+) → per-minute quote flow (OFI, size imbalance, spread) + 1s bid/ask bars, validated against the 1m bars;
+    - (C) same-minute SL/TP ambiguity resolved with 1s bars in the shared Rust kernel + Python reference;
+    - (D) flow features in the dense store with truncation tests.
+    Size estimates required before downloads; ~120 GB cap.
+- 14:10: PAUSED at the user's request (going offline). Stopped the Dukascopy downloader (resumable) and cancelled the hourly check cron. Told Codex to pause (msg 445). Stage 10 change: keep raw aggTrades/ticks on disk (user will push to CSC Allas).
+  Download state at pause:
+  - complete: XAUUSD 2003→2026-11, USA30 2014→2026-11, NQ/SPX 2012→2026-11;
+  - partial: DAX →2016-05, BTCUSD →2021-10, USDJPY →2014-03, XAG →2004-04, BRENT →2012-01;
+  - not started: EURUSD, GBPUSD, WTI, FTSE, Nikkei, ETHUSD.
+  RESUME PLAN:
+  - (1) restart the Dukascopy campaign (single runner);
+  - (2) Codex: msg 443 (RSI2 as-of trigger, event-count labels) if not done;
+  - (3) stage 10 (msg 444 + raw-on-disk change from 445);
+  - (4) then pilot report cards.
+- 14:15: Codex paused cleanly. RSI2 as-of trigger fixed (NQ 2020: 12 events; 2019: 0 because the EMA200 warm-up ends late 2019); event log now separates candidate rows vs unique events; 106 fast tests pass. On resume: rerun the slow real-data truncation test (daily-index TF changed since it last passed), regenerate the stage 9 run/report, then stage 10.
+- 14:45: RESUMED. Binance OK; Dukascopy throttling (503/429), so I'm not restarting its campaign yet. A one-shot probe is scheduled at 15:27 (restarts a single runner if healthy, else re-probes in 45 min). Codex resume msg 447: slow truncation test → regenerate stage 9 (BTC, NQ/SPX cash era, gold 2008→) → stage 10A Binance aggTrades raw on disk → 10C/10D. Hourly check cron re-created (:43).
+- 15:25: USER: Databento signup fails (card declined), so there's no Databento. The user will provide Capital/Telegram keys when the system is ready, and wants more free data sources and Dukascopy download status reports.
+  - Dukascopy probe: HTTP 200 but slow (~30 s/file). Started ONE 1m campaign myself (PID 44918, log stage8_dukascopy_resume2.log); cancelled the probe cron.
+  - Verified free sources: SqueezeMetrics DIX/GEX daily 2011→ (dealer gamma!), Deribit DVOL hourly 2021→, Bybit trade archives 2020-03→ (taker side), Binance bookDepth 2023→. Not usable: Cboe VX settlement path 403; findmymoat alternatives are all US-stock EOD-oriented.
+  - Sent stage 11 (msg 449).
+- 15:30: User approved downloading and using all stage 11 sources. Reprioritized (msg 450): DIX/GEX, DVOL, macro calendar + EDGAR right after the stage 9 regen; then 10A aggTrades; then Bybit trades + bookDepth.
+- 15:40: Stage 9 regen PID 42781: BTC 2018–2019 done, 2020 running; RSS peak 3.37 GB briefly (single worker, acceptable; the ≤3 GB target matters once parallel). DIX/DVOL/macro/earnings are not yet present and come after the regen.
+- 15:55: Slow real-data truncation test passes (219 s). Reviewed the new aux joins: DIX/GEX (next NY day) and VIX (date+1 UTC) are OK. DVOL had a LOOK-AHEAD: candle open-time ts used as known_at for the close value (≤1 h leak). Sent msg 452: known_at = ts + resolution in the parser, test, audit of all aux joins for open-vs-close timestamps.
+- 16:05: DVOL fix accepted (known_at = ts + resolution, tests). Aux audit OK (funding calc_time, metrics create_time, VIX, DIX/GEX). EDGAR since-event only is accepted. Told Codex to keep forward countdowns for scheduled macro events only (unscheduled FOMC visible from occurrence).
+- 16:47 (hourly check): free disk 334 GB (the user freed space), data 9.0 GB. Stage 9 regen alive (PID 42781, BTC 2022). Dukascopy single runner on DAX 2020-04. False 'BLOCKED' lines after XAU/USA30 come from the audit checking ALL symbols per symbol (sent fix msg 456). 111 fast tests pass.
+- 16:55: Stage 9: BTC 2018–2022 done (~6 min/yr), 2023 running, RSS 1.9 GB. Codex fixed a ns/us timestamp-unit issue in generic event-time joins; asked whether already-written outputs were affected and for a mixed-unit regression test (msg 458).
+- 17:10: Timestamp-unit bug: no existing outputs affected (no event-time join had run); mixed us/ns regression test added. Downloader audit wrapper fixed (per-symbol + end inventory). XAU/USA30 data intact; USA30 manifest is missing the 2014-01 entry, so asked for a rebuild_manifest() from disk, run after the campaign ends.
+- 17:15: Codex restarted the stage 9 batch (PID 58199) with per-symbol child processes so peak RSS is measured per symbol (the earlier transient 3.37 GiB peak). BTC is being redone from 2018 (~45 min of compute repeated; acceptable). Dukascopy is untouched.
+- 17:45: Stage 9 restarted again as one subprocess per instrument-year (a later BTC year crossed 3 GiB). Raised a causality/consistency concern (msg 470): level state is cumulative (touches, age, cooldowns), so per-year chunks must equal an unchunked run. Asked for a real-data boundary-spanning equivalence check before the regen finishes; carry level state across years if needed.
+- 18:10: Stage 9 ≈ 6 min/instrument-year, so ~4.5 h sequential. Sent msg 474: parallelize across symbols (4 chains, years sequential within a symbol because of the level carry), start the small-source + aggTrades raw downloads now (they don't interfere), keep the msg 471 row-level equivalence check. Noted that BTC 2018/2019 counts match the earlier continuous run exactly.
+- 18:47 (hourly check): 462 GB free, data 9.9 GB. Dukascopy single runner: BTCUSD 2022-08 (one day retrying with backoff, as designed). Stage 9 memory-bounded run: BTC 2018–2021 done (2021: 5,348 events, 2.45M labels, 353 s); NO stage 9 process running since 16:46 (no error in log). Codex is in a 2 h turn, so msgs 471/476 are queued and it should notice when it finishes the turn.
+- 18:55: Codex: the levels parquet has touches_so_far=0 everywhere; detectors recompute touches/cooldown/arming per run from their input window, so per-year chunks may differ from a continuous run at boundaries (the earlier matching counts came from a run that was also per-year, so they prove nothing). Codex is validating before restart. Sent msg 479: persist per-touch rows + an end-of-year state checkpoint, chunked==unchunked row-level target, fix or remove the misleading touches_so_far, check whether features read it.
+- 19:05: Chunked-vs-unchunked equivalence check FAILED (BTC 2021-06→2022-06):
+  - daily EMA50/slope differ on ~148k rows (370 d warm-up is too short for long-memory EMAs);
+  - levels truncated;
+  - 12 event rows differ at the boundary (cooldown/touch state reset).
+  Sent msg 481 with the design: full-history single-pass HTF features + levels (with per-touch rows/as-of view), streaming event detection with carried state, 1m features with warm-up ≥10× lookback, labels chunk-safe with the horizon included. Acceptance = row-identical two-path comparison on BTC and NQ boundaries before the production restart.
+- 19:30: Codex: per-year JSON event checkpoints + per-touch parquet rows added, touches_so_far removed; no feature read the misleading counter. I verified level 'strength' is a per-type constant set at creation (causal). Asked for a truncation assertion on strength/invalidated_at visibility; the two-path check is in progress.
+- 17:35: Status given to the user. New sources DONE: DIX/GEX (3,905 days), DVOL BTC/ETH, SEC earnings (670). Macro: Fed + BEA present, BLS/ISM missing. DAX complete; Dukascopy now on BTCUSD 2026-04. 120 fast tests pass. Stage 9 paused pending the equivalence fix.
+  USER DECISION: download ALL Binance aggTrades (~166.6 GiB raw, spot + UM, BTC + ETH), lifting the 120 GB cap for this dataset. Sent msg 485.

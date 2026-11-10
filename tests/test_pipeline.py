@@ -25,6 +25,21 @@ def _bars(ts):
                          "volume": np.ones(n)})
 
 
+def test_level_type_codes_do_not_depend_on_future_level_universe():
+    from msd.processing.features import _nearest_level_features
+    base = pd.DataFrame({"known_at": pd.to_datetime(["2024-01-01", "2024-01-02"], utc=True),
+                         "mid_close": [100., 100.], "base_atr14": [1., 1.]})
+    levels = pd.DataFrame({"price": [101.], "type": ["swing_high"],
+                           "known_at": pd.to_datetime(["2024-01-01"], utc=True),
+                           "invalidated_at": [pd.NaT], "strength": [1/3]})
+    future = pd.concat([levels, pd.DataFrame({"price": [90.], "type": ["brand_new_type"],
+        "known_at": [pd.Timestamp("2024-01-03", tz="UTC")], "invalidated_at": [pd.NaT],
+        "strength": [1.]})], ignore_index=True)
+    a = _nearest_level_features(base, levels)
+    b = _nearest_level_features(base, future)
+    np.testing.assert_array_equal(a.level_above_1_type_code, b.level_above_1_type_code)
+
+
 def test_cme_daily_bar_open_is_dst_correct():
     from msd.processing.timeframes import build_timeframe
     for day, expected in (("2024-01-15", "2024-01-14 23:00Z"), ("2024-07-15", "2024-07-14 22:00Z")):
@@ -325,7 +340,7 @@ def test_feature_store_keeps_close_time_metadata_and_float32_features():
 
 
 def test_month_window_features_match_full_history_rows():
-    from msd.processing.features import build_features
+    from msd.processing.features import build_features,prepare_feature_cache
     ts=pd.date_range("2024-01-01",periods=2400,freq="min",tz="UTC")
     bars=_bars(ts)
     full=build_features(bars,"BTCUSDT",timeframes={})
@@ -333,6 +348,10 @@ def test_month_window_features_match_full_history_rows():
     chunk=build_features(bars,"BTCUSDT",timeframes={},output_start=start,output_end=end)
     expected=full[(full.ts>=start)&(full.ts<end)].reset_index(drop=True)
     pd.testing.assert_frame_equal(chunk,expected,check_dtype=True,check_exact=True)
+    cache=prepare_feature_cache(bars,"BTCUSDT",{})
+    chunks=pd.concat([build_features(bars,"BTCUSDT",timeframes={},output_start=start,output_end=ts[1500],cache=cache),
+                      build_features(bars,"BTCUSDT",timeframes={},output_start=ts[1500],output_end=end,cache=cache)],ignore_index=True)
+    pd.testing.assert_frame_equal(chunks,expected,check_dtype=True,check_exact=True)
 
 
 def test_feature_returns_are_timeframe_specific_and_no_infinities(tmp_path):
@@ -732,6 +751,18 @@ def test_cash_cfd_keeps_dukas_bidask_when_adjusted_columns_are_nan():
     assert result.bid_o.iloc[0]==100. and result.ask_o.iloc[0]==100.5
 
 
+def test_yearly_level_outputs_merge_without_losing_prior_years(tmp_path,monkeypatch):
+    from msd.processing import pipeline
+    monkeypatch.setattr(pipeline,"LEVEL_DIR",tmp_path)
+    old=pd.DataFrame({"known_at":pd.to_datetime(["2018-05-01T00:00Z","2022-05-01T00:00Z"]),"price":[1.,3.]})
+    old.to_parquet(tmp_path/"BTCUSDT.parquet",index=False)
+    new=pd.DataFrame({"known_at":pd.to_datetime(["2019-05-01T00:00Z"]),"price":[2.]})
+    incoming=tmp_path/"incoming.parquet";new.to_parquet(incoming,index=False)
+    pipeline._merge_levels_year(incoming,"BTCUSDT",2019)
+    saved=pd.read_parquet(tmp_path/"BTCUSDT.parquet")
+    assert saved.price.tolist()==[1.,2.]
+
+
 def test_feature_qa_appends_and_replaces_year_rows(tmp_path):
     from msd.processing.features import feature_qa
     first=pd.DataFrame({"ts":pd.to_datetime(["2020-01-01T00:00Z","2020-01-01T00:01Z"]),
@@ -746,3 +777,83 @@ def test_feature_qa_appends_and_replaces_year_rows(tmp_path):
     assert sum(line.startswith("| 2020 | x |") for line in lines)==1
     assert sum(line.startswith("| 2021 | x |") for line in lines)==1
     assert any(line.startswith("| 2020 | x |") and "10" in line for line in lines)
+
+
+def test_feature_qa_files_matches_dataframe_stats_without_year_concat(tmp_path):
+    from msd.processing.features import feature_qa,feature_qa_files
+    frame=pd.DataFrame({"ts":pd.to_datetime(["2024-01-31T23:58Z","2024-01-31T23:59Z",
+                                              "2024-02-01T00:00Z","2024-02-01T00:01Z"]),
+                        "known_at":pd.to_datetime(["2024-01-31T23:59Z","2024-02-01T00:00Z",
+                                                    "2024-02-01T00:01Z","2024-02-01T00:02Z"]),
+                        "x":np.array([np.nan,1.,2.,3.],dtype=np.float32),"constant":np.ones(4,dtype=np.float32)})
+    first=tmp_path/"2024-01.parquet";second=tmp_path/"2024-02.parquet"
+    frame.iloc[:2].to_parquet(first);frame.iloc[2:].to_parquet(second)
+    direct=feature_qa(frame,"DIRECT",tmp_path/"direct.md")
+    streamed=feature_qa_files([first,second],"STREAM",tmp_path/"stream.md")
+    direct_rows=[line.split(" | ",2)[-1] for line in direct.read_text().splitlines() if line.startswith("| 2024 |")]
+    stream_rows=[line.split(" | ",2)[-1] for line in streamed.read_text().splitlines() if line.startswith("| 2024 |")]
+    assert direct_rows==stream_rows
+
+
+def test_external_dix_and_dvol_features_are_asof_and_truncation_safe():
+    from msd.processing.features import build_features, external_feature_frame
+    ts=pd.date_range("2024-01-02 14:00",periods=140,freq="min",tz="UTC")
+    close=np.linspace(100.,101.,len(ts))
+    bars=pd.DataFrame({"ts":ts,"bid_o":close,"bid_h":close+.1,"bid_l":close-.1,"bid_c":close,
+                       "ask_o":close+.02,"ask_h":close+.12,"ask_l":close-.08,"ask_c":close+.02,"volume":1.})
+    dix=pd.DataFrame({"known_at":pd.to_datetime(["2024-01-02T15:00Z","2024-01-02T16:00Z"]),
+                      "dix":[.42,.99],"gex":[-1.2,8.0]})
+    dvol=pd.DataFrame({"ts":pd.to_datetime(["2024-01-02T14:00Z","2024-01-02T15:00Z"]),
+                       "known_at":pd.to_datetime(["2024-01-02T15:00Z","2024-01-02T16:00Z"]),
+                       "resolution_seconds":[3600,3600],"close":[55.,99.]})
+    full=build_features(bars,"BTCUSDT",auxiliary={"dix_gex":dix,"dvol_btc":dvol})
+    extra=external_feature_frame(full.known_at,{"dix_gex":dix,"dvol_btc":dvol})
+    for column in ("dix_level","gex_level","dvol_btc_level","dvol_btc_change"):
+        np.testing.assert_allclose(full[column].to_numpy(float),extra[column].to_numpy(float),equal_nan=True)
+    cutoff=pd.Timestamp("2024-01-02T15:30Z")
+    perturbed_dvol=dvol.copy(); perturbed_dvol.loc[1,"close"]=999.
+    truncated=build_features(bars[bars.ts<=cutoff].copy(),"BTCUSDT",
+                              auxiliary={"dix_gex":dix[dix.known_at<=cutoff],"dvol_btc":perturbed_dvol})
+    cols=["ts","dix_level","gex_level","dvol_btc_level"]
+    expected=full.loc[full.ts<=cutoff,cols].reset_index(drop=True)
+    actual=truncated[cols].reset_index(drop=True)
+    pd.testing.assert_frame_equal(expected,actual,check_dtype=False)
+    before=full.loc[full.ts==pd.Timestamp("2024-01-02T14:58Z"),"dix_level"].iloc[0]
+    at=full.loc[full.ts==pd.Timestamp("2024-01-02T14:59Z"),"dix_level"].iloc[0]
+    assert np.isnan(before) and at==.42
+    assert full.loc[full.ts==pd.Timestamp("2024-01-02T15:10Z"),"dix_level"].iloc[0]==.42
+    # The 15:00 candle's close is not available until 16:00.
+    dvol_before=full.loc[full.ts==pd.Timestamp("2024-01-02T15:29Z"),"dvol_btc_level"].iloc[0]
+    dvol_close=full.loc[full.ts==pd.Timestamp("2024-01-02T15:59Z"),"dvol_btc_level"].iloc[0]
+    assert dvol_before==55. and dvol_close==99.
+
+
+def test_edgar_acceptance_is_since_only_never_a_future_countdown():
+    from msd.processing.features import build_features
+    ts=pd.date_range("2024-01-02T10:00Z",periods=3,freq="min")
+    bars=pd.DataFrame({"ts":ts,"bid_o":[100.]*3,"bid_h":[101.]*3,"bid_l":[99.]*3,"bid_c":[100.]*3,
+                       "ask_o":[100.1]*3,"ask_h":[101.1]*3,"ask_l":[99.1]*3,"ask_c":[100.1]*3,"volume":[1.]*3})
+    earnings=pd.DataFrame({"event":["earnings_aapl"],"datetime_utc":pd.to_datetime(["2024-01-02T10:03Z"])})
+    features=build_features(bars,"BTCUSDT",auxiliary={"earnings":earnings})
+    assert "minutes_to_earnings_aapl" not in features
+    assert features.minutes_since_earnings_aapl.iloc[:2].isna().all()
+    assert features.minutes_since_earnings_aapl.iloc[2]==0.
+
+
+def test_macro_countdown_uses_only_prepublished_scheduled_events():
+    from msd.processing.features import build_features
+    ts=pd.date_range("2024-01-02T10:00Z",periods=3,freq="min")
+    bars=pd.DataFrame({"ts":ts,"bid_o":[100.]*3,"bid_h":[101.]*3,"bid_l":[99.]*3,"bid_c":[100.]*3,
+                       "ask_o":[100.1]*3,"ask_h":[101.1]*3,"ask_l":[99.1]*3,"ask_c":[100.1]*3,"volume":[1.]*3})
+    events=pd.DataFrame({"event":["cpi","fomc_emergency"],"datetime_utc":pd.to_datetime(["2024-01-02T10:02Z","2024-01-02T10:02Z"]),
+                         "scheduled":[True,False]})
+    features=build_features(bars,"BTCUSDT",auxiliary={"macro_events":events})
+    mixed=events.copy(); mixed["datetime_utc"]=mixed.datetime_utc.astype("datetime64[us, UTC]")
+    features_mixed=build_features(bars,"BTCUSDT",auxiliary={"macro_events":mixed})
+    pd.testing.assert_series_equal(features.minutes_to_cpi,features_mixed.minutes_to_cpi,check_dtype=False)
+    pd.testing.assert_series_equal(features.minutes_since_fomc_emergency,
+                                   features_mixed.minutes_since_fomc_emergency,check_dtype=False)
+    assert features.minutes_to_cpi.iloc[0]==1.
+    assert "minutes_to_fomc_emergency" not in features
+    assert np.isnan(features.minutes_since_fomc_emergency.iloc[0])
+    assert features.minutes_since_fomc_emergency.iloc[1]==0.
