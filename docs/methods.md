@@ -28,7 +28,7 @@ Frozen trigger definitions and natural levels are in each module docstring. Sign
 | 29 | `volume_profile_poc_vah_val` | level source | all | Beyond profile level/bar +0.2 ATR / 2R | React when price touches an active prior-day POC/VAH/VAL within 0.15 ATR. Direction follows close side of level; stop beyond level/bar plus 0.2 ATR; target 2R. |
 | 30 | `btc_order_flow` | BTC feature | BTC/ETH | Beyond signal bar by 1.2 ATR / 2R | BTC/ETH only: taker-buy ratio freshly crosses 0.65 up or 0.35 down with 20-bar volume z-score above 1. Stop 1.2 ATR; target 2R. |
 | 33 | `post_macro_event_reaction` | event experiment | all | Beyond signal bar by 1.2 ATR / 2R | At first bar with macro_minutes_since_event >=5 after having been <5, emit both follow and fade variants of the five-minute move if magnitude exceeds 0.2 ATR. External calendar supplies the event clock; no event without it. Stop 1.2 ATR; target 2R. |
-| 34 | `post_earnings_index_reaction` | event experiment | NQ | Beyond signal bar by 1.2 ATR / 2R | NQ only: at first bar five minutes after a tagged megacap earnings event, follow the five-minute move if above 0.2 ATR. Stop 1.2 ATR; target 2R. |
+| 34 | `post_earnings_index_reaction` | inputs pending; event experiment | NQ | Beyond signal bar by 1.2 ATR / 2R | NQ only: at first bar five minutes after a tagged megacap earnings event, follow the five-minute move if above 0.2 ATR. Stop 1.2 ATR; target 2R. |
 | 37 | `trend_following` | regime | all | Beyond signal bar by 1.2 ATR / 2R | On first observation of a newly completed daily bar, emit when both 20-day and 60-day time-series returns have same sign. Stop 1.2 ATR; target 2R. |
 | 38 | `intraday_momentum` | conditional feature | indices | Beyond signal bar by 1.2 ATR / 2R | After 30 session minutes, emit on first breakout beyond trailing 20-bar mean absolute distance from session open. Record gamma and VIX percentile when present. Stop 1.2 ATR; target 2R. |
 | 40 | `range_breakout_nr4_nr7` | feature | all | Beyond signal bar by 1.2 ATR / 2R | When completed daily ATR is below the preceding seven observations, emit on crossing of a causal prior-day high/low distance. Stop 1.2 ATR; target 2R. |
@@ -40,3 +40,5 @@ Existing pilots: #1 `sr_touch`, #14 `liquidity_sweep`, #39 `rsi2_mean_reversion`
 Add-ons (filters only): #15 killzones, #32 macro_blackout, #41 time_of_day_calendar, #43 vol_sizing.
 
 Skipped: #49 broker retail positioning has no historical data; #52 has no data.
+
+#34 inputs pending: SEC 8-K acceptance timestamps are filing times, not earnings-release times. A verified release-time calendar and causal feature clock are required before evaluation.

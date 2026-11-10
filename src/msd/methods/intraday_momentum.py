@@ -5,11 +5,11 @@ zero when required causal inputs are absent. Role: conditional feature. Markets:
 """
 from __future__ import annotations
 
-from ._detectors import detect_rule
+from ._checkpoint import detect_checkpointed
 
 NAME = "intraday_momentum"
 SYMBOLS = ('USATECHIDXUSD', 'USA500IDXUSD')
 
 
-def detect(features, levels, bars):
-    return detect_rule(NAME, features, levels, bars)
+def detect(features, levels, bars, *, state=None, return_state=False):
+    return detect_checkpointed(NAME, features, levels, bars, state=state, return_state=return_state)

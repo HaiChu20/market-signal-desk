@@ -5,7 +5,8 @@ import numpy as np
 import pandas as pd
 
 
-def detect_rule(name: str, features: pd.DataFrame, levels: pd.DataFrame, bars: pd.DataFrame) -> list[dict]:
+def detect_rule(name: str, features: pd.DataFrame, levels: pd.DataFrame, bars: pd.DataFrame, *,
+                cut_ts=None, initial_last_emit: dict | None = None) -> list[dict]:
     if features.empty or bars.empty:
         return []
     b = bars.sort_values('ts').reset_index(drop=True)
@@ -324,8 +325,10 @@ def detect_rule(name: str, features: pd.DataFrame, levels: pd.DataFrame, bars: p
     if name in {'post_earnings_index_reaction','vix_spike_dip_buy','intraday_momentum'} and 'sym' in b:
         symbols=['USATECHIDXUSD'] if name=='post_earnings_index_reaction' else ['USATECHIDXUSD','USA500IDXUSD']
         allowed=b.sym.astype(str).isin(symbols).to_numpy(); side[~allowed]=0
-    events=[]; last_key={}
+    events=[]
+    last_key={str(k):pd.Timestamp(v) for k,v in (initial_last_emit or {}).items()}
     for i in np.flatnonzero(valid & (side!=0)):
+        if cut_ts is not None and ts.iloc[i] < cut_ts: continue
         if not np.isfinite(atr[i]) or not np.isfinite(sl[i]) or not np.isfinite(tp[i]): continue
         price=float(limit[i]) if np.isfinite(limit[i]) else float(c[i])
         if side[i]*(price-sl[i])<=0 or side[i]*(tp[i]-price)<=0: continue
