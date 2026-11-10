@@ -207,3 +207,11 @@ Append-only notes from the autonomous review loop while the user sleeps.
   Next for 2dcf8f09: any-minute model on the 15-min label grid + tournament summary generator (DEV only).
 - 20:30: eccaa962 6ee9246 ACCEPTED: JSON state for all 30 detectors; exact chunked==unchunked on real BTC June→July (25 non-vacuous); 220 tests incl. Rust (PATH fix). Main Codex: BTC feature equivalence passes (525,210×401; 5 values differ by 1 ULP; 3 root causes fixed); events/labels next.
   Next for eccaa962: NQ index-method boundary check + deep-learning scaffolding (causal multi-TF window builder, PyTorch grid-offset model, walk-forward trainer, optional gpu deps, Roihu Slurm template), with a minimal pipeline diff for the merge.
+- 20:45: PAUSED (Codex usage limit; the user is going out).
+  - Committed checkpoint 1a02595 on data-lake-pipeline (125 tests). Worker branches saved: cao/2dcf8f09 (4 commits), cao/d271bffd (5), cao/eccaa962 (3).
+  - Stopped the Dukascopy downloader (resumable; it was at XAGUSD 2008-08) and cancelled the hourly cron. No processes running.
+  RESUME LIST:
+  - (1) ETHUSD point-scale calibration is ambiguous after widening the band (raw median 35408.5 fits ×10/×100/×1000 within 10–20000). Fix: pick the scale by cross-checking Binance ETHUSDT on the same day; then restart the single Dukascopy runner (ETH, XAG from 2008-08, USDJPY 2014-03→, EURUSD, GBPUSD, WTI, Brent, FTSE, Nikkei).
+  - (2) Main Codex: event/label part of the BTC chunk equivalence → NQ boundary check → production stage 9 (parallel by symbol) → --augment-external (DIX/GEX, DVOL, macro, earnings) → aggTrades raw download (167 GB approved) → Dukascopy ticks → flow features → BLS/ISM calendar → rebuild_manifest.
+  - (3) Workers: eccaa962 (NQ boundary check + deep-learning scaffolding), 2dcf8f09 (any-minute model + tournament table), d271bffd (10C 1s ambiguity + Bybit/bookDepth).
+  - (4) Merge the three worker branches into data-lake-pipeline (watch pipeline.py, pyproject/uv.lock), then wire the 30 methods into the pipeline with limit-entry labeling.
