@@ -107,3 +107,15 @@ def test_public_mirror_is_preferred(monkeypatch, tmp_path):
     assert path.exists()
     assert len(calls) == 1
     assert "www.dukascopy.com" in calls[0]
+
+
+def test_empty_hour_is_missing_without_retry(monkeypatch, tmp_path):
+    monkeypatch.setattr(ticks, "RAW", tmp_path / "raw")
+    monkeypatch.setattr(ticks.shutil, "disk_usage", lambda _: type("Space", (), {"free": 100 * 1024**3})())
+    calls = []
+    def open_(request, timeout):
+        calls.append(request.full_url)
+        return Response(b"")
+    monkeypatch.setattr(ticks, "urlopen", open_)
+    assert ticks.fetch_hour("USA500IDXUSD", HOUR)[2] == "empty archive"
+    assert len(calls) == 1

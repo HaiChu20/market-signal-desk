@@ -167,6 +167,8 @@ def fetch_hour(symbol: str, hour: datetime) -> tuple[datetime, Path | None, str]
                         raise
             if expected and len(raw) != int(expected):
                 raise OSError("BI5 Content-Length mismatch")
+            if not raw:
+                return hour, None, "empty archive"
             decode_ticks(raw, symbol, hour)
             digest = hashlib.sha256(raw).hexdigest()
             target.parent.mkdir(parents=True, exist_ok=True)
