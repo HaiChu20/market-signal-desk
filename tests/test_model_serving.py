@@ -38,6 +38,13 @@ def test_model_loader_and_order(tmp_path):
     assert order['confidence'] == pytest.approx(0.76)
     assert order['size'] == 10.
     assert order['entry_type'] == 'market'
+    limit_order = order_from_event(model, features, event, pd.DataFrame(), side=1,
+                                   candidate_kind='atr:1:2', risk_budget=20.,
+                                   entry_type='limit', limit_price=99.,
+                                   expiry_ts=ts + pd.Timedelta(minutes=10))
+    assert limit_order['entry_price'] == 99.
+    assert limit_order['size'] == 20.
+    assert limit_order['expiry_ts'] == ts + pd.Timedelta(minutes=10)
     assert order_from_event(model, features, event, pd.DataFrame(), side=1,
                             candidate_kind='atr:1:2', min_probability=0.9) is None
 

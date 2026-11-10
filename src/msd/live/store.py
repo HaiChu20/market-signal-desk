@@ -6,7 +6,8 @@ import sqlite3
 
 SIGNAL_FIELDS = ("signal_key", "symbol", "setup", "side", "decision_ts", "entry_ts", "entry_price",
                  "initial_stop", "stop", "take_profit", "planned_risk", "notional", "confidence", "expected_r", "stop_loss_pct",
-                 "status", "exit_ts", "planned_exit_ts", "exit_price", "realized_r", "created_at")
+                 "status", "exit_ts", "planned_exit_ts", "exit_price", "realized_r", "created_at",
+                 "entry_type", "limit_price", "expiry_ts", "eligible_ts")
 
 
 class SignalStore:
@@ -36,16 +37,26 @@ class SignalStore:
             planned_exit_ts TEXT,
             exit_price REAL,
             realized_r REAL,
-            created_at TEXT NOT NULL
+            created_at TEXT NOT NULL,
+            entry_type TEXT NOT NULL DEFAULT 'market',
+            limit_price REAL,
+            expiry_ts TEXT,
+            eligible_ts TEXT
         )""")
         columns = {row[1] for row in self.connection.execute("PRAGMA table_info(signals)")}
         if "planned_exit_ts" not in columns:
             self.connection.execute("ALTER TABLE signals ADD COLUMN planned_exit_ts TEXT")
+        for name, definition in (("entry_type", "TEXT NOT NULL DEFAULT 'market'"),
+                                 ("limit_price", "REAL"), ("expiry_ts", "TEXT"),
+                                 ("eligible_ts", "TEXT")):
+            if name not in columns:
+                self.connection.execute(f"ALTER TABLE signals ADD COLUMN {name} {definition}")
         self.connection.execute("CREATE TABLE IF NOT EXISTS state (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
         self.connection.commit()
 
     def insert(self, values: dict) -> bool:
         row = {key: values.get(key) for key in SIGNAL_FIELDS}
+        row["entry_type"] = row["entry_type"] or "market"
         placeholders = ",".join("?" for _ in SIGNAL_FIELDS)
         cursor = self.connection.execute(
             f"INSERT OR IGNORE INTO signals ({','.join(SIGNAL_FIELDS)}) VALUES ({placeholders})",

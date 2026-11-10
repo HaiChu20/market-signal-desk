@@ -79,12 +79,15 @@ def load_artifact(path: str | Path, *, expected_config_hash: str | None = None) 
 
 def order_from_event(artifact: ModelArtifact, features: pd.Series, event: dict, levels: pd.DataFrame,
                      *, side: int, candidate_kind: str, min_probability: float = 0.5,
-                     risk_budget: float = 1.0, entry_type: str = "market") -> dict | None:
+                     risk_budget: float = 1.0, entry_type: str = "market",
+                     limit_price: float | None = None, expiry_ts=None) -> dict | None:
     """Choose an explicitly named offline exit candidate and size to stop risk."""
     if side not in event.get("side_candidates", [event.get("side")]):
         raise ValueError("side is not allowed by event")
     if entry_type not in {"market", "limit"}:
         raise ValueError("unsupported entry type")
+    if entry_type == "limit" and (limit_price is None or expiry_ts is None):
+        raise ValueError("limit orders require limit_price and expiry_ts")
     probability = artifact.probability(features)
     if probability < min_probability:
         return None
@@ -94,7 +97,7 @@ def order_from_event(artifact: ModelArtifact, features: pd.Series, event: dict, 
                       if item["kind"] == candidate_kind), None)
     if candidate is None:
         raise ValueError("unknown exit candidate")
-    price = float(event["price"])
+    price = float(limit_price if entry_type == "limit" else event["price"])
     stop, tp = candidate["sl"], candidate["tp"]
     if stop is None or tp is None or not np.isfinite([price, stop, tp]).all():
         raise ValueError("candidate has no executable SL/TP")
@@ -104,6 +107,7 @@ def order_from_event(artifact: ModelArtifact, features: pd.Series, event: dict, 
         raise ValueError("risk budget must be positive")
     return {"decision_ts": event["ts"], "side": side, "entry_type": entry_type,
             "entry_price": price if entry_type == "limit" else None,
+            "expiry_ts": expiry_ts if entry_type == "limit" else None,
             "stop": float(stop), "tp": float(tp), "confidence": probability,
             "size": float(risk_budget / abs(price - stop)),
             "note": f"{event['method']}:{candidate_kind}"}
