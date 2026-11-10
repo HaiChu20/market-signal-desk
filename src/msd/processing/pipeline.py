@@ -15,7 +15,7 @@ import pandas as pd
 from msd.data import load
 from .features import build_features, external_feature_frame, feature_qa_files, prepare_feature_cache
 from .labels import label_grid
-from .levels import build_levels
+from .levels import apply_level_invalidations, build_levels
 from .timeframes import INDEX_SYMBOLS, TIMEFRAMES, build_all_timeframes
 from msd.methods.common import assert_event_volume, exit_candidates, prepare_exit_levels
 from msd.methods import sr_touch, rsi2_mean_reversion, liquidity_sweep
@@ -194,7 +194,8 @@ def _write_monthly(frame: pd.DataFrame, directory: Path, symbol: str, compressio
     return len(work)
 
 
-def _merge_levels_year(level_temp: Path, symbol: str, start_year: int, replace_existing: bool = False) -> None:
+def _merge_levels_year(level_temp: Path, symbol: str, start_year: int, replace_existing: bool = False,
+                       state_levels: pd.DataFrame | None = None) -> None:
     """Atomically merge this year's levels with only earlier completed years."""
     target=LEVEL_DIR/f"{symbol}.parquet"
     current=pd.read_parquet(level_temp)
@@ -204,6 +205,12 @@ def _merge_levels_year(level_temp: Path, symbol: str, start_year: int, replace_e
         # counts are recomputed from causal price bars by the event detectors.
         previous=previous.drop(columns=["touches_so_far"],errors="ignore")
         current=current.drop(columns=["touches_so_far"],errors="ignore")
+        if state_levels is not None and len(previous):
+            invalidations=state_levels.loc[state_levels.invalidated_at.notna(),["level_id","invalidated_at"]]
+            if len(invalidations):
+                state_map=invalidations.drop_duplicates("level_id",keep="last").set_index("level_id").invalidated_at
+                updated=previous.level_id.map(state_map)
+                previous["invalidated_at"]=updated.combine_first(previous.invalidated_at)
         cutoff=pd.Timestamp(start_year,1,1,tz="UTC")
         previous=previous[pd.to_datetime(previous.known_at,utc=True)<cutoff]
         current=pd.concat([previous,current],ignore_index=True).sort_values("known_at").reset_index(drop=True)
@@ -582,9 +589,7 @@ def run_symbol(symbol: str, start_year: int | None = None, end_year: int | None 
     timings=[]
     event_year_counts=[]
     bad_tick_count=0
-    state_root=Path("data/state/pipeline")/symbol
-    first_state_path=state_root/f"{start_year-1}.json"
-    replace_levels_on_start=not first_state_path.exists()
+    replace_levels_pending=not (Path("data/state/pipeline")/symbol/f"{start_year-1}.json").exists()
     for year in range(start_year, end_year+1):
         year_started=time.perf_counter()
         year_start=pd.Timestamp(year,1,1,tz="UTC")
@@ -623,23 +628,27 @@ def run_symbol(symbol: str, start_year: int | None = None, end_year: int | None 
         tfs=_timeframes_with_history(symbol,tfs_current,year_start)
         prior_levels=pd.DataFrame() if bootstrap else _load_year_level_history(symbol,year_start)
         current_levels=build_levels(active_bars,symbol,tfs).drop(columns=["touches_so_far"],errors="ignore")
-        current_levels=current_levels[pd.to_datetime(current_levels.known_at,utc=True)<year_end]
+        # The final minute of the prior calendar year closes exactly at
+        # year_end; levels confirmed at that instant are causal for that row.
+        current_levels=current_levels[pd.to_datetime(current_levels.known_at,utc=True)<=year_end]
         if not bootstrap:
             current_levels=current_levels[pd.to_datetime(current_levels.known_at,utc=True)>=year_start]
         if len(current_levels):
             current_levels=current_levels.drop_duplicates(["price","type","timeframe","created_at","known_at","direction"],keep="last")
         levels=pd.concat([prior_levels,current_levels],ignore_index=True,sort=False)
         levels=levels.drop_duplicates(["price","type","timeframe","created_at","known_at","direction"],keep="last")
+        levels=apply_level_invalidations(active_bars,levels)
         level_output_start=left if bootstrap else year_start
         year_levels=levels[(pd.to_datetime(levels.known_at,utc=True)>=level_output_start)&
-                           (pd.to_datetime(levels.known_at,utc=True)<year_end)]
+                           (pd.to_datetime(levels.known_at,utc=True)<=year_end)]
         if len(year_levels):
             _check_disk();LEVEL_DIR.mkdir(parents=True,exist_ok=True)
             Path("data/tmp").mkdir(parents=True,exist_ok=True)
             level_temp=Path("data/tmp")/f"levels_year_{symbol}_{year}.parquet"
             year_levels.to_parquet(level_temp,index=False,compression="zstd")
-            _merge_levels_year(level_temp,symbol,year,
-                               replace_existing=replace_levels_on_start and year==start_year)
+            _merge_levels_year(level_temp,symbol,year,replace_existing=replace_levels_pending,
+                               state_levels=levels)
+            replace_levels_pending=False
             level_rows+=len(year_levels)
         del year_levels
         auxiliary=_auxiliary_inputs()
@@ -695,6 +704,9 @@ def run_symbol(symbol: str, start_year: int | None = None, end_year: int | None 
             method_features,levels,active_bars,symbol,return_event_counts=True,
             event_start=year_start,event_end=year_end,method_states=method_states,return_states=True,
             detector_features=scan_features,detector_bars=scan_bars)
+        next_states["invalidations"]={str(int(row.level_id)):pd.Timestamp(row.invalidated_at).isoformat()
+            for row in levels.loc[levels.invalidated_at.notna()&
+                (pd.to_datetime(levels.invalidated_at,utc=True)<=year_end)].itertuples(index=False)}
         candidate_counts=events.groupby("method",dropna=False).size() if len(events) else pd.Series(dtype=int)
         methods=methods_for_symbol(symbol)
         yearly_counts=[]

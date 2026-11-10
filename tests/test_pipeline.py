@@ -40,6 +40,36 @@ def test_level_type_codes_do_not_depend_on_future_level_universe():
     np.testing.assert_array_equal(a.level_above_1_type_code, b.level_above_1_type_code)
 
 
+def test_level_invalidation_is_causal_and_persistable():
+    from msd.processing.levels import apply_level_invalidations, levels_asof
+    ts=pd.date_range("2024-01-01",periods=50,freq="min",tz="UTC")
+    close=np.r_[np.full(30,100.),np.full(20,110.)]
+    bars=pd.DataFrame({"ts":ts,"bid_o":close,"bid_h":close+.2,"bid_l":close-.2,"bid_c":close,
+                       "ask_o":close+.1,"ask_h":close+.3,"ask_l":close-.1,"ask_c":close+.1})
+    levels=pd.DataFrame({"level_id":[7],"price":[100.],"type":["swing_high"],"timeframe":["15m"],
+        "created_at":[ts[10]],"known_at":[ts[20]+pd.Timedelta(minutes=1)],"invalidated_at":[pd.NaT],
+        "strength":[1/3],"direction":[-1]})
+    updated=apply_level_invalidations(bars,levels)
+    invalidated=updated.invalidated_at.iloc[0]
+    assert pd.notna(invalidated) and invalidated>levels.known_at.iloc[0]
+    assert len(levels_asof(updated,invalidated-pd.Timedelta(minutes=1)))==1
+    assert levels_asof(updated,invalidated).empty
+
+
+def test_nearest_level_ties_use_stable_level_id_not_input_order():
+    from msd.processing.features import _nearest_level_features
+    base = pd.DataFrame({"known_at": pd.to_datetime(["2024-01-02"], utc=True),
+                         "mid_close": [99.], "base_atr14": [1.]})
+    levels = pd.DataFrame({"level_id": [10, 20], "price": [100., 100.],
+                           "type": ["swing_high", "prior_day_high"],
+                           "known_at": pd.to_datetime(["2024-01-01"]*2, utc=True),
+                           "invalidated_at": [pd.NaT, pd.NaT], "strength": [1/3, 1.]})
+    forward = _nearest_level_features(base, levels)
+    reverse = _nearest_level_features(base, levels.iloc[::-1].reset_index(drop=True))
+    assert forward.level_above_1_type_code.iloc[0] == reverse.level_above_1_type_code.iloc[0]
+    assert forward.level_above_1_strength.iloc[0] == reverse.level_above_1_strength.iloc[0]
+
+
 def test_cme_daily_bar_open_is_dst_correct():
     from msd.processing.timeframes import build_timeframe
     for day, expected in (("2024-01-15", "2024-01-14 23:00Z"), ("2024-07-15", "2024-07-14 22:00Z")):
@@ -220,6 +250,20 @@ def test_label_deadline_gap_and_financing_classes():
     assert result[0]=="time" and result[1]==1 and result[2]==101.
     assert _night_count(pd.Timestamp("2024-06-08 12:00",tz="UTC"),pd.Timestamp("2024-06-10 12:00",tz="UTC"),"crypto")==2
     assert _night_count(pd.Timestamp("2024-06-10 19:00",tz="UTC"),pd.Timestamp("2024-06-10 20:00",tz="UTC"),"index")==0
+
+
+def test_label_grid_can_limit_signal_timestamps_without_changing_outcomes():
+    from msd.processing.labels import label_grid
+    ts=pd.date_range("2024-01-01",periods=120,freq="min",tz="UTC")
+    mid=np.linspace(100,101,len(ts))
+    bars=pd.DataFrame({"ts":ts,"bid_o":mid-.05,"bid_h":mid+.2,"bid_l":mid-.2,"bid_c":mid,
+        "ask_o":mid+.05,"ask_h":mid+.3,"ask_l":mid-.1,"ask_c":mid+.1})
+    atr=pd.Series(np.ones(len(bars)),index=bars.index)
+    all_rows=label_grid(bars,atr,max_trading_days=1,instrument_class="crypto")
+    bounded=label_grid(bars,atr,max_trading_days=1,instrument_class="crypto",
+                       signal_start=ts[30],signal_end=ts[90])
+    all_rows=all_rows[(all_rows.signal_index>=30)&(all_rows.signal_index<90)].reset_index(drop=True)
+    pd.testing.assert_frame_equal(bounded,all_rows,check_dtype=False)
 
 
 def test_label_gap_sl_first_and_favorable_limit_fill_rules():
