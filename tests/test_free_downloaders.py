@@ -40,6 +40,12 @@ def test_bybit_rejects_bad_side():
         bybit.parse_trade({"timestamp": "1", "side": "Maker", "size": "1", "price": "2"})
 
 
+def test_bybit_zero_size_dust_trade_keeps_count():
+    stamp, buy, size, price = bybit.parse_trade({"timestamp": "1593339590.1551", "side": "Sell",
+                                                "size": "0.0", "price": "9055.5"})
+    assert not buy and size == 0 and price == 9055.5
+
+
 def test_bybit_memory_matches_disk_and_manifest_resume(monkeypatch, tmp_path):
     raw = gzip.compress(b"timestamp,side,size,price\n1704067200.1,Buy,2,100\n"
                         b"1704067200.8,Sell,1,110\n")

@@ -51,7 +51,9 @@ def parse_trade(row: dict[str, str]) -> tuple[pd.Timestamp, bool, float, float]:
     if side not in {"buy", "sell"}:
         raise ValueError(f"invalid taker side: {side}")
     size, price = float(row["size"]), float(row["price"])
-    if not 0 < size < float("inf") or not 0 < price < float("inf"):
+    # Historical Bybit files contain genuine zero-size dust trades; retain
+    # their trade counts while they contribute zero to volume and VWAP.
+    if not 0 <= size < float("inf") or not 0 < price < float("inf"):
         raise ValueError("invalid size or price")
     return stamp, side == "buy", size, price
 
