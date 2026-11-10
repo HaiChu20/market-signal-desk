@@ -29,7 +29,7 @@ PRICE_BANDS = {
     "USA30IDXUSD": (5000, 100000), "DEUIDXEUR": (3000, 50000), "XAUUSD": (200, 10000),
     "XAGUSD": (3, 200), "EURUSD": (0.5, 3.0), "USDJPY": (50, 300), "GBPUSD": (0.5, 3.0),
     "LIGHTCMDUSD": (-60, 300), "BRENTCMDUSD": (10, 300), "GBRIDXGBP": (1000, 50000),
-    "JPNIDXJPY": (5000, 100000), "ETHUSD": (1000, 10000),
+    "JPNIDXJPY": (5000, 100000), "ETHUSD": (10, 20000),
 }
 ROOT = Path("data/bars/dukascopy")
 RECORD = struct.Struct(">5if")
@@ -472,7 +472,7 @@ def download(symbol: str, start: date, end: date, root: Path = ROOT, workers: in
             if complete and next_month <= today:
                 print(f"skip {path}", flush=True)
             else:
-                days = [month + timedelta(days=i) for i in range((last - month).days + 1) if month + timedelta(days=i) >= start and (symbol == "BTCUSD" or (month + timedelta(days=i)).weekday() != 5)]
+                days = [month + timedelta(days=i) for i in range((last - month).days + 1) if month + timedelta(days=i) >= start and (symbol in ("BTCUSD", "ETHUSD") or (month + timedelta(days=i)).weekday() != 5)]
                 print(f"fetch {symbol} {month:%Y-%m} ({len(days)} days)", flush=True)
                 frames = []
                 quarantined_this_year={}

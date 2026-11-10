@@ -157,6 +157,8 @@ def _nearest_level_features(base: pd.DataFrame, levels: pd.DataFrame | None) -> 
         return pd.concat([base,pd.DataFrame(empty_fields,index=base.index)],axis=1)
     levels["type_code"]=levels.type.astype(str).map(LEVEL_TYPE_CODES).fillna(0)
     prices=levels.price.to_numpy(float)
+    ids=(pd.to_numeric(levels.level_id,errors="coerce").fillna(-1).to_numpy(np.int64)
+         if "level_id" in levels else np.arange(len(levels),dtype=np.int64))
     known=pd.to_datetime(levels.known_at,utc=True).astype("datetime64[ns, UTC]").astype("int64").to_numpy()
     stamps=pd.to_datetime(base.known_at,utc=True).astype("datetime64[ns, UTC]").astype("int64").to_numpy()
     mids, atr=base.mid_close.to_numpy(float),base.base_atr14.to_numpy(float)
@@ -165,7 +167,8 @@ def _nearest_level_features(base: pd.DataFrame, levels: pd.DataFrame | None) -> 
     invalid=invalid_ts.astype("datetime64[ns, UTC]").astype("int64").to_numpy(copy=True)
     invalid[invalid_ts.isna().to_numpy()]=np.iinfo(np.int64).max
     order=np.argsort(known,kind="stable")
-    removals=sorted((int(invalid[i]),float(prices[i]),int(i)) for i in range(len(levels)) if invalid[i] != np.iinfo(np.int64).max)
+    removals=sorted((int(invalid[i]),float(prices[i]),int(ids[i]),int(i))
+                    for i in range(len(levels)) if invalid[i] != np.iinfo(np.int64).max)
     active=[]; cursor=0; removal_cursor=0
     fields=empty_fields
     strengths=levels.strength.to_numpy(float) if "strength" in levels else np.ones(len(levels))
@@ -173,24 +176,26 @@ def _nearest_level_features(base: pd.DataFrame, levels: pd.DataFrame | None) -> 
     for row,now in enumerate(stamps):
         while cursor<len(order) and known[order[cursor]]<=now:
             idx=int(order[cursor])
-            if np.isfinite(prices[idx]): insort_right(active,(float(prices[idx]),idx))
+            if np.isfinite(prices[idx]): insort_right(active,(float(prices[idx]),int(ids[idx]),idx))
             cursor+=1
         while removal_cursor<len(removals) and removals[removal_cursor][0]<=now:
-            _,price,idx=removals[removal_cursor]
-            pos=bisect_left(active,(price,idx))
-            if pos<len(active) and active[pos]==(price,idx): active.pop(pos)
+            _,price,level_id,idx=removals[removal_cursor]
+            item=(price,level_id,idx)
+            pos=bisect_left(active,item)
+            if pos<len(active) and active[pos]==item: active.pop(pos)
             removal_cursor+=1
         if not active or not np.isfinite(atr[row]) or atr[row]<=0 or not np.isfinite(mids[row]): continue
-        pos=bisect_left(active,(float(mids[row]),-1))
+        pos=bisect_left(active,(float(mids[row]),np.iinfo(np.int64).min,-1))
         below=[active[k] for k in range(max(0,pos-3),pos)][::-1]
         above=[active[k] for k in range(pos,min(len(active),pos+3))]
-        for side,ids in (("below",below),("above",above)):
-            for rank,(_,idx) in enumerate(ids,1):
+        for side,candidates in (("below",below),("above",above)):
+            for rank,item in enumerate(candidates,1):
                 key=f"level_{side}_{rank}_"
-                fields[key+"distance_atr"][row]=(prices[idx]-mids[row])/atr[row]
-                fields[key+"type_code"][row]=types[idx]
-                fields[key+"strength"][row]=strengths[idx]
-                fields[key+"age_minutes"][row]=(now-known[idx])/60e9
+                level_index=item[2]
+                fields[key+"distance_atr"][row]=(prices[level_index]-mids[row])/atr[row]
+                fields[key+"type_code"][row]=types[level_index]
+                fields[key+"strength"][row]=strengths[level_index]
+                fields[key+"age_minutes"][row]=(now-known[level_index])/60e9
     return pd.concat([base,pd.DataFrame(fields,index=base.index)],axis=1)
 
 

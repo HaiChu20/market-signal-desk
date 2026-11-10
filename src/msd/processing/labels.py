@@ -213,7 +213,8 @@ def first_hit(bars: pd.DataFrame, entry_index: int, side: int, entry_price: floa
 
 def label_grid(bars: pd.DataFrame, atr: pd.Series, every_minutes: int=15,
                max_bars: int|None=None, *, max_trading_days: int=5,
-               instrument_class: str="crypto", seconds: pd.DataFrame | None=None) -> pd.DataFrame:
+               instrument_class: str="crypto", seconds: pd.DataFrame | None=None,
+               signal_start=None, signal_end=None) -> pd.DataFrame:
     """Both-side ATR-grid labels; holding limit is a timestamp deadline."""
     try:
         from msd._msd_kernels import first_hit_batch
@@ -235,6 +236,14 @@ def label_grid(bars: pd.DataFrame, atr: pd.Series, every_minutes: int=15,
                        .astype("<i8").tobytes() if seconds is not None else None)
     bid_c=packed[:,3];ask_c=packed[:,7]
     anchors=np.flatnonzero((stamps.dt.minute.to_numpy()%every_minutes)==0)
+    if signal_start is not None:
+        bound=pd.Timestamp(signal_start)
+        bound=bound.tz_localize("UTC") if bound.tzinfo is None else bound.tz_convert("UTC")
+        anchors=anchors[stamps.iloc[anchors].ge(bound).to_numpy()]
+    if signal_end is not None:
+        bound=pd.Timestamp(signal_end)
+        bound=bound.tz_localize("UTC") if bound.tzinfo is None else bound.tz_convert("UTC")
+        anchors=anchors[stamps.iloc[anchors].lt(bound).to_numpy()]
     outcome_code={"tp":1,"stop":-1,"sl":-1,"time":0,"no_fill":-2}
     rows=[]
     for anchor_start in range(0,len(anchors),700):

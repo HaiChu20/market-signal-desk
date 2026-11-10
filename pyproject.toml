@@ -3,9 +3,11 @@ name = "market-signal-desk"
 version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
+    "lightgbm>=4.7.0",
     "numpy",
     "pandas",
     "pyarrow",
+    "scikit-learn>=1.9.1",
 ]
 
 [dependency-groups]

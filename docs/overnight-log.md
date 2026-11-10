@@ -174,3 +174,44 @@ Append-only notes from the autonomous review loop while the user sleeps.
 - 19:30: Codex: per-year JSON event checkpoints + per-touch parquet rows added, touches_so_far removed; no feature read the misleading counter. I verified level 'strength' is a per-type constant set at creation (causal). Asked for a truncation assertion on strength/invalidated_at visibility; the two-path check is in progress.
 - 17:35: Status given to the user. New sources DONE: DIX/GEX (3,905 days), DVOL BTC/ETH, SEC earnings (670). Macro: Fed + BEA present, BLS/ISM missing. DAX complete; Dukascopy now on BTCUSD 2026-04. 120 fast tests pass. Stage 9 paused pending the equivalence fix.
   USER DECISION: download ALL Binance aggTrades (~166.6 GiB raw, spot + UM, BTC + ETH), lifting the 120 GB cap for this dataset. Sent msg 485.
+- 18:05: The user turned Docker on and asked for maximum parallelism while out.
+  - Fixed .gitignore (`data/` had also excluded src/msd/data/, so the downloaders were never committed) → checkpoint commit b7a26f2 (122 tests).
+  - Started the Docker build check (log data/logs/docker_build_check.log).
+  - Started 3 parallel Codex workers in isolated worktrees from b7a26f2:
+    - eccaa962: 32 method detectors + filters;
+    - 2dcf8f09: training/report-card framework (dev only);
+    - d271bffd: online features + model serving + Docker + Roihu scripts.
+  - Main Codex 33128ce1 keeps the data pipeline. Its equivalence check found a 2nd real look-ahead: level type codes came from the full table, so future types shifted earlier codes. Fixed with a fixed map + regression test.
+- 18:15: Docker image builds (EXIT 0) and the engine runs in the container, but the Rust extension in the image is the macOS .so (invalid ELF header); labels silently fall back to Python. Sent to worker d271bffd: .dockerignore, in-image maturin build, container smoke test, no silent fallback (MSD_REQUIRE_RUST).
+- 18:35: Worker reviews.
+  - 2dcf8f09 (research, branch cao/2dcf8f09, 127 tests): sound causality (as-of + forbidden outcome cols, purged WF/CPCV, later-fold isotonic, init_score offset, decision-time spread cost). Gaps: ineffective shrinkage (uncertainty divided by N_all, likely winner's curse: sweep selected n=37 at −0.56R despite Brier skill +0.096); missing random-direction/PBO/DSR. Follow-up sent.
+  - d271bffd (live, branch cao/d271bffd): ACCEPTED in principle. Online==offline ≤1 ULP, events exact; 0.27 s/update; Docker in-image Rust + MSD_REQUIRE_RUST; container replay 0 mismatches; Roihu scripts. Follow-up: limit-order lifecycle matching the label kernel.
+  - Merge plan: merge worker branches into data-lake-pipeline at the next main-checkout checkpoint (their files are mostly disjoint; pyproject/uv.lock need care).
+- 18:45:
+  - Main Codex found a 3rd boundary bug: levels confirmed exactly at the year boundary were dropped by a strict `< year_end` cut. Fixed (inclusive), with the stable ID re-emitted. Remaining diffs: ≤1 float32 ULP in rolling quote_volume_z20. Accept only if levels/events/labels are exact and no decision depends on those columns; document the tolerance; then the NQ boundary check → production restart.
+  - d271bffd: Roihu setup.sh fix commit 3e48a13 (wheel build into .venv, import check).
+- 19:50 (hourly check): 451 GB free, data 11 GB.
+  - FOUND + FIXED myself (one-liners in dukascopy.py):
+    - the ETHUSD plausibility band (1000–10000) was quarantining real 2018 ETH days ($748–990), now 10–20000;
+    - Saturdays were skipped for ETH (only BTCUSD was treated as 7-day), now BTC+ETH.
+    - No ETH months had been written. 48 downloader tests pass. Restarted the single runner (PID 4859, log stage8_dukascopy_resume3.log); told Codex (regression test + CRYPTO_SYMBOLS set).
+  - aggTrades download not started yet (main Codex is in a 3 h turn).
+  - Workers: methods worker eccaa962 has 39 method files, not yet committed; the others are on their follow-ups.
+- 20:00: d271bffd limit-order lifecycle ACCEPTED (7d239e9; SQLite pending orders, fill rules equal to the Rust kernel on synthetic + real BTC; 131 tests; Docker OK). Reassigned to d271bffd: stage 10C (1s ambiguity resolution in Rust + reference) and 11c/d (Bybit trades, Binance bookDepth), with write access only to their new data dirs. Main Codex queue updated accordingly.
+- 20:10: eccaa962 METHODS delivered (cao/eccaa962: 3bf46cc, 067691c): 30 modules + filters + docs/methods.md, 98 detector tests (non-vacuous truncation), 2021 smoke counts sane (most 1–6/day; zeros where inputs are absent: macro/earnings clocks, index daily returns). Accepted in principle. Follow-up: per-detector checkpointed state with chunked==unchunked tests on real BTC (its smoke reset cooldowns monthly); use ~/.cargo/bin on PATH for the Rust build; #34 inputs pending.
+  - Merge plan: merge d271bffd (accepted) and eccaa962 + 2dcf8f09 (after follow-ups) into data-lake-pipeline at the main checkout's next checkpoint. Methods are wired into pipeline.methods_for_symbol only after the limit-entry labeling path exists in the pipeline.
+- 20:20: 2dcf8f09 research follow-up ACCEPTED (9b99901, 68692e2; 132 tests). Preliminary DEV pilots:
+  - sr_touch n=209, −0.23R, t −2.37, random pct 19.5, DSR≈0; selected ≈ unselected, so no edge.
+  - sweep: 0 signals after shrinkage (OOF Brier skill +0.10 but no cost-beating edge).
+  - rsi2 n=2.
+  Next for 2dcf8f09: any-minute model on the 15-min label grid + tournament summary generator (DEV only).
+- 20:30: eccaa962 6ee9246 ACCEPTED: JSON state for all 30 detectors; exact chunked==unchunked on real BTC June→July (25 non-vacuous); 220 tests incl. Rust (PATH fix). Main Codex: BTC feature equivalence passes (525,210×401; 5 values differ by 1 ULP; 3 root causes fixed); events/labels next.
+  Next for eccaa962: NQ index-method boundary check + deep-learning scaffolding (causal multi-TF window builder, PyTorch grid-offset model, walk-forward trainer, optional gpu deps, Roihu Slurm template), with a minimal pipeline diff for the merge.
+- 20:45: PAUSED (Codex usage limit; the user is going out).
+  - Committed checkpoint 1a02595 on data-lake-pipeline (125 tests). Worker branches saved: cao/2dcf8f09 (4 commits), cao/d271bffd (5), cao/eccaa962 (3).
+  - Stopped the Dukascopy downloader (resumable; it was at XAGUSD 2008-08) and cancelled the hourly cron. No processes running.
+  RESUME LIST:
+  - (1) ETHUSD point-scale calibration is ambiguous after widening the band (raw median 35408.5 fits ×10/×100/×1000 within 10–20000). Fix: pick the scale by cross-checking Binance ETHUSDT on the same day; then restart the single Dukascopy runner (ETH, XAG from 2008-08, USDJPY 2014-03→, EURUSD, GBPUSD, WTI, Brent, FTSE, Nikkei).
+  - (2) Main Codex: event/label part of the BTC chunk equivalence → NQ boundary check → production stage 9 (parallel by symbol) → --augment-external (DIX/GEX, DVOL, macro, earnings) → aggTrades raw download (167 GB approved) → Dukascopy ticks → flow features → BLS/ISM calendar → rebuild_manifest.
+  - (3) Workers: eccaa962 (NQ boundary check + deep-learning scaffolding), 2dcf8f09 (any-minute model + tournament table), d271bffd (10C 1s ambiguity + Bybit/bookDepth).
+  - (4) Merge the three worker branches into data-lake-pipeline (watch pipeline.py, pyproject/uv.lock), then wire the 30 methods into the pipeline with limit-entry labeling.

@@ -365,3 +365,46 @@ def build_levels(bars: pd.DataFrame, symbol: str, timeframes: dict[str, pd.DataF
     # stable ID keeps the same causal level addressable across chunking.
     levels["level_id"] = _stable_level_ids(levels)
     return levels[LEVEL_COLUMNS].sort_values("known_at").reset_index(drop=True)
+
+
+def apply_level_invalidations(bars: pd.DataFrame, levels: pd.DataFrame) -> pd.DataFrame:
+    """Set causal first close beyond each directed level by 0.25 ATR.
+
+    Prefix extrema let each level find its first invalidating close with a
+    binary search, avoiding a level-by-bar nested scan.
+    """
+    if bars.empty or levels.empty or not {"bid_c", "ts"}.issubset(bars.columns):
+        return levels.copy()
+    from .features import indicator_frame
+    work=bars.sort_values("ts").reset_index(drop=True)
+    closes=work.bid_c.to_numpy(float)
+    atr=indicator_frame(work,"1m").atr14.to_numpy(float)
+    valid=np.isfinite(closes)&np.isfinite(atr)&(atr>0)
+    above=np.maximum.accumulate(np.where(valid,closes-LEVEL_INVALIDATION_ATR*atr,-np.inf))
+    below=np.minimum.accumulate(np.where(valid,closes+LEVEL_INVALIDATION_ATR*atr,np.inf))
+    close_ns=(pd.to_datetime(work.ts,utc=True).astype("datetime64[ns, UTC]")
+              .astype("int64").to_numpy()+60_000_000_000)
+    out=levels.copy()
+    invalid=pd.to_datetime(out.get("invalidated_at",pd.Series(pd.NaT,index=out.index)),utc=True,errors="coerce")
+    prices=pd.to_numeric(out.price,errors="coerce").to_numpy(float)
+    known=pd.to_datetime(out.known_at,utc=True).astype("int64").to_numpy()
+    directions=pd.to_numeric(out.direction,errors="coerce").fillna(0).to_numpy(np.int8)
+    unset=invalid.isna().to_numpy()
+    invalid_values=invalid.to_numpy(dtype="datetime64[ns]")
+    for direction,extreme in ((-1,above),(1,below)):
+        indices=np.flatnonzero(unset&(directions==direction)&np.isfinite(prices))
+        for idx in indices:
+            start=int(np.searchsorted(close_ns,known[idx],side="left"))
+            if start>=len(close_ns): continue
+            segment=extreme[start:]
+            if direction<0:
+                offset=int(np.searchsorted(segment,prices[idx],side="right"))
+            else:
+                offset=int(np.searchsorted(-segment,-prices[idx],side="right"))
+            pos=start+offset
+            if pos<len(close_ns) and np.isfinite(extreme[pos]) and (
+                    (direction<0 and extreme[pos]>prices[idx]) or
+                    (direction>0 and extreme[pos]<prices[idx])):
+                invalid_values[idx]=np.datetime64(int(close_ns[pos]),"ns")
+    out["invalidated_at"]=pd.to_datetime(invalid_values,utc=True)
+    return out
