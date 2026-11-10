@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from bisect import bisect_left, bisect_right
 from datetime import datetime, time, timedelta
+from decimal import Decimal
+import hashlib
 from zoneinfo import ZoneInfo
 
 import numpy as np
@@ -326,11 +328,23 @@ def _touch_updates(bars: pd.DataFrame, levels: pd.DataFrame) -> pd.DataFrame:
 
 
 def _stable_level_ids(levels: pd.DataFrame) -> np.ndarray:
-    identity = levels[["price", "type", "timeframe", "created_at", "known_at", "direction"]].copy()
-    for column in ("created_at", "known_at"):
-        identity[column] = pd.to_datetime(identity[column], utc=True).astype("datetime64[ns, UTC]")
-    hashes = pd.util.hash_pandas_object(identity, index=False).to_numpy(dtype=np.uint64)
-    return (hashes & np.uint64(0x7FFFFFFFFFFFFFFF)).astype(np.int64)
+    """Hash a canonical level identity independently of process/hash seeds."""
+    identities=[]
+    for row in levels[["price", "type", "timeframe", "created_at", "known_at", "direction"]].itertuples(index=False, name=None):
+        price, kind, timeframe, created, known, direction=row
+        created_ns=pd.Timestamp(created).tz_convert("UTC").value if pd.Timestamp(created).tzinfo else pd.Timestamp(created).tz_localize("UTC").value
+        known_ns=pd.Timestamp(known).tz_convert("UTC").value if pd.Timestamp(known).tzinfo else pd.Timestamp(known).tz_localize("UTC").value
+        fixed_price=format(Decimal(str(float(price))).normalize(), "f")
+        canonical="|".join((str(kind),str(timeframe),str(int(direction)),str(int(created_ns)),str(int(known_ns)),fixed_price))
+        digest=hashlib.blake2b(canonical.encode("utf-8"),digest_size=8).digest()
+        identity=int.from_bytes(digest,"big") & 0x7FFFFFFFFFFFFFFF
+        identities.append((identity,canonical))
+    owners={}
+    for identity,canonical in identities:
+        previous=owners.setdefault(identity,canonical)
+        if previous!=canonical:
+            raise RuntimeError(f"Stable level ID collision: {identity}")
+    return np.asarray([identity for identity,_ in identities],dtype=np.int64)
 
 
 def build_levels(bars: pd.DataFrame, symbol: str, timeframes: dict[str, pd.DataFrame]) -> pd.DataFrame:
@@ -363,7 +377,11 @@ def build_levels(bars: pd.DataFrame, symbol: str, timeframes: dict[str, pd.DataF
     # IDs are carried into touch/cooldown checkpoints. Sequential IDs change
     # when a later chunk adds rows to an earlier category; a content-derived
     # stable ID keeps the same causal level addressable across chunking.
+    identity_columns=["price","type","timeframe","created_at","known_at","direction"]
+    levels=levels.drop_duplicates(identity_columns,keep="last").reset_index(drop=True)
     levels["level_id"] = _stable_level_ids(levels)
+    if levels.level_id.duplicated().any():
+        raise RuntimeError(f"Stable level IDs are not unique for {symbol}")
     return levels[LEVEL_COLUMNS].sort_values("known_at").reset_index(drop=True)
 
 

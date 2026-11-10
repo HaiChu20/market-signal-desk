@@ -42,6 +42,21 @@ def _rsi(close: pd.Series, period: int) -> pd.Series:
     return 100 - 100 / (1 + gain / loss.replace(0, np.nan))
 
 
+def _deterministic_rolling_mean_std(values: pd.Series, window: int) -> tuple[pd.Series, pd.Series]:
+    """Compute each finite window independently so chunk origin cannot change rounding."""
+    array = values.to_numpy(dtype=np.float64, copy=False)
+    means = np.full(len(array), np.nan, dtype=np.float64)
+    stds = np.full(len(array), np.nan, dtype=np.float64)
+    if len(array) >= window:
+        windows = np.lib.stride_tricks.sliding_window_view(array, window)
+        valid = np.isfinite(windows).all(axis=1)
+        mean = windows.mean(axis=1, dtype=np.float64)
+        std = windows.std(axis=1, ddof=0, dtype=np.float64)
+        means[window-1:] = np.where(valid, mean, np.nan)
+        stds[window-1:] = np.where(valid, std, np.nan)
+    return pd.Series(means, index=values.index), pd.Series(stds, index=values.index)
+
+
 def indicator_frame(frame: pd.DataFrame, timeframe: str = "1m") -> pd.DataFrame:
     """Compute trailing OHLCV indicators on completed bars."""
     if frame.empty:
@@ -102,8 +117,9 @@ def indicator_frame(frame: pd.DataFrame, timeframe: str = "1m") -> pd.DataFrame:
     macd = close.ewm(span=MACD_FAST,adjust=False,min_periods=MACD_FAST).mean()-close.ewm(span=MACD_SLOW,adjust=False,min_periods=MACD_SLOW).mean()
     signal = macd.ewm(span=MACD_SIGNAL,adjust=False,min_periods=MACD_SIGNAL).mean()
     out["macd_line_atr"], out["macd_signal_atr"], out["macd_hist_atr"] = macd/out.atr14, signal/out.atr14, (macd-signal)/out.atr14
-    mid = close.rolling(BOLLINGER_WINDOW,min_periods=BOLLINGER_WINDOW).mean()
-    std = close.rolling(BOLLINGER_WINDOW,min_periods=BOLLINGER_WINDOW).std(ddof=0)
+    # Independent window reductions avoid pandas' rolling accumulator carrying
+    # tiny chunk-origin-dependent rounding differences into the dense store.
+    mid, std = _deterministic_rolling_mean_std(close, BOLLINGER_WINDOW)
     upper, lower = mid+BOLLINGER_WIDTH*std, mid-BOLLINGER_WIDTH*std
     out[f"bollinger_pctb{BOLLINGER_WINDOW}"] = (close-lower)/(upper-lower).replace(0,np.nan)
     out[f"bollinger_width{BOLLINGER_WINDOW}"] = (upper-lower)/mid.replace(0,np.nan)

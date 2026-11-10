@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 from datetime import date, datetime, timedelta, timezone
+import inspect
 import os
 from pathlib import Path
 import shutil
@@ -18,7 +19,18 @@ from .labels import label_grid, rust_fallback
 from .levels import apply_level_invalidations, build_levels
 from .timeframes import INDEX_SYMBOLS, TIMEFRAMES, build_all_timeframes
 from msd.methods.common import assert_event_volume, exit_candidates, prepare_exit_levels
-from msd.methods import sr_touch, rsi2_mean_reversion, liquidity_sweep
+from msd.methods import (
+    bollinger, btc_order_flow, candlestick_at_level, chart_patterns,
+    donchian_atr_breakout, dow_trend_confirmation, fib_pullback,
+    funding_extreme_fade, fvg_retrace, ichimoku_cloud, intraday_momentum,
+    liquidity_sweep, ma_cross, macd_signal, market_structure_pullback,
+    order_block_retest, ote_zone, post_earnings_index_reaction,
+    post_macro_event_reaction, price_action_h2l2, range_breakout_nr4_nr7,
+    round_number_reaction, rsi2_mean_reversion, session_level_reaction,
+    sr_touch, stochastic, supply_demand_zone_retest, trend_following,
+    trendline_channel, vix_spike_dip_buy, volume_profile_poc_vah_val,
+    vwap_reclaim_reject, wyckoff_spring_upthrust,
+)
 
 TIER1 = ("USATECHIDXUSD", "USA500IDXUSD", "XAUUSD", "BTCUSDT", "ETHUSDT")
 MAX_LOOKBACK_DAYS = 370
@@ -31,7 +43,20 @@ FEATURE_DIR = Path("data/features")
 LABEL_DIR = Path("data/labels")
 MIN_FREE_BYTES = 65*1024**3
 CASH_ERA_START = pd.Timestamp("2018-12-16 23:00:00",tz="UTC")
-PILOT_METHODS = (sr_touch, rsi2_mean_reversion, liquidity_sweep)
+# Explicit registry: every frozen detector is considered, then its SYMBOLS
+# declaration narrows the instrument scope. Keep pilots in the same path.
+METHOD_REGISTRY = (
+    bollinger, btc_order_flow, candlestick_at_level, chart_patterns,
+    donchian_atr_breakout, dow_trend_confirmation, fib_pullback,
+    funding_extreme_fade, fvg_retrace, ichimoku_cloud, intraday_momentum,
+    liquidity_sweep, ma_cross, macd_signal, market_structure_pullback,
+    order_block_retest, ote_zone, post_earnings_index_reaction,
+    post_macro_event_reaction, price_action_h2l2, range_breakout_nr4_nr7,
+    round_number_reaction, rsi2_mean_reversion, session_level_reaction,
+    sr_touch, stochastic, supply_demand_zone_retest, trend_following,
+    trendline_channel, vix_spike_dip_buy, volume_profile_poc_vah_val,
+    vwap_reclaim_reject, wyckoff_spring_upthrust,
+)
 
 
 def _check_disk() -> None:
@@ -41,8 +66,8 @@ def _check_disk() -> None:
 
 
 def methods_for_symbol(symbol: str) -> tuple:
-    """Select pilots whose declared symbol scope includes this instrument."""
-    return tuple(method for method in PILOT_METHODS
+    """Select registered detectors whose declared scope includes an instrument."""
+    return tuple(method for method in METHOD_REGISTRY
                  if not hasattr(method, "SYMBOLS") or symbol in method.SYMBOLS)
 
 
@@ -214,6 +239,8 @@ def _merge_levels_year(level_temp: Path, symbol: str, start_year: int, replace_e
         cutoff=pd.Timestamp(start_year,1,1,tz="UTC")
         previous=previous[pd.to_datetime(previous.known_at,utc=True)<cutoff]
         current=pd.concat([previous,current],ignore_index=True).sort_values("known_at").reset_index(drop=True)
+    if "level_id" in current and current.level_id.duplicated().any():
+        raise RuntimeError(f"Level ID collision or duplicate identity in full history for {symbol}")
     _check_disk()
     with tempfile.NamedTemporaryFile(dir=LEVEL_DIR,suffix=".parquet",delete=False) as handle:
         merged_temp=Path(handle.name)
@@ -492,19 +519,19 @@ def label_method_events(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.D
     prepared_levels=prepare_exit_levels(levels)
     for method in methods:
         method_started=time.perf_counter()
-        if method.NAME in {"sr_touch","liquidity_sweep"}:
-            events,next_state,method_touches=method.detect(
-                scan_features,levels,scan_bars,state=(method_states or {}).get(method.NAME),return_state=True)
-            state_out[method.NAME]=next_state
-            touch_rows.extend(method_touches)
-        else:
+        detector_state=(method_states or {}).get(method.NAME)
+        if "return_state" in inspect.signature(method.detect).parameters:
             if return_states:
-                events,next_state,_=method.detect(
-                    scan_features,levels,scan_bars,
-                    state=(method_states or {}).get(method.NAME),return_state=True)
+                events,next_state,method_touches=method.detect(
+                    scan_features,levels,scan_bars,state=detector_state,return_state=True)
                 state_out[method.NAME]=next_state
+                touch_rows.extend(method_touches)
             else:
-                events=method.detect(scan_features,levels,scan_bars)
+                events=method.detect(scan_features,levels,scan_bars,state=detector_state)
+        else:
+            events=method.detect(scan_features,levels,scan_bars)
+            if return_states and detector_state is not None:
+                state_out[method.NAME]=detector_state
         if event_start is not None:
             events=[event for event in events if pd.Timestamp(event["ts"]) >= pd.Timestamp(event_start)]
         if event_end is not None:
@@ -530,12 +557,14 @@ def label_method_events(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.D
             event["sym"]=symbol
             event_i=ts_pos.get(event["ts"])
             if event_i is None: continue
-            entry=float(close_mid[int(event_i)])
+            entry_type=str(event.get("entry_type","market"))
+            limit_price=float(event["limit_price"]) if entry_type=="limit" and event.get("limit_price") is not None else None
+            entry=limit_price if limit_price is not None else float(close_mid[int(event_i)])
             atr=float(atr_map.get(event["ts"],np.nan))
             sides=event.get("side_candidates",[event.get("side")])
             for side in sides:
                 if side not in (-1,1): continue
-                oriented={**event,"side":int(side)}
+                oriented={**event,"side":int(side),"price":entry}
                 for candidate in exit_candidates(oriented,levels,atr,prepared_levels):
                     sl,tp=candidate.get("sl"),candidate.get("tp")
                     if sl is None or tp is None or not np.isfinite(sl) or not np.isfinite(tp): continue
@@ -545,10 +574,13 @@ def label_method_events(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.D
                     from .labels import deadline_after_trading_days
                     deadline=deadline_after_trading_days(event_bars.ts.iloc[entry_i],MAX_HOLD_TRADING_DAYS,instrument_class)
                     class_code=1 if instrument_class in {"crypto","24x7"} else 0
+                    expiry=event.get("expiry_at",event.get("expiry_ts")) if limit_price is not None else None
+                    expiry_seconds=float(pd.Timestamp(expiry).timestamp()) if expiry is not None else np.nan
                     jobs.extend([int(event_i),int(side),entry,float(sl),float(tp),int(deadline.value//1_000_000_000),
-                                 2,finance,np.nan,np.nan,class_code])
+                                 2,finance,limit_price if limit_price is not None else np.nan,expiry_seconds,class_code])
                     metadata.append({**oriented,"exit_kind":candidate["kind"],"sl":float(sl),"tp":float(tp),
-                                     "deadline_ts":deadline})
+                                     "deadline_ts":deadline,"entry_type":entry_type,
+                                     "limit_price":limit_price,"expiry_at":expiry if limit_price is not None else None})
     if not jobs:
         empty = pd.DataFrame()
         if return_states:
@@ -565,7 +597,8 @@ def label_method_events(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.D
             signal_i=int(ts_pos.get(event["ts"]))
             ref=first_hit_reference(event_bars,signal_i,int(event["side"]),float(event["price"]),
                 event["sl"],event["tp"],delay_bars=2,financing_per_night=finance,
-                deadline_ts=event["deadline_ts"],instrument_class=instrument_class,detailed=True)
+                deadline_ts=event["deadline_ts"],instrument_class=instrument_class,
+                limit_price=event.get("limit_price"),expiry_ts=event.get("expiry_at"),detailed=True)
             reason,exit_i,exit_price,net,gross,fill,nights,entry_i,risk=ref
             result.append(({"tp":1,"stop":-1,"time":0,"no_fill":-2}[reason],exit_i,fill,exit_price,
                            net,gross,nights,entry_i,risk))
@@ -799,6 +832,12 @@ def write_pipeline_report(results: list[dict]) -> Path:
            "| TP ATR grid | 0.5, 1, 1.5, 2, 3, 4, 6 |", "| ATR source | 14-period ATR on completed 1h bars |", "",
            "## Output inventory", "", "| Root | Parquet files | Bytes |", "|---|---:|---:|"]
     lines += [f"| {root} | {count:,} | {size:,} |" for root,count,size in inventory]
+    lines += ["", "## Registered event methods", "",
+              "Every listed module is frozen for this pipeline run; its module docstring records the trigger, stop/target rule, scope and per-method constants.",
+              "| Method | Symbol scope |", "|---|---|"]
+    for method in METHOD_REGISTRY:
+        scope=", ".join(getattr(method,"SYMBOLS",("all instruments",)))
+        lines.append(f"| {method.NAME} | {scope} |")
     lines += ["", "## Processing runs", "", "| Symbol | Feature rows | Level rows | HTF rows | Unique events | Event candidate rows | Grid labels | Bad ticks excluded | Runtime (s) | Peak RSS (GiB) |", "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|"]
     lines += [f"| {r['symbol']} | {r['features']:,} | {r['levels']:,} | {r['bars']:,} | {r.get('unique_events',0):,} | {r.get('events',0):,} | {r['labels']:,} | {r.get('bad_ticks_excluded',0):,} | {r['runtime_seconds']:.1f} | {r.get('peak_rss_gib',float('nan')):.2f} |" for r in results]
     if not results: lines.append("| No production symbol batch completed yet | 0 | 0 | 0 | 0 | 0 | 0 |" )

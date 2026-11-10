@@ -398,6 +398,22 @@ def test_month_window_features_match_full_history_rows():
     pd.testing.assert_frame_equal(chunks,expected,check_dtype=True,check_exact=True)
 
 
+def test_bollinger_features_are_exact_across_truncated_history():
+    from msd.processing.features import indicator_frame
+    rng=np.random.default_rng(4102)
+    ts=pd.date_range("2021-01-01",periods=5000,freq="min",tz="UTC")
+    close=100+np.cumsum(rng.normal(0,.2,len(ts)))
+    bars=pd.DataFrame({"ts":ts,"bid_o":close,"bid_h":close+.15,"bid_l":close-.15,
+                       "bid_c":close,"ask_o":close+.01,"ask_h":close+.16,
+                       "ask_l":close-.14,"ask_c":close+.01,"volume":np.ones(len(ts))})
+    cut=3200
+    full=indicator_frame(bars)
+    truncated=indicator_frame(bars.iloc[cut-100:])
+    for column in ("bollinger_pctb20","bollinger_width20"):
+        np.testing.assert_array_equal(full[column].to_numpy()[cut:],
+                                      truncated[column].to_numpy()[100:])
+
+
 def test_feature_returns_are_timeframe_specific_and_no_infinities(tmp_path):
     from msd.processing.features import build_features, indicator_frame
     from msd.processing.features import RETURN_WINDOWS
@@ -653,6 +669,40 @@ def test_rsi2_uses_asof_transition_not_exact_htf_timestamp():
     assert len(detect(features,pd.DataFrame(),bars))==1
 
 
+def test_pipeline_registry_contains_new_detectors_and_filters_by_scope():
+    from msd.processing.pipeline import METHOD_REGISTRY, methods_for_symbol
+    names=[method.NAME for method in METHOD_REGISTRY]
+    assert len(names)==len(set(names))==33
+    btc={method.NAME for method in methods_for_symbol("BTCUSDT")}
+    index={method.NAME for method in methods_for_symbol("USATECHIDXUSD")}
+    assert "btc_order_flow" in btc and "btc_order_flow" not in index
+    assert "post_earnings_index_reaction" in index and "post_earnings_index_reaction" not in btc
+
+
+def test_event_limit_order_fields_are_passed_to_batch_labeler(monkeypatch):
+    from msd.processing import pipeline
+    import msd._msd_kernels as kernels
+    ts=pd.date_range("2024-01-02",periods=8,freq="min",tz="UTC")
+    bars=_bars(ts)
+    features=pd.DataFrame({"ts":ts,"1m_atr14":np.ones(len(ts))})
+    class LimitDummy:
+        NAME="limit_dummy"
+        @staticmethod
+        def detect(*_args):
+            return [{"ts":ts[0],"known_at":ts[0]+pd.Timedelta(minutes=1),"side":1,
+                     "price":100.5,"natural_sl":99.,"natural_tp":105.,"entry_type":"limit",
+                     "limit_price":101.,"expiry_at":ts[0]+pd.Timedelta(minutes=5)}]
+    monkeypatch.setattr(pipeline,"methods_for_symbol",lambda _symbol:(LimitDummy,))
+    seen=[]
+    def fake_batch(_rows,_times,jobs,job_size):
+        seen.extend(np.asarray(jobs,dtype=float).reshape(-1,job_size).tolist())
+        return np.tile([0.,len(ts)-1,101.,106.,0.,0.,0.,2.,2.],len(jobs)//job_size).tolist()
+    monkeypatch.setattr(kernels,"first_hit_batch",fake_batch)
+    pipeline.label_method_events(features,pd.DataFrame(),bars,"BTCUSDT")
+    assert seen and all(row[8]==101. for row in seen)
+    assert all(row[9]==ts[0].timestamp()+300 for row in seen)
+
+
 @pytest.mark.slow
 def test_real_btc_jan22_end_to_end_event_truncation():
     """Rebuild HTFs, levels, features and events at 20 real-data cut points."""
@@ -742,6 +792,79 @@ def test_real_btc_jan22_end_to_end_event_truncation():
     assert active_counts["liquidity_sweep"]>=15, f"sweep test is too often vacuous: {active_counts}"
     print(f"BTCUSDT 2022-01 causal event cuts: S/R {active_counts['sr_touch']}/20 {active_cut_times['sr_touch']}; "
           f"sweep {active_counts['liquidity_sweep']}/20 {active_cut_times['liquidity_sweep']}")
+
+
+@pytest.mark.slow
+def test_real_btc_year_checkpoint_restores_five_sr_boundary_events():
+    """A yearly detector checkpoint must preserve the five Jan 2022 S/R signatures."""
+    import json
+    from pathlib import Path
+    from msd.data import load
+    from msd.methods.sr_touch import detect
+    from msd.processing.levels import apply_level_invalidations, build_levels
+    from msd.processing.pipeline import _active_mask, _event_feature_frame
+    from msd.processing.timeframes import build_all_timeframes
+
+    if not Path("data/bars/binance_spot/BTCUSDT/2020-05.parquet").exists():
+        pytest.skip("local BTC bars for the checkpoint span are absent")
+
+    start=pd.Timestamp("2020-05-27",tz="UTC")
+    split=pd.Timestamp("2022-01-01",tz="UTC")
+    end=pd.Timestamp("2022-01-06",tz="UTC")
+    bars=load("BTCUSDT",start,end).sort_values("ts").reset_index(drop=True)
+    assert not bars.empty and bars.ts.min()<=start+pd.Timedelta(minutes=2)
+    bars=bars[(bars.ts>=start)&(bars.ts<end)].reset_index(drop=True)
+    active=bars.loc[_active_mask(bars,"BTCUSDT")].reset_index(drop=True)
+    tfs=build_all_timeframes(bars,"BTCUSDT")
+    features=_event_feature_frame(bars,tfs)
+    levels=build_levels(active,"BTCUSDT",tfs)
+    levels=levels.loc[levels.type.ne("session_vwap")].copy()
+    levels=apply_level_invalidations(active,levels)
+    first_bars=bars[bars.ts<split].reset_index(drop=True)
+    first_active=first_bars.loc[_active_mask(first_bars,"BTCUSDT")].reset_index(drop=True)
+    first_tfs=build_all_timeframes(first_bars,"BTCUSDT")
+    first_levels=build_levels(first_active,"BTCUSDT",first_tfs)
+    first_levels=first_levels.loc[first_levels.type.ne("session_vwap")].copy()
+    first_levels=first_levels[pd.to_datetime(first_levels.known_at,utc=True)<=split]
+    first_levels=apply_level_invalidations(first_active,first_levels)
+
+    full_events,full_state,_=detect(features,levels,active,return_state=True)
+    first_mask=active.ts<split
+    pre_events,full_boundary,_=detect(features[features.ts<split],levels,
+                                      active.loc[first_mask].reset_index(drop=True),return_state=True)
+    chunk_pre,chunk_boundary,_=detect(features[features.ts<split],first_levels,
+                                      active.loc[first_mask].reset_index(drop=True),return_state=True)
+    assert full_boundary==chunk_boundary
+    post_mask=active.ts>=split
+    chunk_post,chunk_final,_=detect(features[features.ts>=split],levels,
+                                    active.loc[post_mask].reset_index(drop=True),
+                                    state=chunk_boundary,return_state=True)
+    assert pre_events+chunk_post==full_events
+    assert chunk_final==full_state
+
+    fixture=json.loads(Path("tests/fixtures/sr_touch_btc_2022_boundary.json").read_text())
+    by_ts={pd.Timestamp(event["ts"]).isoformat():event for event in full_events}
+    for expected in fixture:
+        event=by_ts[pd.Timestamp(expected["ts"]).isoformat()]
+        assert int(event["cluster_id"])==expected["cluster_id"]
+        assert event["cluster_types"]==tuple(expected["cluster_types"])
+        for field in ("cluster_price","cluster_strength","cluster_age_minutes","approach_direction"):
+            assert event[field]==expected[field]
+        chunk_match=next(item for item in chunk_post if item["ts"]==event["ts"])
+        assert chunk_match==event
+
+    state_at_boundary={}
+    for expected in fixture:
+        key=str(expected["cluster_id"])
+        state_at_boundary[key]={
+            "full": {name:full_boundary.get(name,{}).get(key)
+                     for name in ("touch_counts","armed","last_emit")},
+            "chunked": {name:chunk_boundary.get(name,{}).get(key)
+                        for name in ("touch_counts","armed","last_emit")},
+        }
+    print({"BTCUSDT 2022-01-01 checkpoint":state_at_boundary,
+           "fixture_events":len(fixture),"full_events":len(full_events),
+           "chunked_events":len(pre_events)+len(chunk_post)})
 
 
 def test_returns_and_timeframes_do_not_mix_feed_regimes():
