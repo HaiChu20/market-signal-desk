@@ -1,0 +1,22 @@
+mode = "paper"
+
+[[instruments]]
+symbol = "USATECHIDXUSD"
+search_term = "Nasdaq 100"
+epic = ""
+hours = "cme_equity"
+
+[[instruments]]
+symbol = "USA500IDXUSD"
+search_term = "US 500"
+epic = ""
+hours = "cme_equity"
+
+[[instruments]]
+symbol = "BTCUSDT"
+search_term = "Bitcoin"
+epic = ""
+hours = "24x7"
+
+# Add strategies only after review. Each module exposes NAME, SYMBOLS,
+# RESOLUTION and orders(bars). This config intentionally enables none.
