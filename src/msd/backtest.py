@@ -19,9 +19,51 @@ def ratchet_stop(side: int, current: float, update: float | None) -> float:
     return max(float(current), float(update)) if int(side) > 0 else min(float(current), float(update))
 
 
+AMBIGUITY_KEYS = ("ambiguous", "resolved_tp", "resolved_sl", "unresolved")
+
+
+def second_quotes(single_price: pd.DataFrame, spread: float | pd.Series) -> pd.DataFrame:
+    """Apply one modeled spread symmetrically to single-price second OHLC."""
+    spread_values = np.asarray(spread, dtype=float)
+    if not np.isfinite(spread_values).all() or (spread_values < 0).any():
+        raise ValueError("spread must be finite and nonnegative")
+    out = single_price[["ts"]].copy()
+    for field in "ohlc":
+        values = pd.to_numeric(single_price[field], errors="raise")
+        out[f"bid_{field}"] = values.to_numpy(float) - spread_values / 2
+        out[f"ask_{field}"] = values.to_numpy(float) + spread_values / 2
+    return out
+
+
+def _resolve_second(side: int, stop: float, tp: float, seconds: pd.DataFrame | None,
+                    minute_ts) -> tuple[str, float] | None:
+    if seconds is None or minute_ts is None or len(seconds) != 60:
+        return None
+    start = pd.Timestamp(minute_ts)
+    start = start.tz_localize("UTC") if start.tzinfo is None else start.tz_convert("UTC")
+    stamps = pd.to_datetime(seconds.ts, utc=True)
+    expected = pd.date_range(start, periods=60, freq="s")
+    if not stamps.reset_index(drop=True).equals(pd.Series(expected)):
+        return None
+    prefix = "bid" if side > 0 else "ask"
+    for second in seconds.itertuples(index=False):
+        op = float(getattr(second, f"{prefix}_o"))
+        high = float(getattr(second, f"{prefix}_h"))
+        low = float(getattr(second, f"{prefix}_l"))
+        stop_hit = low <= stop if side > 0 else high >= stop
+        tp_hit = high >= tp if side > 0 else low <= tp
+        if stop_hit:
+            return "stop", min(op, stop) if side > 0 else max(op, stop)
+        if tp_hit:
+            return "tp", tp
+    return None
+
+
 def evaluate_bar(side: int, stop: float, tp: float | None, bar: dict,
                  *, stop_update: float | None = None, time_exit: bool = False,
-                 time_at_open: bool = False, stop_active: bool = True, close_only: bool = False) -> tuple[float, str | None, float | None]:
+                 time_at_open: bool = False, stop_active: bool = True, close_only: bool = False,
+                 seconds: pd.DataFrame | None = None,
+                 ambiguity_stats: dict[str, int] | None = None) -> tuple[float, str | None, float | None]:
     """Shared single-bar SL/TP/time evaluation used by backtest and live."""
     side = int(side)
     current = ratchet_stop(side, stop, stop_update)
@@ -32,6 +74,15 @@ def evaluate_bar(side: int, stop: float, tp: float | None, bar: dict,
         return current, "time", op
     sl_hit = stop_active and (close <= current if side > 0 else close >= current) if close_only else stop_active and (low <= current if side > 0 else high >= current)
     tp_hit = tp is not None and (high >= float(tp) if side > 0 else low <= float(tp))
+    if sl_hit and tp_hit and not close_only:
+        if ambiguity_stats is not None:
+            ambiguity_stats["ambiguous"] = ambiguity_stats.get("ambiguous", 0) + 1
+        resolved = _resolve_second(side, current, float(tp), seconds, bar.get("ts"))
+        key = "resolved_tp" if resolved and resolved[0] == "tp" else "resolved_sl" if resolved else "unresolved"
+        if ambiguity_stats is not None:
+            ambiguity_stats[key] = ambiguity_stats.get(key, 0) + 1
+        if resolved is not None:
+            return current, resolved[0], resolved[1]
     if sl_hit:
         fill = close if close_only else (min(op, current) if side > 0 else max(op, current))
         return current, "stop", fill
@@ -42,11 +93,13 @@ def evaluate_bar(side: int, stop: float, tp: float | None, bar: dict,
     return current, None, None
 
 
-def simulate(bars: pd.DataFrame, orders: Sequence[dict]) -> pd.DataFrame:
+def simulate(bars: pd.DataFrame, orders: Sequence[dict], *, seconds: pd.DataFrame | None = None) -> pd.DataFrame:
     """Simulate causal orders using the same per-bar evaluator as the live engine."""
     timestamps = bars.ts.dt.tz_localize(None).to_numpy()
     ts_ns = bars.ts.astype("datetime64[ns, UTC]").astype("int64").to_numpy()
     arrays = {c: bars[c].to_numpy(dtype=float) for c in ("bid_o", "bid_h", "bid_l", "bid_c", "ask_o", "ask_h", "ask_l", "ask_c")}
+    second_groups = ({stamp: frame for stamp, frame in seconds.groupby(pd.to_datetime(seconds.ts, utc=True).dt.floor("min"))}
+                     if seconds is not None and not seconds.empty else {})
     out = []
     for order_id, order in enumerate(orders):
         side = 1 if order["side"] in (1, "long") else -1
@@ -78,6 +131,7 @@ def simulate(bars: pd.DataFrame, orders: Sequence[dict]) -> pd.DataFrame:
         else:
             path = None
         stop_checks = order.get("stop_checks")
+        stats = dict.fromkeys(AMBIGUITY_KEYS, 0)
         exit_i, price, reason = end - 1, None, None
         for i in range(start, end):
             update = None
@@ -85,13 +139,15 @@ def simulate(bars: pd.DataFrame, orders: Sequence[dict]) -> pd.DataFrame:
                 update = path.get(i - 1) if isinstance(path, dict) else path[i - 1]
             bar = {f"{prefix}_{field}": arrays[f"{prefix}_{field}"][i]
                    for prefix in ("bid", "ask") for field in ("o", "h", "l", "c")}
+            bar["ts"] = bars.ts.iloc[i]
             active = stop_checks is None or i in stop_checks
             at_deadline_open = exit_ts is not None and exit_index < len(timestamps) and i == exit_index
             terminal_close = exit_ts is None or exit_index >= len(timestamps)
             stop, reason, price = evaluate_bar(side, stop, tp, bar, stop_update=update,
                 time_exit=at_deadline_open or (terminal_close and i == end - 1),
                 time_at_open=at_deadline_open, stop_active=active,
-                close_only=stop_checks is not None and active)
+                close_only=stop_checks is not None and active,
+                seconds=second_groups.get(bars.ts.iloc[i]), ambiguity_stats=stats if seconds is not None else None)
             if reason is not None:
                 exit_i = i
                 break
@@ -101,9 +157,11 @@ def simulate(bars: pd.DataFrame, orders: Sequence[dict]) -> pd.DataFrame:
         exit_open = exit_ts is not None and exit_index < len(timestamps) and exit_i == exit_index
         exit_spread = (arrays["ask_o"][exit_i] - arrays["bid_o"][exit_i]) if exit_open else (arrays["ask_c"][exit_i] - arrays["bid_c"][exit_i])
         spread = (arrays["ask_o"][start] - arrays["bid_o"][start]) / 2 + exit_spread / 2
-        out.append(dict(order_id=order_id, entry_ts=pd.Timestamp(timestamps[start], tz="UTC"), exit_ts=pd.Timestamp(timestamps[exit_i], tz="UTC"), entry_price=entry,
+        record=dict(order_id=order_id, entry_ts=pd.Timestamp(timestamps[start], tz="UTC"), exit_ts=pd.Timestamp(timestamps[exit_i], tz="UTC"), entry_price=entry,
                         exit_price=price, side=side, exit_reason=reason, R=gross / risk, return_pct=100 * gross / entry,
-                        spread_paid=spread, initial_risk=risk))
+                        spread_paid=spread, initial_risk=risk)
+        if seconds is not None: record.update(stats)
+        out.append(record)
     return pd.DataFrame(out)
 
 
