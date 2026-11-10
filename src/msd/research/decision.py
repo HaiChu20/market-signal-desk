@@ -10,7 +10,7 @@ def choose(frame,threshold=0.05,uncertainty=None):
     """One signal per event; require adjacent candidates in SL/TP-distance rank."""
     if frame.empty:return frame.copy()
     work=frame.copy()
-    if uncertainty is None:uncertainty=np.sqrt(np.clip(work.p*(1-work.p),0,1)/max(1,len(work)))
+    if uncertainty is None:uncertainty=np.sqrt(np.clip(work.p*(1-work.p),0,1)/10)
     work['edge']=expected_r(work.p,work.TP_R,work.cost_R,work.financing_R)
     work['shrunk_edge']=np.maximum(0,work.edge-1.64*np.asarray(uncertainty)*(work.TP_R+1))
     selected=[]

@@ -66,3 +66,57 @@ def test_report_metrics_toy():
     m=metrics(d,d)
     assert m['n']==4 and m['hit_rate']==.5 and m['net_avg_R']==0
     assert m['profit_factor']==1 and m['brier_skill_vs_p0']==0
+
+def test_feature_filter_uses_training_data_only():
+    from msd.research.models import fit_time_ordered
+    f=synthetic(True).iloc[:300].copy()
+    f['train_dense']=np.arange(len(f),dtype=float)
+    f['future_only']=np.nan
+    f.loc[f.index>=240,'future_only']=1.0
+    m=fit_time_ordered(f)
+    assert 'train_dense' in m.features
+    assert 'future_only' not in m.features
+
+
+def test_shrinkage_blocks_weak_candidate():
+    f=synthetic(True).iloc[:9].copy()
+    f['p']=.62
+    f['cost_R']=.1
+    assert len(choose(f,threshold=.05,uncertainty=np.full(len(f),.2)))==0
+
+
+def test_random_direction_benchmark_uses_same_entry(tmp_path):
+    from msd.research.benchmark import random_direction
+    t=pd.date_range('2022-01-03',periods=20,freq='min',tz='UTC')
+    bars=pd.DataFrame({'ts':t})
+    for side,shift in [('bid',-.05),('ask',.05)]:
+        bars[f'{side}_o']=100+shift
+        bars[f'{side}_h']=101+shift
+        bars[f'{side}_l']=99+shift
+        bars[f'{side}_c']=100+shift
+    path=tmp_path/'bars'/'dukascopy'/'USATECHIDXUSD'/'2022-01.parquet'
+    path.parent.mkdir(parents=True)
+    bars.to_parquet(path,index=False)
+    signals=pd.DataFrame({'ts':[t[0]],'sym':['USATECHIDXUSD'],'side':[1],'price':[100.],
+        'sl':[99.],'tp':[101.],'deadline_ts':[t[10]],'label_end_ts':[t[5]],
+        'spread_R':[.1],'planned_risk':[1.],'net_R':[1.]})
+    percentile,n,manifest=random_direction(signals,tmp_path)
+    assert n==1 and 0<=percentile<=100 and len(manifest)==1
+
+
+def test_pbo_cscv_from_logged_dev_years():
+    import json
+    from msd.research.report_card import trial_diagnostics
+    rows=[]
+    for i,values in enumerate(([1,1,-1,-1],[-1,-1,1,1])):
+        rows.append({'method':'x','period':'development','metrics':json.dumps(
+            {'daily_sharpe':.2+i,'per_year':dict(zip(('2019','2020','2021','2022'),values))})})
+    sharpes,pbo,count=trial_diagnostics(rows,'x')
+    assert len(sharpes)==2 and count==2 and 0<=pbo<=1
+
+def test_dev_excludes_labels_ending_in_test_period():
+    e,f=fixture_events()
+    e.loc[3,'exit_ts']=pd.Timestamp('2023-01-01',tz='UTC')
+    out,audit=assemble(e,f,('1m_return_bars_5',),return_audit=True)
+    assert len(out)==3
+    assert audit['label_extends_beyond_dev']==1

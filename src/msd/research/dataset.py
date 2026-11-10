@@ -6,19 +6,19 @@ import pandas as pd
 import numpy as np
 
 DEV_END = pd.Timestamp('2023-01-01', tz='UTC')
-FEATURES = ('1m_return_bars_5','1m_return_bars_60','1m_realized_vol30',
-            '1m_rsi2','1m_atr14','1m_adx14','1m_ema20_distance_atr','1m_volume_z20',
-            '15m_return_bars_4','15m_rsi14','1h_return_bars_4','1h_adx14',
-            '4h_return_bars_6','1d_return_bars_5','time_sin','time_cos',
-            'spread_atr','vix_level','funding_z20')
-EVENT_COLUMNS = ('ts','sym','method','side','price','sl','tp','known_at','entry_ts',
+FEATURES_BY_METHOD: dict[str, tuple[str, ...] | None] = {
+    'sr_touch': None, 'liquidity_sweep': None, 'rsi2_mean_reversion': None,
+}
+EVENT_COLUMNS = ('ts','sym','method','side','price','sl','tp','known_at','entry_ts','deadline_ts',
                  'entry_price','planned_risk','outcome','exit_ts','R','gross_R','exit_kind')
 FORBIDDEN = {'outcome','exit_ts','entry_ts','entry_price','R','gross_R','net_R',
              'label_end_ts','tp_first','exit_price','financing_nights'}
 
 
-def assemble(events: pd.DataFrame, features: pd.DataFrame, feature_cols=FEATURES) -> pd.DataFrame:
+def assemble(events: pd.DataFrame, features: pd.DataFrame, feature_cols=None, *, return_audit=False):
     """Join features available at decision time; event outcomes stay separate."""
+    if feature_cols is None:
+        feature_cols=[c for c in features if c not in {'ts','known_at'} and pd.api.types.is_numeric_dtype(features[c])]
     if set(feature_cols) & FORBIDDEN:
         raise AssertionError('Outcome field used as a feature')
     if 'known_at' not in events or 'known_at' not in features:
@@ -46,14 +46,21 @@ def assemble(events: pd.DataFrame, features: pd.DataFrame, feature_cols=FEATURES
     rate=np.where(out.sym.eq('BTCUSDT'),.0006,.0002)
     out['financing_R']=rate*pd.to_numeric(out.price,errors='coerce')/pd.to_numeric(out.planned_risk,errors='coerce')
     out['event_key']=out.sym.astype(str)+'|'+out.method.astype(str)+'|'+out.ts.astype(str)+'|'+out.side.astype(str)
-    valid=(risk>0)&(reward>0)&out.label_end_ts.notna()&out.net_R.notna()&out.feature_known_at.notna()&out.known_at.lt(DEV_END)
-    return out.loc[valid].reset_index(drop=True)
+    conditions={'invalid_geometry':~((risk>0)&(reward>0)),
+        'missing_outcome':out.label_end_ts.isna()|out.net_R.isna(),
+        'missing_asof_feature':out.feature_known_at.isna(),
+        'event_after_dev':~out.known_at.lt(DEV_END),
+        'label_extends_beyond_dev':~out.label_end_ts.lt(DEV_END)}
+    valid=~pd.DataFrame(conditions).any(axis=1)
+    audit={k:int(v.sum()) for k,v in conditions.items()}
+    result=out.loc[valid].reset_index(drop=True)
+    return (result,audit) if return_audit else result
 
 
-def load_method(method: str, data_root: Path, symbols=('BTCUSDT','USATECHIDXUSD','USA500IDXUSD')):
+def load_method(method: str, data_root: Path, symbols=('BTCUSDT','USATECHIDXUSD','USA500IDXUSD'), *, return_audit=False):
     """Read monthly source files defensively and return an auditable inventory."""
     import pyarrow.parquet as pq
-    tables=[]; manifest=[]
+    tables=[]; manifest=[];audit={'events':0,'candidate_rows':0,'assembled_rows':0,'drops':{}}
     for sym in symbols:
         event_paths=sorted(p for p in (data_root/'events'/sym).glob('*.parquet') if p.name[:4]<='2022')
         if not event_paths: continue
@@ -71,6 +78,8 @@ def load_method(method: str, data_root: Path, symbols=('BTCUSDT','USATECHIDXUSD'
                 st=p.stat();manifest.append({'path':str(p),'mtime_ns':st.st_mtime_ns,'size':st.st_size})
         if not event_parts: continue
         events=pd.concat(event_parts,ignore_index=True)
+        audit['events']+=len(events[['sym','ts','side']].drop_duplicates())
+        audit['candidate_rows']+=len(events)
         lo=pd.to_datetime(events.known_at,utc=True).min()-pd.Timedelta(days=2)
         hi=pd.to_datetime(events.known_at,utc=True).max()
         feature_paths=sorted(p for p in (data_root/'features'/sym).glob('*.parquet')
@@ -79,11 +88,18 @@ def load_method(method: str, data_root: Path, symbols=('BTCUSDT','USATECHIDXUSD'
         feature_parts=[]
         for p in feature_paths:
             available=set(pq.read_schema(p).names)
-            cols=['known_at',*(c for c in FEATURES if c in available)]
+            import pyarrow as pa
+            cols=['known_at',*(field.name for field in pq.read_schema(p)
+                if field.name not in {'ts','known_at'} and
+                (pa.types.is_integer(field.type) or pa.types.is_floating(field.type) or pa.types.is_boolean(field.type)))]
             before=p.stat()
             feature_parts.append(pd.read_parquet(p,columns=cols))
             if p.stat().st_mtime_ns!=before.st_mtime_ns: raise RuntimeError(f'Source changed during read: {p}')
             st=p.stat();manifest.append({'path':str(p),'mtime_ns':st.st_mtime_ns,'size':st.st_size})
         if feature_parts:
-            tables.append(assemble(events,pd.concat(feature_parts,ignore_index=True)))
-    return (pd.concat(tables,ignore_index=True) if tables else pd.DataFrame(),manifest)
+            result,drops=assemble(events,pd.concat(feature_parts,ignore_index=True),return_audit=True)
+            tables.append(result)
+            audit['assembled_rows']+=len(result)
+            for key,value in drops.items():audit['drops'][key]=audit['drops'].get(key,0)+value
+    table=pd.concat(tables,ignore_index=True) if tables else pd.DataFrame()
+    return (table,manifest,audit) if return_audit else (table,manifest)
