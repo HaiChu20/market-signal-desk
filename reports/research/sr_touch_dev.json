@@ -1,0 +1,3806 @@
+{
+  "method": "sr_touch",
+  "period": "dev",
+  "preliminary": true,
+  "protocol": "v2",
+  "grade_in_dev": "not applicable; protocol section 5 grades test only",
+  "pooled": {
+    "n": 209,
+    "signals_per_year": 62.87522721890919,
+    "hit_rate": 0.18181818181818182,
+    "net_avg_R": -0.23205448177631482,
+    "t_stat": -2.37121363495968,
+    "profit_factor": 0.6357718640466493,
+    "daily_sharpe": -1.5905845967149275,
+    "max_drawdown": -0.2213107310597905,
+    "positive_dev_year_share": 0.0,
+    "per_year": {
+      "2020": -0.11419209652553343,
+      "2021": -0.31994335562889,
+      "2022": -0.38024591898516
+    },
+    "spread_1_5x_net_avg_R": -0.2523850476617808,
+    "random_direction_percentile": 19.5,
+    "pbo": null,
+    "grade": "ungraded: development",
+    "brier": 0.207538067041636,
+    "brier_skill_vs_p0": 0.047839053547058974,
+    "reliability_by_year": {
+      "2019": {
+        "n": 36705,
+        "predicted": 0.3446941122583006,
+        "observed": 0.34521182400217953
+      },
+      "2020": {
+        "n": 154808,
+        "predicted": 0.3549787004249681,
+        "observed": 0.3597294713451501
+      },
+      "2021": {
+        "n": 205509,
+        "predicted": 0.36254425984200617,
+        "observed": 0.36313251487769393
+      },
+      "2022": {
+        "n": 75256,
+        "predicted": 0.35760026298423636,
+        "observed": 0.35167960029765066
+      }
+    },
+    "reliability_by_vol_tercile": {
+      "high": {
+        "n": 157426,
+        "predicted": 0.349692943708174,
+        "observed": 0.3471853442252233
+      },
+      "low": {
+        "n": 157426,
+        "predicted": 0.34925780913804216,
+        "observed": 0.3436344695285404
+      },
+      "middle": {
+        "n": 157426,
+        "predicted": 0.374716962352302,
+        "observed": 0.3855779858473187
+      }
+    },
+    "deflated_sharpe_ratio": 1.3695850224482164e-06,
+    "random_direction_matched_signals": 209,
+    "row_accounting": {
+      "events": 18675,
+      "candidate_rows": 590352,
+      "assembled_rows": 590348,
+      "drops": {
+        "invalid_geometry": 0,
+        "missing_outcome": 0,
+        "missing_asof_feature": 0,
+        "event_after_dev": 0,
+        "label_extends_beyond_dev": 4
+      },
+      "model_features_by_fold": [
+        [
+          "1m_return_bars_1",
+          "1m_return_bars_5",
+          "1m_return_bars_15",
+          "1m_return_bars_60",
+          "1m_return_bars_240",
+          "1m_return_bars_1440",
+          "1m_realized_vol30",
+          "1m_atr14",
+          "1m_realized_vol14",
+          "1m_parkinson_vol14",
+          "1m_atr50",
+          "1m_vol_ratio14_50",
+          "1m_ema20_slope",
+          "1m_ema20_distance_atr",
+          "1m_ema50_slope",
+          "1m_ema50_distance_atr",
+          "1m_ema200_slope",
+          "1m_ema200_distance_atr",
+          "1m_ema20_50_gap_atr",
+          "1m_ema50_200_gap_atr",
+          "1m_donchian20_position",
+          "1m_donchian20_width_atr",
+          "1m_donchian55_position",
+          "1m_donchian55_width_atr",
+          "1m_plus_di14",
+          "1m_minus_di14",
+          "1m_adx14",
+          "1m_rsi2",
+          "1m_rsi14",
+          "1m_stoch_k14",
+          "1m_stoch_d3",
+          "1m_macd_line_atr",
+          "1m_macd_signal_atr",
+          "1m_macd_hist_atr",
+          "1m_bollinger_pctb20",
+          "1m_bollinger_width20",
+          "1m_range_position14",
+          "1m_range_position50",
+          "1m_volume_z20",
+          "1m_upper_wick_atr",
+          "1m_lower_wick_atr",
+          "5m_return_bars_1",
+          "5m_return_bars_4",
+          "5m_return_bars_12",
+          "5m_return_bars_48",
+          "5m_realized_vol30",
+          "5m_atr14",
+          "5m_atr14_price",
+          "5m_realized_vol14",
+          "5m_parkinson_vol14",
+          "5m_atr50",
+          "5m_atr50_price",
+          "5m_realized_vol50",
+          "5m_parkinson_vol50",
+          "5m_vol_ratio14_50",
+          "5m_ema20_slope",
+          "5m_ema20_distance_atr",
+          "5m_ema50_slope",
+          "5m_ema50_distance_atr",
+          "5m_ema200_slope",
+          "5m_ema200_distance_atr",
+          "5m_ema20_50_gap_atr",
+          "5m_ema50_200_gap_atr",
+          "5m_donchian20_position",
+          "5m_donchian20_width_atr",
+          "5m_donchian55_position",
+          "5m_donchian55_width_atr",
+          "5m_plus_di14",
+          "5m_minus_di14",
+          "5m_adx14",
+          "5m_rsi2",
+          "5m_rsi14",
+          "5m_stoch_k14",
+          "5m_stoch_d3",
+          "5m_macd_line_atr",
+          "5m_macd_signal_atr",
+          "5m_macd_hist_atr",
+          "5m_bollinger_pctb20",
+          "5m_bollinger_width20",
+          "5m_range_position14",
+          "5m_range_position50",
+          "5m_volume_z20",
+          "5m_volume_ratio20",
+          "5m_upper_wick_atr",
+          "5m_lower_wick_atr",
+          "5m_swing_high",
+          "5m_swing_high_age",
+          "5m_swing_low",
+          "5m_swing_low_age",
+          "5m_higher_high",
+          "5m_higher_low",
+          "5m_bos_up",
+          "5m_bos_down",
+          "5m_choch_up",
+          "5m_choch_down",
+          "15m_return_bars_1",
+          "15m_return_bars_4",
+          "15m_return_bars_12",
+          "15m_return_bars_48",
+          "15m_realized_vol30",
+          "15m_atr14",
+          "15m_atr14_price",
+          "15m_realized_vol14",
+          "15m_parkinson_vol14",
+          "15m_atr50",
+          "15m_atr50_price",
+          "15m_realized_vol50",
+          "15m_parkinson_vol50",
+          "15m_vol_ratio14_50",
+          "15m_ema20_slope",
+          "15m_ema20_distance_atr",
+          "15m_ema50_slope",
+          "15m_ema50_distance_atr",
+          "15m_ema200_slope",
+          "15m_ema200_distance_atr",
+          "15m_ema20_50_gap_atr",
+          "15m_ema50_200_gap_atr",
+          "15m_donchian20_position",
+          "15m_donchian20_width_atr",
+          "15m_donchian55_position",
+          "15m_donchian55_width_atr",
+          "15m_plus_di14",
+          "15m_minus_di14",
+          "15m_adx14",
+          "15m_rsi2",
+          "15m_rsi14",
+          "15m_stoch_k14",
+          "15m_stoch_d3",
+          "15m_macd_line_atr",
+          "15m_macd_signal_atr",
+          "15m_macd_hist_atr",
+          "15m_bollinger_pctb20",
+          "15m_bollinger_width20",
+          "15m_range_position14",
+          "15m_range_position50",
+          "15m_volume_z20",
+          "15m_volume_ratio20",
+          "15m_upper_wick_atr",
+          "15m_lower_wick_atr",
+          "15m_swing_high",
+          "15m_swing_high_age",
+          "15m_swing_low",
+          "15m_swing_low_age",
+          "15m_higher_high",
+          "15m_higher_low",
+          "15m_bos_up",
+          "15m_bos_down",
+          "15m_choch_up",
+          "15m_choch_down",
+          "1h_return_bars_1",
+          "1h_return_bars_4",
+          "1h_return_bars_24",
+          "1h_return_bars_120",
+          "1h_realized_vol30",
+          "1h_atr14",
+          "1h_atr14_price",
+          "1h_realized_vol14",
+          "1h_parkinson_vol14",
+          "1h_atr50",
+          "1h_atr50_price",
+          "1h_realized_vol50",
+          "1h_parkinson_vol50",
+          "1h_vol_ratio14_50",
+          "1h_ema20_slope",
+          "1h_ema20_distance_atr",
+          "1h_ema50_slope",
+          "1h_ema50_distance_atr",
+          "1h_ema200_slope",
+          "1h_ema200_distance_atr",
+          "1h_ema20_50_gap_atr",
+          "1h_ema50_200_gap_atr",
+          "1h_donchian20_position",
+          "1h_donchian20_width_atr",
+          "1h_donchian55_position",
+          "1h_donchian55_width_atr",
+          "1h_plus_di14",
+          "1h_minus_di14",
+          "1h_adx14",
+          "1h_rsi2",
+          "1h_rsi14",
+          "1h_stoch_k14",
+          "1h_stoch_d3",
+          "1h_macd_line_atr",
+          "1h_macd_signal_atr",
+          "1h_macd_hist_atr",
+          "1h_bollinger_pctb20",
+          "1h_bollinger_width20",
+          "1h_range_position14",
+          "1h_range_position50",
+          "1h_volume_z20",
+          "1h_volume_ratio20",
+          "1h_upper_wick_atr",
+          "1h_lower_wick_atr",
+          "1h_swing_high",
+          "1h_swing_high_age",
+          "1h_swing_low",
+          "1h_swing_low_age",
+          "1h_higher_high",
+          "1h_higher_low",
+          "1h_bos_up",
+          "1h_bos_down",
+          "1h_choch_up",
+          "1h_choch_down",
+          "4h_return_bars_1",
+          "4h_return_bars_6",
+          "4h_return_bars_30",
+          "4h_realized_vol30",
+          "4h_atr14",
+          "4h_atr14_price",
+          "4h_realized_vol14",
+          "4h_parkinson_vol14",
+          "4h_atr50",
+          "4h_atr50_price",
+          "4h_realized_vol50",
+          "4h_parkinson_vol50",
+          "4h_vol_ratio14_50",
+          "4h_ema20_slope",
+          "4h_ema20_distance_atr",
+          "4h_ema50_slope",
+          "4h_ema50_distance_atr",
+          "4h_ema200_slope",
+          "4h_ema200_distance_atr",
+          "4h_ema20_50_gap_atr",
+          "4h_ema50_200_gap_atr",
+          "4h_donchian20_position",
+          "4h_donchian20_width_atr",
+          "4h_donchian55_position",
+          "4h_donchian55_width_atr",
+          "4h_plus_di14",
+          "4h_minus_di14",
+          "4h_adx14",
+          "4h_rsi2",
+          "4h_rsi14",
+          "4h_stoch_k14",
+          "4h_stoch_d3",
+          "4h_macd_line_atr",
+          "4h_macd_signal_atr",
+          "4h_macd_hist_atr",
+          "4h_bollinger_pctb20",
+          "4h_bollinger_width20",
+          "4h_range_position14",
+          "4h_range_position50",
+          "4h_volume_z20",
+          "4h_volume_ratio20",
+          "4h_upper_wick_atr",
+          "4h_lower_wick_atr",
+          "4h_swing_high",
+          "4h_swing_high_age",
+          "4h_swing_low",
+          "4h_swing_low_age",
+          "4h_higher_high",
+          "4h_higher_low",
+          "4h_bos_up",
+          "4h_bos_down",
+          "4h_choch_up",
+          "4h_choch_down",
+          "1d_return_bars_1",
+          "1d_return_bars_5",
+          "1d_return_bars_20",
+          "1d_realized_vol30",
+          "1d_atr14",
+          "1d_atr14_price",
+          "1d_realized_vol14",
+          "1d_parkinson_vol14",
+          "1d_ema20_slope",
+          "1d_ema20_distance_atr",
+          "1d_donchian20_position",
+          "1d_donchian20_width_atr",
+          "1d_plus_di14",
+          "1d_minus_di14",
+          "1d_adx14",
+          "1d_rsi2",
+          "1d_rsi14",
+          "1d_stoch_k14",
+          "1d_stoch_d3",
+          "1d_macd_line_atr",
+          "1d_macd_signal_atr",
+          "1d_macd_hist_atr",
+          "1d_bollinger_pctb20",
+          "1d_bollinger_width20",
+          "1d_range_position14",
+          "1d_volume_z20",
+          "1d_volume_ratio20",
+          "1d_upper_wick_atr",
+          "1d_lower_wick_atr",
+          "1d_swing_high",
+          "1d_swing_high_age",
+          "1d_swing_low",
+          "1d_swing_low_age",
+          "1d_higher_high",
+          "1d_higher_low",
+          "1d_bos_up",
+          "1d_bos_down",
+          "1d_choch_up",
+          "1d_choch_down",
+          "time_sin",
+          "time_cos",
+          "weekday",
+          "minutes_since_session_open",
+          "session_id",
+          "level_above_1_distance_atr",
+          "level_above_1_type_code",
+          "level_above_1_strength",
+          "level_above_1_age_minutes",
+          "level_above_2_distance_atr",
+          "level_above_2_type_code",
+          "level_above_2_strength",
+          "level_above_2_age_minutes",
+          "level_above_3_distance_atr",
+          "level_above_3_type_code",
+          "level_above_3_strength",
+          "level_above_3_age_minutes",
+          "level_below_1_distance_atr",
+          "level_below_1_type_code",
+          "level_below_1_strength",
+          "level_below_1_age_minutes",
+          "level_below_2_distance_atr",
+          "level_below_2_type_code",
+          "level_below_2_strength",
+          "level_below_2_age_minutes",
+          "level_below_3_distance_atr",
+          "level_below_3_type_code",
+          "level_below_3_strength",
+          "level_below_3_age_minutes",
+          "prior_day_high_distance_atr",
+          "prior_day_low_distance_atr",
+          "prior_week_high_distance_atr",
+          "prior_week_low_distance_atr",
+          "spread_atr",
+          "volume_z20",
+          "vwap_distance_atr",
+          "vix_level",
+          "vix_percentile_1y",
+          "vix3m_level",
+          "vix9d_level",
+          "cross_USA500IDXUSD_return_1m_bars_15",
+          "cross_USA500IDXUSD_return_1m_bars_60",
+          "cross_USA500IDXUSD_return_1m_bars_240",
+          "cross_XAUUSD_return_1m_bars_15",
+          "cross_XAUUSD_return_1m_bars_60",
+          "cross_XAUUSD_return_1m_bars_240",
+          "cross_ETHUSDT_return_1m_bars_15",
+          "cross_ETHUSDT_return_1m_bars_60",
+          "cross_ETHUSDT_return_1m_bars_240",
+          "vix_vix3m_ratio",
+          "cross_BTCUSDT_return_1m_bars_15",
+          "cross_BTCUSDT_return_1m_bars_60",
+          "cross_BTCUSDT_return_1m_bars_240"
+        ],
+        [
+          "1m_return_bars_1",
+          "1m_return_bars_5",
+          "1m_return_bars_15",
+          "1m_return_bars_60",
+          "1m_return_bars_240",
+          "1m_return_bars_1440",
+          "1m_realized_vol30",
+          "1m_atr14",
+          "1m_realized_vol14",
+          "1m_parkinson_vol14",
+          "1m_atr50",
+          "1m_vol_ratio14_50",
+          "1m_ema20_slope",
+          "1m_ema20_distance_atr",
+          "1m_ema50_slope",
+          "1m_ema50_distance_atr",
+          "1m_ema200_slope",
+          "1m_ema200_distance_atr",
+          "1m_ema20_50_gap_atr",
+          "1m_ema50_200_gap_atr",
+          "1m_donchian20_position",
+          "1m_donchian20_width_atr",
+          "1m_donchian55_position",
+          "1m_donchian55_width_atr",
+          "1m_plus_di14",
+          "1m_minus_di14",
+          "1m_adx14",
+          "1m_rsi2",
+          "1m_rsi14",
+          "1m_stoch_k14",
+          "1m_stoch_d3",
+          "1m_macd_line_atr",
+          "1m_macd_signal_atr",
+          "1m_macd_hist_atr",
+          "1m_bollinger_pctb20",
+          "1m_bollinger_width20",
+          "1m_range_position14",
+          "1m_range_position50",
+          "1m_volume_z20",
+          "1m_upper_wick_atr",
+          "1m_lower_wick_atr",
+          "5m_return_bars_1",
+          "5m_return_bars_4",
+          "5m_return_bars_12",
+          "5m_return_bars_48",
+          "5m_realized_vol30",
+          "5m_atr14",
+          "5m_atr14_price",
+          "5m_realized_vol14",
+          "5m_parkinson_vol14",
+          "5m_atr50",
+          "5m_atr50_price",
+          "5m_realized_vol50",
+          "5m_parkinson_vol50",
+          "5m_vol_ratio14_50",
+          "5m_ema20_slope",
+          "5m_ema20_distance_atr",
+          "5m_ema50_slope",
+          "5m_ema50_distance_atr",
+          "5m_ema200_slope",
+          "5m_ema200_distance_atr",
+          "5m_ema20_50_gap_atr",
+          "5m_ema50_200_gap_atr",
+          "5m_donchian20_position",
+          "5m_donchian20_width_atr",
+          "5m_donchian55_position",
+          "5m_donchian55_width_atr",
+          "5m_plus_di14",
+          "5m_minus_di14",
+          "5m_adx14",
+          "5m_rsi2",
+          "5m_rsi14",
+          "5m_stoch_k14",
+          "5m_stoch_d3",
+          "5m_macd_line_atr",
+          "5m_macd_signal_atr",
+          "5m_macd_hist_atr",
+          "5m_bollinger_pctb20",
+          "5m_bollinger_width20",
+          "5m_range_position14",
+          "5m_range_position50",
+          "5m_volume_z20",
+          "5m_volume_ratio20",
+          "5m_upper_wick_atr",
+          "5m_lower_wick_atr",
+          "5m_swing_high",
+          "5m_swing_high_age",
+          "5m_swing_low",
+          "5m_swing_low_age",
+          "5m_higher_high",
+          "5m_higher_low",
+          "5m_bos_up",
+          "5m_bos_down",
+          "5m_choch_up",
+          "5m_choch_down",
+          "15m_return_bars_1",
+          "15m_return_bars_4",
+          "15m_return_bars_12",
+          "15m_return_bars_48",
+          "15m_realized_vol30",
+          "15m_atr14",
+          "15m_atr14_price",
+          "15m_realized_vol14",
+          "15m_parkinson_vol14",
+          "15m_atr50",
+          "15m_atr50_price",
+          "15m_realized_vol50",
+          "15m_parkinson_vol50",
+          "15m_vol_ratio14_50",
+          "15m_ema20_slope",
+          "15m_ema20_distance_atr",
+          "15m_ema50_slope",
+          "15m_ema50_distance_atr",
+          "15m_ema200_slope",
+          "15m_ema200_distance_atr",
+          "15m_ema20_50_gap_atr",
+          "15m_ema50_200_gap_atr",
+          "15m_donchian20_position",
+          "15m_donchian20_width_atr",
+          "15m_donchian55_position",
+          "15m_donchian55_width_atr",
+          "15m_plus_di14",
+          "15m_minus_di14",
+          "15m_adx14",
+          "15m_rsi2",
+          "15m_rsi14",
+          "15m_stoch_k14",
+          "15m_stoch_d3",
+          "15m_macd_line_atr",
+          "15m_macd_signal_atr",
+          "15m_macd_hist_atr",
+          "15m_bollinger_pctb20",
+          "15m_bollinger_width20",
+          "15m_range_position14",
+          "15m_range_position50",
+          "15m_volume_z20",
+          "15m_volume_ratio20",
+          "15m_upper_wick_atr",
+          "15m_lower_wick_atr",
+          "15m_swing_high",
+          "15m_swing_high_age",
+          "15m_swing_low",
+          "15m_swing_low_age",
+          "15m_higher_high",
+          "15m_higher_low",
+          "15m_bos_up",
+          "15m_bos_down",
+          "15m_choch_up",
+          "15m_choch_down",
+          "1h_return_bars_1",
+          "1h_return_bars_4",
+          "1h_return_bars_24",
+          "1h_return_bars_120",
+          "1h_realized_vol30",
+          "1h_atr14",
+          "1h_atr14_price",
+          "1h_realized_vol14",
+          "1h_parkinson_vol14",
+          "1h_atr50",
+          "1h_atr50_price",
+          "1h_realized_vol50",
+          "1h_parkinson_vol50",
+          "1h_vol_ratio14_50",
+          "1h_ema20_slope",
+          "1h_ema20_distance_atr",
+          "1h_ema50_slope",
+          "1h_ema50_distance_atr",
+          "1h_ema200_slope",
+          "1h_ema200_distance_atr",
+          "1h_ema20_50_gap_atr",
+          "1h_ema50_200_gap_atr",
+          "1h_donchian20_position",
+          "1h_donchian20_width_atr",
+          "1h_donchian55_position",
+          "1h_donchian55_width_atr",
+          "1h_plus_di14",
+          "1h_minus_di14",
+          "1h_adx14",
+          "1h_rsi2",
+          "1h_rsi14",
+          "1h_stoch_k14",
+          "1h_stoch_d3",
+          "1h_macd_line_atr",
+          "1h_macd_signal_atr",
+          "1h_macd_hist_atr",
+          "1h_bollinger_pctb20",
+          "1h_bollinger_width20",
+          "1h_range_position14",
+          "1h_range_position50",
+          "1h_volume_z20",
+          "1h_volume_ratio20",
+          "1h_upper_wick_atr",
+          "1h_lower_wick_atr",
+          "1h_swing_high",
+          "1h_swing_high_age",
+          "1h_swing_low",
+          "1h_swing_low_age",
+          "1h_higher_high",
+          "1h_higher_low",
+          "1h_bos_up",
+          "1h_bos_down",
+          "1h_choch_up",
+          "1h_choch_down",
+          "4h_return_bars_1",
+          "4h_return_bars_6",
+          "4h_return_bars_30",
+          "4h_realized_vol30",
+          "4h_atr14",
+          "4h_atr14_price",
+          "4h_realized_vol14",
+          "4h_parkinson_vol14",
+          "4h_atr50",
+          "4h_atr50_price",
+          "4h_realized_vol50",
+          "4h_parkinson_vol50",
+          "4h_vol_ratio14_50",
+          "4h_ema20_slope",
+          "4h_ema20_distance_atr",
+          "4h_ema50_slope",
+          "4h_ema50_distance_atr",
+          "4h_ema200_slope",
+          "4h_ema200_distance_atr",
+          "4h_ema20_50_gap_atr",
+          "4h_ema50_200_gap_atr",
+          "4h_donchian20_position",
+          "4h_donchian20_width_atr",
+          "4h_donchian55_position",
+          "4h_donchian55_width_atr",
+          "4h_plus_di14",
+          "4h_minus_di14",
+          "4h_adx14",
+          "4h_rsi2",
+          "4h_rsi14",
+          "4h_stoch_k14",
+          "4h_stoch_d3",
+          "4h_macd_line_atr",
+          "4h_macd_signal_atr",
+          "4h_macd_hist_atr",
+          "4h_bollinger_pctb20",
+          "4h_bollinger_width20",
+          "4h_range_position14",
+          "4h_range_position50",
+          "4h_volume_z20",
+          "4h_volume_ratio20",
+          "4h_upper_wick_atr",
+          "4h_lower_wick_atr",
+          "4h_swing_high",
+          "4h_swing_high_age",
+          "4h_swing_low",
+          "4h_swing_low_age",
+          "4h_higher_high",
+          "4h_higher_low",
+          "4h_bos_up",
+          "4h_bos_down",
+          "4h_choch_up",
+          "4h_choch_down",
+          "1d_return_bars_1",
+          "1d_return_bars_5",
+          "1d_return_bars_20",
+          "1d_return_bars_60",
+          "1d_realized_vol30",
+          "1d_atr14",
+          "1d_atr14_price",
+          "1d_realized_vol14",
+          "1d_parkinson_vol14",
+          "1d_atr50",
+          "1d_atr50_price",
+          "1d_realized_vol50",
+          "1d_parkinson_vol50",
+          "1d_vol_ratio14_50",
+          "1d_ema20_slope",
+          "1d_ema20_distance_atr",
+          "1d_ema50_slope",
+          "1d_ema50_distance_atr",
+          "1d_ema20_50_gap_atr",
+          "1d_donchian20_position",
+          "1d_donchian20_width_atr",
+          "1d_donchian55_position",
+          "1d_donchian55_width_atr",
+          "1d_plus_di14",
+          "1d_minus_di14",
+          "1d_adx14",
+          "1d_rsi2",
+          "1d_rsi14",
+          "1d_stoch_k14",
+          "1d_stoch_d3",
+          "1d_macd_line_atr",
+          "1d_macd_signal_atr",
+          "1d_macd_hist_atr",
+          "1d_bollinger_pctb20",
+          "1d_bollinger_width20",
+          "1d_range_position14",
+          "1d_range_position50",
+          "1d_volume_z20",
+          "1d_volume_ratio20",
+          "1d_upper_wick_atr",
+          "1d_lower_wick_atr",
+          "1d_swing_high",
+          "1d_swing_high_age",
+          "1d_swing_low",
+          "1d_swing_low_age",
+          "1d_higher_high",
+          "1d_higher_low",
+          "1d_bos_up",
+          "1d_bos_down",
+          "1d_choch_up",
+          "1d_choch_down",
+          "time_sin",
+          "time_cos",
+          "weekday",
+          "minutes_since_session_open",
+          "session_id",
+          "level_above_1_distance_atr",
+          "level_above_1_type_code",
+          "level_above_1_strength",
+          "level_above_1_age_minutes",
+          "level_above_2_distance_atr",
+          "level_above_2_type_code",
+          "level_above_2_strength",
+          "level_above_2_age_minutes",
+          "level_above_3_distance_atr",
+          "level_above_3_type_code",
+          "level_above_3_strength",
+          "level_above_3_age_minutes",
+          "level_below_1_distance_atr",
+          "level_below_1_type_code",
+          "level_below_1_strength",
+          "level_below_1_age_minutes",
+          "level_below_2_distance_atr",
+          "level_below_2_type_code",
+          "level_below_2_strength",
+          "level_below_2_age_minutes",
+          "level_below_3_distance_atr",
+          "level_below_3_type_code",
+          "level_below_3_strength",
+          "level_below_3_age_minutes",
+          "prior_day_high_distance_atr",
+          "prior_day_low_distance_atr",
+          "prior_week_high_distance_atr",
+          "prior_week_low_distance_atr",
+          "spread_atr",
+          "volume_z20",
+          "vwap_distance_atr",
+          "vix_level",
+          "vix_percentile_1y",
+          "vix3m_level",
+          "vix9d_level",
+          "cross_USA500IDXUSD_return_1m_bars_15",
+          "cross_USA500IDXUSD_return_1m_bars_60",
+          "cross_USA500IDXUSD_return_1m_bars_240",
+          "cross_XAUUSD_return_1m_bars_15",
+          "cross_XAUUSD_return_1m_bars_60",
+          "cross_XAUUSD_return_1m_bars_240",
+          "cross_ETHUSDT_return_1m_bars_15",
+          "cross_ETHUSDT_return_1m_bars_60",
+          "cross_ETHUSDT_return_1m_bars_240",
+          "vix_vix3m_ratio",
+          "cross_BTCUSDT_return_1m_bars_15",
+          "cross_BTCUSDT_return_1m_bars_60",
+          "cross_BTCUSDT_return_1m_bars_240"
+        ],
+        [
+          "1m_return_bars_1",
+          "1m_return_bars_5",
+          "1m_return_bars_15",
+          "1m_return_bars_60",
+          "1m_return_bars_240",
+          "1m_return_bars_1440",
+          "1m_realized_vol30",
+          "1m_atr14",
+          "1m_realized_vol14",
+          "1m_parkinson_vol14",
+          "1m_atr50",
+          "1m_vol_ratio14_50",
+          "1m_ema20_slope",
+          "1m_ema20_distance_atr",
+          "1m_ema50_slope",
+          "1m_ema50_distance_atr",
+          "1m_ema200_slope",
+          "1m_ema200_distance_atr",
+          "1m_ema20_50_gap_atr",
+          "1m_ema50_200_gap_atr",
+          "1m_donchian20_position",
+          "1m_donchian20_width_atr",
+          "1m_donchian55_position",
+          "1m_donchian55_width_atr",
+          "1m_plus_di14",
+          "1m_minus_di14",
+          "1m_adx14",
+          "1m_rsi2",
+          "1m_rsi14",
+          "1m_stoch_k14",
+          "1m_stoch_d3",
+          "1m_macd_line_atr",
+          "1m_macd_signal_atr",
+          "1m_macd_hist_atr",
+          "1m_bollinger_pctb20",
+          "1m_bollinger_width20",
+          "1m_range_position14",
+          "1m_range_position50",
+          "1m_volume_z20",
+          "1m_upper_wick_atr",
+          "1m_lower_wick_atr",
+          "5m_return_bars_1",
+          "5m_return_bars_4",
+          "5m_return_bars_12",
+          "5m_return_bars_48",
+          "5m_realized_vol30",
+          "5m_atr14",
+          "5m_atr14_price",
+          "5m_realized_vol14",
+          "5m_parkinson_vol14",
+          "5m_atr50",
+          "5m_atr50_price",
+          "5m_realized_vol50",
+          "5m_parkinson_vol50",
+          "5m_vol_ratio14_50",
+          "5m_ema20_slope",
+          "5m_ema20_distance_atr",
+          "5m_ema50_slope",
+          "5m_ema50_distance_atr",
+          "5m_ema200_slope",
+          "5m_ema200_distance_atr",
+          "5m_ema20_50_gap_atr",
+          "5m_ema50_200_gap_atr",
+          "5m_donchian20_position",
+          "5m_donchian20_width_atr",
+          "5m_donchian55_position",
+          "5m_donchian55_width_atr",
+          "5m_plus_di14",
+          "5m_minus_di14",
+          "5m_adx14",
+          "5m_rsi2",
+          "5m_rsi14",
+          "5m_stoch_k14",
+          "5m_stoch_d3",
+          "5m_macd_line_atr",
+          "5m_macd_signal_atr",
+          "5m_macd_hist_atr",
+          "5m_bollinger_pctb20",
+          "5m_bollinger_width20",
+          "5m_range_position14",
+          "5m_range_position50",
+          "5m_volume_z20",
+          "5m_volume_ratio20",
+          "5m_upper_wick_atr",
+          "5m_lower_wick_atr",
+          "5m_swing_high",
+          "5m_swing_high_age",
+          "5m_swing_low",
+          "5m_swing_low_age",
+          "5m_higher_high",
+          "5m_higher_low",
+          "5m_bos_up",
+          "5m_bos_down",
+          "5m_choch_up",
+          "5m_choch_down",
+          "15m_return_bars_1",
+          "15m_return_bars_4",
+          "15m_return_bars_12",
+          "15m_return_bars_48",
+          "15m_realized_vol30",
+          "15m_atr14",
+          "15m_atr14_price",
+          "15m_realized_vol14",
+          "15m_parkinson_vol14",
+          "15m_atr50",
+          "15m_atr50_price",
+          "15m_realized_vol50",
+          "15m_parkinson_vol50",
+          "15m_vol_ratio14_50",
+          "15m_ema20_slope",
+          "15m_ema20_distance_atr",
+          "15m_ema50_slope",
+          "15m_ema50_distance_atr",
+          "15m_ema200_slope",
+          "15m_ema200_distance_atr",
+          "15m_ema20_50_gap_atr",
+          "15m_ema50_200_gap_atr",
+          "15m_donchian20_position",
+          "15m_donchian20_width_atr",
+          "15m_donchian55_position",
+          "15m_donchian55_width_atr",
+          "15m_plus_di14",
+          "15m_minus_di14",
+          "15m_adx14",
+          "15m_rsi2",
+          "15m_rsi14",
+          "15m_stoch_k14",
+          "15m_stoch_d3",
+          "15m_macd_line_atr",
+          "15m_macd_signal_atr",
+          "15m_macd_hist_atr",
+          "15m_bollinger_pctb20",
+          "15m_bollinger_width20",
+          "15m_range_position14",
+          "15m_range_position50",
+          "15m_volume_z20",
+          "15m_volume_ratio20",
+          "15m_upper_wick_atr",
+          "15m_lower_wick_atr",
+          "15m_swing_high",
+          "15m_swing_high_age",
+          "15m_swing_low",
+          "15m_swing_low_age",
+          "15m_higher_high",
+          "15m_higher_low",
+          "15m_bos_up",
+          "15m_bos_down",
+          "15m_choch_up",
+          "15m_choch_down",
+          "1h_return_bars_1",
+          "1h_return_bars_4",
+          "1h_return_bars_24",
+          "1h_return_bars_120",
+          "1h_realized_vol30",
+          "1h_atr14",
+          "1h_atr14_price",
+          "1h_realized_vol14",
+          "1h_parkinson_vol14",
+          "1h_atr50",
+          "1h_atr50_price",
+          "1h_realized_vol50",
+          "1h_parkinson_vol50",
+          "1h_vol_ratio14_50",
+          "1h_ema20_slope",
+          "1h_ema20_distance_atr",
+          "1h_ema50_slope",
+          "1h_ema50_distance_atr",
+          "1h_ema200_slope",
+          "1h_ema200_distance_atr",
+          "1h_ema20_50_gap_atr",
+          "1h_ema50_200_gap_atr",
+          "1h_donchian20_position",
+          "1h_donchian20_width_atr",
+          "1h_donchian55_position",
+          "1h_donchian55_width_atr",
+          "1h_plus_di14",
+          "1h_minus_di14",
+          "1h_adx14",
+          "1h_rsi2",
+          "1h_rsi14",
+          "1h_stoch_k14",
+          "1h_stoch_d3",
+          "1h_macd_line_atr",
+          "1h_macd_signal_atr",
+          "1h_macd_hist_atr",
+          "1h_bollinger_pctb20",
+          "1h_bollinger_width20",
+          "1h_range_position14",
+          "1h_range_position50",
+          "1h_volume_z20",
+          "1h_volume_ratio20",
+          "1h_upper_wick_atr",
+          "1h_lower_wick_atr",
+          "1h_swing_high",
+          "1h_swing_high_age",
+          "1h_swing_low",
+          "1h_swing_low_age",
+          "1h_higher_high",
+          "1h_higher_low",
+          "1h_bos_up",
+          "1h_bos_down",
+          "1h_choch_up",
+          "1h_choch_down",
+          "4h_return_bars_1",
+          "4h_return_bars_6",
+          "4h_return_bars_30",
+          "4h_realized_vol30",
+          "4h_atr14",
+          "4h_atr14_price",
+          "4h_realized_vol14",
+          "4h_parkinson_vol14",
+          "4h_atr50",
+          "4h_atr50_price",
+          "4h_realized_vol50",
+          "4h_parkinson_vol50",
+          "4h_vol_ratio14_50",
+          "4h_ema20_slope",
+          "4h_ema20_distance_atr",
+          "4h_ema50_slope",
+          "4h_ema50_distance_atr",
+          "4h_ema200_slope",
+          "4h_ema200_distance_atr",
+          "4h_ema20_50_gap_atr",
+          "4h_ema50_200_gap_atr",
+          "4h_donchian20_position",
+          "4h_donchian20_width_atr",
+          "4h_donchian55_position",
+          "4h_donchian55_width_atr",
+          "4h_plus_di14",
+          "4h_minus_di14",
+          "4h_adx14",
+          "4h_rsi2",
+          "4h_rsi14",
+          "4h_stoch_k14",
+          "4h_stoch_d3",
+          "4h_macd_line_atr",
+          "4h_macd_signal_atr",
+          "4h_macd_hist_atr",
+          "4h_bollinger_pctb20",
+          "4h_bollinger_width20",
+          "4h_range_position14",
+          "4h_range_position50",
+          "4h_volume_z20",
+          "4h_volume_ratio20",
+          "4h_upper_wick_atr",
+          "4h_lower_wick_atr",
+          "4h_swing_high",
+          "4h_swing_high_age",
+          "4h_swing_low",
+          "4h_swing_low_age",
+          "4h_higher_high",
+          "4h_higher_low",
+          "4h_bos_up",
+          "4h_bos_down",
+          "4h_choch_up",
+          "4h_choch_down",
+          "1d_return_bars_1",
+          "1d_return_bars_5",
+          "1d_return_bars_20",
+          "1d_return_bars_60",
+          "1d_realized_vol30",
+          "1d_atr14",
+          "1d_atr14_price",
+          "1d_realized_vol14",
+          "1d_parkinson_vol14",
+          "1d_atr50",
+          "1d_atr50_price",
+          "1d_realized_vol50",
+          "1d_parkinson_vol50",
+          "1d_vol_ratio14_50",
+          "1d_ema20_slope",
+          "1d_ema20_distance_atr",
+          "1d_ema50_slope",
+          "1d_ema50_distance_atr",
+          "1d_ema20_50_gap_atr",
+          "1d_donchian20_position",
+          "1d_donchian20_width_atr",
+          "1d_donchian55_position",
+          "1d_donchian55_width_atr",
+          "1d_plus_di14",
+          "1d_minus_di14",
+          "1d_adx14",
+          "1d_rsi2",
+          "1d_rsi14",
+          "1d_stoch_k14",
+          "1d_stoch_d3",
+          "1d_macd_line_atr",
+          "1d_macd_signal_atr",
+          "1d_macd_hist_atr",
+          "1d_bollinger_pctb20",
+          "1d_bollinger_width20",
+          "1d_range_position14",
+          "1d_range_position50",
+          "1d_volume_z20",
+          "1d_volume_ratio20",
+          "1d_upper_wick_atr",
+          "1d_lower_wick_atr",
+          "1d_swing_high",
+          "1d_swing_high_age",
+          "1d_swing_low",
+          "1d_swing_low_age",
+          "1d_higher_high",
+          "1d_higher_low",
+          "1d_bos_up",
+          "1d_bos_down",
+          "1d_choch_up",
+          "1d_choch_down",
+          "time_sin",
+          "time_cos",
+          "weekday",
+          "minutes_since_session_open",
+          "session_id",
+          "level_above_1_distance_atr",
+          "level_above_1_type_code",
+          "level_above_1_strength",
+          "level_above_1_age_minutes",
+          "level_above_2_distance_atr",
+          "level_above_2_type_code",
+          "level_above_2_strength",
+          "level_above_2_age_minutes",
+          "level_above_3_distance_atr",
+          "level_above_3_type_code",
+          "level_above_3_strength",
+          "level_above_3_age_minutes",
+          "level_below_1_distance_atr",
+          "level_below_1_type_code",
+          "level_below_1_strength",
+          "level_below_1_age_minutes",
+          "level_below_2_distance_atr",
+          "level_below_2_type_code",
+          "level_below_2_strength",
+          "level_below_2_age_minutes",
+          "level_below_3_distance_atr",
+          "level_below_3_type_code",
+          "level_below_3_strength",
+          "level_below_3_age_minutes",
+          "prior_day_high_distance_atr",
+          "prior_day_low_distance_atr",
+          "prior_week_high_distance_atr",
+          "prior_week_low_distance_atr",
+          "spread_atr",
+          "volume_z20",
+          "vwap_distance_atr",
+          "vix_level",
+          "vix_percentile_1y",
+          "vix3m_level",
+          "vix9d_level",
+          "cross_USA500IDXUSD_return_1m_bars_15",
+          "cross_USA500IDXUSD_return_1m_bars_60",
+          "cross_USA500IDXUSD_return_1m_bars_240",
+          "cross_XAUUSD_return_1m_bars_15",
+          "cross_XAUUSD_return_1m_bars_60",
+          "cross_XAUUSD_return_1m_bars_240",
+          "cross_ETHUSDT_return_1m_bars_15",
+          "cross_ETHUSDT_return_1m_bars_60",
+          "cross_ETHUSDT_return_1m_bars_240",
+          "vix_vix3m_ratio",
+          "cross_BTCUSDT_return_1m_bars_15",
+          "cross_BTCUSDT_return_1m_bars_60",
+          "cross_BTCUSDT_return_1m_bars_240"
+        ],
+        [
+          "1m_return_bars_1",
+          "1m_return_bars_5",
+          "1m_return_bars_15",
+          "1m_return_bars_60",
+          "1m_return_bars_240",
+          "1m_return_bars_1440",
+          "1m_realized_vol30",
+          "1m_atr14",
+          "1m_realized_vol14",
+          "1m_parkinson_vol14",
+          "1m_atr50",
+          "1m_vol_ratio14_50",
+          "1m_ema20_slope",
+          "1m_ema20_distance_atr",
+          "1m_ema50_slope",
+          "1m_ema50_distance_atr",
+          "1m_ema200_slope",
+          "1m_ema200_distance_atr",
+          "1m_ema20_50_gap_atr",
+          "1m_ema50_200_gap_atr",
+          "1m_donchian20_position",
+          "1m_donchian20_width_atr",
+          "1m_donchian55_position",
+          "1m_donchian55_width_atr",
+          "1m_plus_di14",
+          "1m_minus_di14",
+          "1m_adx14",
+          "1m_rsi2",
+          "1m_rsi14",
+          "1m_stoch_k14",
+          "1m_stoch_d3",
+          "1m_macd_line_atr",
+          "1m_macd_signal_atr",
+          "1m_macd_hist_atr",
+          "1m_bollinger_pctb20",
+          "1m_bollinger_width20",
+          "1m_range_position14",
+          "1m_range_position50",
+          "1m_volume_z20",
+          "1m_upper_wick_atr",
+          "1m_lower_wick_atr",
+          "5m_return_bars_1",
+          "5m_return_bars_4",
+          "5m_return_bars_12",
+          "5m_return_bars_48",
+          "5m_realized_vol30",
+          "5m_atr14",
+          "5m_atr14_price",
+          "5m_realized_vol14",
+          "5m_parkinson_vol14",
+          "5m_atr50",
+          "5m_atr50_price",
+          "5m_realized_vol50",
+          "5m_parkinson_vol50",
+          "5m_vol_ratio14_50",
+          "5m_ema20_slope",
+          "5m_ema20_distance_atr",
+          "5m_ema50_slope",
+          "5m_ema50_distance_atr",
+          "5m_ema200_slope",
+          "5m_ema200_distance_atr",
+          "5m_ema20_50_gap_atr",
+          "5m_ema50_200_gap_atr",
+          "5m_donchian20_position",
+          "5m_donchian20_width_atr",
+          "5m_donchian55_position",
+          "5m_donchian55_width_atr",
+          "5m_plus_di14",
+          "5m_minus_di14",
+          "5m_adx14",
+          "5m_rsi2",
+          "5m_rsi14",
+          "5m_stoch_k14",
+          "5m_stoch_d3",
+          "5m_macd_line_atr",
+          "5m_macd_signal_atr",
+          "5m_macd_hist_atr",
+          "5m_bollinger_pctb20",
+          "5m_bollinger_width20",
+          "5m_range_position14",
+          "5m_range_position50",
+          "5m_volume_z20",
+          "5m_volume_ratio20",
+          "5m_upper_wick_atr",
+          "5m_lower_wick_atr",
+          "5m_swing_high",
+          "5m_swing_high_age",
+          "5m_swing_low",
+          "5m_swing_low_age",
+          "5m_higher_high",
+          "5m_higher_low",
+          "5m_bos_up",
+          "5m_bos_down",
+          "5m_choch_up",
+          "5m_choch_down",
+          "15m_return_bars_1",
+          "15m_return_bars_4",
+          "15m_return_bars_12",
+          "15m_return_bars_48",
+          "15m_realized_vol30",
+          "15m_atr14",
+          "15m_atr14_price",
+          "15m_realized_vol14",
+          "15m_parkinson_vol14",
+          "15m_atr50",
+          "15m_atr50_price",
+          "15m_realized_vol50",
+          "15m_parkinson_vol50",
+          "15m_vol_ratio14_50",
+          "15m_ema20_slope",
+          "15m_ema20_distance_atr",
+          "15m_ema50_slope",
+          "15m_ema50_distance_atr",
+          "15m_ema200_slope",
+          "15m_ema200_distance_atr",
+          "15m_ema20_50_gap_atr",
+          "15m_ema50_200_gap_atr",
+          "15m_donchian20_position",
+          "15m_donchian20_width_atr",
+          "15m_donchian55_position",
+          "15m_donchian55_width_atr",
+          "15m_plus_di14",
+          "15m_minus_di14",
+          "15m_adx14",
+          "15m_rsi2",
+          "15m_rsi14",
+          "15m_stoch_k14",
+          "15m_stoch_d3",
+          "15m_macd_line_atr",
+          "15m_macd_signal_atr",
+          "15m_macd_hist_atr",
+          "15m_bollinger_pctb20",
+          "15m_bollinger_width20",
+          "15m_range_position14",
+          "15m_range_position50",
+          "15m_volume_z20",
+          "15m_volume_ratio20",
+          "15m_upper_wick_atr",
+          "15m_lower_wick_atr",
+          "15m_swing_high",
+          "15m_swing_high_age",
+          "15m_swing_low",
+          "15m_swing_low_age",
+          "15m_higher_high",
+          "15m_higher_low",
+          "15m_bos_up",
+          "15m_bos_down",
+          "15m_choch_up",
+          "15m_choch_down",
+          "1h_return_bars_1",
+          "1h_return_bars_4",
+          "1h_return_bars_24",
+          "1h_return_bars_120",
+          "1h_realized_vol30",
+          "1h_atr14",
+          "1h_atr14_price",
+          "1h_realized_vol14",
+          "1h_parkinson_vol14",
+          "1h_atr50",
+          "1h_atr50_price",
+          "1h_realized_vol50",
+          "1h_parkinson_vol50",
+          "1h_vol_ratio14_50",
+          "1h_ema20_slope",
+          "1h_ema20_distance_atr",
+          "1h_ema50_slope",
+          "1h_ema50_distance_atr",
+          "1h_ema200_slope",
+          "1h_ema200_distance_atr",
+          "1h_ema20_50_gap_atr",
+          "1h_ema50_200_gap_atr",
+          "1h_donchian20_position",
+          "1h_donchian20_width_atr",
+          "1h_donchian55_position",
+          "1h_donchian55_width_atr",
+          "1h_plus_di14",
+          "1h_minus_di14",
+          "1h_adx14",
+          "1h_rsi2",
+          "1h_rsi14",
+          "1h_stoch_k14",
+          "1h_stoch_d3",
+          "1h_macd_line_atr",
+          "1h_macd_signal_atr",
+          "1h_macd_hist_atr",
+          "1h_bollinger_pctb20",
+          "1h_bollinger_width20",
+          "1h_range_position14",
+          "1h_range_position50",
+          "1h_volume_z20",
+          "1h_volume_ratio20",
+          "1h_upper_wick_atr",
+          "1h_lower_wick_atr",
+          "1h_swing_high",
+          "1h_swing_high_age",
+          "1h_swing_low",
+          "1h_swing_low_age",
+          "1h_higher_high",
+          "1h_higher_low",
+          "1h_bos_up",
+          "1h_bos_down",
+          "1h_choch_up",
+          "1h_choch_down",
+          "4h_return_bars_1",
+          "4h_return_bars_6",
+          "4h_return_bars_30",
+          "4h_realized_vol30",
+          "4h_atr14",
+          "4h_atr14_price",
+          "4h_realized_vol14",
+          "4h_parkinson_vol14",
+          "4h_atr50",
+          "4h_atr50_price",
+          "4h_realized_vol50",
+          "4h_parkinson_vol50",
+          "4h_vol_ratio14_50",
+          "4h_ema20_slope",
+          "4h_ema20_distance_atr",
+          "4h_ema50_slope",
+          "4h_ema50_distance_atr",
+          "4h_ema200_slope",
+          "4h_ema200_distance_atr",
+          "4h_ema20_50_gap_atr",
+          "4h_ema50_200_gap_atr",
+          "4h_donchian20_position",
+          "4h_donchian20_width_atr",
+          "4h_donchian55_position",
+          "4h_donchian55_width_atr",
+          "4h_plus_di14",
+          "4h_minus_di14",
+          "4h_adx14",
+          "4h_rsi2",
+          "4h_rsi14",
+          "4h_stoch_k14",
+          "4h_stoch_d3",
+          "4h_macd_line_atr",
+          "4h_macd_signal_atr",
+          "4h_macd_hist_atr",
+          "4h_bollinger_pctb20",
+          "4h_bollinger_width20",
+          "4h_range_position14",
+          "4h_range_position50",
+          "4h_volume_z20",
+          "4h_volume_ratio20",
+          "4h_upper_wick_atr",
+          "4h_lower_wick_atr",
+          "4h_swing_high",
+          "4h_swing_high_age",
+          "4h_swing_low",
+          "4h_swing_low_age",
+          "4h_higher_high",
+          "4h_higher_low",
+          "4h_bos_up",
+          "4h_bos_down",
+          "4h_choch_up",
+          "4h_choch_down",
+          "1d_return_bars_1",
+          "1d_return_bars_5",
+          "1d_return_bars_20",
+          "1d_return_bars_60",
+          "1d_realized_vol30",
+          "1d_atr14",
+          "1d_atr14_price",
+          "1d_realized_vol14",
+          "1d_parkinson_vol14",
+          "1d_atr50",
+          "1d_atr50_price",
+          "1d_realized_vol50",
+          "1d_parkinson_vol50",
+          "1d_vol_ratio14_50",
+          "1d_ema20_slope",
+          "1d_ema20_distance_atr",
+          "1d_ema50_slope",
+          "1d_ema50_distance_atr",
+          "1d_ema20_50_gap_atr",
+          "1d_donchian20_position",
+          "1d_donchian20_width_atr",
+          "1d_donchian55_position",
+          "1d_donchian55_width_atr",
+          "1d_plus_di14",
+          "1d_minus_di14",
+          "1d_adx14",
+          "1d_rsi2",
+          "1d_rsi14",
+          "1d_stoch_k14",
+          "1d_stoch_d3",
+          "1d_macd_line_atr",
+          "1d_macd_signal_atr",
+          "1d_macd_hist_atr",
+          "1d_bollinger_pctb20",
+          "1d_bollinger_width20",
+          "1d_range_position14",
+          "1d_range_position50",
+          "1d_volume_z20",
+          "1d_volume_ratio20",
+          "1d_upper_wick_atr",
+          "1d_lower_wick_atr",
+          "1d_swing_high",
+          "1d_swing_high_age",
+          "1d_swing_low",
+          "1d_swing_low_age",
+          "1d_higher_high",
+          "1d_higher_low",
+          "1d_bos_up",
+          "1d_bos_down",
+          "1d_choch_up",
+          "1d_choch_down",
+          "time_sin",
+          "time_cos",
+          "weekday",
+          "minutes_since_session_open",
+          "session_id",
+          "level_above_1_distance_atr",
+          "level_above_1_type_code",
+          "level_above_1_strength",
+          "level_above_1_age_minutes",
+          "level_above_2_distance_atr",
+          "level_above_2_type_code",
+          "level_above_2_strength",
+          "level_above_2_age_minutes",
+          "level_above_3_distance_atr",
+          "level_above_3_type_code",
+          "level_above_3_strength",
+          "level_above_3_age_minutes",
+          "level_below_1_distance_atr",
+          "level_below_1_type_code",
+          "level_below_1_strength",
+          "level_below_1_age_minutes",
+          "level_below_2_distance_atr",
+          "level_below_2_type_code",
+          "level_below_2_strength",
+          "level_below_2_age_minutes",
+          "level_below_3_distance_atr",
+          "level_below_3_type_code",
+          "level_below_3_strength",
+          "level_below_3_age_minutes",
+          "prior_day_high_distance_atr",
+          "prior_day_low_distance_atr",
+          "prior_week_high_distance_atr",
+          "prior_week_low_distance_atr",
+          "spread_atr",
+          "volume_z20",
+          "vwap_distance_atr",
+          "vix_level",
+          "vix_percentile_1y",
+          "vix3m_level",
+          "vix9d_level",
+          "cross_USA500IDXUSD_return_1m_bars_15",
+          "cross_USA500IDXUSD_return_1m_bars_60",
+          "cross_USA500IDXUSD_return_1m_bars_240",
+          "cross_XAUUSD_return_1m_bars_15",
+          "cross_XAUUSD_return_1m_bars_60",
+          "cross_XAUUSD_return_1m_bars_240",
+          "cross_ETHUSDT_return_1m_bars_15",
+          "cross_ETHUSDT_return_1m_bars_60",
+          "cross_ETHUSDT_return_1m_bars_240",
+          "vix_vix3m_ratio",
+          "cross_BTCUSDT_return_1m_bars_15",
+          "cross_BTCUSDT_return_1m_bars_60",
+          "cross_BTCUSDT_return_1m_bars_240"
+        ]
+      ],
+      "oof_predicted_rows": 472278,
+      "selected_signals": 209,
+      "no_oof_prediction": 118070
+    },
+    "selection_comparison": {
+      "selected_n": 209,
+      "selected_avg_R": -0.23205448177631485,
+      "unselected_n": 472069,
+      "unselected_avg_R": -2.1853531860636073,
+      "same_event_unselected_n": 7999,
+      "same_event_unselected_avg_R": -0.2159189478857964
+    }
+  },
+  "per_instrument": {
+    "BTCUSDT": {
+      "n": 5,
+      "signals_per_year": 1.5041920387298848,
+      "hit_rate": 0.2,
+      "net_avg_R": -0.14500564397167107,
+      "t_stat": -0.2999556844967837,
+      "profit_factor": 0.6864822442462152,
+      "daily_sharpe": -0.3637661021023761,
+      "max_drawdown": -0.0055912729439189235,
+      "positive_dev_year_share": 0.0,
+      "per_year": {
+        "2021": -0.14500564397167107
+      },
+      "spread_1_5x_net_avg_R": -0.19633664147516944,
+      "random_direction_percentile": null,
+      "pbo": null,
+      "grade": "ungraded: development",
+      "brier": 0.20198926294867034,
+      "brier_skill_vs_p0": 0.10708684163180904,
+      "reliability_by_year": {
+        "2019": {
+          "n": 3023,
+          "predicted": 0.2885530511436502,
+          "observed": 0.24082037710883228
+        },
+        "2020": {
+          "n": 23752,
+          "predicted": 0.30365986016282315,
+          "observed": 0.25926237790501855
+        },
+        "2021": {
+          "n": 48602,
+          "predicted": 0.3398462949273471,
+          "observed": 0.3358709518126826
+        },
+        "2022": {
+          "n": 35248,
+          "predicted": 0.3212994441664711,
+          "observed": 0.27368928733545167
+        }
+      },
+      "reliability_by_vol_tercile": {
+        "high": {
+          "n": 36875,
+          "predicted": 0.337798182778088,
+          "observed": 0.33491525423728813
+        },
+        "low": {
+          "n": 36875,
+          "predicted": 0.310358614920641,
+          "observed": 0.26364745762711866
+        },
+        "middle": {
+          "n": 36875,
+          "predicted": 0.32614007840251397,
+          "observed": 0.29247457627118645
+        }
+      },
+      "deflated_sharpe_ratio": 0.023115845867144824
+    },
+    "USA500IDXUSD": {
+      "n": 61,
+      "signals_per_year": 18.431995036322743,
+      "hit_rate": 0.21311475409836064,
+      "net_avg_R": -0.10077725788804881,
+      "t_stat": -0.4748940874684635,
+      "profit_factor": 0.8343278267874412,
+      "daily_sharpe": -0.3461202480084748,
+      "max_drawdown": -0.04640499515345098,
+      "positive_dev_year_share": 0.3333333333333333,
+      "per_year": {
+        "2020": 0.010402623110031043,
+        "2021": -0.7897563373725167,
+        "2022": -0.02132246497517613
+      },
+      "spread_1_5x_net_avg_R": -0.11877790885665024,
+      "random_direction_percentile": null,
+      "pbo": null,
+      "grade": "ungraded: development",
+      "brier": 0.2110741771759193,
+      "brier_skill_vs_p0": 0.023787339091200455,
+      "reliability_by_year": {
+        "2019": {
+          "n": 9733,
+          "predicted": 0.35705583230808235,
+          "observed": 0.3612452481249358
+        },
+        "2020": {
+          "n": 44317,
+          "predicted": 0.3713851370143233,
+          "observed": 0.3896247489676648
+        },
+        "2021": {
+          "n": 61166,
+          "predicted": 0.366270754755007,
+          "observed": 0.3698623418238891
+        },
+        "2022": {
+          "n": 18420,
+          "predicted": 0.38900490748639216,
+          "observed": 0.41682953311617804
+        }
+      },
+      "reliability_by_vol_tercile": {
+        "high": {
+          "n": 44545,
+          "predicted": 0.38529526350221405,
+          "observed": 0.4162532270737456
+        },
+        "low": {
+          "n": 44546,
+          "predicted": 0.3487440878626619,
+          "observed": 0.34508148879809636
+        },
+        "middle": {
+          "n": 44545,
+          "predicted": 0.3772489676400532,
+          "observed": 0.38545291278482435
+        }
+      },
+      "deflated_sharpe_ratio": 0.002170937865860867
+    },
+    "USATECHIDXUSD": {
+      "n": 143,
+      "signals_per_year": 43.16283735546827,
+      "hit_rate": 0.16783216783216784,
+      "net_avg_R": -0.29109752265888444,
+      "t_stat": -2.6487419925983433,
+      "profit_factor": 0.5559232246460932,
+      "daily_sharpe": -1.7980339728349795,
+      "max_drawdown": -0.19016098911611645,
+      "positive_dev_year_share": 0.0,
+      "per_year": {
+        "2020": -0.19933182160983592,
+        "2021": -0.26751035025320063,
+        "2022": -0.5340702564180102
+      },
+      "spread_1_5x_net_avg_R": -0.31133803715860614,
+      "random_direction_percentile": null,
+      "pbo": null,
+      "grade": "ungraded: development",
+      "brier": 0.20815769118755156,
+      "brier_skill_vs_p0": 0.03177020482457105,
+      "reliability_by_year": {
+        "2019": {
+          "n": 23949,
+          "predicted": 0.3467567372741703,
+          "observed": 0.35187272955029436
+        },
+        "2020": {
+          "n": 86739,
+          "predicted": 0.360649056822621,
+          "observed": 0.37196647413504885
+        },
+        "2021": {
+          "n": 95741,
+          "predicted": 0.37168592018536634,
+          "observed": 0.3726721049498125
+        },
+        "2022": {
+          "n": 21588,
+          "predicted": 0.3900746797879643,
+          "observed": 0.4234296831573096
+        }
+      },
+      "reliability_by_vol_tercile": {
+        "high": {
+          "n": 76006,
+          "predicted": 0.3853003432332408,
+          "observed": 0.4108754572007473
+        },
+        "low": {
+          "n": 76006,
+          "predicted": 0.3394635778083031,
+          "observed": 0.32671104912770044
+        },
+        "middle": {
+          "n": 76005,
+          "predicted": 0.37506641575899696,
+          "observed": 0.3874876652851786
+        }
+      },
+      "deflated_sharpe_ratio": 4.2618680062833647e-07
+    }
+  },
+  "input_manifest": [
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2018-01.parquet",
+      "mtime_ns": 1794320859484692749,
+      "size": 228366
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2018-02.parquet",
+      "mtime_ns": 1794320859494194649,
+      "size": 182943
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2018-03.parquet",
+      "mtime_ns": 1794320859501904363,
+      "size": 136602
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2018-04.parquet",
+      "mtime_ns": 1794320859506203745,
+      "size": 82389
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2018-05.parquet",
+      "mtime_ns": 1794320859509753577,
+      "size": 62870
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2018-06.parquet",
+      "mtime_ns": 1794320859512791404,
+      "size": 58055
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2018-07.parquet",
+      "mtime_ns": 1794320859515923231,
+      "size": 59607
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2018-08.parquet",
+      "mtime_ns": 1794320859519046642,
+      "size": 52415
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2018-09.parquet",
+      "mtime_ns": 1794320859521566421,
+      "size": 30956
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2018-10.parquet",
+      "mtime_ns": 1794320859524513455,
+      "size": 34380
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2018-11.parquet",
+      "mtime_ns": 1794320859527566282,
+      "size": 54845
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2018-12.parquet",
+      "mtime_ns": 1794320859530110727,
+      "size": 37170
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2019-01.parquet",
+      "mtime_ns": 1794321219361917521,
+      "size": 30771
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2019-02.parquet",
+      "mtime_ns": 1794321219365557244,
+      "size": 30221
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2019-03.parquet",
+      "mtime_ns": 1794321219367862071,
+      "size": 20104
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2019-04.parquet",
+      "mtime_ns": 1794321219371917926,
+      "size": 68343
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2019-05.parquet",
+      "mtime_ns": 1794321219377002129,
+      "size": 100067
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2019-06.parquet",
+      "mtime_ns": 1794321219384558662,
+      "size": 138370
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2019-07.parquet",
+      "mtime_ns": 1794321219392833623,
+      "size": 163187
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2019-08.parquet",
+      "mtime_ns": 1794321219397617905,
+      "size": 99862
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2019-09.parquet",
+      "mtime_ns": 1794321219402261393,
+      "size": 90860
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2019-10.parquet",
+      "mtime_ns": 1794321219406773296,
+      "size": 73364
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2019-11.parquet",
+      "mtime_ns": 1794321219410779983,
+      "size": 76841
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2019-12.parquet",
+      "mtime_ns": 1794321219413905698,
+      "size": 50891
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2020-01.parquet",
+      "mtime_ns": 1794321568777835289,
+      "size": 61602
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2020-02.parquet",
+      "mtime_ns": 1794321568782815158,
+      "size": 89117
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2020-03.parquet",
+      "mtime_ns": 1794321568790345524,
+      "size": 141666
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2020-04.parquet",
+      "mtime_ns": 1794321568794288877,
+      "size": 72327
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2020-05.parquet",
+      "mtime_ns": 1794321568800695309,
+      "size": 93730
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2020-06.parquet",
+      "mtime_ns": 1794321568804370699,
+      "size": 65876
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2020-07.parquet",
+      "mtime_ns": 1794321568807548790,
+      "size": 52679
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2020-08.parquet",
+      "mtime_ns": 1794321568811580810,
+      "size": 86291
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2020-09.parquet",
+      "mtime_ns": 1794321568815095823,
+      "size": 66541
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2020-10.parquet",
+      "mtime_ns": 1794321568818892048,
+      "size": 89467
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2020-11.parquet",
+      "mtime_ns": 1794321568828213442,
+      "size": 261181
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2020-12.parquet",
+      "mtime_ns": 1794321568838610727,
+      "size": 272672
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2021-01.parquet",
+      "mtime_ns": 1794321918468715560,
+      "size": 450548
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2021-02.parquet",
+      "mtime_ns": 1794321918485622155,
+      "size": 457553
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2021-03.parquet",
+      "mtime_ns": 1794321918499306907,
+      "size": 343727
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2021-04.parquet",
+      "mtime_ns": 1794321918512839533,
+      "size": 328038
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2021-05.parquet",
+      "mtime_ns": 1794321918526664954,
+      "size": 329158
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2021-06.parquet",
+      "mtime_ns": 1794321918538624847,
+      "size": 263435
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2021-07.parquet",
+      "mtime_ns": 1794321918550388278,
+      "size": 279260
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2021-08.parquet",
+      "mtime_ns": 1794321918562939930,
+      "size": 282163
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2021-09.parquet",
+      "mtime_ns": 1794321918576075591,
+      "size": 301583
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2021-10.parquet",
+      "mtime_ns": 1794321918590998780,
+      "size": 349309
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2021-11.parquet",
+      "mtime_ns": 1794321918605393419,
+      "size": 355399
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2021-12.parquet",
+      "mtime_ns": 1794321918619063463,
+      "size": 297423
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2022-01.parquet",
+      "mtime_ns": 1794318449563826419,
+      "size": 301926
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2022-02.parquet",
+      "mtime_ns": 1794318449575466602,
+      "size": 251744
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2022-03.parquet",
+      "mtime_ns": 1794318449587559370,
+      "size": 261779
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2022-04.parquet",
+      "mtime_ns": 1794318449598503802,
+      "size": 253209
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2022-05.parquet",
+      "mtime_ns": 1794318449610055611,
+      "size": 274858
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2022-06.parquet",
+      "mtime_ns": 1794318449622420170,
+      "size": 340920
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2022-07.parquet",
+      "mtime_ns": 1794318449633222936,
+      "size": 274854
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2022-08.parquet",
+      "mtime_ns": 1794318449642237657,
+      "size": 207604
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2022-09.parquet",
+      "mtime_ns": 1794318449650680670,
+      "size": 193464
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2022-10.parquet",
+      "mtime_ns": 1794318449658032097,
+      "size": 164774
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2022-11.parquet",
+      "mtime_ns": 1794318449667235860,
+      "size": 234578
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/BTCUSDT/2022-12.parquet",
+      "mtime_ns": 1794318449673813203,
+      "size": 125470
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-01.parquet",
+      "mtime_ns": 1794320672475948839,
+      "size": 21798321
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-02.parquet",
+      "mtime_ns": 1794320673308298129,
+      "size": 18722668
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-03.parquet",
+      "mtime_ns": 1794320674266940908,
+      "size": 21802344
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-04.parquet",
+      "mtime_ns": 1794320675206316799,
+      "size": 21016397
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-05.parquet",
+      "mtime_ns": 1794320676183138286,
+      "size": 21824180
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-06.parquet",
+      "mtime_ns": 1794320677136870176,
+      "size": 20693868
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-07.parquet",
+      "mtime_ns": 1794320678133718893,
+      "size": 21564880
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-08.parquet",
+      "mtime_ns": 1794320679158304802,
+      "size": 21854679
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-09.parquet",
+      "mtime_ns": 1794320680188754446,
+      "size": 20996252
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-10.parquet",
+      "mtime_ns": 1794320681295520381,
+      "size": 21430594
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-11.parquet",
+      "mtime_ns": 1794320682423802230,
+      "size": 20961687
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-12.parquet",
+      "mtime_ns": 1794320683599374370,
+      "size": 22099329
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-01.parquet",
+      "mtime_ns": 1794320918614468200,
+      "size": 22378200
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-02.parquet",
+      "mtime_ns": 1794320919836439754,
+      "size": 20138285
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-03.parquet",
+      "mtime_ns": 1794320921151594305,
+      "size": 22052697
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-04.parquet",
+      "mtime_ns": 1794320922487816723,
+      "size": 21631563
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-05.parquet",
+      "mtime_ns": 1794320923863773207,
+      "size": 22669527
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-06.parquet",
+      "mtime_ns": 1794320925263236465,
+      "size": 22092498
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-07.parquet",
+      "mtime_ns": 1794320926697683332,
+      "size": 22972973
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-08.parquet",
+      "mtime_ns": 1794320928115190553,
+      "size": 22631488
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-09.parquet",
+      "mtime_ns": 1794320929525764323,
+      "size": 22079250
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-10.parquet",
+      "mtime_ns": 1794320930958466676,
+      "size": 22902364
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-11.parquet",
+      "mtime_ns": 1794320932404652100,
+      "size": 21813150
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-12.parquet",
+      "mtime_ns": 1794320933914825102,
+      "size": 22581042
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-01.parquet",
+      "mtime_ns": 1794321279026319979,
+      "size": 22862653
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-02.parquet",
+      "mtime_ns": 1794321280166478189,
+      "size": 21157176
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-03.parquet",
+      "mtime_ns": 1794321281346044925,
+      "size": 22805790
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-04.parquet",
+      "mtime_ns": 1794321282509182156,
+      "size": 22060090
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-05.parquet",
+      "mtime_ns": 1794321283735057230,
+      "size": 22913444
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-06.parquet",
+      "mtime_ns": 1794321284936075171,
+      "size": 22054078
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-07.parquet",
+      "mtime_ns": 1794321286184509011,
+      "size": 22843533
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-08.parquet",
+      "mtime_ns": 1794321287450303826,
+      "size": 22798618
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-09.parquet",
+      "mtime_ns": 1794321288685517418,
+      "size": 22332294
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-10.parquet",
+      "mtime_ns": 1794321289956510897,
+      "size": 22840425
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-11.parquet",
+      "mtime_ns": 1794321291181364206,
+      "size": 21684448
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-12.parquet",
+      "mtime_ns": 1794321292438027255,
+      "size": 22509560
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-01.parquet",
+      "mtime_ns": 1794321633592522740,
+      "size": 22641037
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-02.parquet",
+      "mtime_ns": 1794321634622569502,
+      "size": 20500863
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-03.parquet",
+      "mtime_ns": 1794321635750422979,
+      "size": 22914489
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-04.parquet",
+      "mtime_ns": 1794321636840412499,
+      "size": 22038644
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-05.parquet",
+      "mtime_ns": 1794321637995371313,
+      "size": 23168981
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-06.parquet",
+      "mtime_ns": 1794321639115384920,
+      "size": 22420234
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-07.parquet",
+      "mtime_ns": 1794321640280001799,
+      "size": 23080112
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-08.parquet",
+      "mtime_ns": 1794321641426220728,
+      "size": 22962927
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-09.parquet",
+      "mtime_ns": 1794321642565192461,
+      "size": 22382011
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-10.parquet",
+      "mtime_ns": 1794321643730851814,
+      "size": 23085095
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-11.parquet",
+      "mtime_ns": 1794321644889812356,
+      "size": 22425733
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-12.parquet",
+      "mtime_ns": 1794321646089701487,
+      "size": 23263105
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-01.parquet",
+      "mtime_ns": 1794321988954748772,
+      "size": 23161388
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-02.parquet",
+      "mtime_ns": 1794321990086003345,
+      "size": 20996598
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-03.parquet",
+      "mtime_ns": 1794321991284226451,
+      "size": 23319113
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-04.parquet",
+      "mtime_ns": 1794321992487113253,
+      "size": 22341784
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-05.parquet",
+      "mtime_ns": 1794321993745939876,
+      "size": 23180624
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-06.parquet",
+      "mtime_ns": 1794321995039865000,
+      "size": 22202674
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-07.parquet",
+      "mtime_ns": 1794321996381198521,
+      "size": 22842531
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-08.parquet",
+      "mtime_ns": 1794321997786628947,
+      "size": 23028482
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-09.parquet",
+      "mtime_ns": 1794321999237028859,
+      "size": 22340265
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-10.parquet",
+      "mtime_ns": 1794318166733882668,
+      "size": 23000008
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-11.parquet",
+      "mtime_ns": 1794318168316022960,
+      "size": 22174350
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-12.parquet",
+      "mtime_ns": 1794318170016187424,
+      "size": 22718190
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2018-12.parquet",
+      "mtime_ns": 1794312233111037667,
+      "size": 229394
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2019-01.parquet",
+      "mtime_ns": 1794312295243456232,
+      "size": 374835
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2019-02.parquet",
+      "mtime_ns": 1794312295255903755,
+      "size": 361771
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2019-03.parquet",
+      "mtime_ns": 1794312295268345986,
+      "size": 385516
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2019-04.parquet",
+      "mtime_ns": 1794312295282575912,
+      "size": 455691
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2019-05.parquet",
+      "mtime_ns": 1794312295294686055,
+      "size": 325061
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2019-06.parquet",
+      "mtime_ns": 1794312295305021838,
+      "size": 271750
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2019-07.parquet",
+      "mtime_ns": 1794312295317317192,
+      "size": 344098
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2019-08.parquet",
+      "mtime_ns": 1794312295329489420,
+      "size": 337069
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2019-09.parquet",
+      "mtime_ns": 1794312295340497504,
+      "size": 272512
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2019-10.parquet",
+      "mtime_ns": 1794312295354095087,
+      "size": 371924
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2019-11.parquet",
+      "mtime_ns": 1794312295366036811,
+      "size": 353377
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2019-12.parquet",
+      "mtime_ns": 1794312295376641764,
+      "size": 303141
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2020-01.parquet",
+      "mtime_ns": 1794312412851803477,
+      "size": 431198
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2020-02.parquet",
+      "mtime_ns": 1794312412865380434,
+      "size": 370676
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2020-03.parquet",
+      "mtime_ns": 1794312412885083026,
+      "size": 488843
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2020-04.parquet",
+      "mtime_ns": 1794312412898095892,
+      "size": 345978
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2020-05.parquet",
+      "mtime_ns": 1794312412909343980,
+      "size": 298934
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2020-06.parquet",
+      "mtime_ns": 1794312412921660085,
+      "size": 367065
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2020-07.parquet",
+      "mtime_ns": 1794312412936982402,
+      "size": 445425
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2020-08.parquet",
+      "mtime_ns": 1794312412950827822,
+      "size": 435406
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2020-09.parquet",
+      "mtime_ns": 1794312412965379335,
+      "size": 415814
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2020-10.parquet",
+      "mtime_ns": 1794312412978982835,
+      "size": 375664
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2020-11.parquet",
+      "mtime_ns": 1794312412991054602,
+      "size": 321818
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2020-12.parquet",
+      "mtime_ns": 1794312413006263209,
+      "size": 457629
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2021-01.parquet",
+      "mtime_ns": 1794309891880254793,
+      "size": 366591
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2021-02.parquet",
+      "mtime_ns": 1794309891892302284,
+      "size": 373489
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2021-03.parquet",
+      "mtime_ns": 1794309891904517066,
+      "size": 392016
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2021-04.parquet",
+      "mtime_ns": 1794309891915613895,
+      "size": 348283
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2021-05.parquet",
+      "mtime_ns": 1794309891924762148,
+      "size": 277088
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2021-06.parquet",
+      "mtime_ns": 1794309891936526515,
+      "size": 389367
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2021-07.parquet",
+      "mtime_ns": 1794309891951987575,
+      "size": 504071
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2021-08.parquet",
+      "mtime_ns": 1794309891964030441,
+      "size": 384524
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2021-09.parquet",
+      "mtime_ns": 1794309891977182470,
+      "size": 423523
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2021-10.parquet",
+      "mtime_ns": 1794309891986377723,
+      "size": 291623
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2021-11.parquet",
+      "mtime_ns": 1794309891999971249,
+      "size": 444278
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2021-12.parquet",
+      "mtime_ns": 1794309892012447738,
+      "size": 394319
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2022-01.parquet",
+      "mtime_ns": 1794310070654741984,
+      "size": 346672
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2022-02.parquet",
+      "mtime_ns": 1794310070664521359,
+      "size": 326308
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2022-03.parquet",
+      "mtime_ns": 1794310070675798062,
+      "size": 403033
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2022-04.parquet",
+      "mtime_ns": 1794310070685524313,
+      "size": 331968
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2022-05.parquet",
+      "mtime_ns": 1794310070696479517,
+      "size": 392634
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2022-06.parquet",
+      "mtime_ns": 1794310070707526679,
+      "size": 392415
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2022-07.parquet",
+      "mtime_ns": 1794310070717784594,
+      "size": 321687
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2022-08.parquet",
+      "mtime_ns": 1794310070728148426,
+      "size": 377746
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2022-09.parquet",
+      "mtime_ns": 1794310070738414716,
+      "size": 370687
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2022-10.parquet",
+      "mtime_ns": 1794310070749326670,
+      "size": 377363
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2022-11.parquet",
+      "mtime_ns": 1794310070759693585,
+      "size": 361791
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2022-12.parquet",
+      "mtime_ns": 1794310070770229499,
+      "size": 371815
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2018-12.parquet",
+      "mtime_ns": 1794312231976944067,
+      "size": 6541342
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2019-01.parquet",
+      "mtime_ns": 1794312244532255646,
+      "size": 14826018
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2019-02.parquet",
+      "mtime_ns": 1794312244676908437,
+      "size": 13243260
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2019-03.parquet",
+      "mtime_ns": 1794312244827939367,
+      "size": 14102815
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2019-04.parquet",
+      "mtime_ns": 1794312244989826879,
+      "size": 13861717
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2019-05.parquet",
+      "mtime_ns": 1794312245154273348,
+      "size": 15608448
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2019-06.parquet",
+      "mtime_ns": 1794312245300275909,
+      "size": 13786691
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2019-07.parquet",
+      "mtime_ns": 1794312245463417357,
+      "size": 15296429
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2019-08.parquet",
+      "mtime_ns": 1794312245624483857,
+      "size": 15112775
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2019-09.parquet",
+      "mtime_ns": 1794312245778971382,
+      "size": 14401731
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2019-10.parquet",
+      "mtime_ns": 1794312245944524033,
+      "size": 15710618
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2019-11.parquet",
+      "mtime_ns": 1794312246095818301,
+      "size": 13636111
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2019-12.parquet",
+      "mtime_ns": 1794312246248171126,
+      "size": 13750915
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-01.parquet",
+      "mtime_ns": 1794312335530167968,
+      "size": 14619343
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-02.parquet",
+      "mtime_ns": 1794312335678612025,
+      "size": 13492886
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-03.parquet",
+      "mtime_ns": 1794312335824274831,
+      "size": 13677664
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-04.parquet",
+      "mtime_ns": 1794312335978534519,
+      "size": 14572947
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-05.parquet",
+      "mtime_ns": 1794312336131173890,
+      "size": 14366947
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-06.parquet",
+      "mtime_ns": 1794312336305535510,
+      "size": 14992875
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-07.parquet",
+      "mtime_ns": 1794312336471281248,
+      "size": 15417843
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-08.parquet",
+      "mtime_ns": 1794312336624950010,
+      "size": 14209793
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-09.parquet",
+      "mtime_ns": 1794312336787320154,
+      "size": 15025604
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-10.parquet",
+      "mtime_ns": 1794312336948048941,
+      "size": 15095426
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-11.parquet",
+      "mtime_ns": 1794312337100625811,
+      "size": 14423015
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-12.parquet",
+      "mtime_ns": 1794312337259433777,
+      "size": 14844792
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2021-01.parquet",
+      "mtime_ns": 1794309807380975911,
+      "size": 13029107
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2021-02.parquet",
+      "mtime_ns": 1794309807512425859,
+      "size": 13047052
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2021-03.parquet",
+      "mtime_ns": 1794309807663132810,
+      "size": 15319548
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2021-04.parquet",
+      "mtime_ns": 1794309807805120756,
+      "size": 14139652
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2021-05.parquet",
+      "mtime_ns": 1794309807943714632,
+      "size": 13929427
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2021-06.parquet",
+      "mtime_ns": 1794309808087386696,
+      "size": 14387419
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2021-07.parquet",
+      "mtime_ns": 1794309808231631091,
+      "size": 14143788
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2021-08.parquet",
+      "mtime_ns": 1794309808375699986,
+      "size": 14392227
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2021-09.parquet",
+      "mtime_ns": 1794309808521071459,
+      "size": 14358140
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2021-10.parquet",
+      "mtime_ns": 1794309808660632582,
+      "size": 13927353
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2021-11.parquet",
+      "mtime_ns": 1794309808809554707,
+      "size": 14077680
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2021-12.parquet",
+      "mtime_ns": 1794309808953761726,
+      "size": 14507168
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2022-01.parquet",
+      "mtime_ns": 1794309942905104382,
+      "size": 13903218
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2022-02.parquet",
+      "mtime_ns": 1794309943036667496,
+      "size": 13296248
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2022-03.parquet",
+      "mtime_ns": 1794309943191635304,
+      "size": 15400112
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2022-04.parquet",
+      "mtime_ns": 1794309943322725129,
+      "size": 13350758
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2022-05.parquet",
+      "mtime_ns": 1794309943466927982,
+      "size": 14642838
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2022-06.parquet",
+      "mtime_ns": 1794309943608965969,
+      "size": 14593844
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2022-07.parquet",
+      "mtime_ns": 1794309943745854895,
+      "size": 13913720
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2022-08.parquet",
+      "mtime_ns": 1794309943895296267,
+      "size": 15357302
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2022-09.parquet",
+      "mtime_ns": 1794309944039361288,
+      "size": 14546911
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2022-10.parquet",
+      "mtime_ns": 1794309944176803253,
+      "size": 14092942
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2022-11.parquet",
+      "mtime_ns": 1794309944318665490,
+      "size": 14485406
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2022-12.parquet",
+      "mtime_ns": 1794309944459228859,
+      "size": 14011991
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2018-12.parquet",
+      "mtime_ns": 1794310951023409041,
+      "size": 200350
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2019-01.parquet",
+      "mtime_ns": 1794310992545972552,
+      "size": 260062
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2019-02.parquet",
+      "mtime_ns": 1794310992554368264,
+      "size": 211789
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2019-03.parquet",
+      "mtime_ns": 1794310992560764570,
+      "size": 133129
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2019-04.parquet",
+      "mtime_ns": 1794310992567990221,
+      "size": 208076
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2019-05.parquet",
+      "mtime_ns": 1794310992576064303,
+      "size": 241520
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2019-06.parquet",
+      "mtime_ns": 1794310992582283023,
+      "size": 145875
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2019-07.parquet",
+      "mtime_ns": 1794310992587625229,
+      "size": 115037
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2019-08.parquet",
+      "mtime_ns": 1794310992596447531,
+      "size": 264818
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2019-09.parquet",
+      "mtime_ns": 1794310992603232718,
+      "size": 165198
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2019-10.parquet",
+      "mtime_ns": 1794310992610391910,
+      "size": 182184
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2019-11.parquet",
+      "mtime_ns": 1794310992616951885,
+      "size": 168605
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2019-12.parquet",
+      "mtime_ns": 1794310992622764057,
+      "size": 129921
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2020-01.parquet",
+      "mtime_ns": 1794311099519264313,
+      "size": 218527
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2020-02.parquet",
+      "mtime_ns": 1794311099528103614,
+      "size": 247306
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2020-03.parquet",
+      "mtime_ns": 1794311099538291228,
+      "size": 317465
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2020-04.parquet",
+      "mtime_ns": 1794311099548429924,
+      "size": 323261
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2020-05.parquet",
+      "mtime_ns": 1794311099558386701,
+      "size": 310453
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2020-06.parquet",
+      "mtime_ns": 1794311099569077656,
+      "size": 351919
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2020-07.parquet",
+      "mtime_ns": 1794311099578748096,
+      "size": 303320
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2020-08.parquet",
+      "mtime_ns": 1794311099585427947,
+      "size": 194602
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2020-09.parquet",
+      "mtime_ns": 1794311099596378614,
+      "size": 360998
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2020-10.parquet",
+      "mtime_ns": 1794311099605200707,
+      "size": 288079
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2020-11.parquet",
+      "mtime_ns": 1794311099614865605,
+      "size": 311257
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2020-12.parquet",
+      "mtime_ns": 1794311099623359235,
+      "size": 276444
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2021-01.parquet",
+      "mtime_ns": 1794311210985943281,
+      "size": 359444
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2021-02.parquet",
+      "mtime_ns": 1794311210995585803,
+      "size": 282359
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2021-03.parquet",
+      "mtime_ns": 1794311211005001530,
+      "size": 311268
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2021-04.parquet",
+      "mtime_ns": 1794311211014181837,
+      "size": 279254
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2021-05.parquet",
+      "mtime_ns": 1794311211021085693,
+      "size": 194656
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2021-06.parquet",
+      "mtime_ns": 1794311211030305958,
+      "size": 268041
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2021-07.parquet",
+      "mtime_ns": 1794311211040239693,
+      "size": 330658
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2021-08.parquet",
+      "mtime_ns": 1794311211048673239,
+      "size": 263070
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2021-09.parquet",
+      "mtime_ns": 1794311211057057742,
+      "size": 280686
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2021-10.parquet",
+      "mtime_ns": 1794311211065575913,
+      "size": 277531
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2021-11.parquet",
+      "mtime_ns": 1794311211073733038,
+      "size": 248300
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2021-12.parquet",
+      "mtime_ns": 1794311211082673674,
+      "size": 292613
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2022-01.parquet",
+      "mtime_ns": 1794311379234837117,
+      "size": 304425
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2022-02.parquet",
+      "mtime_ns": 1794311379245517197,
+      "size": 341249
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2022-03.parquet",
+      "mtime_ns": 1794311379257211000,
+      "size": 424557
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2022-04.parquet",
+      "mtime_ns": 1794311379268017332,
+      "size": 363409
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2022-05.parquet",
+      "mtime_ns": 1794311379279770428,
+      "size": 392475
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2022-06.parquet",
+      "mtime_ns": 1794311379289523327,
+      "size": 334270
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2022-07.parquet",
+      "mtime_ns": 1794311379298550714,
+      "size": 285743
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2022-08.parquet",
+      "mtime_ns": 1794311379308234946,
+      "size": 319355
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2022-09.parquet",
+      "mtime_ns": 1794311379318213473,
+      "size": 310548
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2022-10.parquet",
+      "mtime_ns": 1794311379328976012,
+      "size": 341060
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2022-11.parquet",
+      "mtime_ns": 1794311379339932096,
+      "size": 330177
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USA500IDXUSD/2022-12.parquet",
+      "mtime_ns": 1794311379350133710,
+      "size": 319106
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2018-12.parquet",
+      "mtime_ns": 1794310949827805127,
+      "size": 5971286
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2019-01.parquet",
+      "mtime_ns": 1794310961506158238,
+      "size": 12535302
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2019-02.parquet",
+      "mtime_ns": 1794310961632015284,
+      "size": 9943805
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2019-03.parquet",
+      "mtime_ns": 1794310961764525056,
+      "size": 10427943
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2019-04.parquet",
+      "mtime_ns": 1794310961886207663,
+      "size": 9110742
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2019-05.parquet",
+      "mtime_ns": 1794310962037031173,
+      "size": 12507348
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2019-06.parquet",
+      "mtime_ns": 1794310962162199709,
+      "size": 10209460
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2019-07.parquet",
+      "mtime_ns": 1794310962286734901,
+      "size": 10199675
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2019-08.parquet",
+      "mtime_ns": 1794310962431436068,
+      "size": 12815041
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2019-09.parquet",
+      "mtime_ns": 1794310962559630816,
+      "size": 10803241
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2019-10.parquet",
+      "mtime_ns": 1794310962696962537,
+      "size": 11832848
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2019-11.parquet",
+      "mtime_ns": 1794310962813194644,
+      "size": 9282436
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2019-12.parquet",
+      "mtime_ns": 1794310962924915349,
+      "size": 8956168
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2020-01.parquet",
+      "mtime_ns": 1794311041134655198,
+      "size": 12156363
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2020-02.parquet",
+      "mtime_ns": 1794311041264326344,
+      "size": 12212858
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2020-03.parquet",
+      "mtime_ns": 1794311041398938357,
+      "size": 13051614
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2020-04.parquet",
+      "mtime_ns": 1794311041539121621,
+      "size": 13929575
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2020-05.parquet",
+      "mtime_ns": 1794311041679830144,
+      "size": 13717553
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2020-06.parquet",
+      "mtime_ns": 1794311041828047906,
+      "size": 14476570
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2020-07.parquet",
+      "mtime_ns": 1794311041977789483,
+      "size": 14731898
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2020-08.parquet",
+      "mtime_ns": 1794311042113393928,
+      "size": 12929264
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2020-09.parquet",
+      "mtime_ns": 1794311042258153929,
+      "size": 14146741
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2020-10.parquet",
+      "mtime_ns": 1794311042405575220,
+      "size": 14066321
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2020-11.parquet",
+      "mtime_ns": 1794311042545667192,
+      "size": 13458028
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2020-12.parquet",
+      "mtime_ns": 1794311042685188863,
+      "size": 13176563
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2021-01.parquet",
+      "mtime_ns": 1794311147135279118,
+      "size": 12691972
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2021-02.parquet",
+      "mtime_ns": 1794311147266055197,
+      "size": 12516220
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2021-03.parquet",
+      "mtime_ns": 1794311147418177268,
+      "size": 14959525
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2021-04.parquet",
+      "mtime_ns": 1794311147553286539,
+      "size": 12562482
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2021-05.parquet",
+      "mtime_ns": 1794311147691274687,
+      "size": 13099609
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2021-06.parquet",
+      "mtime_ns": 1794311147829887552,
+      "size": 13053197
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2021-07.parquet",
+      "mtime_ns": 1794311147967615196,
+      "size": 13152740
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2021-08.parquet",
+      "mtime_ns": 1794311148105313547,
+      "size": 12915025
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2021-09.parquet",
+      "mtime_ns": 1794311148243887037,
+      "size": 13534205
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2021-10.parquet",
+      "mtime_ns": 1794311148388511036,
+      "size": 13500529
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2021-11.parquet",
+      "mtime_ns": 1794311148526298889,
+      "size": 13199292
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2021-12.parquet",
+      "mtime_ns": 1794311148669534075,
+      "size": 14100169
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2022-01.parquet",
+      "mtime_ns": 1794311265974046808,
+      "size": 13810153
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2022-02.parquet",
+      "mtime_ns": 1794311266109403332,
+      "size": 13176107
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2022-03.parquet",
+      "mtime_ns": 1794311266261528821,
+      "size": 15251466
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2022-04.parquet",
+      "mtime_ns": 1794311266395806245,
+      "size": 13069620
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2022-05.parquet",
+      "mtime_ns": 1794311266540432619,
+      "size": 14539031
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2022-06.parquet",
+      "mtime_ns": 1794311266685869797,
+      "size": 14451906
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2022-07.parquet",
+      "mtime_ns": 1794311266827742337,
+      "size": 13793446
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2022-08.parquet",
+      "mtime_ns": 1794311266984190184,
+      "size": 14989308
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2022-09.parquet",
+      "mtime_ns": 1794311267127881043,
+      "size": 14396015
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2022-10.parquet",
+      "mtime_ns": 1794311267275115874,
+      "size": 14003380
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2022-11.parquet",
+      "mtime_ns": 1794311267416785327,
+      "size": 14287328
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2022-12.parquet",
+      "mtime_ns": 1794311267554548138,
+      "size": 13794648
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/binance_spot/BTCUSDT/2021-01.parquet",
+      "mtime_ns": 1794283849344680630,
+      "size": 4602480
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/binance_spot/BTCUSDT/2021-02.parquet",
+      "mtime_ns": 1794283852201541755,
+      "size": 4168378
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/binance_spot/BTCUSDT/2021-12.parquet",
+      "mtime_ns": 1794283879011368366,
+      "size": 4549862
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/binance_spot/BTCUSDT/2022-01.parquet",
+      "mtime_ns": 1794283881431073014,
+      "size": 4561407
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2020-03.parquet",
+      "mtime_ns": 1794242474249224426,
+      "size": 1470222
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2020-04.parquet",
+      "mtime_ns": 1794242484716921225,
+      "size": 1332774
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2020-04.parquet",
+      "mtime_ns": 1794242484716921225,
+      "size": 1332774
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2020-05.parquet",
+      "mtime_ns": 1794242495032650690,
+      "size": 1213487
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2020-06.parquet",
+      "mtime_ns": 1794242505410077431,
+      "size": 1261417
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2020-07.parquet",
+      "mtime_ns": 1794242516275123655,
+      "size": 1210891
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2020-09.parquet",
+      "mtime_ns": 1794242537196020402,
+      "size": 1213514
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2020-10.parquet",
+      "mtime_ns": 1794242547663224279,
+      "size": 1292402
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2020-10.parquet",
+      "mtime_ns": 1794242547663224279,
+      "size": 1292402
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2020-11.parquet",
+      "mtime_ns": 1794242558107430638,
+      "size": 1241306
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2020-11.parquet",
+      "mtime_ns": 1794242558107430638,
+      "size": 1241306
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2020-12.parquet",
+      "mtime_ns": 1794242571216246397,
+      "size": 1004917
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2020-12.parquet",
+      "mtime_ns": 1794242571216246397,
+      "size": 1004917
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2021-01.parquet",
+      "mtime_ns": 1794242582481114152,
+      "size": 1028774
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2021-01.parquet",
+      "mtime_ns": 1794242582481114152,
+      "size": 1028774
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2021-02.parquet",
+      "mtime_ns": 1794242592721698166,
+      "size": 1041770
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2021-03.parquet",
+      "mtime_ns": 1794242637702179618,
+      "size": 1235978
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2021-04.parquet",
+      "mtime_ns": 1794242698603347310,
+      "size": 1053522
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2021-04.parquet",
+      "mtime_ns": 1794242698603347310,
+      "size": 1053522
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2021-05.parquet",
+      "mtime_ns": 1794242708986510774,
+      "size": 1069128
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2021-08.parquet",
+      "mtime_ns": 1794242740577814865,
+      "size": 1028894
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2021-09.parquet",
+      "mtime_ns": 1794242751651123938,
+      "size": 1155563
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2021-12.parquet",
+      "mtime_ns": 1794242783424993166,
+      "size": 1278167
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2022-01.parquet",
+      "mtime_ns": 1794242793844159903,
+      "size": 1356050
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2022-01.parquet",
+      "mtime_ns": 1794242793844159903,
+      "size": 1356050
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2022-02.parquet",
+      "mtime_ns": 1794242803432434642,
+      "size": 1336448
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2022-05.parquet",
+      "mtime_ns": 1794242885723529630,
+      "size": 1457472
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2022-06.parquet",
+      "mtime_ns": 1794242896064817431,
+      "size": 1434254
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2022-06.parquet",
+      "mtime_ns": 1794242896064817431,
+      "size": 1434254
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2022-07.parquet",
+      "mtime_ns": 1794242952555713149,
+      "size": 1200250
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2022-09.parquet",
+      "mtime_ns": 1794242974139447193,
+      "size": 1447280
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2022-10.parquet",
+      "mtime_ns": 1794242984607024033,
+      "size": 1688046
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2022-10.parquet",
+      "mtime_ns": 1794242984607024033,
+      "size": 1688046
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2022-11.parquet",
+      "mtime_ns": 1794242995157904279,
+      "size": 1565644
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USA500IDXUSD/2022-12.parquet",
+      "mtime_ns": 1794243005517269217,
+      "size": 1606774
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2020-02.parquet",
+      "mtime_ns": 1794238185937952859,
+      "size": 1496427
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2020-03.parquet",
+      "mtime_ns": 1794238196788630342,
+      "size": 1653835
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2020-03.parquet",
+      "mtime_ns": 1794238196788630342,
+      "size": 1653835
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2020-04.parquet",
+      "mtime_ns": 1794238207191429100,
+      "size": 1737672
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2020-04.parquet",
+      "mtime_ns": 1794238207191429100,
+      "size": 1737672
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2020-05.parquet",
+      "mtime_ns": 1794238217548007793,
+      "size": 1660555
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2020-06.parquet",
+      "mtime_ns": 1794238228070271075,
+      "size": 1682278
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2020-07.parquet",
+      "mtime_ns": 1794238238313050471,
+      "size": 1666813
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2020-07.parquet",
+      "mtime_ns": 1794238238313050471,
+      "size": 1666813
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2020-08.parquet",
+      "mtime_ns": 1794238248816606950,
+      "size": 1521263
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2020-08.parquet",
+      "mtime_ns": 1794238248816606950,
+      "size": 1521263
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2020-09.parquet",
+      "mtime_ns": 1794238259199223271,
+      "size": 1779949
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2020-09.parquet",
+      "mtime_ns": 1794238259199223271,
+      "size": 1779949
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2020-10.parquet",
+      "mtime_ns": 1794238269648818216,
+      "size": 1809377
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2020-10.parquet",
+      "mtime_ns": 1794238269648818216,
+      "size": 1809377
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2020-11.parquet",
+      "mtime_ns": 1794238280218882746,
+      "size": 1654658
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2020-11.parquet",
+      "mtime_ns": 1794238280218882746,
+      "size": 1654658
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2020-12.parquet",
+      "mtime_ns": 1794238998827246595,
+      "size": 1628778
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2020-12.parquet",
+      "mtime_ns": 1794238998827246595,
+      "size": 1628778
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2021-01.parquet",
+      "mtime_ns": 1794239034756222289,
+      "size": 1589712
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2021-01.parquet",
+      "mtime_ns": 1794239034756222289,
+      "size": 1589712
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2021-02.parquet",
+      "mtime_ns": 1794239044771457116,
+      "size": 1625223
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2021-02.parquet",
+      "mtime_ns": 1794239044771457116,
+      "size": 1625223
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2021-03.parquet",
+      "mtime_ns": 1794239122918407441,
+      "size": 1909991
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2021-03.parquet",
+      "mtime_ns": 1794239122918407441,
+      "size": 1909991
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2021-04.parquet",
+      "mtime_ns": 1794239175069884926,
+      "size": 1683308
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2021-04.parquet",
+      "mtime_ns": 1794239175069884926,
+      "size": 1683308
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2021-05.parquet",
+      "mtime_ns": 1794239497714875747,
+      "size": 1717092
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2021-05.parquet",
+      "mtime_ns": 1794239497714875747,
+      "size": 1717092
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2021-06.parquet",
+      "mtime_ns": 1794239919339260795,
+      "size": 1764618
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2021-06.parquet",
+      "mtime_ns": 1794239919339260795,
+      "size": 1764618
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2021-07.parquet",
+      "mtime_ns": 1794239929688010730,
+      "size": 1711163
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2021-07.parquet",
+      "mtime_ns": 1794239929688010730,
+      "size": 1711163
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2021-08.parquet",
+      "mtime_ns": 1794239940592576624,
+      "size": 1650688
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2021-08.parquet",
+      "mtime_ns": 1794239940592576624,
+      "size": 1650688
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2021-09.parquet",
+      "mtime_ns": 1794239951236027813,
+      "size": 1732753
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2021-09.parquet",
+      "mtime_ns": 1794239951236027813,
+      "size": 1732753
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2021-10.parquet",
+      "mtime_ns": 1794239961824700105,
+      "size": 1709031
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2021-10.parquet",
+      "mtime_ns": 1794239961824700105,
+      "size": 1709031
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2021-11.parquet",
+      "mtime_ns": 1794239972313825627,
+      "size": 1552971
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2021-12.parquet",
+      "mtime_ns": 1794239983221808406,
+      "size": 1728418
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2022-01.parquet",
+      "mtime_ns": 1794239993720485537,
+      "size": 1784121
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2022-01.parquet",
+      "mtime_ns": 1794239993720485537,
+      "size": 1784121
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2022-02.parquet",
+      "mtime_ns": 1794240003371457631,
+      "size": 1726109
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2022-02.parquet",
+      "mtime_ns": 1794240003371457631,
+      "size": 1726109
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2022-03.parquet",
+      "mtime_ns": 1794240014317478053,
+      "size": 1986411
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2022-03.parquet",
+      "mtime_ns": 1794240014317478053,
+      "size": 1986411
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2022-04.parquet",
+      "mtime_ns": 1794240024433038984,
+      "size": 1740100
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2022-04.parquet",
+      "mtime_ns": 1794240024433038984,
+      "size": 1740100
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2022-05.parquet",
+      "mtime_ns": 1794240035287339659,
+      "size": 1906736
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2022-05.parquet",
+      "mtime_ns": 1794240035287339659,
+      "size": 1906736
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2022-06.parquet",
+      "mtime_ns": 1794240102890821858,
+      "size": 1815559
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2022-06.parquet",
+      "mtime_ns": 1794240102890821858,
+      "size": 1815559
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2022-07.parquet",
+      "mtime_ns": 1794240121971916307,
+      "size": 1668210
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2022-09.parquet",
+      "mtime_ns": 1794240146587309084,
+      "size": 1785579
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2022-10.parquet",
+      "mtime_ns": 1794240159023718732,
+      "size": 1677666
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2022-10.parquet",
+      "mtime_ns": 1794240159023718732,
+      "size": 1677666
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2022-11.parquet",
+      "mtime_ns": 1794240169595122661,
+      "size": 1791825
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2022-11.parquet",
+      "mtime_ns": 1794240169595122661,
+      "size": 1791825
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2022-12.parquet",
+      "mtime_ns": 1794240179946818926,
+      "size": 1757463
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/bars/dukascopy/USATECHIDXUSD/2022-12.parquet",
+      "mtime_ns": 1794240179946818926,
+      "size": 1757463
+    }
+  ],
+  "limitations": [
+    "Stage 9 inputs may be rebuilt; inspect manifest before reuse.",
+    "PBO uses CSCV over common development years of logged configurations; null here because fewer than four common years have comparable trial scores.",
+    "Random-direction benchmark uses the executable opposite-side label kernel on raw bars; coverage is reported.",
+    "For BTC, the raw mid-price bars use a monthly median of the modeled decision-time spread in the opposite-direction simulation.",
+    "DSR uses trial-ledger daily Sharpe dispersion; null if too few trials."
+  ]
+}
