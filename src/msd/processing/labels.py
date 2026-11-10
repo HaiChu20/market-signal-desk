@@ -1,11 +1,25 @@
 """Python contract and Rust acceleration for causal first-hit labels."""
 from __future__ import annotations
 
-import numpy as np
-import pandas as pd
+import logging
+import os
 from zoneinfo import ZoneInfo
 
+import numpy as np
+import pandas as pd
 from msd.backtest import evaluate_bar
+
+_RUST_FALLBACK_WARNED = False
+
+
+def rust_fallback(error: ImportError) -> None:
+    """Make a missing kernel visible, or fatal when production requires Rust."""
+    global _RUST_FALLBACK_WARNED
+    if os.getenv("MSD_REQUIRE_RUST") == "1":
+        raise RuntimeError("MSD_REQUIRE_RUST=1 but msd._msd_kernels is unavailable") from error
+    if not _RUST_FALLBACK_WARNED:
+        logging.getLogger(__name__).warning("Rust kernels unavailable; using slow Python reference: %s", error)
+        _RUST_FALLBACK_WARNED = True
 
 NY=ZoneInfo("America/New_York")
 
@@ -152,7 +166,8 @@ def first_hit(bars: pd.DataFrame, entry_index: int, side: int, entry_price: floa
     """Run the shared-contract Rust kernel; retain the Python reference fallback."""
     try:
         from msd._msd_kernels import first_hit as rust_first_hit
-    except ImportError:
+    except ImportError as error:
+        rust_fallback(error)
         return first_hit_reference(bars,entry_index,side,entry_price,sl,tp,max_bars,delay_bars,
             financing_per_night,limit_price,expiry_index,deadline_ts=deadline_ts,expiry_ts=expiry_ts,
             instrument_class=instrument_class,detailed=detailed)
@@ -183,7 +198,8 @@ def label_grid(bars: pd.DataFrame, atr: pd.Series, every_minutes: int=15,
     """Both-side ATR-grid labels; holding limit is a timestamp deadline."""
     try:
         from msd._msd_kernels import first_hit_batch
-    except ImportError:
+    except ImportError as error:
+        rust_fallback(error)
         first_hit_batch=None
     stop_grid,tp_grid=(.5,1,1.5,2,3),(.5,1,1.5,2,3,4,6)
     stamps=pd.to_datetime(bars.ts,utc=True)

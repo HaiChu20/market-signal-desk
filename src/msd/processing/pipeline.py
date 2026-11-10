@@ -14,7 +14,7 @@ import pandas as pd
 
 from msd.data import load
 from .features import build_features, external_feature_frame, feature_qa_files, prepare_feature_cache
-from .labels import label_grid
+from .labels import label_grid, rust_fallback
 from .levels import build_levels
 from .timeframes import INDEX_SYMBOLS, TIMEFRAMES, build_all_timeframes
 from msd.methods.common import assert_event_volume, exit_candidates, prepare_exit_levels
@@ -469,7 +469,8 @@ def label_method_events(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.D
                         detector_bars: pd.DataFrame | None = None):
     try:
         from msd._msd_kernels import first_hit_batch
-    except ImportError:
+    except ImportError as error:
+        rust_fallback(error)
         first_hit_batch = None
     methods=methods_for_symbol(symbol)
     instrument_class="index" if symbol in INDEX_SYMBOLS else "crypto" if symbol in {"BTCUSDT","ETHUSDT"} else "index"
