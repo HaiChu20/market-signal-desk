@@ -4,8 +4,14 @@ from __future__ import annotations
 import argparse
 import csv
 import gzip
+import hashlib
+import io
+import json
 import os
+import random
 import re
+import shutil
+import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, datetime, timedelta, timezone
@@ -16,12 +22,12 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from msd.data.archive_download import HEADERS, remote_size, stream_archive
+from msd.data.archive_download import HEADERS, MIN_FREE_BYTES, remote_size, stream_archive
 
 MAIN = Path("/Users/bfhach/Projects/market-signal-desk")
 RAW = MAIN / "data/raw/bybit"
 OUT = MAIN / "data/bars/bybit_flow"
-MISSING = Path("data/logs/missing_bybit.csv")
+MISSING = MAIN / "data/logs/missing_bybit.csv"
 BASE = "https://public.bybit.com/trading"
 SYMBOLS = ("BTCUSDT", "ETHUSDT")
 START = date(2020, 3, 25)
@@ -50,25 +56,27 @@ def parse_trade(row: dict[str, str]) -> tuple[pd.Timestamp, bool, float, float]:
     return stamp, side == "buy", size, price
 
 
-def aggregate_files(paths: list[Path], month: str) -> pd.DataFrame:
-    acc: dict[pd.Timestamp, list[float]] = defaultdict(lambda: [0.0] * 8)
-    for path in paths:
-        with gzip.open(path, "rt", newline="") as handle:
-            rows = csv.DictReader(handle)
-            if not rows.fieldnames or not {"timestamp", "side", "size", "price"} <= set(rows.fieldnames):
-                raise ValueError(f"Bybit schema mismatch: {path}")
-            for row in rows:
-                stamp, buy, size, price = parse_trade(row)
-                minute = stamp.floor("min")
-                if minute.strftime("%Y-%m") != month:
-                    raise ValueError(f"trade outside archive month: {path}")
-                values = acc[minute]
-                side = 0 if buy else 1
-                values[side] += size
-                values[side + 2] += 1
-                values[side + 4] += size * price
-                values[6] = max(values[6], size)
-                values[7] += 1
+def _accumulate(rows, month: str, source: str, acc: dict[pd.Timestamp, list[float]]) -> None:
+    if not rows.fieldnames or not {"timestamp", "side", "size", "price"} <= set(rows.fieldnames):
+        raise ValueError(f"Bybit schema mismatch: {source}")
+    for row in rows:
+        stamp, buy, size, price = parse_trade(row)
+        minute = stamp.floor("min")
+        if minute.strftime("%Y-%m") != month:
+            raise ValueError(f"trade outside archive month: {source}")
+        values = acc[minute]
+        side = 0 if buy else 1
+        values[side] += size
+        values[side + 2] += 1
+        values[side + 4] += size * price
+        values[6] = max(values[6], size)
+        values[7] += 1
+
+
+def _to_frame(acc: dict[pd.Timestamp, list[float]]) -> pd.DataFrame:
+    columns = ["ts", "known_at", "buy_taker_volume", "sell_taker_volume", "delta",
+               "buy_trade_count", "sell_trade_count", "vwap_buy", "vwap_sell",
+               "max_trade", "trade_count"]
     records = []
     for ts, v in sorted(acc.items()):
         records.append({"ts": ts, "known_at": ts + pd.Timedelta(minutes=1),
@@ -78,7 +86,22 @@ def aggregate_files(paths: list[Path], month: str) -> pd.DataFrame:
                         "vwap_buy": v[4] / v[0] if v[0] else float("nan"),
                         "vwap_sell": v[5] / v[1] if v[1] else float("nan"),
                         "max_trade": v[6], "trade_count": int(v[7])})
-    return pd.DataFrame.from_records(records)
+    return pd.DataFrame.from_records(records, columns=columns)
+
+
+def aggregate_bytes(raw: bytes, month: str) -> pd.DataFrame:
+    acc: dict[pd.Timestamp, list[float]] = defaultdict(lambda: [0.0] * 8)
+    with gzip.open(io.BytesIO(raw), "rt", newline="") as handle:
+        _accumulate(csv.DictReader(handle), month, "memory archive", acc)
+    return _to_frame(acc)
+
+
+def aggregate_files(paths: list[Path], month: str) -> pd.DataFrame:
+    acc: dict[pd.Timestamp, list[float]] = defaultdict(lambda: [0.0] * 8)
+    for path in paths:
+        with gzip.open(path, "rt", newline="") as handle:
+            _accumulate(csv.DictReader(handle), month, str(path), acc)
+    return _to_frame(acc)
 
 
 def write_month(symbol: str, month: str, paths: list[Path]) -> int:
@@ -122,6 +145,115 @@ def fetch_day(symbol: str, day: date) -> tuple[date, Path | None, str]:
     return day, target if digest else None, f"{expected} bytes"
 
 
+def fetch_no_raw_day(symbol: str, day: date) -> tuple[date, pd.DataFrame | None, dict | None, str]:
+    source = url(symbol, day)
+    expected = remote_size(source)
+    if expected is None:
+        return day, None, None, "HTTP 404"
+    for attempt in range(5):
+        try:
+            if shutil.disk_usage(MAIN).free < MIN_FREE_BYTES:
+                raise OSError("free disk below 65 GiB")
+            with urlopen(Request(source, headers=HEADERS), timeout=120) as response:
+                length = response.headers.get("Content-Length")
+                if length and int(length) != expected:
+                    raise ValueError("HEAD size differs from Content-Length")
+                raw = response.read(expected + 1)
+            if len(raw) != expected:
+                raise ValueError(f"downloaded size {len(raw)} != expected {expected}")
+            digest = hashlib.sha256(raw).hexdigest()
+            frame = aggregate_bytes(raw, day.strftime("%Y-%m"))
+            del raw
+            if frame.empty:
+                raise ValueError("empty trade archive")
+            info = {"date": day.isoformat(), "bytes": expected, "sha256": digest,
+                    "row_count": int(frame.trade_count.sum()), "minute_count": len(frame)}
+            return day, frame, info, f"{expected} bytes SHA256 {digest[:12]}"
+        except OSError as error:
+            if "65 GiB" in str(error):
+                raise
+            last = error
+        except Exception as error:
+            last = error
+        if attempt < 4:
+            time.sleep(min(60, 2**attempt) + random.random())
+    raise RuntimeError(f"{symbol} {day}: {type(last).__name__}: {last}")
+
+
+def _write_no_raw_month(symbol: str, month: str, frames: list[pd.DataFrame],
+                        completed: list[date], updates: dict[str, dict],
+                        manifest: dict[str, dict]) -> int:
+    target = OUT / symbol / f"{month}.parquet"
+    if target.exists():
+        prior = pq.read_table(target).to_pandas()
+        prior = prior[~prior.ts.dt.date.isin(completed)]
+        frames.insert(0, prior)
+    frame = pd.concat(frames, ignore_index=True).sort_values("ts")
+    if frame.ts.duplicated().any():
+        raise ValueError(f"duplicate minute in {symbol} {month}")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    scratch = Path("data/tmp/free_downloaders")
+    scratch.mkdir(parents=True, exist_ok=True)
+    tmp = scratch / f"bybit-memory-{symbol}-{month}.parquet.part.{os.getpid()}"
+    try:
+        pq.write_table(pa.Table.from_pandas(frame, preserve_index=False), tmp)
+        if pq.read_metadata(tmp).num_rows != len(frame):
+            raise ValueError("Parquet row count mismatch")
+        os.replace(tmp, target)
+    finally:
+        tmp.unlink(missing_ok=True)
+    manifest.update(updates)
+    manifest_path = OUT / symbol / "manifest.json"
+    manifest_tmp = scratch / f"bybit-manifest-{symbol}.part.{os.getpid()}"
+    manifest_tmp.write_text(json.dumps({"days": manifest}, sort_keys=True) + "\n")
+    os.replace(manifest_tmp, manifest_path)
+    return len(frame)
+
+
+def run_no_raw(end: date | None = None) -> None:
+    end = end or datetime.now(timezone.utc).date() - timedelta(days=1)
+    for symbol in SYMBOLS:
+        available = listed_days(symbol)
+        manifest_path = OUT / symbol / "manifest.json"
+        manifest = json.loads(manifest_path.read_text()).get("days", {}) if manifest_path.exists() else {}
+        months: dict[str, list[date]] = defaultdict(list)
+        for i in range((end - START).days + 1):
+            day = START + timedelta(days=i)
+            months[day.strftime("%Y-%m")].append(day)
+        for month, days in sorted(months.items()):
+            out = OUT / symbol / f"{month}.parquet"
+            pending = [day for day in days if day in available and (day.isoformat() not in manifest or not out.exists())]
+            for day in days:
+                if day not in available:
+                    log_missing(symbol, day, "absent from listing")
+            if not pending:
+                continue
+            frames, updates = [], {}
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                futures = {pool.submit(fetch_no_raw_day, symbol, day): day for day in pending}
+                for future in as_completed(futures):
+                    day = futures[future]
+                    try:
+                        _, frame, info, message = future.result()
+                        if frame is None:
+                            log_missing(symbol, day, message)
+                        else:
+                            frames.append(frame)
+                            updates[day.isoformat()] = info
+                            print(f"verified in memory {symbol} {day}: {message}", flush=True)
+                    except OSError as error:
+                        if "65 GiB" in str(error):
+                            pool.shutdown(cancel_futures=True)
+                            raise
+                        log_missing(symbol, day, str(error))
+                    except Exception as error:
+                        log_missing(symbol, day, str(error))
+            if frames:
+                count = _write_no_raw_month(symbol, month, frames,
+                                            [date.fromisoformat(day) for day in updates], updates, manifest)
+                print(f"aggregated {symbol} {month}: {count} minutes; {len(updates)} days recorded", flush=True)
+
+
 def run(end: date | None = None) -> None:
     end = end or datetime.now(timezone.utc).date() - timedelta(days=1)
     for symbol in SYMBOLS:
@@ -162,5 +294,6 @@ def run(end: date | None = None) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--end", type=date.fromisoformat)
+    parser.add_argument("--no-raw", action="store_true")
     args = parser.parse_args()
-    run(args.end)
+    (run_no_raw if args.no_raw else run)(args.end)

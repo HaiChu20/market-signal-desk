@@ -2,6 +2,7 @@ import csv
 import gzip
 import hashlib
 import io
+import json
 from datetime import date
 from pathlib import Path
 from urllib.error import HTTPError
@@ -37,6 +38,32 @@ def test_bybit_parser_and_asof(tmp_path):
 def test_bybit_rejects_bad_side():
     with pytest.raises(ValueError):
         bybit.parse_trade({"timestamp": "1", "side": "Maker", "size": "1", "price": "2"})
+
+
+def test_bybit_memory_matches_disk_and_manifest_resume(monkeypatch, tmp_path):
+    raw = gzip.compress(b"timestamp,side,size,price\n1704067200.1,Buy,2,100\n"
+                        b"1704067200.8,Sell,1,110\n")
+    path = tmp_path / "2024-01-01.csv.gz"
+    path.write_bytes(raw)
+    pd.testing.assert_frame_equal(bybit.aggregate_bytes(raw, "2024-01"),
+                                  bybit.aggregate_files([path], "2024-01"))
+    monkeypatch.setattr(bybit, "OUT", tmp_path / "bars")
+    monkeypatch.setattr(bybit, "MISSING", tmp_path / "missing.csv")
+    monkeypatch.setattr(bybit, "START", date(2024, 1, 1))
+    monkeypatch.setattr(bybit, "SYMBOLS", ("BTCUSDT",))
+    monkeypatch.setattr(bybit, "listed_days", lambda _: {date(2024, 1, 1)})
+    monkeypatch.setattr(bybit, "remote_size", lambda _: len(raw))
+    monkeypatch.setattr(bybit.shutil, "disk_usage", lambda _: type("Space", (), {"free": 100 * 1024**3})())
+    monkeypatch.setattr(bybit, "urlopen", lambda request, timeout: FakeResponse(raw))
+    bybit.run_no_raw(date(2024, 1, 1))
+    target = tmp_path / "bars/BTCUSDT/2024-01.parquet"
+    assert len(pd.read_parquet(target)) == 1
+    entry = json.loads((tmp_path / "bars/BTCUSDT/manifest.json").read_text())["days"]["2024-01-01"]
+    assert entry["bytes"] == len(raw)
+    assert entry["sha256"] == hashlib.sha256(raw).hexdigest()
+    assert entry["row_count"] == 2
+    monkeypatch.setattr(bybit, "urlopen", lambda request, timeout: pytest.fail("completed day re-downloaded"))
+    bybit.run_no_raw(date(2024, 1, 1))
 
 
 def test_depth_parser_and_imbalance():
