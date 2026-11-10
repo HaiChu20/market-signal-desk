@@ -153,7 +153,7 @@ def fetch_no_raw_day(symbol: str, day: date) -> tuple[date, pd.DataFrame | None,
     for attempt in range(5):
         try:
             if shutil.disk_usage(MAIN).free < MIN_FREE_BYTES:
-                raise OSError("free disk below 65 GiB")
+                raise OSError("free disk below 15 GiB")
             with urlopen(Request(source, headers=HEADERS), timeout=120) as response:
                 length = response.headers.get("Content-Length")
                 if length and int(length) != expected:
@@ -170,7 +170,7 @@ def fetch_no_raw_day(symbol: str, day: date) -> tuple[date, pd.DataFrame | None,
                     "row_count": int(frame.trade_count.sum()), "minute_count": len(frame)}
             return day, frame, info, f"{expected} bytes SHA256 {digest[:12]}"
         except OSError as error:
-            if "65 GiB" in str(error):
+            if "15 GiB" in str(error):
                 raise
             last = error
         except Exception as error:
@@ -242,7 +242,7 @@ def run_no_raw(end: date | None = None) -> None:
                             updates[day.isoformat()] = info
                             print(f"verified in memory {symbol} {day}: {message}", flush=True)
                     except OSError as error:
-                        if "65 GiB" in str(error):
+                        if "15 GiB" in str(error):
                             pool.shutdown(cancel_futures=True)
                             raise
                         log_missing(symbol, day, str(error))
@@ -280,7 +280,7 @@ def run(end: date | None = None) -> None:
                             paths.append(path)
                             print(f"verified {symbol} {day}: {result}", flush=True)
                     except OSError as error:
-                        if "65 GiB" in str(error):
+                        if "15 GiB" in str(error):
                             pool.shutdown(cancel_futures=True)
                             raise
                         log_missing(symbol, day, str(error))

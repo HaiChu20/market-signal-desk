@@ -142,7 +142,7 @@ def run(end: date | None = None) -> None:
                         else:
                             print(f"MISSING {symbol} {day}: {message}", flush=True)
                     except OSError as error:
-                        if "65 GiB" in str(error):
+                        if "15 GiB" in str(error):
                             pool.shutdown(cancel_futures=True)
                             raise
                         print(f"FAILED {symbol} {day}: {error}", flush=True)

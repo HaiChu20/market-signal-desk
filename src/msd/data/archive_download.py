@@ -10,7 +10,7 @@ from pathlib import Path
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
-MIN_FREE_BYTES = 65 * 1024**3
+MIN_FREE_BYTES = 15 * 1024**3
 CHUNK = 8 * 1024**2
 HEADERS = {"User-Agent": "MarketSignalDesk/0.1"}
 
@@ -45,7 +45,7 @@ def stream_archive(url: str, target: Path, expected: int | None = None,
         try:
             size_hint = expected or 0
             if shutil.disk_usage(disk_path).free - size_hint < MIN_FREE_BYTES:
-                raise OSError("free disk would drop below 65 GiB")
+                raise OSError("free disk would drop below 15 GiB")
             digest = hashlib.sha256()
             size = 0
             with urlopen(Request(url, headers=HEADERS), timeout=120) as response, tmp.open("wb") as out:
@@ -56,7 +56,7 @@ def stream_archive(url: str, target: Path, expected: int | None = None,
                 while chunk := response.read(CHUNK):
                     size += len(chunk)
                     if size % (256 * 1024**2) < CHUNK and shutil.disk_usage(disk_path).free < MIN_FREE_BYTES:
-                        raise OSError("free disk below 65 GiB")
+                        raise OSError("free disk below 15 GiB")
                     out.write(chunk)
                     digest.update(chunk)
             if expected is not None and size != expected or response_size is not None and size != response_size:
@@ -74,7 +74,7 @@ def stream_archive(url: str, target: Path, expected: int | None = None,
                 return None
             last = error
         except OSError as error:
-            if "65 GiB" in str(error):
+            if "15 GiB" in str(error):
                 raise
             last = error
         except (ValueError, TimeoutError) as error:
