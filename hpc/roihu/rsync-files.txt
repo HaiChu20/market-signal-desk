@@ -1,0 +1,7 @@
+# Relative paths to sync from the project root. Do not sync data/raw.
+data/bars/
+data/derived/
+data/features/
+data/labels/
+data/levels/
+data/events/
