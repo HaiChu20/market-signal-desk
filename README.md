@@ -24,7 +24,7 @@ def orders(bars):
     return []
 ```
 
-Each order has `decision_ts`, `side` (`+1` long, `-1` short), and `stop`; it may also have `tp`, `exit_ts`, `stop_path` (a `{timestamp: stop_level}` mapping), `confidence`, `size`, and `note`. The decision bar must be closed. The live engine announces a new order when the next bar is forming and uses that bar's open as the approximate entry. Stops and targets are checked on completed bars, with the stop taking priority if both are touched. Strategy authors should run `assert_causal` before backtesting or enabling a module.
+Each order has `decision_ts`, `side` (`+1` long, `-1` short), and `stop`; it may also have `tp`, `exit_ts`, `stop_path` (a `{timestamp: stop_level}` mapping), `confidence`, `size`, and `note`. The decision bar must be closed. Market orders use the next forming bar's open as the approximate entry. A limit order adds `entry_type="limit"`, `entry_price` (limit price), and `expiry_ts`; it remains pending until the ask low reaches the limit for a long or the bid high reaches it for a short. A favorable gap fills at the open. Stops and targets are checked on completed bars, with the stop taking priority if both are touched. On a limit fill bar only the stop is active. Pending orders persist in SQLite and expire at the first bar whose open time reaches `expiry_ts`. Strategy authors should run `assert_causal` before backtesting or enabling a module.
 
 To add a strategy, create one module implementing this contract and add one `[[strategies]]` entry to `live.toml` with its import path and `enabled = true`. No engine changes are needed. Strategy entries are deliberately absent until a new strategy is reviewed.
 

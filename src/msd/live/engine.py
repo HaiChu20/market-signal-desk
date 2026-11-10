@@ -73,6 +73,11 @@ def format_signal(symbol: str, module, order: dict, entry_price: float) -> str:
     distance = abs(entry_price - sl)
     optional = lambda value, fmt: "n/a" if value is None else fmt.format(value)
     confidence = optional(order.get("confidence"), "{:.0%}")
+    if order.get("entry_type", "market") == "limit":
+        expiry = _utc(order["expiry_ts"]).isoformat()
+        return (f"{'BUY' if side > 0 else 'SELL'} LIMIT {entry_price:.2f} {pair} | "
+                f"SL {sl:.2f} | TP {optional(tp, '{:.2f}')} | valid until {expiry} "
+                f"| Confidence {confidence} | {module.NAME}")
     size = optional(order.get("size"), "{:.2f}")
     note = str(order.get("note") or "").strip()
     suffix = f" | {module.NAME}" + (f" {note}" if note else "")
@@ -157,6 +162,7 @@ class SignalEngine:
         frame = frame.drop_duplicates("ts", keep="last").sort_values("ts").reset_index(drop=True)
         self.bars[key] = frame
         self._check_exits(symbol, resolution, row)
+        self._check_pending(symbol, resolution, row)
         for entry, module in self.strategies:
             if symbol not in module.SYMBOLS or module.RESOLUTION != resolution:
                 continue
@@ -186,7 +192,14 @@ class SignalEngine:
             side = int(order.get("side", 0))
             stop_value = order.get("stop")
             tp_value = order.get("tp")
-            valid = side in (-1, 1) and stop_value is not None and np.isfinite(float(entry_price)) and np.isfinite(float(stop_value))
+            entry_type = order.get("entry_type", "market")
+            valid = (side in (-1, 1) and entry_type in {"market", "limit"}
+                     and stop_value is not None and np.isfinite(float(entry_price))
+                     and np.isfinite(float(stop_value)))
+            if entry_type == "limit":
+                valid = valid and order.get("expiry_ts") is not None
+                if valid:
+                    valid = _utc(order["expiry_ts"]) > _utc(order["decision_ts"])
             if tp_value is not None:
                 valid = valid and np.isfinite(float(tp_value))
             if valid:
@@ -206,29 +219,83 @@ class SignalEngine:
 
     def _create_signal(self, entry, module, order, forming, symbol):
         symbol, side = str(symbol), int(order["side"])
-        entry_price = float(forming["ask_o"] if side > 0 else forming["bid_o"])
+        entry_type = order.get("entry_type", "market")
+        entry_price = (order.get("limit_price", order.get("entry_price"))
+                       if entry_type == "limit" else
+                       forming["ask_o"] if side > 0 else forming["bid_o"])
         if not self._validate(entry, module, order, entry_price):
             return
+        entry_price = float(entry_price)
         decision = _utc(order["decision_ts"])
         key = f"{symbol}:{module.NAME}:{decision.isoformat()}"
         risk = abs(entry_price - float(order["stop"]))
         opposite = self.store.connection.execute(
-            "SELECT signal_key,side FROM signals WHERE symbol=? AND setup=? AND status='open'",
+            "SELECT signal_key,side,status FROM signals WHERE symbol=? AND setup=? AND status IN ('open','pending')",
             (symbol, module.NAME)).fetchall()
-        for old_key, old_side in opposite:
+        for old_key, old_side, old_status in opposite:
             if int(old_side) == -side:
-                self.store.update(old_key, status="flip", exit_ts=decision.isoformat(), exit_price=entry_price,
-                                  realized_r=None)
-                self.send(f"EXIT now {symbol} ({module.NAME} flip)")
+                if old_status == "pending":
+                    self.cancel_pending(old_key)
+                else:
+                    self.store.update(old_key, status="flip", exit_ts=decision.isoformat(), exit_price=entry_price,
+                                      realized_r=None)
+                    self.send(f"EXIT now {symbol} ({module.NAME} flip)")
         stop = float(order["stop"])
         values = {"signal_key": key, "symbol": symbol, "setup": module.NAME, "side": side,
-                  "decision_ts": decision.isoformat(), "entry_ts": _utc(forming["ts"]).isoformat(),
-                  "entry_price": entry_price, "initial_stop": stop, "stop": stop,
+                  "decision_ts": decision.isoformat(),
+                  "entry_ts": None if entry_type == "limit" else _utc(forming["ts"]).isoformat(),
+                  "entry_price": None if entry_type == "limit" else entry_price,
+                  "entry_type": entry_type, "limit_price": entry_price if entry_type == "limit" else None,
+                  "eligible_ts": _utc(forming["ts"]).isoformat() if entry_type == "limit" else None,
+                  "expiry_ts": _utc(order["expiry_ts"]).isoformat() if entry_type == "limit" else None,
+                  "initial_stop": stop, "stop": stop,
                   "take_profit": order.get("tp"), "planned_exit_ts": None if order.get("exit_ts") is None else _utc(order["exit_ts"]).isoformat(),
                   "planned_risk": risk, "notional": order.get("size"), "confidence": order.get("confidence"),
-                  "status": "open", "created_at": datetime.now(timezone.utc).isoformat()}
+                  "status": "pending" if entry_type == "limit" else "open",
+                  "created_at": datetime.now(timezone.utc).isoformat()}
         if self.store.insert(values):
             self.send(format_signal(symbol, module, order, entry_price))
+
+    def cancel_pending(self, signal_key: str) -> bool:
+        """Cancel an unfilled limit once, including after a process restart."""
+        row = self.store.get(signal_key)
+        if not row or row["status"] != "pending":
+            return False
+        self.store.update(signal_key, status="cancelled")
+        self.send(f"LIMIT CANCELLED {row['symbol']} {row['setup']}")
+        return True
+
+    def _check_pending(self, symbol, resolution, bar):
+        ts = _utc(bar["ts"])
+        self.store.connection.row_factory = sqlite3.Row
+        rows = self.store.connection.execute(
+            "SELECT * FROM signals WHERE symbol=? AND status='pending'", (symbol,)).fetchall()
+        for raw in rows:
+            row = dict(raw)
+            if row["eligible_ts"] is None or ts < _utc(row["eligible_ts"]):
+                continue
+            if ts >= _utc(row["expiry_ts"]):
+                self.store.update(row["signal_key"], status="expired")
+                self.send(f"LIMIT EXPIRED {symbol} {row['setup']}")
+                continue
+            side, limit = int(row["side"]), float(row["limit_price"])
+            touched = float(bar["ask_l"]) <= limit if side > 0 else float(bar["bid_h"]) >= limit
+            if not touched:
+                continue
+            fill = min(float(bar["ask_o"]), limit) if side > 0 else max(float(bar["bid_o"]), limit)
+            self.store.update(row["signal_key"], status="open", entry_ts=ts.isoformat(), entry_price=fill)
+            self.send(f"LIMIT FILLED at {fill:.2f} {symbol} {row['setup']}")
+            deadline = row.get("planned_exit_ts")
+            time_exit = deadline is not None and ts >= _utc(deadline)
+            _, reason, price = evaluate_bar(side, float(row["stop"]), None, bar,
+                                            time_exit=time_exit, time_at_open=time_exit,
+                                            stop_active=not time_exit)
+            if reason is not None:
+                risk = float(row["planned_risk"])
+                realized = side * (price - fill) / risk
+                self.store.update(row["signal_key"], status=reason, exit_ts=ts.isoformat(),
+                                  exit_price=price, realized_r=realized)
+                self.send(f"{symbol} {reason.upper()} hit at {price:.2f}; realized {realized:.2f}R")
 
     def _apply_updates(self, entry, module, bars, through, symbol):
         for order in _strategy_orders(module, bars):

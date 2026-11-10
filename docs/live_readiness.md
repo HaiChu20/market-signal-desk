@@ -1,0 +1,15 @@
+# Live readiness interfaces
+
+`OnlineFeatures(symbol, history)` accepts complete, strictly increasing 1-minute Capital-format bars. `history` must contain the full warm-up history used for offline training; the engine retains it so EWM indicators are float32-equivalent. Call `update(closed_bar)` once per completed minute. It returns the offline feature row, `levels_asof` at minute close, and pilot method events at that minute. Restart by restoring the same warm-up bars and replaying them to rebuild detector state. Do not feed forming bars or truncate the history without a separately verified checkpoint scheme. External auxiliary and cross-asset inputs are not accepted; artifacts requiring those features will fail the loader's feature check.
+
+The real BTC 2021-06-01 to 2021-06-04 integration test computes one full offline reference, primes online state with only preceding bars, and replays 61 consecutive minutes around a real pilot event. It compares every feature to at most one float32 ULP, all level rows by stable ID, and events exactly. On the local ARM development machine, the 61-row replay took about 10 seconds, around 0.16 seconds per update. A separate 2021-06-01 to 2021-06-07 benchmark with 10,080 bars took 0.27 seconds for one update (0.92 seconds to prime). These are samples, not throughput guarantees for longer warm-up histories.
+
+A model artifact directory contains:
+
+- `manifest.json`: `artifact_version` (currently 1), `protocol_version` (currently 2), ordered `features` as `{name,dtype}` entries (`float32`), `config_hash` (64 lowercase hex digits), `training_range` with `start` and `end`, and `model_sha256`.
+- `model.pkl`: a trusted local object with `predict_proba` and a SHA-256 matching the manifest. Never load an untrusted pickle.
+- `calibration.json`: monotone `raw` and `calibrated` probability knots covering 0 through 1.
+
+`load_artifact` rejects version, hash, schema, range and calibration errors. `order_from_event` requires an explicit side and exit candidate kind, computes calibrated confidence, and sizes units as `risk_budget / abs(signal_price - stop)`. The stop and target come from the shared offline `exit_candidates`. It can represent a market or limit entry. A limit order requires `entry_type="limit"`, `entry_price` (the limit), and `expiry_ts` on the strategy order. The engine persists it as `pending`, checks the ask low for a long or bid high for a short, fills at the better of limit or open, and checks only the stop on the fill bar. At expiry it becomes `expired`; `cancel_pending` makes it `cancelled`. A restart retains the pending order in SQLite. Synthetic and real-data tests compare fill, exit, and R with the Rust label kernel. No production model is trained or enabled.
+
+The Docker image builds the Rust extension for its own CPU architecture. The `MSD_REQUIRE_RUST=1` environment setting makes a missing extension fatal; otherwise the first fallback emits a warning. Live strategy configuration remains disabled until a trained artifact and a forward-paper review exist.
