@@ -12,5 +12,8 @@ if ! command -v uv >/dev/null; then
   exit 1
 fi
 uv sync --frozen --no-dev
-uvx --from maturin==1.16.0 maturin develop --release --manifest-path rust/msd_kernels/Cargo.toml
-python -c 'import msd._msd_kernels; print("Rust extension ready")'
+uvx --from maturin==1.16.0 maturin build --release --locked \
+  --manifest-path rust/msd_kernels/Cargo.toml --out rust/msd_kernels/target/wheels
+uv pip install --python .venv/bin/python rust/msd_kernels/target/wheels/*.whl
+find .venv -name '_msd_kernels*.so' -exec cp {} src/msd/ \;
+./.venv/bin/python -c 'import msd._msd_kernels; print("Rust extension ready")'

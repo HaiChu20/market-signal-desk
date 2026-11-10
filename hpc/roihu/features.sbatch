@@ -9,5 +9,5 @@
 set -euo pipefail
 cd "${SLURM_SUBMIT_DIR}"
 mapfile -t symbols < <(printf '%s\n' USATECHIDXUSD USA500IDXUSD XAUUSD BTCUSDT ETHUSDT)
-python -m msd.processing.pipeline --symbol "${symbols[$SLURM_ARRAY_TASK_ID]}" \
+./.venv/bin/python -m msd.processing.pipeline --symbol "${symbols[$SLURM_ARRAY_TASK_ID]}" \
   --start-year "${START_YEAR:?Set START_YEAR}" --end-year "${END_YEAR:?Set END_YEAR}"
