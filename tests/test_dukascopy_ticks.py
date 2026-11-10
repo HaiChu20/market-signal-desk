@@ -1,7 +1,8 @@
 import hashlib
+import http.client
 import lzma
 import struct
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pandas as pd
@@ -70,52 +71,95 @@ def test_scale_checked_against_stored_minute(monkeypatch, tmp_path):
 class Response:
     def __init__(self, raw):
         self.raw = raw
-        self.headers = {"Content-Length": str(len(raw))}
-    def __enter__(self):
-        return self
-    def __exit__(self, *args):
-        pass
-    def read(self, size):
+        self.status = 200
+    def getheader(self, name):
+        return str(len(self.raw)) if name == "Content-Length" else None
+    def read(self):
         return self.raw
+
+
+class Connection:
+    def __init__(self, raw):
+        self.raw = raw
+        self.requests = []
+    def request(self, method, path, headers):
+        self.requests.append((method, path, headers))
+    def getresponse(self):
+        return Response(self.raw)
+    def close(self):
+        pass
 
 
 def test_fetch_resume(monkeypatch, tmp_path):
     raw = sample()
     monkeypatch.setattr(ticks, "RAW", tmp_path / "raw")
     monkeypatch.setattr(ticks.shutil, "disk_usage", lambda _: type("Space", (), {"free": 100 * 1024**3})())
-    calls = []
-    def open_(request, timeout):
-        calls.append(request.full_url)
-        return Response(raw)
-    monkeypatch.setattr(ticks, "urlopen", open_)
+    ticks._disconnect()
+    connections = []
+    def factory(host, timeout):
+        conn = Connection(raw)
+        connections.append(conn)
+        return conn
+    monkeypatch.setattr(ticks.http.client, "HTTPConnection", factory)
     _, path, _ = ticks.fetch_hour("USA500IDXUSD", HOUR)
     assert path.read_bytes() == raw
     assert Path(str(path) + ".sha256").read_text().split()[0] == hashlib.sha256(raw).hexdigest()
     assert ticks.fetch_hour("USA500IDXUSD", HOUR)[2] == "resume verified"
-    assert len(calls) == 1
+    assert len(connections) == 1 and len(connections[0].requests) == 1
+    ticks._disconnect()
 
 
-def test_public_mirror_is_preferred(monkeypatch, tmp_path):
+def test_keepalive_connection_reused_across_hours(monkeypatch, tmp_path):
     monkeypatch.setattr(ticks, "RAW", tmp_path / "raw")
     monkeypatch.setattr(ticks.shutil, "disk_usage", lambda _: type("Space", (), {"free": 100 * 1024**3})())
-    calls = []
-    def open_(request, timeout):
-        calls.append(request.full_url)
-        return Response(sample())
-    monkeypatch.setattr(ticks, "urlopen", open_)
-    _, path, _ = ticks.fetch_hour("USA500IDXUSD", HOUR)
-    assert path.exists()
-    assert len(calls) == 1
-    assert "www.dukascopy.com" in calls[0]
+    ticks._disconnect()
+    connections = []
+    def factory(host, timeout):
+        conn = Connection(sample())
+        connections.append(conn)
+        return conn
+    monkeypatch.setattr(ticks.http.client, "HTTPConnection", factory)
+    for i in range(3):
+        _, path, _ = ticks.fetch_hour("USA500IDXUSD", HOUR + timedelta(hours=i))
+        assert path.exists()
+    assert len(connections) == 1
+    assert len(connections[0].requests) == 3
+    assert all(request[2]["Connection"] == "keep-alive" for request in connections[0].requests)
+    ticks._disconnect()
 
 
 def test_empty_hour_is_missing_without_retry(monkeypatch, tmp_path):
     monkeypatch.setattr(ticks, "RAW", tmp_path / "raw")
     monkeypatch.setattr(ticks.shutil, "disk_usage", lambda _: type("Space", (), {"free": 100 * 1024**3})())
-    calls = []
-    def open_(request, timeout):
-        calls.append(request.full_url)
-        return Response(b"")
-    monkeypatch.setattr(ticks, "urlopen", open_)
+    ticks._disconnect()
+    conn = Connection(b"")
+    monkeypatch.setattr(ticks.http.client, "HTTPConnection", lambda host, timeout: conn)
     assert ticks.fetch_hour("USA500IDXUSD", HOUR)[2] == "empty archive"
-    assert len(calls) == 1
+    assert len(conn.requests) == 1
+    ticks._disconnect()
+
+
+def test_reconnects_after_remote_disconnect(monkeypatch, tmp_path):
+    monkeypatch.setattr(ticks, "RAW", tmp_path / "raw")
+    monkeypatch.setattr(ticks.shutil, "disk_usage", lambda _: type("Space", (), {"free": 100 * 1024**3})())
+    monkeypatch.setattr(ticks.time, "sleep", lambda _: None)
+    ticks._disconnect()
+    made = []
+    class Dropped(Connection):
+        def getresponse(self):
+            raise http.client.RemoteDisconnected("connection dropped")
+    def factory(host, timeout):
+        conn = Dropped(sample()) if not made else Connection(sample())
+        made.append(conn)
+        return conn
+    monkeypatch.setattr(ticks.http.client, "HTTPConnection", factory)
+    assert ticks.fetch_hour("USA500IDXUSD", HOUR)[1].exists()
+    assert len(made) == 2
+    ticks._disconnect()
+
+
+def test_tick_workers_env(monkeypatch):
+    monkeypatch.delenv("MSD_TICK_WORKERS", raising=False)
+    assert ticks.tick_workers() == 2
+    monkeypatch.setenv("MSD_TICK_WORKERS", "4")
+    assert ticks.tick_workers() == 4

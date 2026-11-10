@@ -10,24 +10,25 @@ import argparse
 import calendar
 import csv
 import hashlib
+import http.client
 import lzma
 import os
 import random
 import shutil
+import threading
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
-from urllib.error import HTTPError
-from urllib.request import Request, urlopen
+from urllib.parse import urlsplit
 
 import numpy as np
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from msd.data.archive_download import HEADERS, MIN_FREE_BYTES
+from msd.data.archive_download import MIN_FREE_BYTES
 from msd.data.dukascopy import SCALES, RANGES
 
 MAIN = Path("/Users/bfhach/Projects/market-signal-desk")
@@ -41,6 +42,32 @@ START = {"USATECHIDXUSD": date(2018, 12, 16),
          "USA500IDXUSD": date(2018, 12, 16), "XAUUSD": date(2008, 1, 1)}
 DTYPE = np.dtype([("ms", ">u4"), ("ask", ">u4"), ("bid", ">u4"),
                   ("ask_size", ">f4"), ("bid_size", ">f4")])
+HOST = "datafeed.dukascopy.com"
+_LOCAL = threading.local()
+
+
+def _connection() -> http.client.HTTPConnection:
+    conn = getattr(_LOCAL, "conn", None)
+    if conn is None:
+        # The working public HTTPS URL redirects to this HTTP datafeed host.
+        # Direct HTTPS datafeed timed out in a 60-second single-connection test.
+        conn = http.client.HTTPConnection(HOST, timeout=20)
+        _LOCAL.conn = conn
+    return conn
+
+
+def _disconnect() -> None:
+    conn = getattr(_LOCAL, "conn", None)
+    _LOCAL.conn = None
+    if conn is not None:
+        try:
+            conn.close()
+        except OSError:
+            pass
+
+
+def tick_workers() -> int:
+    return max(1, min(4, int(os.environ.get("MSD_TICK_WORKERS", "2"))))
 
 
 def url(symbol: str, hour: datetime) -> str:
@@ -141,30 +168,24 @@ def fetch_hour(symbol: str, hour: datetime) -> tuple[datetime, Path | None, str]
                 raise ValueError(f"retained raw decode failed: {error}") from error
             return hour, target, "resume verified"
         raise ValueError(f"retained raw SHA256 mismatch: {target}")
-    source = url(symbol, hour)
-    mirror = source.replace("datafeed.dukascopy.com", "www.dukascopy.com")
+    path = urlsplit(url(symbol, hour)).path
     last: Exception | None = None
     for attempt in range(5):
         try:
             if shutil.disk_usage(MAIN).free < MIN_FREE_BYTES:
                 raise OSError("free disk below 15 GiB")
-            # The public datafeed host often throttles while www serves the
-            # same archive; try the verified mirror first to avoid a timeout
-            # on every one of hundreds of thousands of hourly files.
-            for endpoint in (mirror, source):
-                try:
-                    with urlopen(Request(endpoint, headers=HEADERS), timeout=20) as response:
-                        expected = response.headers.get("Content-Length")
-                        raw = response.read(int(expected) + 1 if expected else 128 * 1024**2)
-                    break
-                except HTTPError as error:
-                    if error.code == 404:
-                        return hour, None, "HTTP 404"
-                    if endpoint == source:
-                        raise
-                except (OSError, TimeoutError):
-                    if endpoint == source:
-                        raise
+            conn = _connection()
+            conn.request("GET", path, headers={"User-Agent": "Mozilla/5.0 (compatible; MarketSignalDesk/0.1)",
+                                                       "Connection": "keep-alive"})
+            response = conn.getresponse()
+            expected = response.getheader("Content-Length")
+            raw = response.read()
+            if response.status == 404:
+                return hour, None, "HTTP 404"
+            if response.status in (429, 503):
+                raise OSError(f"HTTP {response.status} for {path}")
+            if response.status != 200:
+                raise OSError(f"HTTP {response.status} for {path}")
             if expected and len(raw) != int(expected):
                 raise OSError("BI5 Content-Length mismatch")
             if not raw:
@@ -181,13 +202,13 @@ def fetch_hour(symbol: str, hour: datetime) -> tuple[datetime, Path | None, str]
             side_tmp.write_text(f"{digest}  {target.name}\n")
             os.replace(side_tmp, sidecar)
             return hour, target, f"{len(raw)} bytes SHA256 {digest[:12]}"
-        except HTTPError as error:
-            if error.code == 404:
-                return hour, None, "HTTP 404"
+        except (http.client.RemoteDisconnected, ConnectionResetError, http.client.BadStatusLine) as error:
+            _disconnect()
             last = error
         except OSError as error:
             if "15 GiB" in str(error):
                 raise
+            _disconnect()
             last = error
         except ValueError:
             raise
@@ -249,7 +270,7 @@ def process_month(symbol: str, month: str, hours: list[datetime], through: date)
         return
     found: dict[datetime, Path] = {}
     failed = False
-    with ThreadPoolExecutor(max_workers=2) as pool:
+    with ThreadPoolExecutor(max_workers=tick_workers()) as pool:
         futures = {pool.submit(fetch_hour, symbol, hour): hour for hour in hours}
         for future in as_completed(futures):
             hour = futures[future]
