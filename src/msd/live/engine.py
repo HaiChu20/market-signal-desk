@@ -186,7 +186,9 @@ class SignalEngine:
             side = int(order.get("side", 0))
             stop_value = order.get("stop")
             tp_value = order.get("tp")
-            valid = side in (-1, 1) and stop_value is not None and np.isfinite(float(entry_price)) and np.isfinite(float(stop_value))
+            valid = (side in (-1, 1) and order.get("entry_type", "market") == "market"
+                     and stop_value is not None and np.isfinite(float(entry_price))
+                     and np.isfinite(float(stop_value)))
             if tp_value is not None:
                 valid = valid and np.isfinite(float(tp_value))
             if valid:
