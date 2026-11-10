@@ -1,0 +1,187 @@
+{
+  "method": "rsi2_mean_reversion",
+  "period": "dev",
+  "preliminary": true,
+  "protocol": "v2",
+  "grade_in_dev": "not applicable; protocol section 5 grades test only",
+  "pooled": {
+    "n": 4,
+    "signals_per_year": 5.988727583262169,
+    "hit_rate": 0.0,
+    "net_avg_R": -0.6221817376135138,
+    "t_stat": -2.3879014268657843,
+    "profit_factor": 0.0,
+    "daily_sharpe": -1.6651904753594167,
+    "max_drawdown": -0.006799979069337492,
+    "positive_dev_year_share": 0.0,
+    "per_year": {
+      "2020": -0.6221817376135138
+    },
+    "spread_1_5x_net_avg_R": -0.6973017720048579,
+    "random_direction_percentile": null,
+    "pbo": null,
+    "grade": "ungraded: development",
+    "brier": 0.22752689368248982,
+    "brier_skill_vs_p0": -0.18613589163108468,
+    "reliability_by_year": {
+      "2020": {
+        "n": 258,
+        "predicted": 0.5146842066361256,
+        "observed": 0.41472868217054265
+      }
+    },
+    "reliability_by_vol_tercile": {
+      "high": {
+        "n": 86,
+        "predicted": 0.5645546398866257,
+        "observed": 0.23255813953488372
+      },
+      "low": {
+        "n": 86,
+        "predicted": 0.47352513149740577,
+        "observed": 0.6395348837209303
+      },
+      "middle": {
+        "n": 86,
+        "predicted": 0.5059728485243451,
+        "observed": 0.37209302325581395
+      }
+    },
+    "deflated_sharpe_ratio": null
+  },
+  "per_instrument": {
+    "USATECHIDXUSD": {
+      "n": 4,
+      "signals_per_year": 5.988727583262169,
+      "hit_rate": 0.0,
+      "net_avg_R": -0.6221817376135138,
+      "t_stat": -2.3879014268657843,
+      "profit_factor": 0.0,
+      "daily_sharpe": -1.6651904753594167,
+      "max_drawdown": -0.006799979069337492,
+      "positive_dev_year_share": 0.0,
+      "per_year": {
+        "2020": -0.6221817376135138
+      },
+      "spread_1_5x_net_avg_R": -0.6973017720048579,
+      "random_direction_percentile": null,
+      "pbo": null,
+      "grade": "ungraded: development",
+      "brier": 0.22752689368248982,
+      "brier_skill_vs_p0": -0.18613589163108468,
+      "reliability_by_year": {
+        "2020": {
+          "n": 258,
+          "predicted": 0.5146842066361256,
+          "observed": 0.41472868217054265
+        }
+      },
+      "reliability_by_vol_tercile": {
+        "high": {
+          "n": 86,
+          "predicted": 0.5645546398866257,
+          "observed": 0.23255813953488372
+        },
+        "low": {
+          "n": 86,
+          "predicted": 0.47352513149740577,
+          "observed": 0.6395348837209303
+        },
+        "middle": {
+          "n": 86,
+          "predicted": 0.5059728485243451,
+          "observed": 0.37209302325581395
+        }
+      },
+      "deflated_sharpe_ratio": null
+    }
+  },
+  "input_manifest": [
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2020-01.parquet",
+      "mtime_ns": 1794312412851803477,
+      "size": 431198
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2020-02.parquet",
+      "mtime_ns": 1794312412865380434,
+      "size": 370676
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2020-07.parquet",
+      "mtime_ns": 1794312412936982402,
+      "size": 445425
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2020-08.parquet",
+      "mtime_ns": 1794312412950827822,
+      "size": 435406
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2020-09.parquet",
+      "mtime_ns": 1794312412965379335,
+      "size": 415814
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/events/USATECHIDXUSD/2020-10.parquet",
+      "mtime_ns": 1794312412978982835,
+      "size": 375664
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-01.parquet",
+      "mtime_ns": 1794312335530167968,
+      "size": 14619343
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-02.parquet",
+      "mtime_ns": 1794312335678612025,
+      "size": 13492886
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-03.parquet",
+      "mtime_ns": 1794312335824274831,
+      "size": 13677664
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-04.parquet",
+      "mtime_ns": 1794312335978534519,
+      "size": 14572947
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-05.parquet",
+      "mtime_ns": 1794312336131173890,
+      "size": 14366947
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-06.parquet",
+      "mtime_ns": 1794312336305535510,
+      "size": 14992875
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-07.parquet",
+      "mtime_ns": 1794312336471281248,
+      "size": 15417843
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-08.parquet",
+      "mtime_ns": 1794312336624950010,
+      "size": 14209793
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-09.parquet",
+      "mtime_ns": 1794312336787320154,
+      "size": 15025604
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-10.parquet",
+      "mtime_ns": 1794312336948048941,
+      "size": 15095426
+    }
+  ],
+  "limitations": [
+    "Stage 9 inputs may be rebuilt; inspect manifest before reuse.",
+    "Random-direction percentile needs opposite-direction execution at identical entries and is unavailable from event labels.",
+    "PBO needs comparable strategy configurations across CPCV paths; unavailable when only one fixed configuration is run.",
+    "Deflated Sharpe requires observed trial Sharpe dispersion; omitted if not available."
+  ]
+}
