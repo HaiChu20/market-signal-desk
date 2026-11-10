@@ -57,6 +57,9 @@ def test_bybit_memory_matches_disk_and_manifest_resume(monkeypatch, tmp_path):
     monkeypatch.setattr(bybit, "urlopen", lambda request, timeout: FakeResponse(raw))
     bybit.run_no_raw(date(2024, 1, 1))
     target = tmp_path / "bars/BTCUSDT/2024-01.parquet"
+    before = target.stat().st_mtime_ns
+    assert bybit.write_month("BTCUSDT", "2024-01", [path]) == 1
+    assert target.stat().st_mtime_ns == before
     assert len(pd.read_parquet(target)) == 1
     entry = json.loads((tmp_path / "bars/BTCUSDT/manifest.json").read_text())["days"]["2024-01-01"]
     assert entry["bytes"] == len(raw)

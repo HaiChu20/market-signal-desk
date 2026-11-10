@@ -109,6 +109,24 @@ def write_month(symbol: str, month: str, paths: list[Path]) -> int:
     if frame.empty:
         return 0
     target = OUT / symbol / f"{month}.parquet"
+    manifest_path = OUT / symbol / "manifest.json"
+    if target.exists():
+        stored = pq.read_table(target).to_pandas().sort_values("ts").reset_index(drop=True)
+        verified_days = (json.loads(manifest_path.read_text()).get("days", {})
+                         if manifest_path.exists() else {})
+        for day in sorted({p.name[-17:-7] for p in paths} & verified_days.keys()):
+            old_day = stored[stored.ts.dt.strftime("%Y-%m-%d").eq(day)].reset_index(drop=True)
+            new_day = frame[frame.ts.dt.strftime("%Y-%m-%d").eq(day)].reset_index(drop=True)
+            try:
+                pd.testing.assert_frame_equal(old_day, new_day)
+            except AssertionError as error:
+                print(f"MISMATCH raw versus memory summary {symbol} {day}: {str(error).splitlines()[0]}", flush=True)
+        try:
+            pd.testing.assert_frame_equal(stored, frame.reset_index(drop=True))
+            print(f"MATCH raw versus stored parquet {symbol} {month}; skipping rewrite", flush=True)
+            return len(frame)
+        except AssertionError:
+            print(f"UPDATE raw month differs from stored parquet {symbol} {month}", flush=True)
     target.parent.mkdir(parents=True, exist_ok=True)
     scratch = Path("data/tmp/free_downloaders")
     scratch.mkdir(parents=True, exist_ok=True)
@@ -286,9 +304,11 @@ def run(end: date | None = None) -> None:
                         log_missing(symbol, day, str(error))
                     except Exception as error:
                         log_missing(symbol, day, str(error))
-            if paths:
+            if paths and len(paths) == len(jobs):
                 rows = write_month(symbol, month, sorted(paths))
                 print(f"aggregated {symbol} {month}: {rows} minutes", flush=True)
+            elif paths:
+                print(f"INCOMPLETE {symbol} {month}: {len(paths)}/{len(jobs)} archives; parquet not rewritten", flush=True)
 
 
 if __name__ == "__main__":
