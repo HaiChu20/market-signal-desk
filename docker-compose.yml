@@ -1,9 +1,12 @@
 services:
   market-signal-desk:
     build: .
-    env_file: .env
+    environment:
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+    command: ["python", "-m", "msd.live.shadow"]
     volumes:
-      - ./data/live:/app/data/live
+      - live-state:/app/data/live
       - ./live.toml:/app/live.toml
     restart: unless-stopped
     healthcheck:
@@ -12,3 +15,5 @@ services:
       timeout: 5s
       retries: 3
       start_period: 2m
+volumes:
+  live-state:

@@ -7,7 +7,7 @@ A strategy-agnostic historical data, spread-aware backtest, and paper-forward si
 - `msd.data` loads UTC OHLC bars with bid/ask prices. Index CFD bars are downloaded from Dukascopy; BTCUSDT bars come from checksum-verified Binance archives with the modeled spread embedded into bid/ask.
 - `msd.backtest.simulate(bars, orders)` applies side-specific fills, intrabar stop/TP rules, and timestamp-keyed stop updates. An update at time `t` takes effect on the next bar.
 - `msd.strategy_check.assert_causal(module, bars)` checks random truncations and future-volume perturbations.
-- The live engine polls Capital.com and stores signals, exits, and processing checkpoints in SQLite. `live.toml` currently has **zero strategies enabled**. Paper mode is the default.
+- The public spot shadow loop uses Binance closed 1-minute candles for BTCUSDT and ETHUSDT. It backfills gaps through REST, computes causal offline features and supported method events, and records preliminary candidates in SQLite. The Capital.com index adapter awaits credentials and implementation.
 - Historical results and research remain in `reports/` and `docs/`. The prior strategy and ML implementations were removed; none is selected for live operation.
 
 ## Strategy contract
@@ -39,7 +39,7 @@ uv run python -m msd.data.dukascopy --symbol USATECHIDXUSD --start 2018-01-01
 uv run python -m msd.data.quality --symbol USATECHIDXUSD --hours cme_equity
 ```
 
-Configure Capital.com demo credentials and Telegram variables from `.env.example` into a local `.env` (never commit it), then run `docker compose up -d`. `uv run python -m msd.live.engine --check` validates the Capital connection. `--dry-run` and `--replay START END --symbol SYMBOL --strategy package.module` support local replay; `--verify-live package.module SYMBOL START END` compares replayed signals and exits against the backtest simulator. Tests use synthetic fixtures and do not make network calls.
+`docker compose up -d --build` runs the Binance shadow loop without credentials. It writes preliminary candidates to a named SQLite state volume and never sends them to Telegram. Set `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` as environment variables when a qualified model is installed; the token is never printed. A model is eligible only with a matching artifact manifest, an explicit live policy, a separately calibrated `expected_net_R` curve, and a report card graded ✅ or 🧪 for its symbol and method. Current development report cards are ungraded, so all candidates remain preliminary. The five checkpointed rules `ma_cross`, `macd_signal`, `stochastic`, `bollinger`, and `donchian_atr_breakout` join the pilot detectors online; other frozen methods are reported unavailable until their input and state parity is verified. Run `uv run python -m msd.live.shadow --symbols BTCUSDT` locally. The older Capital.com path remains at `uv run python -m msd.live.engine --check` and supports `--dry-run`, `--replay START END --symbol SYMBOL --strategy package.module`, and `--verify-live package.module SYMBOL START END`.
 
 ## Strategy status
 

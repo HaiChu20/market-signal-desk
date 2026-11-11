@@ -7,6 +7,7 @@ same warm-up bars and detector state, or replay them before accepting new bars.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 
 import pandas as pd
 
@@ -14,6 +15,9 @@ from msd.processing.features import build_features
 from msd.processing.levels import build_levels, levels_asof
 from msd.processing.pipeline import methods_for_symbol
 from msd.processing.timeframes import build_all_timeframes
+from msd.methods import ma_cross, macd_signal, stochastic, bollinger, donchian_atr_breakout
+
+EXTRA_ONLINE_METHODS = (ma_cross, macd_signal, stochastic, bollinger, donchian_atr_breakout)
 
 
 @dataclass
@@ -32,6 +36,12 @@ class OnlineFeatures:
 
     def __init__(self, symbol: str, history: pd.DataFrame | None = None):
         self.symbol = symbol
+        self.methods = methods_for_symbol(symbol) + EXTRA_ONLINE_METHODS
+        self.available_methods = tuple(method.NAME for method in self.methods)
+        registry = {path.stem for path in Path(__file__).resolve().parents[1].joinpath("methods").glob("*.py")
+                    if not path.stem.startswith("_") and path.stem not in
+                    {"__init__", "common", "filters", "level_clusters"}}
+        self.unavailable_methods = tuple(sorted(registry - set(self.available_methods)))
         self.bars = pd.DataFrame() if history is None else history.copy().sort_values("ts").reset_index(drop=True)
         self.states: dict[str, dict] = {}
         self.previous_features = pd.DataFrame()
@@ -46,8 +56,8 @@ class OnlineFeatures:
     def _prime(self):
         timeframes, levels = self._inputs()
         features = build_features(self.bars, self.symbol, timeframes, levels)
-        for method in methods_for_symbol(self.symbol):
-            if method.NAME in {"sr_touch", "liquidity_sweep"}:
+        for method in self.methods:
+            if method.NAME != "rsi2_mean_reversion":
                 _, state, _ = method.detect(features, levels, self.bars, return_state=True)
                 self.states[method.NAME] = state
         self.previous_features = features.tail(1).reset_index(drop=True)
@@ -65,8 +75,8 @@ class OnlineFeatures:
         detector_features = pd.concat([self.previous_features, current], ignore_index=True)
         one_bar = self.bars.tail(1)
         events = []
-        for method in methods_for_symbol(self.symbol):
-            if method.NAME in {"sr_touch", "liquidity_sweep"}:
+        for method in self.methods:
+            if method.NAME != "rsi2_mean_reversion":
                 found, state, _ = method.detect(current, levels, one_bar,
                                                 state=self.states.get(method.NAME), return_state=True)
                 self.states[method.NAME] = state

@@ -28,4 +28,4 @@ ENV PATH="/app/.venv/bin:$PATH" \
 USER app
 HEALTHCHECK --interval=60s --timeout=5s --start-period=2m --retries=3 \
     CMD python -c "from pathlib import Path; import time,sys; p=Path('/app/data/live/heartbeat'); sys.exit(0 if p.exists() and time.time()-p.stat().st_mtime < 180 else 1)"
-CMD ["python", "-m", "msd.live.engine", "--live"]
+CMD ["python", "-m", "msd.live.shadow"]
