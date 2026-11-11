@@ -306,3 +306,27 @@ Append-only notes from the autonomous review loop while the user sleeps.
     - Fix spec sent to 33128ce1: ≥80% of expected_effective, excluding the index daily gap; keep known_at = scheduled end; tests; chunk equivalence re-validated.
   - PLAN: production4 full rerun after merging (a) HTF fix, (b) 2dcf8f09 event-scan fix, (c) d271bffd 10C. Then augment-external, flow features, tournament, Roihu bundle.
   - 66f270b0 Roihu package v1 accepted in principle; on hold until production4. Asked for a stale-input guard and an anchor-discard coverage gate.
+- 03:55: merged fe242257 7907ee4 bookDepth features (BTC 2023-01..2026-01, 97.5% minute coverage; 416 MiB). Found: the bookDepth downloader had crashed on '-5.00' percentage at BTC 2026-01, so BTC after 2026-01 and all ETH are missing. fe242257 is fixing the parser (float bands, ±0.2), adding error logging that continues, and restarting. Suite 291 passed.
+- 04:00: Codex at usage limit until 07:52. Production3 + augment-external DONE (BTC/NQ/SPX/XAU). Merged d271bffd 10C (f7ac8ee); downloader add/add conflicts resolved to the fe242257 versions; stage11 prototype tests skipped as superseded. Rust rebuilt. Strict suite 299 passed; slow 10k parity 9/9 passed.
+- 04:30 (Claude, while Codex is limited): HTF completeness fix committed.
+  - Sample-month bar counts, old → new: SPX 1h 1715→2761, 4h 227→734; NQ 1h 2740→2937, 4h 576→764; XAU 4h 587→736 (metals rollover 17–18 ET excluded); BTC unchanged.
+  - Tests: OHLC is unchanged by no-tick omissions where the first minute traded; a <80% bucket is absent; the index gap bucket is present; truncation never emits a partial bucket early; the metals break. Suite 303 passed.
+  - NQ 2020-06→2021-06 real chunk equivalence re-running (features: 343,739 rows, 14 allowed rolling ULPs).
+  - Prepared production4 runner data/tmp/run_stage9_p4.py: BTC/NQ/SPX/XAU + ETH, 2 active children, separate p4 result names, augment-external per symbol at chain end.
+- 04:45: NQ real chunk equivalence PASSED with the new HTF rule: features 343,739 rows (14 allowed rolling ULPs); checkpoint state at the split equal; events sr 2,859 / sweep 3,002 equal; labels 1,604,190 rows monthly equal (12 months). The harness UnboundLocalError in cleanup was fixed (data/tmp only).
+- 04:47: PRODUCTION4 STARTED: data/tmp/run_stage9_p4.py (BTC 2018→, NQ/SPX cash era, XAU 2008→, ETH 2018→; 2 active; augment per symbol at chain end). Logs: data/logs/stage9_production4.log and stage9p4_*.
+  - Includes HTF fix 1db86a9 and the 10C merge 72e62d6.
+  - Events are still from the minimal event frame; they get replaced by the events-only replay after 2dcf8f09's fix.
+  - NO processing-code edits in the main checkout until it finishes.
+  - One-shot wake at 07:56 to re-dispatch Codex workers after their 07:52 reset.
+- 04:55 hourly: production4 actually started 04:12 (the earlier log time was approximate). NQ 2018–2025 DONE (2026 running); SPX through 2023; BTC through 2019; XAU 2008; ETH on 2021; peaks 2.2–4.0 GiB, 2 active, no failures. Disk 222 GiB free. One Dukascopy 1m runner (EURUSD 2019) + ticks + Bybit + bookDepth stopped (fix pending). Codex limited until 07:52.
+- 05:55 hourly: production4 has no failures. NQ DONE + augment exit 0. ETH on 2026; XAU on 2017; BTC (2021) and SPX (2024) are waiting: the scheduler favours the chain that just finished (no fairness), so they proceed once ETH and XAU finish. ETA ~2h. Disk 202 GiB. Dukascopy 1m on EURUSD 2025 (one runner) + ticks.
+- 06:55 hourly: production4 has no failures. ETH DONE + augment exit 0; NQ DONE + augment; BTC on 2026 (last year); XAU on 2023; SPX still waiting at 2024 (scheduler starvation; runs after BTC). Dukascopy 1m: EURUSD DONE, USDJPY in progress. Disk 198 GiB.
+- 07:55: PRODUCTION4 COMPLETE for BTC, NQ, SPX, XAU and ETH; augment-external exit 0 for all. Report: reports/data/pipeline_report.md (features 632 files / 11.5 GB; labels 631 / 1.25 GB).
+  - SPX 2019-11: 1h 82→371 rows, 4h missing→93.
+  - Codex reset: panes 3 and 6 had fallen back to Luna, switched to Sol high. Dispatched:
+    - 33128ce1: flow features finish + build;
+    - 2dcf8f09: event-scan fix + events-only dry run;
+    - d271bffd: live shadow;
+    - fe242257: bookDepth fix + restart;
+    - 66f270b0: stale guard + coverage gate + 5-symbol bundle.
