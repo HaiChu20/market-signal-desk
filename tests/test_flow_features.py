@@ -103,6 +103,25 @@ def test_present_hour_without_ticks_is_zero_and_missing_hour_is_nan():
     assert np.isnan(out.ticks_ofi.iloc[70])
 
 
+def test_verified_tick_hour_with_twenty_quote_less_minutes_stays_valid():
+    primary, _, _ = _frames(60)
+    missing = list(range(20, 40))
+    sparse_primary = primary.drop(index=missing).reset_index(drop=True)
+    tick = pd.DataFrame({"ts": primary.ts.iloc[[0, 59]],
+                         "known_at": primary.known_at.iloc[[0, 59]],
+                         "tick_count": [2, 1], "ofi": [3., -1.],
+                         "bid_size_sum": [4., 2.], "ask_size_sum": [2., 2.],
+                         "size_imbalance": [1/3, 0.], "mean_spread": [.2, .3],
+                         "max_spread": [.3, .4]})
+    covered = pd.DatetimeIndex(primary.known_at)
+    out = build_flow_features(sparse_primary, ticks=tick, covered_minutes={"ticks": covered})
+    final = out.iloc[-1]
+    assert final.ticks_tick_count_60m == 3
+    assert final.ticks_ofi_60m == 2
+    assert final.tick_flow_coverage
+    assert len(out) == 40  # Complete clock is sampled back to primary rows.
+
+
 def test_complete_crypto_file_without_trades_is_zero_and_time_gap_breaks_60m():
     primary, spot, _ = _frames(120)
     keep = list(range(30)) + list(range(90, 120))
@@ -144,7 +163,13 @@ def test_us_timestamp_join_and_absent_depth_month(tmp_path):
     depth_path = tmp_path / "depth.parquet"
     pd.DataFrame({"known_at": base.known_at.astype("datetime64[us, UTC]"),
                   "coverage": [True, True],
-                  "depth_imbalance_1pct": [.2, .3]}).to_parquet(depth_path)
+                  "depth_imbalance_1pct": [.2, .3],
+                  "source_missing_day": [False, False],
+                  "staleness_seconds": [0., 0.],
+                  "snapshot_ts": base.known_at}).to_parquet(depth_path)
     with_depth = join_by_known_at(base[["known_at"]], flow, depth_path)
     assert with_depth.depth_imbalance_1pct.tolist() == [.2, .3]
     assert with_depth.depth_coverage.tolist() == [True, True]
+    assert "source_missing_day" not in with_depth
+    assert "staleness_seconds" not in with_depth
+    assert "snapshot_ts" not in with_depth
