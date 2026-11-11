@@ -138,3 +138,104 @@ def test_purged_walk_forward_cpu(tmp_path):
     assert cards
     assert list(tmp_path.glob("fold_*/model.pt"))
     assert all(card["period"] == "dev" for card in cards)
+
+
+def test_dev_guard_rejects_test_and_final():
+    from msd.research.sequence_train import _dev_guard
+    from msd.research.sequence_data import SequenceData, WINDOWS
+    for year in (2023, 2025):
+        stamp = pd.Timestamp(f"{year}-01-01", tz="UTC")
+        data = SequenceData({tf: np.zeros((1, 2, 6), dtype="float32") for tf in WINDOWS},
+                            np.zeros((1, 1), dtype="float32"), np.zeros((1, 2, 5, 7), dtype="float32"),
+                            np.ones((1, 2, 5, 7), dtype=bool), np.full((1, 2, 5, 7), .5),
+                            pd.DataFrame({"known_at": [stamp], "label_end_ts": [stamp]}), ("x",))
+        with pytest.raises(ValueError, match="DEV"):
+            _dev_guard(data)
+
+
+def test_index_loader_and_window_causality():
+    from msd.research.sequence_data import load_executable_1m
+    root = Path("/Users/bfhach/Projects/market-signal-desk/data")
+    if not root.exists():
+        pytest.skip("Read-only local data is absent")
+    bars = load_executable_1m("USATECHIDXUSD", "2021-01-01", "2021-01-04", root)
+    assert not bars.empty
+    assert (bars.ask_c >= bars.bid_c).all()
+    assert bars.ts.min() >= pd.Timestamp("2018-12-16 23:00", tz="UTC")
+    bars["known_at"] = pd.to_datetime(bars.ts, utc=True) + pd.Timedelta(minutes=1)
+    anchor = pd.Timestamp("2021-01-04 12:00", tz="UTC")
+    assert bars.loc[bars.known_at <= anchor, "known_at"].max() <= anchor
+    assert bars.loc[bars.known_at > anchor, "known_at"].min() > anchor
+
+
+def _small_training_data():
+    from msd.research.sequence_data import SequenceData, WINDOWS
+    n = 30
+    stamps = pd.date_range("2021-01-01", periods=n, freq="2D", tz="UTC")
+    anchors = pd.DataFrame({"known_at": stamps, "label_end_ts": stamps + pd.Timedelta(hours=1),
+                            "price": 100., "atr": 2., "spread": .1})
+    baseline = np.empty((n, 2, 5, 7), dtype="float32")
+    rows = []
+    for k, stamp in enumerate(stamps):
+        for si, side in enumerate((-1, 1)):
+            for i, sl in enumerate(SL_GRID):
+                for j, tp in enumerate(TP_GRID):
+                    baseline[k, si, i, j] = sl / (sl + tp)
+                    rows.append({"known_at": stamp, "side": side, "sl_atr": sl, "tp_atr": tp,
+                                 "exit_ts": stamp + pd.Timedelta(hours=1),
+                                 "entry_ts": stamp + pd.Timedelta(minutes=2),
+                                 "net_R": 1. if k % 2 else -1.})
+    return SequenceData({tf: np.zeros((n, 8, 6), dtype="float32") for tf in WINDOWS},
+                        np.zeros((n, 1), dtype="float32"),
+                        np.random.default_rng(1).integers(0, 2, (n, 2, 5, 7)).astype("float32"),
+                        np.ones((n, 2, 5, 7), dtype=bool), baseline, anchors, ("x",),
+                        labels=pd.DataFrame(rows))
+
+
+def test_checkpoint_resume_matches_uninterrupted(tmp_path):
+    pytest.importorskip("torch")
+    from msd.research.sequence_train import train_walk_forward
+    data = _small_training_data()
+    common = dict(n_folds=3, epochs=2, batch_size=2, width=8, checkpoint_every=1,
+                  config_sha256="fixture", seed=7)
+    train_walk_forward(data, tmp_path / "full", **common)
+    assert train_walk_forward(data, tmp_path / "resumed", max_steps=1, **common) == []
+    train_walk_forward(data, tmp_path / "resumed", **common)
+    full = sorted((tmp_path / "full").rglob("oof.parquet"))
+    resumed = sorted((tmp_path / "resumed").rglob("oof.parquet"))
+    assert len(full) == len(resumed) > 0
+    for left, right in zip(full, resumed):
+        pd.testing.assert_frame_equal(pd.read_parquet(left), pd.read_parquet(right), check_exact=True)
+
+
+def test_grade_sequence_cli_fixture(tmp_path):
+    from msd.research.grade_sequence import grade
+    folder = tmp_path / "oof" / "fold_00"
+    folder.mkdir(parents=True)
+    time = pd.Timestamp("2021-02-01", tz="UTC")
+    row = {"known_at": time, "label_end_ts": time + pd.Timedelta(hours=1),
+           "entry_ts": time + pd.Timedelta(minutes=2), "ts": time - pd.Timedelta(minutes=1),
+           "side": 1, "sl": 98., "tp": 104., "price": 100., "p": .8, "p0": 1 / 3,
+           "tp_first": 1., "net_R": 1., "cost_R": .01, "financing_R": 0., "spread_R": .01,
+           "TP_R": 2., "sym": "BTCUSDT", "event_key": "event", "candidate_id": "candidate",
+           "config_sha256": "fixture", "fold": 0, "seed": 7}
+    pd.DataFrame([row]).to_parquet(folder / "oof.parquet")
+    cards = grade(tmp_path / "oof", data_root=tmp_path / "absent")
+    assert next(iter(cards.values()))["pooled"]["brier"] is not None
+    assert (tmp_path / "oof" / "grade" / "summary.json").exists()
+    row["known_at"] = pd.Timestamp("2023-01-01", tz="UTC")
+    pd.DataFrame([row]).to_parquet(folder / "oof.parquet")
+    with pytest.raises(ValueError, match="TEST/FINAL"):
+        grade(tmp_path / "oof", data_root=tmp_path / "absent")
+
+
+def test_cli_refuses_test_dates_even_in_smoke(monkeypatch, tmp_path):
+    from msd.research.sequence_train import main
+    config = Path(__file__).resolve().parents[2] / "hpc/roihu/sequence/configs/dev_v1.json"
+    monkeypatch.setattr("sys.argv", ["sequence_train", "--data-root", str(tmp_path),
+                                    "--config", str(config), "--symbol", "BTCUSDT",
+                                    "--output", str(tmp_path / "out"), "--end", "2024-01-01",
+                                    "--smoke"])
+    with pytest.raises(SystemExit) as caught:
+        main()
+    assert caught.value.code == 2
