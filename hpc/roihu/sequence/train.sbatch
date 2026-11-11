@@ -1,18 +1,36 @@
 #!/usr/bin/env bash
 #SBATCH --job-name=msd-sequence
 #SBATCH --partition=gpumedium
-#SBATCH --gres=gpu:1
-#SBATCH --cpus-per-task=8
+#SBATCH --gres=gpu:gh200:1
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=16
 #SBATCH --mem=64G
 #SBATCH --time=24:00:00
-#SBATCH --array=0-1
+#SBATCH --requeue
+#SBATCH --signal=USR1@180
 #SBATCH --output=logs/sequence-%A_%a.log
 set -euo pipefail
 cd "${SLURM_SUBMIT_DIR}"
-mapfile -t symbols < <(printf '%s\n' BTCUSDT ETHUSDT)
-symbol="${symbols[$SLURM_ARRAY_TASK_ID]}"
-./.venv/bin/python -m msd.research.sequence_train \
-  --data-root data --symbol "$symbol" \
-  --start "${START:?Set START}" --end "${END:?Set END}" \
-  --output "${OUTPUT_ROOT:?Set OUTPUT_ROOT}/$symbol" \
-  --epochs "${EPOCHS:-20}" --seed "${SEED:-7}"
+module load python-pytorch/2.13
+./.venv-roihu/bin/python -c 'import torch; assert torch.cuda.is_available(), "CUDA torch unavailable in project venv"'
+IFS=, read -r -a symbols <<< "${SYMBOLS:?Set comma-separated SYMBOLS}"
+IFS=, read -r -a seeds <<< "${SEEDS:?Set comma-separated SEEDS}"
+seed_count=${#seeds[@]}
+index=${SLURM_ARRAY_TASK_ID}
+symbol=${symbols[$((index / seed_count))]}
+seed=${seeds[$((index % seed_count))]}
+config_sha=$(sha256sum hpc/roihu/sequence/configs/dev_v1.json | cut -d' ' -f1)
+output="reports/sequence/${config_sha}/${symbol}/seed_${seed}"
+mkdir -p "$output"
+set +e
+srun ./.venv-roihu/bin/python -m msd.research.sequence_train \
+  --data-root data --config hpc/roihu/sequence/configs/dev_v1.json \
+  --symbol "$symbol" --seed "$seed" --output "$output"
+result=$?
+set -e
+if [[ "$result" -eq 99 ]]; then
+  scontrol requeue "$SLURM_JOB_ID"
+  exit 0
+fi
+exit "$result"
