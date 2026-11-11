@@ -18,6 +18,7 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from urllib.request import Request, urlopen
 
+import numpy as np
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -44,67 +45,85 @@ def listed_days(symbol: str) -> set[date]:
     return {date.fromisoformat(value) for value in re.findall(rf'{symbol}(\d{{4}}-\d{{2}}-\d{{2}})\.csv\.gz', listing)}
 
 
-def parse_trade(row: dict[str, str]) -> tuple[pd.Timestamp, bool, float, float]:
-    if not {"timestamp", "side", "size", "price"} <= row.keys():
-        raise ValueError("Bybit trade schema missing required columns")
-    stamp = pd.to_datetime(float(row["timestamp"]), unit="s", utc=True)
-    side = row["side"].lower()
-    if side not in {"buy", "sell"}:
-        raise ValueError(f"invalid taker side: {side}")
-    size, price = float(row["size"]), float(row["price"])
+REQUIRED = ("timestamp", "side", "size", "price")
+COLUMNS = ["ts", "known_at", "buy_taker_volume", "sell_taker_volume", "delta",
+           "buy_trade_count", "sell_trade_count", "vwap_buy", "vwap_sell",
+           "max_trade", "trade_count"]
+
+
+def _read_trades(source, name: str) -> pd.DataFrame:
+    """Parse one gzip CSV archive in C; per-row Python parsing took ~30 s per BTC day."""
+    with gzip.open(source, "rt", newline="") as handle:
+        header = next(csv.reader(handle), [])
+    if not set(REQUIRED) <= set(header):
+        raise ValueError(f"Bybit schema mismatch: {name}")
+    if isinstance(source, io.BytesIO):
+        source.seek(0)
+    return pd.read_csv(source, compression="gzip", engine="pyarrow", usecols=list(REQUIRED),
+                       dtype={"timestamp": "float64", "side": "str", "size": "float64", "price": "float64"})
+
+
+def _accumulate(trades: pd.DataFrame, month: str, source: str, acc: np.ndarray) -> None:
+    """Add trades to the month's per-minute sums, in file row order like a row loop."""
+    side = trades["side"].str.lower()
+    bad = ~side.isin(("buy", "sell"))
+    if bad.any():
+        raise ValueError(f"invalid taker side: {side[bad].iloc[0]}")
+    size = trades["size"].to_numpy(dtype=float)
+    price = trades["price"].to_numpy(dtype=float)
     # Historical Bybit files contain genuine zero-size dust trades; retain
     # their trade counts while they contribute zero to volume and VWAP.
-    if not 0 <= size < float("inf") or not 0 < price < float("inf"):
+    if not (((0 <= size) & (size < np.inf)).all() and ((0 < price) & (price < np.inf)).all()):
         raise ValueError("invalid size or price")
-    return stamp, side == "buy", size, price
+    stamps = pd.to_datetime(trades["timestamp"].to_numpy(dtype=float), unit="s", utc=True)
+    if stamps.isna().any():
+        raise ValueError(f"invalid timestamp: {source}")
+    minute = ((stamps.floor("min") - pd.Timestamp(f"{month}-01", tz="UTC"))
+              // pd.Timedelta(minutes=1)).to_numpy(dtype=np.int64)
+    if ((minute < 0) | (minute >= acc.shape[1])).any():
+        raise ValueError(f"trade outside archive month: {source}")
+    buy = side.eq("buy").to_numpy(dtype=bool)
+    # ufunc.at adds unbuffered in index order, so float sums match sequential accumulation.
+    for column, mask in ((0, buy), (1, ~buy)):
+        np.add.at(acc[column], minute[mask], size[mask])
+        np.add.at(acc[column + 2], minute[mask], 1.0)
+        np.add.at(acc[column + 4], minute[mask], size[mask] * price[mask])
+    np.maximum.at(acc[6], minute, size)
+    np.add.at(acc[7], minute, 1.0)
 
 
-def _accumulate(rows, month: str, source: str, acc: dict[pd.Timestamp, list[float]]) -> None:
-    if not rows.fieldnames or not {"timestamp", "side", "size", "price"} <= set(rows.fieldnames):
-        raise ValueError(f"Bybit schema mismatch: {source}")
-    for row in rows:
-        stamp, buy, size, price = parse_trade(row)
-        minute = stamp.floor("min")
-        if minute.strftime("%Y-%m") != month:
-            raise ValueError(f"trade outside archive month: {source}")
-        values = acc[minute]
-        side = 0 if buy else 1
-        values[side] += size
-        values[side + 2] += 1
-        values[side + 4] += size * price
-        values[6] = max(values[6], size)
-        values[7] += 1
+def _month_acc(month: str) -> np.ndarray:
+    return np.zeros((8, pd.Period(month, "M").days_in_month * 1440))
 
 
-def _to_frame(acc: dict[pd.Timestamp, list[float]]) -> pd.DataFrame:
-    columns = ["ts", "known_at", "buy_taker_volume", "sell_taker_volume", "delta",
-               "buy_trade_count", "sell_trade_count", "vwap_buy", "vwap_sell",
-               "max_trade", "trade_count"]
-    records = []
-    for ts, v in sorted(acc.items()):
-        records.append({"ts": ts, "known_at": ts + pd.Timedelta(minutes=1),
-                        "buy_taker_volume": v[0], "sell_taker_volume": v[1],
-                        "delta": v[0] - v[1], "buy_trade_count": int(v[2]),
-                        "sell_trade_count": int(v[3]),
-                        "vwap_buy": v[4] / v[0] if v[0] else float("nan"),
-                        "vwap_sell": v[5] / v[1] if v[1] else float("nan"),
-                        "max_trade": v[6], "trade_count": int(v[7])})
-    return pd.DataFrame.from_records(records, columns=columns)
+def _to_frame(acc: np.ndarray, month: str) -> pd.DataFrame:
+    present = np.flatnonzero(acc[7])
+    if not len(present):
+        return pd.DataFrame.from_records([], columns=COLUMNS)
+    v = acc[:, present]
+    start = pd.Timestamp(f"{month}-01", tz="UTC").as_unit("ns")
+    ts = pd.DatetimeIndex(start + pd.to_timedelta(present, unit="min")).as_unit("ns")
+    with np.errstate(divide="ignore", invalid="ignore"):
+        vwap_buy = np.where(v[0] != 0, v[4] / v[0], np.nan)
+        vwap_sell = np.where(v[1] != 0, v[5] / v[1], np.nan)
+    return pd.DataFrame({"ts": ts, "known_at": ts + pd.Timedelta(minutes=1),
+                         "buy_taker_volume": v[0], "sell_taker_volume": v[1], "delta": v[0] - v[1],
+                         "buy_trade_count": v[2].astype(np.int64), "sell_trade_count": v[3].astype(np.int64),
+                         "vwap_buy": vwap_buy, "vwap_sell": vwap_sell, "max_trade": v[6],
+                         "trade_count": v[7].astype(np.int64)}, columns=COLUMNS)
 
 
 def aggregate_bytes(raw: bytes, month: str) -> pd.DataFrame:
-    acc: dict[pd.Timestamp, list[float]] = defaultdict(lambda: [0.0] * 8)
-    with gzip.open(io.BytesIO(raw), "rt", newline="") as handle:
-        _accumulate(csv.DictReader(handle), month, "memory archive", acc)
-    return _to_frame(acc)
+    acc = _month_acc(month)
+    _accumulate(_read_trades(io.BytesIO(raw), "memory archive"), month, "memory archive", acc)
+    return _to_frame(acc, month)
 
 
 def aggregate_files(paths: list[Path], month: str) -> pd.DataFrame:
-    acc: dict[pd.Timestamp, list[float]] = defaultdict(lambda: [0.0] * 8)
+    acc = _month_acc(month)
     for path in paths:
-        with gzip.open(path, "rt", newline="") as handle:
-            _accumulate(csv.DictReader(handle), month, str(path), acc)
-    return _to_frame(acc)
+        _accumulate(_read_trades(path, str(path)), month, str(path), acc)
+    return _to_frame(acc, month)
 
 
 def write_month(symbol: str, month: str, paths: list[Path]) -> int:
