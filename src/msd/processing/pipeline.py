@@ -957,6 +957,13 @@ def replay_events_only(symbol: str, start_year: int, end_year: int,
         if not path.exists():raise FileNotFoundError(path)
         levels=pd.read_parquet(path).drop(columns=['touches_so_far'],errors='ignore')
         levels=levels[pd.to_datetime(levels.known_at,utc=True)<=year_end]
+        level_known=pd.to_datetime(levels.known_at,utc=True,errors='coerce')
+        impossible=(pd.to_datetime(levels.invalidated_at,utc=True,errors='coerce')<=level_known)
+        repair=levels.loc[impossible & level_known.ge(left)].copy()
+        if len(repair):
+            repair['invalidated_at']=pd.NaT
+            repair=apply_level_invalidations(active,repair)
+            levels.loc[repair.index,'invalidated_at']=repair.invalidated_at
         features=_event_feature_frame(active,{},symbol=symbol,feature_root=source_root/'features')
         scan=features[(features.ts>=(left if year==start_year else year_start))&(features.ts<year_end)]
         scan_bars=active[(active.ts>=(left if year==start_year else year_start))&(active.ts<year_end)]
