@@ -1,49 +1,1731 @@
 # Processing pipeline report
 
-Protocol: `docs/protocol.md` v2. No model training or label-performance evaluation was run. The final period remains locked. Values below distinguish current diagnostic runs from retained legacy outputs.
+Protocol: docs/protocol.md v2. No model training was run. The final period remains locked.
 
-## Current fixed definitions
+## Fixed processing constants
 
-| Item | Definition |
+| Constant | Value |
+|---|---:|
+| Index input boundary | 2018-12-16 23:00:00+00:00 (futures era excluded) |
+| Index development period | 2019-01-01 through 2022-12-31 |
+| HTF/level/event warm-up | full permitted source history (replayed for each output year) |
+| Label entry delay | 2 bars after signal bar |
+| Maximum label holding window | 5 weekdays (non-crypto; deadline at first bar open at/after timestamp) or 5×24h (crypto) |
+| Label cadence | every 15 UTC minutes; both sides |
+| S/R touch | level clusters within 0.25 ATR(1h), >=2 touches; edge-trigger within 0.1 ATR, 0.5 ATR re-arm; 4h cooldown |
+| Liquidity sweep | clustered 15m+ levels; 0.1 ATR wick, close-back within 3 bars; 4h cooldown |
+| SL ATR grid | 0.5, 1, 1.5, 2, 3 |
+| TP ATR grid | 0.5, 1, 1.5, 2, 3, 4, 6 |
+| ATR source | 14-period ATR on completed 1h bars |
+
+## Output inventory
+
+| Root | Parquet files | Bytes |
+|---|---:|---:|
+| data/derived | 3,154 | 387,103,497 |
+| data/levels | 60 | 901,577,206 |
+| data/features | 632 | 11,540,117,201 |
+| data/events | 631 | 617,826,494 |
+| data/labels | 631 | 1,247,165,119 |
+
+## Registered event methods
+
+Every listed module is frozen for this pipeline run; its module docstring records the trigger, stop/target rule, scope and per-method constants.
+| Method | Symbol scope |
 |---|---|
-| HTF bars | 5m, 15m, 1h, 4h, 1D; emit only when complete; index daily session 18:00–17:00 America/New_York, crypto UTC day |
-| Feature knowledge time | `known_at = 1m bar open + 1 minute`; all as-of joins backward |
-| Label entry | At the open of signal bar + 2 bars |
-| Label maximum hold | 5 trading days by time: entry timestamp plus 5 weekdays for non-crypto, 120h for crypto; exit at first bar open at/after deadline |
-| Label grid | Every 15 UTC minutes, both sides; SL ATR multipliers 0.5, 1, 1.5, 2, 3; TP multipliers 0.5, 1, 1.5, 2, 3, 4, 6 |
-| Financing | 17:00 New York rollover; Friday counts 3 for index/metals/FX; crypto counts 1 at every UTC midnight |
-| S/R touch | Confirmed 15m+ swing k3/k5, prior day/week H/L, round numbers, zone edges; cluster 0.25×ATR1h, require 2 touches; edge-trigger at ±0.1×ATR after rearm 0.5×ATR; 4h cooldown |
-| Liquidity sweep | Same level universe/clustering; wick 0.1×ATR beyond and close back inside within 3 bars; 4h cooldown |
-| RSI(2) | Daily close RSI(2)<10 above daily EMA200; index-only, max one per day |
+| bollinger | all instruments |
+| btc_order_flow | BTCUSDT, ETHUSDT |
+| candlestick_at_level | all instruments |
+| chart_patterns | all instruments |
+| donchian_atr_breakout | all instruments |
+| dow_trend_confirmation | all instruments |
+| fib_pullback | all instruments |
+| funding_extreme_fade | BTCUSDT, ETHUSDT |
+| fvg_retrace | all instruments |
+| ichimoku_cloud | all instruments |
+| intraday_momentum | USATECHIDXUSD, USA500IDXUSD |
+| liquidity_sweep | all instruments |
+| ma_cross | all instruments |
+| macd_signal | all instruments |
+| market_structure_pullback | all instruments |
+| order_block_retest | all instruments |
+| ote_zone | all instruments |
+| post_earnings_index_reaction | USATECHIDXUSD |
+| post_macro_event_reaction | all instruments |
+| price_action_h2l2 | all instruments |
+| range_breakout_nr4_nr7 | all instruments |
+| round_number_reaction | all instruments |
+| rsi2_mean_reversion | USATECHIDXUSD, USA500IDXUSD |
+| session_level_reaction | all instruments |
+| sr_touch | all instruments |
+| stochastic | all instruments |
+| supply_demand_zone_retest | all instruments |
+| trend_following | all instruments |
+| trendline_channel | all instruments |
+| vix_spike_dip_buy | USATECHIDXUSD, USA500IDXUSD |
+| volume_profile_poc_vah_val | all instruments |
+| vwap_reclaim_reject | all instruments |
+| wyckoff_spring_upthrust | all instruments |
 
-The Rust scalar and batch label entry points share one `simulate_one` implementation. Ten thousand randomized cases are checked against the independent Python reference for each entry point.
+## Processing runs
 
-## Diagnostic performance
+| Symbol | Feature rows | Level rows | HTF rows | Unique events | Event candidate rows | Grid labels | Bad ticks excluded | Runtime (s) | Peak RSS (GiB) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| BTCUSDT | 4,637,375 | 5,357,036 | 1,336,424 | 164,083 | 6,911,075 | 21,641,270 | 0 | 5039.7 | 5.28 |
+| USATECHIDXUSD | 2,699,810 | 2,963,683 | 780,325 | 107,158 | 4,621,075 | 12,575,150 | 975 | 2059.3 | 3.99 |
+| USA500IDXUSD | 2,632,042 | 2,898,778 | 756,012 | 100,643 | 4,301,500 | 12,387,970 | 1,617 | 1960.0 | 3.98 |
+| XAUUSD | 6,722,314 | 7,387,280 | 1,924,363 | 226,269 | 9,336,304 | 31,461,430 | 2,942 | 9547.6 | 5.12 |
+| ETHUSDT | 4,637,374 | 5,346,356 | 1,336,424 | 154,515 | 6,329,150 | 21,641,270 | 0 | 5187.0 | 4.75 |
 
-The table below is the saved pre-event/vectorization baseline. Current post-change timings and exact comparison results are in `performance_optimization.md`.
+## Events per year
 
-| Layer/sample | Runtime | Peak RSS | Detail |
-|---|---:|---:|---|
-| HTF, BTCUSDT 2022-01 | 0.433s | 0.165 GiB | Top cumulative entries in `profile_BTCUSDT_2022-01.md` |
-| Levels, BTCUSDT 2022-01 | 2.888s | 0.179 GiB | `_vwap_snapshots` dominates; 2.332s cumulative |
-| Features, BTCUSDT 2022-01 | 0.750s | 0.695 GiB | `_nearest_level_features` is largest function |
-| S/R, BTCUSDT 2022-01 | 2.056s | 0.696 GiB | `bar_clusters` / Python level scanning dominate |
-| Sweep, BTCUSDT 2022-01 | 2.182s | 0.696 GiB | `bar_clusters` / Python level scanning dominate |
-| RSI(2), BTCUSDT 2022-01 | 0.017s | 0.696 GiB | No BTC events; index-only method |
-| Labels, BTCUSDT 2022-01 | 0.798s | 0.344 GiB | 208,250 labels; 261,119 labels/s; top entries in profile file |
-| S/R, BTCUSDT 2024 | 63.229s | 2.12 GiB | Event-count/guard only; no labels or outcomes |
-| Sweep, BTCUSDT 2024 | 64.487s | 2.12 GiB | Event-count/guard only; no labels or outcomes |
+| Symbol | Year | Method | Unique events | Candidate rows |
+|---|---:|---|---:|---:|
+| BTCUSDT | 2018 | bollinger | 0 | 0 |
+| BTCUSDT | 2018 | btc_order_flow | 0 | 0 |
+| BTCUSDT | 2018 | candlestick_at_level | 30 | 1,110 |
+| BTCUSDT | 2018 | chart_patterns | 683 | 25,093 |
+| BTCUSDT | 2018 | donchian_atr_breakout | 0 | 0 |
+| BTCUSDT | 2018 | dow_trend_confirmation | 0 | 0 |
+| BTCUSDT | 2018 | fib_pullback | 0 | 0 |
+| BTCUSDT | 2018 | funding_extreme_fade | 0 | 0 |
+| BTCUSDT | 2018 | fvg_retrace | 1,657 | 61,276 |
+| BTCUSDT | 2018 | ichimoku_cloud | 2,023 | 74,039 |
+| BTCUSDT | 2018 | liquidity_sweep | 4,588 | 162,757 |
+| BTCUSDT | 2018 | ma_cross | 0 | 0 |
+| BTCUSDT | 2018 | macd_signal | 0 | 0 |
+| BTCUSDT | 2018 | market_structure_pullback | 0 | 0 |
+| BTCUSDT | 2018 | order_block_retest | 0 | 0 |
+| BTCUSDT | 2018 | ote_zone | 0 | 0 |
+| BTCUSDT | 2018 | post_macro_event_reaction | 0 | 0 |
+| BTCUSDT | 2018 | price_action_h2l2 | 0 | 0 |
+| BTCUSDT | 2018 | range_breakout_nr4_nr7 | 0 | 0 |
+| BTCUSDT | 2018 | round_number_reaction | 363 | 13,205 |
+| BTCUSDT | 2018 | session_level_reaction | 0 | 0 |
+| BTCUSDT | 2018 | sr_touch | 3,698 | 266,167 |
+| BTCUSDT | 2018 | stochastic | 0 | 0 |
+| BTCUSDT | 2018 | supply_demand_zone_retest | 0 | 0 |
+| BTCUSDT | 2018 | trend_following | 2,160 | 79,012 |
+| BTCUSDT | 2018 | trendline_channel | 1,225 | 44,032 |
+| BTCUSDT | 2018 | volume_profile_poc_vah_val | 2,158 | 77,098 |
+| BTCUSDT | 2018 | vwap_reclaim_reject | 0 | 0 |
+| BTCUSDT | 2018 | wyckoff_spring_upthrust | 0 | 0 |
+| BTCUSDT | 2019 | bollinger | 0 | 0 |
+| BTCUSDT | 2019 | btc_order_flow | 0 | 0 |
+| BTCUSDT | 2019 | candlestick_at_level | 43 | 1,570 |
+| BTCUSDT | 2019 | chart_patterns | 696 | 25,495 |
+| BTCUSDT | 2019 | donchian_atr_breakout | 0 | 0 |
+| BTCUSDT | 2019 | dow_trend_confirmation | 0 | 0 |
+| BTCUSDT | 2019 | fib_pullback | 0 | 0 |
+| BTCUSDT | 2019 | funding_extreme_fade | 0 | 0 |
+| BTCUSDT | 2019 | fvg_retrace | 1,608 | 59,472 |
+| BTCUSDT | 2019 | ichimoku_cloud | 2,044 | 74,537 |
+| BTCUSDT | 2019 | liquidity_sweep | 4,478 | 158,753 |
+| BTCUSDT | 2019 | ma_cross | 0 | 0 |
+| BTCUSDT | 2019 | macd_signal | 0 | 0 |
+| BTCUSDT | 2019 | market_structure_pullback | 0 | 0 |
+| BTCUSDT | 2019 | order_block_retest | 0 | 0 |
+| BTCUSDT | 2019 | ote_zone | 0 | 0 |
+| BTCUSDT | 2019 | post_macro_event_reaction | 0 | 0 |
+| BTCUSDT | 2019 | price_action_h2l2 | 0 | 0 |
+| BTCUSDT | 2019 | range_breakout_nr4_nr7 | 0 | 0 |
+| BTCUSDT | 2019 | round_number_reaction | 297 | 10,768 |
+| BTCUSDT | 2019 | session_level_reaction | 0 | 0 |
+| BTCUSDT | 2019 | sr_touch | 3,092 | 222,491 |
+| BTCUSDT | 2019 | stochastic | 0 | 0 |
+| BTCUSDT | 2019 | supply_demand_zone_retest | 0 | 0 |
+| BTCUSDT | 2019 | trend_following | 2,169 | 79,161 |
+| BTCUSDT | 2019 | trendline_channel | 1,258 | 45,091 |
+| BTCUSDT | 2019 | volume_profile_poc_vah_val | 2,176 | 77,482 |
+| BTCUSDT | 2019 | vwap_reclaim_reject | 0 | 0 |
+| BTCUSDT | 2019 | wyckoff_spring_upthrust | 0 | 0 |
+| BTCUSDT | 2020 | bollinger | 0 | 0 |
+| BTCUSDT | 2020 | btc_order_flow | 0 | 0 |
+| BTCUSDT | 2020 | candlestick_at_level | 56 | 2,056 |
+| BTCUSDT | 2020 | chart_patterns | 659 | 24,312 |
+| BTCUSDT | 2020 | donchian_atr_breakout | 0 | 0 |
+| BTCUSDT | 2020 | dow_trend_confirmation | 0 | 0 |
+| BTCUSDT | 2020 | fib_pullback | 0 | 0 |
+| BTCUSDT | 2020 | funding_extreme_fade | 0 | 0 |
+| BTCUSDT | 2020 | fvg_retrace | 1,809 | 66,871 |
+| BTCUSDT | 2020 | ichimoku_cloud | 2,046 | 75,302 |
+| BTCUSDT | 2020 | liquidity_sweep | 4,525 | 160,465 |
+| BTCUSDT | 2020 | ma_cross | 0 | 0 |
+| BTCUSDT | 2020 | macd_signal | 0 | 0 |
+| BTCUSDT | 2020 | market_structure_pullback | 0 | 0 |
+| BTCUSDT | 2020 | order_block_retest | 0 | 0 |
+| BTCUSDT | 2020 | ote_zone | 0 | 0 |
+| BTCUSDT | 2020 | post_macro_event_reaction | 0 | 0 |
+| BTCUSDT | 2020 | price_action_h2l2 | 0 | 0 |
+| BTCUSDT | 2020 | range_breakout_nr4_nr7 | 0 | 0 |
+| BTCUSDT | 2020 | round_number_reaction | 382 | 13,894 |
+| BTCUSDT | 2020 | session_level_reaction | 22 | 800 |
+| BTCUSDT | 2020 | sr_touch | 2,044 | 147,044 |
+| BTCUSDT | 2020 | stochastic | 0 | 0 |
+| BTCUSDT | 2020 | supply_demand_zone_retest | 0 | 0 |
+| BTCUSDT | 2020 | trend_following | 2,177 | 80,188 |
+| BTCUSDT | 2020 | trendline_channel | 1,244 | 44,837 |
+| BTCUSDT | 2020 | volume_profile_poc_vah_val | 2,159 | 77,162 |
+| BTCUSDT | 2020 | vwap_reclaim_reject | 0 | 0 |
+| BTCUSDT | 2020 | wyckoff_spring_upthrust | 0 | 0 |
+| BTCUSDT | 2021 | bollinger | 0 | 0 |
+| BTCUSDT | 2021 | btc_order_flow | 0 | 0 |
+| BTCUSDT | 2021 | candlestick_at_level | 136 | 5,029 |
+| BTCUSDT | 2021 | chart_patterns | 690 | 25,499 |
+| BTCUSDT | 2021 | donchian_atr_breakout | 0 | 0 |
+| BTCUSDT | 2021 | dow_trend_confirmation | 0 | 0 |
+| BTCUSDT | 2021 | fib_pullback | 0 | 0 |
+| BTCUSDT | 2021 | funding_extreme_fade | 0 | 0 |
+| BTCUSDT | 2021 | fvg_retrace | 1,775 | 65,596 |
+| BTCUSDT | 2021 | ichimoku_cloud | 2,035 | 75,189 |
+| BTCUSDT | 2021 | liquidity_sweep | 4,500 | 161,633 |
+| BTCUSDT | 2021 | ma_cross | 0 | 0 |
+| BTCUSDT | 2021 | macd_signal | 0 | 0 |
+| BTCUSDT | 2021 | market_structure_pullback | 0 | 0 |
+| BTCUSDT | 2021 | order_block_retest | 0 | 0 |
+| BTCUSDT | 2021 | ote_zone | 0 | 0 |
+| BTCUSDT | 2021 | post_macro_event_reaction | 0 | 0 |
+| BTCUSDT | 2021 | price_action_h2l2 | 0 | 0 |
+| BTCUSDT | 2021 | range_breakout_nr4_nr7 | 0 | 0 |
+| BTCUSDT | 2021 | round_number_reaction | 1,741 | 64,273 |
+| BTCUSDT | 2021 | session_level_reaction | 19 | 698 |
+| BTCUSDT | 2021 | sr_touch | 3,298 | 237,216 |
+| BTCUSDT | 2021 | stochastic | 0 | 0 |
+| BTCUSDT | 2021 | supply_demand_zone_retest | 0 | 0 |
+| BTCUSDT | 2021 | trend_following | 2,173 | 80,292 |
+| BTCUSDT | 2021 | trendline_channel | 1,171 | 43,246 |
+| BTCUSDT | 2021 | volume_profile_poc_vah_val | 2,114 | 78,086 |
+| BTCUSDT | 2021 | vwap_reclaim_reject | 0 | 0 |
+| BTCUSDT | 2021 | wyckoff_spring_upthrust | 0 | 0 |
+| BTCUSDT | 2022 | bollinger | 0 | 0 |
+| BTCUSDT | 2022 | btc_order_flow | 0 | 0 |
+| BTCUSDT | 2022 | candlestick_at_level | 91 | 3,367 |
+| BTCUSDT | 2022 | chart_patterns | 672 | 24,848 |
+| BTCUSDT | 2022 | donchian_atr_breakout | 0 | 0 |
+| BTCUSDT | 2022 | dow_trend_confirmation | 0 | 0 |
+| BTCUSDT | 2022 | fib_pullback | 0 | 0 |
+| BTCUSDT | 2022 | funding_extreme_fade | 0 | 0 |
+| BTCUSDT | 2022 | fvg_retrace | 1,740 | 64,352 |
+| BTCUSDT | 2022 | ichimoku_cloud | 2,041 | 75,444 |
+| BTCUSDT | 2022 | liquidity_sweep | 4,223 | 151,129 |
+| BTCUSDT | 2022 | ma_cross | 0 | 0 |
+| BTCUSDT | 2022 | macd_signal | 0 | 0 |
+| BTCUSDT | 2022 | market_structure_pullback | 0 | 0 |
+| BTCUSDT | 2022 | order_block_retest | 0 | 0 |
+| BTCUSDT | 2022 | ote_zone | 0 | 0 |
+| BTCUSDT | 2022 | post_macro_event_reaction | 0 | 0 |
+| BTCUSDT | 2022 | price_action_h2l2 | 0 | 0 |
+| BTCUSDT | 2022 | range_breakout_nr4_nr7 | 0 | 0 |
+| BTCUSDT | 2022 | round_number_reaction | 984 | 36,341 |
+| BTCUSDT | 2022 | session_level_reaction | 4 | 148 |
+| BTCUSDT | 2022 | sr_touch | 3,263 | 234,832 |
+| BTCUSDT | 2022 | stochastic | 0 | 0 |
+| BTCUSDT | 2022 | supply_demand_zone_retest | 0 | 0 |
+| BTCUSDT | 2022 | trend_following | 2,173 | 80,315 |
+| BTCUSDT | 2022 | trendline_channel | 1,207 | 44,455 |
+| BTCUSDT | 2022 | volume_profile_poc_vah_val | 2,185 | 80,116 |
+| BTCUSDT | 2022 | vwap_reclaim_reject | 0 | 0 |
+| BTCUSDT | 2022 | wyckoff_spring_upthrust | 0 | 0 |
+| BTCUSDT | 2023 | bollinger | 0 | 0 |
+| BTCUSDT | 2023 | btc_order_flow | 0 | 0 |
+| BTCUSDT | 2023 | candlestick_at_level | 119 | 4,401 |
+| BTCUSDT | 2023 | chart_patterns | 682 | 25,194 |
+| BTCUSDT | 2023 | donchian_atr_breakout | 0 | 0 |
+| BTCUSDT | 2023 | dow_trend_confirmation | 0 | 0 |
+| BTCUSDT | 2023 | fib_pullback | 0 | 0 |
+| BTCUSDT | 2023 | funding_extreme_fade | 0 | 0 |
+| BTCUSDT | 2023 | fvg_retrace | 1,828 | 67,542 |
+| BTCUSDT | 2023 | ichimoku_cloud | 2,042 | 75,386 |
+| BTCUSDT | 2023 | liquidity_sweep | 4,579 | 163,710 |
+| BTCUSDT | 2023 | ma_cross | 0 | 0 |
+| BTCUSDT | 2023 | macd_signal | 0 | 0 |
+| BTCUSDT | 2023 | market_structure_pullback | 0 | 0 |
+| BTCUSDT | 2023 | order_block_retest | 0 | 0 |
+| BTCUSDT | 2023 | ote_zone | 0 | 0 |
+| BTCUSDT | 2023 | post_macro_event_reaction | 0 | 0 |
+| BTCUSDT | 2023 | price_action_h2l2 | 0 | 0 |
+| BTCUSDT | 2023 | range_breakout_nr4_nr7 | 0 | 0 |
+| BTCUSDT | 2023 | round_number_reaction | 692 | 25,545 |
+| BTCUSDT | 2023 | session_level_reaction | 0 | 0 |
+| BTCUSDT | 2023 | sr_touch | 3,527 | 253,722 |
+| BTCUSDT | 2023 | stochastic | 0 | 0 |
+| BTCUSDT | 2023 | supply_demand_zone_retest | 0 | 0 |
+| BTCUSDT | 2023 | trend_following | 2,172 | 80,195 |
+| BTCUSDT | 2023 | trendline_channel | 1,128 | 41,557 |
+| BTCUSDT | 2023 | volume_profile_poc_vah_val | 2,181 | 79,782 |
+| BTCUSDT | 2023 | vwap_reclaim_reject | 0 | 0 |
+| BTCUSDT | 2023 | wyckoff_spring_upthrust | 0 | 0 |
+| BTCUSDT | 2024 | bollinger | 0 | 0 |
+| BTCUSDT | 2024 | btc_order_flow | 0 | 0 |
+| BTCUSDT | 2024 | candlestick_at_level | 104 | 3,845 |
+| BTCUSDT | 2024 | chart_patterns | 692 | 25,568 |
+| BTCUSDT | 2024 | donchian_atr_breakout | 0 | 0 |
+| BTCUSDT | 2024 | dow_trend_confirmation | 0 | 0 |
+| BTCUSDT | 2024 | fib_pullback | 0 | 0 |
+| BTCUSDT | 2024 | funding_extreme_fade | 0 | 0 |
+| BTCUSDT | 2024 | fvg_retrace | 1,887 | 69,721 |
+| BTCUSDT | 2024 | ichimoku_cloud | 2,039 | 75,310 |
+| BTCUSDT | 2024 | liquidity_sweep | 4,304 | 154,406 |
+| BTCUSDT | 2024 | ma_cross | 0 | 0 |
+| BTCUSDT | 2024 | macd_signal | 0 | 0 |
+| BTCUSDT | 2024 | market_structure_pullback | 0 | 0 |
+| BTCUSDT | 2024 | order_block_retest | 0 | 0 |
+| BTCUSDT | 2024 | ote_zone | 0 | 0 |
+| BTCUSDT | 2024 | post_macro_event_reaction | 0 | 0 |
+| BTCUSDT | 2024 | price_action_h2l2 | 0 | 0 |
+| BTCUSDT | 2024 | range_breakout_nr4_nr7 | 0 | 0 |
+| BTCUSDT | 2024 | round_number_reaction | 1,562 | 57,666 |
+| BTCUSDT | 2024 | session_level_reaction | 28 | 1,033 |
+| BTCUSDT | 2024 | sr_touch | 2,177 | 156,471 |
+| BTCUSDT | 2024 | stochastic | 0 | 0 |
+| BTCUSDT | 2024 | supply_demand_zone_retest | 0 | 0 |
+| BTCUSDT | 2024 | trend_following | 2,181 | 80,551 |
+| BTCUSDT | 2024 | trendline_channel | 1,136 | 41,954 |
+| BTCUSDT | 2024 | volume_profile_poc_vah_val | 2,133 | 78,746 |
+| BTCUSDT | 2024 | vwap_reclaim_reject | 0 | 0 |
+| BTCUSDT | 2024 | wyckoff_spring_upthrust | 0 | 0 |
+| BTCUSDT | 2025 | bollinger | 0 | 0 |
+| BTCUSDT | 2025 | btc_order_flow | 0 | 0 |
+| BTCUSDT | 2025 | candlestick_at_level | 104 | 3,847 |
+| BTCUSDT | 2025 | chart_patterns | 724 | 26,729 |
+| BTCUSDT | 2025 | donchian_atr_breakout | 0 | 0 |
+| BTCUSDT | 2025 | dow_trend_confirmation | 0 | 0 |
+| BTCUSDT | 2025 | fib_pullback | 0 | 0 |
+| BTCUSDT | 2025 | funding_extreme_fade | 0 | 0 |
+| BTCUSDT | 2025 | fvg_retrace | 1,924 | 71,042 |
+| BTCUSDT | 2025 | ichimoku_cloud | 2,032 | 75,006 |
+| BTCUSDT | 2025 | liquidity_sweep | 4,517 | 162,212 |
+| BTCUSDT | 2025 | ma_cross | 0 | 0 |
+| BTCUSDT | 2025 | macd_signal | 0 | 0 |
+| BTCUSDT | 2025 | market_structure_pullback | 0 | 0 |
+| BTCUSDT | 2025 | order_block_retest | 0 | 0 |
+| BTCUSDT | 2025 | ote_zone | 0 | 0 |
+| BTCUSDT | 2025 | post_macro_event_reaction | 0 | 0 |
+| BTCUSDT | 2025 | price_action_h2l2 | 0 | 0 |
+| BTCUSDT | 2025 | range_breakout_nr4_nr7 | 0 | 0 |
+| BTCUSDT | 2025 | round_number_reaction | 1,694 | 62,505 |
+| BTCUSDT | 2025 | session_level_reaction | 9 | 331 |
+| BTCUSDT | 2025 | sr_touch | 3,430 | 246,540 |
+| BTCUSDT | 2025 | stochastic | 0 | 0 |
+| BTCUSDT | 2025 | supply_demand_zone_retest | 0 | 0 |
+| BTCUSDT | 2025 | trend_following | 2,175 | 80,257 |
+| BTCUSDT | 2025 | trendline_channel | 1,117 | 41,216 |
+| BTCUSDT | 2025 | volume_profile_poc_vah_val | 2,143 | 79,036 |
+| BTCUSDT | 2025 | vwap_reclaim_reject | 0 | 0 |
+| BTCUSDT | 2025 | wyckoff_spring_upthrust | 0 | 0 |
+| BTCUSDT | 2026 | bollinger | 0 | 0 |
+| BTCUSDT | 2026 | btc_order_flow | 0 | 0 |
+| BTCUSDT | 2026 | candlestick_at_level | 80 | 2,960 |
+| BTCUSDT | 2026 | chart_patterns | 544 | 20,103 |
+| BTCUSDT | 2026 | donchian_atr_breakout | 0 | 0 |
+| BTCUSDT | 2026 | dow_trend_confirmation | 0 | 0 |
+| BTCUSDT | 2026 | fib_pullback | 0 | 0 |
+| BTCUSDT | 2026 | funding_extreme_fade | 0 | 0 |
+| BTCUSDT | 2026 | fvg_retrace | 1,621 | 59,920 |
+| BTCUSDT | 2026 | ichimoku_cloud | 1,695 | 62,652 |
+| BTCUSDT | 2026 | liquidity_sweep | 3,834 | 137,624 |
+| BTCUSDT | 2026 | ma_cross | 0 | 0 |
+| BTCUSDT | 2026 | macd_signal | 0 | 0 |
+| BTCUSDT | 2026 | market_structure_pullback | 0 | 0 |
+| BTCUSDT | 2026 | order_block_retest | 0 | 0 |
+| BTCUSDT | 2026 | ote_zone | 0 | 0 |
+| BTCUSDT | 2026 | post_macro_event_reaction | 0 | 0 |
+| BTCUSDT | 2026 | price_action_h2l2 | 0 | 0 |
+| BTCUSDT | 2026 | range_breakout_nr4_nr7 | 0 | 0 |
+| BTCUSDT | 2026 | round_number_reaction | 1,200 | 44,380 |
+| BTCUSDT | 2026 | session_level_reaction | 8 | 296 |
+| BTCUSDT | 2026 | sr_touch | 1,662 | 119,535 |
+| BTCUSDT | 2026 | stochastic | 0 | 0 |
+| BTCUSDT | 2026 | supply_demand_zone_retest | 0 | 0 |
+| BTCUSDT | 2026 | trend_following | 1,810 | 66,886 |
+| BTCUSDT | 2026 | trendline_channel | 943 | 34,846 |
+| BTCUSDT | 2026 | volume_profile_poc_vah_val | 1,820 | 67,203 |
+| BTCUSDT | 2026 | vwap_reclaim_reject | 0 | 0 |
+| BTCUSDT | 2026 | wyckoff_spring_upthrust | 0 | 0 |
+| USATECHIDXUSD | 2018 | bollinger | 0 | 0 |
+| USATECHIDXUSD | 2018 | candlestick_at_level | 9 | 328 |
+| USATECHIDXUSD | 2018 | chart_patterns | 17 | 621 |
+| USATECHIDXUSD | 2018 | donchian_atr_breakout | 0 | 0 |
+| USATECHIDXUSD | 2018 | dow_trend_confirmation | 0 | 0 |
+| USATECHIDXUSD | 2018 | fib_pullback | 0 | 0 |
+| USATECHIDXUSD | 2018 | fvg_retrace | 45 | 1,648 |
+| USATECHIDXUSD | 2018 | ichimoku_cloud | 55 | 2,005 |
+| USATECHIDXUSD | 2018 | intraday_momentum | 0 | 0 |
+| USATECHIDXUSD | 2018 | liquidity_sweep | 78 | 2,778 |
+| USATECHIDXUSD | 2018 | ma_cross | 0 | 0 |
+| USATECHIDXUSD | 2018 | macd_signal | 0 | 0 |
+| USATECHIDXUSD | 2018 | market_structure_pullback | 0 | 0 |
+| USATECHIDXUSD | 2018 | order_block_retest | 0 | 0 |
+| USATECHIDXUSD | 2018 | ote_zone | 0 | 0 |
+| USATECHIDXUSD | 2018 | post_earnings_index_reaction | 0 | 0 |
+| USATECHIDXUSD | 2018 | post_macro_event_reaction | 0 | 0 |
+| USATECHIDXUSD | 2018 | price_action_h2l2 | 0 | 0 |
+| USATECHIDXUSD | 2018 | range_breakout_nr4_nr7 | 0 | 0 |
+| USATECHIDXUSD | 2018 | round_number_reaction | 40 | 1,453 |
+| USATECHIDXUSD | 2018 | rsi2_mean_reversion | 0 | 0 |
+| USATECHIDXUSD | 2018 | session_level_reaction | 5 | 184 |
+| USATECHIDXUSD | 2018 | sr_touch | 71 | 5,079 |
+| USATECHIDXUSD | 2018 | stochastic | 0 | 0 |
+| USATECHIDXUSD | 2018 | supply_demand_zone_retest | 0 | 0 |
+| USATECHIDXUSD | 2018 | trend_following | 59 | 2,153 |
+| USATECHIDXUSD | 2018 | trendline_channel | 25 | 910 |
+| USATECHIDXUSD | 2018 | vix_spike_dip_buy | 0 | 0 |
+| USATECHIDXUSD | 2018 | volume_profile_poc_vah_val | 27 | 984 |
+| USATECHIDXUSD | 2018 | vwap_reclaim_reject | 0 | 0 |
+| USATECHIDXUSD | 2018 | wyckoff_spring_upthrust | 0 | 0 |
+| USATECHIDXUSD | 2019 | bollinger | 0 | 0 |
+| USATECHIDXUSD | 2019 | candlestick_at_level | 77 | 2,839 |
+| USATECHIDXUSD | 2019 | chart_patterns | 446 | 16,399 |
+| USATECHIDXUSD | 2019 | donchian_atr_breakout | 0 | 0 |
+| USATECHIDXUSD | 2019 | dow_trend_confirmation | 0 | 0 |
+| USATECHIDXUSD | 2019 | fib_pullback | 0 | 0 |
+| USATECHIDXUSD | 2019 | fvg_retrace | 1,188 | 43,702 |
+| USATECHIDXUSD | 2019 | ichimoku_cloud | 1,412 | 51,884 |
+| USATECHIDXUSD | 2019 | intraday_momentum | 0 | 0 |
+| USATECHIDXUSD | 2019 | liquidity_sweep | 2,910 | 104,396 |
+| USATECHIDXUSD | 2019 | ma_cross | 0 | 0 |
+| USATECHIDXUSD | 2019 | macd_signal | 0 | 0 |
+| USATECHIDXUSD | 2019 | market_structure_pullback | 0 | 0 |
+| USATECHIDXUSD | 2019 | order_block_retest | 0 | 0 |
+| USATECHIDXUSD | 2019 | ote_zone | 0 | 0 |
+| USATECHIDXUSD | 2019 | post_earnings_index_reaction | 0 | 0 |
+| USATECHIDXUSD | 2019 | post_macro_event_reaction | 0 | 0 |
+| USATECHIDXUSD | 2019 | price_action_h2l2 | 0 | 0 |
+| USATECHIDXUSD | 2019 | range_breakout_nr4_nr7 | 0 | 0 |
+| USATECHIDXUSD | 2019 | round_number_reaction | 538 | 19,803 |
+| USATECHIDXUSD | 2019 | rsi2_mean_reversion | 0 | 0 |
+| USATECHIDXUSD | 2019 | session_level_reaction | 91 | 3,323 |
+| USATECHIDXUSD | 2019 | sr_touch | 2,579 | 185,274 |
+| USATECHIDXUSD | 2019 | stochastic | 0 | 0 |
+| USATECHIDXUSD | 2019 | supply_demand_zone_retest | 0 | 0 |
+| USATECHIDXUSD | 2019 | trend_following | 1,539 | 56,583 |
+| USATECHIDXUSD | 2019 | trendline_channel | 744 | 27,340 |
+| USATECHIDXUSD | 2019 | vix_spike_dip_buy | 0 | 0 |
+| USATECHIDXUSD | 2019 | volume_profile_poc_vah_val | 1,315 | 48,327 |
+| USATECHIDXUSD | 2019 | vwap_reclaim_reject | 0 | 0 |
+| USATECHIDXUSD | 2019 | wyckoff_spring_upthrust | 0 | 0 |
+| USATECHIDXUSD | 2020 | bollinger | 0 | 0 |
+| USATECHIDXUSD | 2020 | candlestick_at_level | 107 | 3,947 |
+| USATECHIDXUSD | 2020 | chart_patterns | 451 | 16,608 |
+| USATECHIDXUSD | 2020 | donchian_atr_breakout | 0 | 0 |
+| USATECHIDXUSD | 2020 | dow_trend_confirmation | 0 | 0 |
+| USATECHIDXUSD | 2020 | fib_pullback | 0 | 0 |
+| USATECHIDXUSD | 2020 | fvg_retrace | 1,230 | 45,311 |
+| USATECHIDXUSD | 2020 | ichimoku_cloud | 1,409 | 51,880 |
+| USATECHIDXUSD | 2020 | intraday_momentum | 0 | 0 |
+| USATECHIDXUSD | 2020 | liquidity_sweep | 2,886 | 103,563 |
+| USATECHIDXUSD | 2020 | ma_cross | 0 | 0 |
+| USATECHIDXUSD | 2020 | macd_signal | 0 | 0 |
+| USATECHIDXUSD | 2020 | market_structure_pullback | 0 | 0 |
+| USATECHIDXUSD | 2020 | order_block_retest | 0 | 0 |
+| USATECHIDXUSD | 2020 | ote_zone | 0 | 0 |
+| USATECHIDXUSD | 2020 | post_earnings_index_reaction | 0 | 0 |
+| USATECHIDXUSD | 2020 | post_macro_event_reaction | 0 | 0 |
+| USATECHIDXUSD | 2020 | price_action_h2l2 | 0 | 0 |
+| USATECHIDXUSD | 2020 | range_breakout_nr4_nr7 | 0 | 0 |
+| USATECHIDXUSD | 2020 | round_number_reaction | 1,039 | 38,279 |
+| USATECHIDXUSD | 2020 | rsi2_mean_reversion | 12 | 432 |
+| USATECHIDXUSD | 2020 | session_level_reaction | 89 | 3,251 |
+| USATECHIDXUSD | 2020 | sr_touch | 2,562 | 184,094 |
+| USATECHIDXUSD | 2020 | stochastic | 0 | 0 |
+| USATECHIDXUSD | 2020 | supply_demand_zone_retest | 1 | 36 |
+| USATECHIDXUSD | 2020 | trend_following | 1,539 | 56,698 |
+| USATECHIDXUSD | 2020 | trendline_channel | 736 | 27,104 |
+| USATECHIDXUSD | 2020 | vix_spike_dip_buy | 0 | 0 |
+| USATECHIDXUSD | 2020 | volume_profile_poc_vah_val | 1,344 | 49,499 |
+| USATECHIDXUSD | 2020 | vwap_reclaim_reject | 0 | 0 |
+| USATECHIDXUSD | 2020 | wyckoff_spring_upthrust | 0 | 0 |
+| USATECHIDXUSD | 2021 | bollinger | 0 | 0 |
+| USATECHIDXUSD | 2021 | candlestick_at_level | 149 | 5,497 |
+| USATECHIDXUSD | 2021 | chart_patterns | 447 | 16,453 |
+| USATECHIDXUSD | 2021 | donchian_atr_breakout | 0 | 0 |
+| USATECHIDXUSD | 2021 | dow_trend_confirmation | 0 | 0 |
+| USATECHIDXUSD | 2021 | fib_pullback | 0 | 0 |
+| USATECHIDXUSD | 2021 | fvg_retrace | 1,155 | 42,568 |
+| USATECHIDXUSD | 2021 | ichimoku_cloud | 1,413 | 52,005 |
+| USATECHIDXUSD | 2021 | intraday_momentum | 0 | 0 |
+| USATECHIDXUSD | 2021 | liquidity_sweep | 3,024 | 108,574 |
+| USATECHIDXUSD | 2021 | ma_cross | 0 | 0 |
+| USATECHIDXUSD | 2021 | macd_signal | 0 | 0 |
+| USATECHIDXUSD | 2021 | market_structure_pullback | 0 | 0 |
+| USATECHIDXUSD | 2021 | order_block_retest | 0 | 0 |
+| USATECHIDXUSD | 2021 | ote_zone | 0 | 0 |
+| USATECHIDXUSD | 2021 | post_earnings_index_reaction | 0 | 0 |
+| USATECHIDXUSD | 2021 | post_macro_event_reaction | 0 | 0 |
+| USATECHIDXUSD | 2021 | price_action_h2l2 | 0 | 0 |
+| USATECHIDXUSD | 2021 | range_breakout_nr4_nr7 | 0 | 0 |
+| USATECHIDXUSD | 2021 | round_number_reaction | 986 | 36,332 |
+| USATECHIDXUSD | 2021 | rsi2_mean_reversion | 21 | 754 |
+| USATECHIDXUSD | 2021 | session_level_reaction | 82 | 2,990 |
+| USATECHIDXUSD | 2021 | sr_touch | 2,825 | 203,054 |
+| USATECHIDXUSD | 2021 | stochastic | 0 | 0 |
+| USATECHIDXUSD | 2021 | supply_demand_zone_retest | 1 | 36 |
+| USATECHIDXUSD | 2021 | trend_following | 1,544 | 56,865 |
+| USATECHIDXUSD | 2021 | trendline_channel | 730 | 26,866 |
+| USATECHIDXUSD | 2021 | vix_spike_dip_buy | 0 | 0 |
+| USATECHIDXUSD | 2021 | volume_profile_poc_vah_val | 1,379 | 50,756 |
+| USATECHIDXUSD | 2021 | vwap_reclaim_reject | 0 | 0 |
+| USATECHIDXUSD | 2021 | wyckoff_spring_upthrust | 0 | 0 |
+| USATECHIDXUSD | 2022 | bollinger | 0 | 0 |
+| USATECHIDXUSD | 2022 | candlestick_at_level | 187 | 6,919 |
+| USATECHIDXUSD | 2022 | chart_patterns | 471 | 17,425 |
+| USATECHIDXUSD | 2022 | donchian_atr_breakout | 0 | 0 |
+| USATECHIDXUSD | 2022 | dow_trend_confirmation | 0 | 0 |
+| USATECHIDXUSD | 2022 | fib_pullback | 0 | 0 |
+| USATECHIDXUSD | 2022 | fvg_retrace | 1,141 | 42,215 |
+| USATECHIDXUSD | 2022 | ichimoku_cloud | 1,411 | 52,195 |
+| USATECHIDXUSD | 2022 | intraday_momentum | 0 | 0 |
+| USATECHIDXUSD | 2022 | liquidity_sweep | 3,359 | 120,703 |
+| USATECHIDXUSD | 2022 | ma_cross | 0 | 0 |
+| USATECHIDXUSD | 2022 | macd_signal | 0 | 0 |
+| USATECHIDXUSD | 2022 | market_structure_pullback | 0 | 0 |
+| USATECHIDXUSD | 2022 | order_block_retest | 0 | 0 |
+| USATECHIDXUSD | 2022 | ote_zone | 0 | 0 |
+| USATECHIDXUSD | 2022 | post_earnings_index_reaction | 0 | 0 |
+| USATECHIDXUSD | 2022 | post_macro_event_reaction | 0 | 0 |
+| USATECHIDXUSD | 2022 | price_action_h2l2 | 0 | 0 |
+| USATECHIDXUSD | 2022 | range_breakout_nr4_nr7 | 0 | 0 |
+| USATECHIDXUSD | 2022 | round_number_reaction | 1,210 | 44,764 |
+| USATECHIDXUSD | 2022 | rsi2_mean_reversion | 4 | 144 |
+| USATECHIDXUSD | 2022 | session_level_reaction | 17 | 629 |
+| USATECHIDXUSD | 2022 | sr_touch | 1,816 | 130,745 |
+| USATECHIDXUSD | 2022 | stochastic | 0 | 0 |
+| USATECHIDXUSD | 2022 | supply_demand_zone_retest | 0 | 0 |
+| USATECHIDXUSD | 2022 | trend_following | 1,539 | 56,935 |
+| USATECHIDXUSD | 2022 | trendline_channel | 695 | 25,712 |
+| USATECHIDXUSD | 2022 | vix_spike_dip_buy | 0 | 0 |
+| USATECHIDXUSD | 2022 | volume_profile_poc_vah_val | 1,540 | 56,976 |
+| USATECHIDXUSD | 2022 | vwap_reclaim_reject | 0 | 0 |
+| USATECHIDXUSD | 2022 | wyckoff_spring_upthrust | 0 | 0 |
+| USATECHIDXUSD | 2023 | bollinger | 0 | 0 |
+| USATECHIDXUSD | 2023 | candlestick_at_level | 156 | 5,770 |
+| USATECHIDXUSD | 2023 | chart_patterns | 452 | 16,715 |
+| USATECHIDXUSD | 2023 | donchian_atr_breakout | 0 | 0 |
+| USATECHIDXUSD | 2023 | dow_trend_confirmation | 0 | 0 |
+| USATECHIDXUSD | 2023 | fib_pullback | 0 | 0 |
+| USATECHIDXUSD | 2023 | fvg_retrace | 1,086 | 40,161 |
+| USATECHIDXUSD | 2023 | ichimoku_cloud | 1,401 | 51,796 |
+| USATECHIDXUSD | 2023 | intraday_momentum | 0 | 0 |
+| USATECHIDXUSD | 2023 | liquidity_sweep | 3,476 | 124,915 |
+| USATECHIDXUSD | 2023 | ma_cross | 0 | 0 |
+| USATECHIDXUSD | 2023 | macd_signal | 0 | 0 |
+| USATECHIDXUSD | 2023 | market_structure_pullback | 0 | 0 |
+| USATECHIDXUSD | 2023 | order_block_retest | 0 | 0 |
+| USATECHIDXUSD | 2023 | ote_zone | 0 | 0 |
+| USATECHIDXUSD | 2023 | post_earnings_index_reaction | 0 | 0 |
+| USATECHIDXUSD | 2023 | post_macro_event_reaction | 0 | 0 |
+| USATECHIDXUSD | 2023 | price_action_h2l2 | 0 | 0 |
+| USATECHIDXUSD | 2023 | range_breakout_nr4_nr7 | 0 | 0 |
+| USATECHIDXUSD | 2023 | round_number_reaction | 944 | 34,910 |
+| USATECHIDXUSD | 2023 | rsi2_mean_reversion | 13 | 468 |
+| USATECHIDXUSD | 2023 | session_level_reaction | 10 | 367 |
+| USATECHIDXUSD | 2023 | sr_touch | 2,160 | 155,462 |
+| USATECHIDXUSD | 2023 | stochastic | 0 | 0 |
+| USATECHIDXUSD | 2023 | supply_demand_zone_retest | 0 | 0 |
+| USATECHIDXUSD | 2023 | trend_following | 1,532 | 56,649 |
+| USATECHIDXUSD | 2023 | trendline_channel | 701 | 25,915 |
+| USATECHIDXUSD | 2023 | vix_spike_dip_buy | 0 | 0 |
+| USATECHIDXUSD | 2023 | volume_profile_poc_vah_val | 1,515 | 56,011 |
+| USATECHIDXUSD | 2023 | vwap_reclaim_reject | 0 | 0 |
+| USATECHIDXUSD | 2023 | wyckoff_spring_upthrust | 0 | 0 |
+| USATECHIDXUSD | 2024 | bollinger | 0 | 0 |
+| USATECHIDXUSD | 2024 | candlestick_at_level | 173 | 6,393 |
+| USATECHIDXUSD | 2024 | chart_patterns | 434 | 15,979 |
+| USATECHIDXUSD | 2024 | donchian_atr_breakout | 0 | 0 |
+| USATECHIDXUSD | 2024 | dow_trend_confirmation | 0 | 0 |
+| USATECHIDXUSD | 2024 | fib_pullback | 0 | 0 |
+| USATECHIDXUSD | 2024 | fvg_retrace | 1,120 | 41,283 |
+| USATECHIDXUSD | 2024 | ichimoku_cloud | 1,402 | 51,617 |
+| USATECHIDXUSD | 2024 | intraday_momentum | 0 | 0 |
+| USATECHIDXUSD | 2024 | liquidity_sweep | 3,158 | 113,358 |
+| USATECHIDXUSD | 2024 | ma_cross | 0 | 0 |
+| USATECHIDXUSD | 2024 | macd_signal | 0 | 0 |
+| USATECHIDXUSD | 2024 | market_structure_pullback | 0 | 0 |
+| USATECHIDXUSD | 2024 | order_block_retest | 0 | 0 |
+| USATECHIDXUSD | 2024 | ote_zone | 0 | 0 |
+| USATECHIDXUSD | 2024 | post_earnings_index_reaction | 0 | 0 |
+| USATECHIDXUSD | 2024 | post_macro_event_reaction | 0 | 0 |
+| USATECHIDXUSD | 2024 | price_action_h2l2 | 0 | 0 |
+| USATECHIDXUSD | 2024 | range_breakout_nr4_nr7 | 0 | 0 |
+| USATECHIDXUSD | 2024 | round_number_reaction | 1,068 | 39,319 |
+| USATECHIDXUSD | 2024 | rsi2_mean_reversion | 15 | 540 |
+| USATECHIDXUSD | 2024 | session_level_reaction | 57 | 2,084 |
+| USATECHIDXUSD | 2024 | sr_touch | 3,162 | 227,289 |
+| USATECHIDXUSD | 2024 | stochastic | 0 | 0 |
+| USATECHIDXUSD | 2024 | supply_demand_zone_retest | 0 | 0 |
+| USATECHIDXUSD | 2024 | trend_following | 1,544 | 56,857 |
+| USATECHIDXUSD | 2024 | trendline_channel | 690 | 25,416 |
+| USATECHIDXUSD | 2024 | vix_spike_dip_buy | 0 | 0 |
+| USATECHIDXUSD | 2024 | volume_profile_poc_vah_val | 1,343 | 49,446 |
+| USATECHIDXUSD | 2024 | vwap_reclaim_reject | 0 | 0 |
+| USATECHIDXUSD | 2024 | wyckoff_spring_upthrust | 0 | 0 |
+| USATECHIDXUSD | 2025 | bollinger | 0 | 0 |
+| USATECHIDXUSD | 2025 | candlestick_at_level | 195 | 7,206 |
+| USATECHIDXUSD | 2025 | chart_patterns | 449 | 16,548 |
+| USATECHIDXUSD | 2025 | donchian_atr_breakout | 0 | 0 |
+| USATECHIDXUSD | 2025 | dow_trend_confirmation | 0 | 0 |
+| USATECHIDXUSD | 2025 | fib_pullback | 0 | 0 |
+| USATECHIDXUSD | 2025 | fvg_retrace | 1,155 | 42,610 |
+| USATECHIDXUSD | 2025 | ichimoku_cloud | 1,401 | 51,623 |
+| USATECHIDXUSD | 2025 | intraday_momentum | 0 | 0 |
+| USATECHIDXUSD | 2025 | liquidity_sweep | 3,107 | 111,540 |
+| USATECHIDXUSD | 2025 | ma_cross | 0 | 0 |
+| USATECHIDXUSD | 2025 | macd_signal | 0 | 0 |
+| USATECHIDXUSD | 2025 | market_structure_pullback | 0 | 0 |
+| USATECHIDXUSD | 2025 | order_block_retest | 0 | 0 |
+| USATECHIDXUSD | 2025 | ote_zone | 0 | 0 |
+| USATECHIDXUSD | 2025 | post_earnings_index_reaction | 0 | 0 |
+| USATECHIDXUSD | 2025 | post_macro_event_reaction | 0 | 0 |
+| USATECHIDXUSD | 2025 | price_action_h2l2 | 0 | 0 |
+| USATECHIDXUSD | 2025 | range_breakout_nr4_nr7 | 0 | 0 |
+| USATECHIDXUSD | 2025 | round_number_reaction | 1,208 | 44,524 |
+| USATECHIDXUSD | 2025 | rsi2_mean_reversion | 17 | 612 |
+| USATECHIDXUSD | 2025 | session_level_reaction | 51 | 1,867 |
+| USATECHIDXUSD | 2025 | sr_touch | 2,589 | 186,116 |
+| USATECHIDXUSD | 2025 | stochastic | 0 | 0 |
+| USATECHIDXUSD | 2025 | supply_demand_zone_retest | 0 | 0 |
+| USATECHIDXUSD | 2025 | trend_following | 1,535 | 56,606 |
+| USATECHIDXUSD | 2025 | trendline_channel | 709 | 26,147 |
+| USATECHIDXUSD | 2025 | vix_spike_dip_buy | 0 | 0 |
+| USATECHIDXUSD | 2025 | volume_profile_poc_vah_val | 1,392 | 51,317 |
+| USATECHIDXUSD | 2025 | vwap_reclaim_reject | 0 | 0 |
+| USATECHIDXUSD | 2025 | wyckoff_spring_upthrust | 0 | 0 |
+| USATECHIDXUSD | 2026 | bollinger | 0 | 0 |
+| USATECHIDXUSD | 2026 | candlestick_at_level | 149 | 5,511 |
+| USATECHIDXUSD | 2026 | chart_patterns | 374 | 13,812 |
+| USATECHIDXUSD | 2026 | donchian_atr_breakout | 0 | 0 |
+| USATECHIDXUSD | 2026 | dow_trend_confirmation | 0 | 0 |
+| USATECHIDXUSD | 2026 | fib_pullback | 0 | 0 |
+| USATECHIDXUSD | 2026 | fvg_retrace | 1,027 | 37,946 |
+| USATECHIDXUSD | 2026 | ichimoku_cloud | 1,197 | 44,214 |
+| USATECHIDXUSD | 2026 | intraday_momentum | 0 | 0 |
+| USATECHIDXUSD | 2026 | liquidity_sweep | 2,709 | 97,269 |
+| USATECHIDXUSD | 2026 | ma_cross | 0 | 0 |
+| USATECHIDXUSD | 2026 | macd_signal | 0 | 0 |
+| USATECHIDXUSD | 2026 | market_structure_pullback | 0 | 0 |
+| USATECHIDXUSD | 2026 | order_block_retest | 0 | 0 |
+| USATECHIDXUSD | 2026 | ote_zone | 0 | 0 |
+| USATECHIDXUSD | 2026 | post_earnings_index_reaction | 0 | 0 |
+| USATECHIDXUSD | 2026 | post_macro_event_reaction | 0 | 0 |
+| USATECHIDXUSD | 2026 | price_action_h2l2 | 0 | 0 |
+| USATECHIDXUSD | 2026 | range_breakout_nr4_nr7 | 0 | 0 |
+| USATECHIDXUSD | 2026 | round_number_reaction | 1,196 | 44,124 |
+| USATECHIDXUSD | 2026 | rsi2_mean_reversion | 19 | 684 |
+| USATECHIDXUSD | 2026 | session_level_reaction | 42 | 1,545 |
+| USATECHIDXUSD | 2026 | sr_touch | 2,043 | 146,937 |
+| USATECHIDXUSD | 2026 | stochastic | 0 | 0 |
+| USATECHIDXUSD | 2026 | supply_demand_zone_retest | 0 | 0 |
+| USATECHIDXUSD | 2026 | trend_following | 1,321 | 48,790 |
+| USATECHIDXUSD | 2026 | trendline_channel | 606 | 22,391 |
+| USATECHIDXUSD | 2026 | vix_spike_dip_buy | 0 | 0 |
+| USATECHIDXUSD | 2026 | volume_profile_poc_vah_val | 1,234 | 45,589 |
+| USATECHIDXUSD | 2026 | vwap_reclaim_reject | 0 | 0 |
+| USATECHIDXUSD | 2026 | wyckoff_spring_upthrust | 0 | 0 |
+| USA500IDXUSD | 2018 | bollinger | 0 | 0 |
+| USA500IDXUSD | 2018 | candlestick_at_level | 7 | 256 |
+| USA500IDXUSD | 2018 | chart_patterns | 15 | 550 |
+| USA500IDXUSD | 2018 | donchian_atr_breakout | 0 | 0 |
+| USA500IDXUSD | 2018 | dow_trend_confirmation | 0 | 0 |
+| USA500IDXUSD | 2018 | fib_pullback | 0 | 0 |
+| USA500IDXUSD | 2018 | fvg_retrace | 46 | 1,689 |
+| USA500IDXUSD | 2018 | ichimoku_cloud | 54 | 1,964 |
+| USA500IDXUSD | 2018 | intraday_momentum | 0 | 0 |
+| USA500IDXUSD | 2018 | liquidity_sweep | 83 | 2,958 |
+| USA500IDXUSD | 2018 | ma_cross | 0 | 0 |
+| USA500IDXUSD | 2018 | macd_signal | 0 | 0 |
+| USA500IDXUSD | 2018 | market_structure_pullback | 0 | 0 |
+| USA500IDXUSD | 2018 | order_block_retest | 0 | 0 |
+| USA500IDXUSD | 2018 | ote_zone | 0 | 0 |
+| USA500IDXUSD | 2018 | post_macro_event_reaction | 0 | 0 |
+| USA500IDXUSD | 2018 | price_action_h2l2 | 0 | 0 |
+| USA500IDXUSD | 2018 | range_breakout_nr4_nr7 | 0 | 0 |
+| USA500IDXUSD | 2018 | round_number_reaction | 45 | 1,634 |
+| USA500IDXUSD | 2018 | rsi2_mean_reversion | 0 | 0 |
+| USA500IDXUSD | 2018 | session_level_reaction | 6 | 219 |
+| USA500IDXUSD | 2018 | sr_touch | 81 | 5,793 |
+| USA500IDXUSD | 2018 | stochastic | 0 | 0 |
+| USA500IDXUSD | 2018 | supply_demand_zone_retest | 0 | 0 |
+| USA500IDXUSD | 2018 | trend_following | 59 | 2,155 |
+| USA500IDXUSD | 2018 | trendline_channel | 25 | 911 |
+| USA500IDXUSD | 2018 | vix_spike_dip_buy | 0 | 0 |
+| USA500IDXUSD | 2018 | volume_profile_poc_vah_val | 37 | 1,347 |
+| USA500IDXUSD | 2018 | vwap_reclaim_reject | 0 | 0 |
+| USA500IDXUSD | 2018 | wyckoff_spring_upthrust | 0 | 0 |
+| USA500IDXUSD | 2019 | bollinger | 0 | 0 |
+| USA500IDXUSD | 2019 | candlestick_at_level | 41 | 1,498 |
+| USA500IDXUSD | 2019 | chart_patterns | 416 | 15,168 |
+| USA500IDXUSD | 2019 | donchian_atr_breakout | 0 | 0 |
+| USA500IDXUSD | 2019 | dow_trend_confirmation | 0 | 0 |
+| USA500IDXUSD | 2019 | fib_pullback | 0 | 0 |
+| USA500IDXUSD | 2019 | fvg_retrace | 1,263 | 46,066 |
+| USA500IDXUSD | 2019 | ichimoku_cloud | 1,391 | 50,687 |
+| USA500IDXUSD | 2019 | intraday_momentum | 0 | 0 |
+| USA500IDXUSD | 2019 | liquidity_sweep | 1,558 | 55,672 |
+| USA500IDXUSD | 2019 | ma_cross | 0 | 0 |
+| USA500IDXUSD | 2019 | macd_signal | 0 | 0 |
+| USA500IDXUSD | 2019 | market_structure_pullback | 0 | 0 |
+| USA500IDXUSD | 2019 | order_block_retest | 0 | 0 |
+| USA500IDXUSD | 2019 | ote_zone | 0 | 0 |
+| USA500IDXUSD | 2019 | post_macro_event_reaction | 0 | 0 |
+| USA500IDXUSD | 2019 | price_action_h2l2 | 0 | 0 |
+| USA500IDXUSD | 2019 | range_breakout_nr4_nr7 | 0 | 0 |
+| USA500IDXUSD | 2019 | round_number_reaction | 646 | 23,565 |
+| USA500IDXUSD | 2019 | rsi2_mean_reversion | 0 | 0 |
+| USA500IDXUSD | 2019 | session_level_reaction | 68 | 2,466 |
+| USA500IDXUSD | 2019 | sr_touch | 1,564 | 112,008 |
+| USA500IDXUSD | 2019 | stochastic | 0 | 0 |
+| USA500IDXUSD | 2019 | supply_demand_zone_retest | 5 | 182 |
+| USA500IDXUSD | 2019 | trend_following | 1,537 | 56,046 |
+| USA500IDXUSD | 2019 | trendline_channel | 621 | 22,644 |
+| USA500IDXUSD | 2019 | vix_spike_dip_buy | 0 | 0 |
+| USA500IDXUSD | 2019 | volume_profile_poc_vah_val | 732 | 26,804 |
+| USA500IDXUSD | 2019 | vwap_reclaim_reject | 0 | 0 |
+| USA500IDXUSD | 2019 | wyckoff_spring_upthrust | 0 | 0 |
+| USA500IDXUSD | 2020 | bollinger | 0 | 0 |
+| USA500IDXUSD | 2020 | candlestick_at_level | 56 | 2,070 |
+| USA500IDXUSD | 2020 | chart_patterns | 447 | 16,464 |
+| USA500IDXUSD | 2020 | donchian_atr_breakout | 0 | 0 |
+| USA500IDXUSD | 2020 | dow_trend_confirmation | 0 | 0 |
+| USA500IDXUSD | 2020 | fib_pullback | 0 | 0 |
+| USA500IDXUSD | 2020 | fvg_retrace | 1,270 | 46,803 |
+| USA500IDXUSD | 2020 | ichimoku_cloud | 1,394 | 51,330 |
+| USA500IDXUSD | 2020 | intraday_momentum | 0 | 0 |
+| USA500IDXUSD | 2020 | liquidity_sweep | 2,786 | 99,954 |
+| USA500IDXUSD | 2020 | ma_cross | 0 | 0 |
+| USA500IDXUSD | 2020 | macd_signal | 0 | 0 |
+| USA500IDXUSD | 2020 | market_structure_pullback | 0 | 0 |
+| USA500IDXUSD | 2020 | order_block_retest | 0 | 0 |
+| USA500IDXUSD | 2020 | ote_zone | 0 | 0 |
+| USA500IDXUSD | 2020 | post_macro_event_reaction | 0 | 0 |
+| USA500IDXUSD | 2020 | price_action_h2l2 | 0 | 0 |
+| USA500IDXUSD | 2020 | range_breakout_nr4_nr7 | 0 | 0 |
+| USA500IDXUSD | 2020 | round_number_reaction | 1,074 | 39,574 |
+| USA500IDXUSD | 2020 | rsi2_mean_reversion | 8 | 288 |
+| USA500IDXUSD | 2020 | session_level_reaction | 44 | 1,607 |
+| USA500IDXUSD | 2020 | sr_touch | 2,317 | 166,442 |
+| USA500IDXUSD | 2020 | stochastic | 0 | 0 |
+| USA500IDXUSD | 2020 | supply_demand_zone_retest | 0 | 0 |
+| USA500IDXUSD | 2020 | trend_following | 1,540 | 56,735 |
+| USA500IDXUSD | 2020 | trendline_channel | 724 | 26,653 |
+| USA500IDXUSD | 2020 | vix_spike_dip_buy | 0 | 0 |
+| USA500IDXUSD | 2020 | volume_profile_poc_vah_val | 1,336 | 49,235 |
+| USA500IDXUSD | 2020 | vwap_reclaim_reject | 0 | 0 |
+| USA500IDXUSD | 2020 | wyckoff_spring_upthrust | 0 | 0 |
+| USA500IDXUSD | 2021 | bollinger | 0 | 0 |
+| USA500IDXUSD | 2021 | candlestick_at_level | 81 | 2,987 |
+| USA500IDXUSD | 2021 | chart_patterns | 467 | 17,154 |
+| USA500IDXUSD | 2021 | donchian_atr_breakout | 0 | 0 |
+| USA500IDXUSD | 2021 | dow_trend_confirmation | 0 | 0 |
+| USA500IDXUSD | 2021 | fib_pullback | 0 | 0 |
+| USA500IDXUSD | 2021 | fvg_retrace | 1,248 | 45,856 |
+| USA500IDXUSD | 2021 | ichimoku_cloud | 1,408 | 51,733 |
+| USA500IDXUSD | 2021 | intraday_momentum | 0 | 0 |
+| USA500IDXUSD | 2021 | liquidity_sweep | 2,768 | 99,239 |
+| USA500IDXUSD | 2021 | ma_cross | 0 | 0 |
+| USA500IDXUSD | 2021 | macd_signal | 0 | 0 |
+| USA500IDXUSD | 2021 | market_structure_pullback | 0 | 0 |
+| USA500IDXUSD | 2021 | order_block_retest | 0 | 0 |
+| USA500IDXUSD | 2021 | ote_zone | 0 | 0 |
+| USA500IDXUSD | 2021 | post_macro_event_reaction | 0 | 0 |
+| USA500IDXUSD | 2021 | price_action_h2l2 | 0 | 0 |
+| USA500IDXUSD | 2021 | range_breakout_nr4_nr7 | 0 | 0 |
+| USA500IDXUSD | 2021 | round_number_reaction | 922 | 33,907 |
+| USA500IDXUSD | 2021 | rsi2_mean_reversion | 15 | 540 |
+| USA500IDXUSD | 2021 | session_level_reaction | 96 | 3,492 |
+| USA500IDXUSD | 2021 | sr_touch | 2,663 | 191,220 |
+| USA500IDXUSD | 2021 | stochastic | 0 | 0 |
+| USA500IDXUSD | 2021 | supply_demand_zone_retest | 0 | 0 |
+| USA500IDXUSD | 2021 | trend_following | 1,544 | 56,732 |
+| USA500IDXUSD | 2021 | trendline_channel | 668 | 24,546 |
+| USA500IDXUSD | 2021 | vix_spike_dip_buy | 0 | 0 |
+| USA500IDXUSD | 2021 | volume_profile_poc_vah_val | 1,241 | 45,609 |
+| USA500IDXUSD | 2021 | vwap_reclaim_reject | 0 | 0 |
+| USA500IDXUSD | 2021 | wyckoff_spring_upthrust | 0 | 0 |
+| USA500IDXUSD | 2022 | bollinger | 0 | 0 |
+| USA500IDXUSD | 2022 | candlestick_at_level | 143 | 5,291 |
+| USA500IDXUSD | 2022 | chart_patterns | 471 | 17,420 |
+| USA500IDXUSD | 2022 | donchian_atr_breakout | 0 | 0 |
+| USA500IDXUSD | 2022 | dow_trend_confirmation | 0 | 0 |
+| USA500IDXUSD | 2022 | fib_pullback | 0 | 0 |
+| USA500IDXUSD | 2022 | fvg_retrace | 1,183 | 43,764 |
+| USA500IDXUSD | 2022 | ichimoku_cloud | 1,403 | 51,891 |
+| USA500IDXUSD | 2022 | intraday_momentum | 0 | 0 |
+| USA500IDXUSD | 2022 | liquidity_sweep | 3,133 | 112,598 |
+| USA500IDXUSD | 2022 | ma_cross | 0 | 0 |
+| USA500IDXUSD | 2022 | macd_signal | 0 | 0 |
+| USA500IDXUSD | 2022 | market_structure_pullback | 0 | 0 |
+| USA500IDXUSD | 2022 | order_block_retest | 0 | 0 |
+| USA500IDXUSD | 2022 | ote_zone | 0 | 0 |
+| USA500IDXUSD | 2022 | post_macro_event_reaction | 0 | 0 |
+| USA500IDXUSD | 2022 | price_action_h2l2 | 0 | 0 |
+| USA500IDXUSD | 2022 | range_breakout_nr4_nr7 | 0 | 0 |
+| USA500IDXUSD | 2022 | round_number_reaction | 1,216 | 44,982 |
+| USA500IDXUSD | 2022 | rsi2_mean_reversion | 11 | 396 |
+| USA500IDXUSD | 2022 | session_level_reaction | 9 | 333 |
+| USA500IDXUSD | 2022 | sr_touch | 1,772 | 127,561 |
+| USA500IDXUSD | 2022 | stochastic | 0 | 0 |
+| USA500IDXUSD | 2022 | supply_demand_zone_retest | 0 | 0 |
+| USA500IDXUSD | 2022 | trend_following | 1,540 | 56,966 |
+| USA500IDXUSD | 2022 | trendline_channel | 679 | 25,119 |
+| USA500IDXUSD | 2022 | vix_spike_dip_buy | 0 | 0 |
+| USA500IDXUSD | 2022 | volume_profile_poc_vah_val | 1,539 | 56,924 |
+| USA500IDXUSD | 2022 | vwap_reclaim_reject | 0 | 0 |
+| USA500IDXUSD | 2022 | wyckoff_spring_upthrust | 0 | 0 |
+| USA500IDXUSD | 2023 | bollinger | 0 | 0 |
+| USA500IDXUSD | 2023 | candlestick_at_level | 126 | 4,662 |
+| USA500IDXUSD | 2023 | chart_patterns | 442 | 16,345 |
+| USA500IDXUSD | 2023 | donchian_atr_breakout | 0 | 0 |
+| USA500IDXUSD | 2023 | dow_trend_confirmation | 0 | 0 |
+| USA500IDXUSD | 2023 | fib_pullback | 0 | 0 |
+| USA500IDXUSD | 2023 | fvg_retrace | 1,166 | 43,128 |
+| USA500IDXUSD | 2023 | ichimoku_cloud | 1,393 | 51,512 |
+| USA500IDXUSD | 2023 | intraday_momentum | 0 | 0 |
+| USA500IDXUSD | 2023 | liquidity_sweep | 3,187 | 114,486 |
+| USA500IDXUSD | 2023 | ma_cross | 0 | 0 |
+| USA500IDXUSD | 2023 | macd_signal | 0 | 0 |
+| USA500IDXUSD | 2023 | market_structure_pullback | 0 | 0 |
+| USA500IDXUSD | 2023 | order_block_retest | 0 | 0 |
+| USA500IDXUSD | 2023 | ote_zone | 0 | 0 |
+| USA500IDXUSD | 2023 | post_macro_event_reaction | 0 | 0 |
+| USA500IDXUSD | 2023 | price_action_h2l2 | 0 | 0 |
+| USA500IDXUSD | 2023 | range_breakout_nr4_nr7 | 0 | 0 |
+| USA500IDXUSD | 2023 | round_number_reaction | 883 | 32,667 |
+| USA500IDXUSD | 2023 | rsi2_mean_reversion | 14 | 504 |
+| USA500IDXUSD | 2023 | session_level_reaction | 0 | 0 |
+| USA500IDXUSD | 2023 | sr_touch | 1,633 | 117,545 |
+| USA500IDXUSD | 2023 | stochastic | 0 | 0 |
+| USA500IDXUSD | 2023 | supply_demand_zone_retest | 0 | 0 |
+| USA500IDXUSD | 2023 | trend_following | 1,532 | 56,660 |
+| USA500IDXUSD | 2023 | trendline_channel | 653 | 24,154 |
+| USA500IDXUSD | 2023 | vix_spike_dip_buy | 0 | 0 |
+| USA500IDXUSD | 2023 | volume_profile_poc_vah_val | 1,529 | 56,547 |
+| USA500IDXUSD | 2023 | vwap_reclaim_reject | 0 | 0 |
+| USA500IDXUSD | 2023 | wyckoff_spring_upthrust | 0 | 0 |
+| USA500IDXUSD | 2024 | bollinger | 0 | 0 |
+| USA500IDXUSD | 2024 | candlestick_at_level | 120 | 4,422 |
+| USA500IDXUSD | 2024 | chart_patterns | 447 | 16,420 |
+| USA500IDXUSD | 2024 | donchian_atr_breakout | 0 | 0 |
+| USA500IDXUSD | 2024 | dow_trend_confirmation | 0 | 0 |
+| USA500IDXUSD | 2024 | fib_pullback | 0 | 0 |
+| USA500IDXUSD | 2024 | fvg_retrace | 1,177 | 43,287 |
+| USA500IDXUSD | 2024 | ichimoku_cloud | 1,405 | 51,605 |
+| USA500IDXUSD | 2024 | intraday_momentum | 0 | 0 |
+| USA500IDXUSD | 2024 | liquidity_sweep | 2,854 | 102,321 |
+| USA500IDXUSD | 2024 | ma_cross | 0 | 0 |
+| USA500IDXUSD | 2024 | macd_signal | 0 | 0 |
+| USA500IDXUSD | 2024 | market_structure_pullback | 0 | 0 |
+| USA500IDXUSD | 2024 | order_block_retest | 0 | 0 |
+| USA500IDXUSD | 2024 | ote_zone | 0 | 0 |
+| USA500IDXUSD | 2024 | post_macro_event_reaction | 0 | 0 |
+| USA500IDXUSD | 2024 | price_action_h2l2 | 0 | 0 |
+| USA500IDXUSD | 2024 | range_breakout_nr4_nr7 | 0 | 0 |
+| USA500IDXUSD | 2024 | round_number_reaction | 941 | 34,565 |
+| USA500IDXUSD | 2024 | rsi2_mean_reversion | 16 | 576 |
+| USA500IDXUSD | 2024 | session_level_reaction | 77 | 2,809 |
+| USA500IDXUSD | 2024 | sr_touch | 2,896 | 207,987 |
+| USA500IDXUSD | 2024 | stochastic | 0 | 0 |
+| USA500IDXUSD | 2024 | supply_demand_zone_retest | 0 | 0 |
+| USA500IDXUSD | 2024 | trend_following | 1,544 | 56,743 |
+| USA500IDXUSD | 2024 | trendline_channel | 676 | 24,836 |
+| USA500IDXUSD | 2024 | vix_spike_dip_buy | 0 | 0 |
+| USA500IDXUSD | 2024 | volume_profile_poc_vah_val | 1,287 | 47,239 |
+| USA500IDXUSD | 2024 | vwap_reclaim_reject | 0 | 0 |
+| USA500IDXUSD | 2024 | wyckoff_spring_upthrust | 0 | 0 |
+| USA500IDXUSD | 2025 | bollinger | 0 | 0 |
+| USA500IDXUSD | 2025 | candlestick_at_level | 144 | 5,322 |
+| USA500IDXUSD | 2025 | chart_patterns | 428 | 15,775 |
+| USA500IDXUSD | 2025 | donchian_atr_breakout | 0 | 0 |
+| USA500IDXUSD | 2025 | dow_trend_confirmation | 0 | 0 |
+| USA500IDXUSD | 2025 | fib_pullback | 0 | 0 |
+| USA500IDXUSD | 2025 | fvg_retrace | 1,186 | 43,724 |
+| USA500IDXUSD | 2025 | ichimoku_cloud | 1,398 | 51,533 |
+| USA500IDXUSD | 2025 | intraday_momentum | 0 | 0 |
+| USA500IDXUSD | 2025 | liquidity_sweep | 2,955 | 106,062 |
+| USA500IDXUSD | 2025 | ma_cross | 0 | 0 |
+| USA500IDXUSD | 2025 | macd_signal | 0 | 0 |
+| USA500IDXUSD | 2025 | market_structure_pullback | 0 | 0 |
+| USA500IDXUSD | 2025 | order_block_retest | 0 | 0 |
+| USA500IDXUSD | 2025 | ote_zone | 0 | 0 |
+| USA500IDXUSD | 2025 | post_macro_event_reaction | 0 | 0 |
+| USA500IDXUSD | 2025 | price_action_h2l2 | 0 | 0 |
+| USA500IDXUSD | 2025 | range_breakout_nr4_nr7 | 0 | 0 |
+| USA500IDXUSD | 2025 | round_number_reaction | 1,123 | 41,401 |
+| USA500IDXUSD | 2025 | rsi2_mean_reversion | 17 | 611 |
+| USA500IDXUSD | 2025 | session_level_reaction | 62 | 2,259 |
+| USA500IDXUSD | 2025 | sr_touch | 2,579 | 185,367 |
+| USA500IDXUSD | 2025 | stochastic | 0 | 0 |
+| USA500IDXUSD | 2025 | supply_demand_zone_retest | 0 | 0 |
+| USA500IDXUSD | 2025 | trend_following | 1,535 | 56,593 |
+| USA500IDXUSD | 2025 | trendline_channel | 694 | 25,586 |
+| USA500IDXUSD | 2025 | vix_spike_dip_buy | 0 | 0 |
+| USA500IDXUSD | 2025 | volume_profile_poc_vah_val | 1,371 | 50,523 |
+| USA500IDXUSD | 2025 | vwap_reclaim_reject | 0 | 0 |
+| USA500IDXUSD | 2025 | wyckoff_spring_upthrust | 0 | 0 |
+| USA500IDXUSD | 2026 | bollinger | 0 | 0 |
+| USA500IDXUSD | 2026 | candlestick_at_level | 129 | 4,768 |
+| USA500IDXUSD | 2026 | chart_patterns | 382 | 14,101 |
+| USA500IDXUSD | 2026 | donchian_atr_breakout | 0 | 0 |
+| USA500IDXUSD | 2026 | dow_trend_confirmation | 0 | 0 |
+| USA500IDXUSD | 2026 | fib_pullback | 0 | 0 |
+| USA500IDXUSD | 2026 | fvg_retrace | 1,006 | 37,128 |
+| USA500IDXUSD | 2026 | ichimoku_cloud | 1,204 | 44,411 |
+| USA500IDXUSD | 2026 | intraday_momentum | 0 | 0 |
+| USA500IDXUSD | 2026 | liquidity_sweep | 2,569 | 92,220 |
+| USA500IDXUSD | 2026 | ma_cross | 0 | 0 |
+| USA500IDXUSD | 2026 | macd_signal | 0 | 0 |
+| USA500IDXUSD | 2026 | market_structure_pullback | 0 | 0 |
+| USA500IDXUSD | 2026 | order_block_retest | 0 | 0 |
+| USA500IDXUSD | 2026 | ote_zone | 0 | 0 |
+| USA500IDXUSD | 2026 | post_macro_event_reaction | 0 | 0 |
+| USA500IDXUSD | 2026 | price_action_h2l2 | 0 | 0 |
+| USA500IDXUSD | 2026 | range_breakout_nr4_nr7 | 0 | 0 |
+| USA500IDXUSD | 2026 | round_number_reaction | 1,062 | 39,165 |
+| USA500IDXUSD | 2026 | rsi2_mean_reversion | 15 | 539 |
+| USA500IDXUSD | 2026 | session_level_reaction | 42 | 1,537 |
+| USA500IDXUSD | 2026 | sr_touch | 2,094 | 150,531 |
+| USA500IDXUSD | 2026 | stochastic | 0 | 0 |
+| USA500IDXUSD | 2026 | supply_demand_zone_retest | 0 | 0 |
+| USA500IDXUSD | 2026 | trend_following | 1,320 | 48,712 |
+| USA500IDXUSD | 2026 | trendline_channel | 617 | 22,763 |
+| USA500IDXUSD | 2026 | vix_spike_dip_buy | 0 | 0 |
+| USA500IDXUSD | 2026 | volume_profile_poc_vah_val | 1,197 | 44,152 |
+| USA500IDXUSD | 2026 | vwap_reclaim_reject | 0 | 0 |
+| USA500IDXUSD | 2026 | wyckoff_spring_upthrust | 0 | 0 |
+| XAUUSD | 2008 | bollinger | 0 | 0 |
+| XAUUSD | 2008 | candlestick_at_level | 12 | 435 |
+| XAUUSD | 2008 | chart_patterns | 458 | 16,885 |
+| XAUUSD | 2008 | donchian_atr_breakout | 0 | 0 |
+| XAUUSD | 2008 | dow_trend_confirmation | 0 | 0 |
+| XAUUSD | 2008 | fib_pullback | 0 | 0 |
+| XAUUSD | 2008 | fvg_retrace | 1,298 | 47,849 |
+| XAUUSD | 2008 | ichimoku_cloud | 1,465 | 53,944 |
+| XAUUSD | 2008 | liquidity_sweep | 3,202 | 114,969 |
+| XAUUSD | 2008 | ma_cross | 0 | 0 |
+| XAUUSD | 2008 | macd_signal | 0 | 0 |
+| XAUUSD | 2008 | market_structure_pullback | 0 | 0 |
+| XAUUSD | 2008 | order_block_retest | 0 | 0 |
+| XAUUSD | 2008 | ote_zone | 0 | 0 |
+| XAUUSD | 2008 | post_macro_event_reaction | 0 | 0 |
+| XAUUSD | 2008 | price_action_h2l2 | 0 | 0 |
+| XAUUSD | 2008 | range_breakout_nr4_nr7 | 0 | 0 |
+| XAUUSD | 2008 | round_number_reaction | 205 | 7,546 |
+| XAUUSD | 2008 | session_level_reaction | 27 | 985 |
+| XAUUSD | 2008 | sr_touch | 2,704 | 194,332 |
+| XAUUSD | 2008 | stochastic | 0 | 0 |
+| XAUUSD | 2008 | supply_demand_zone_retest | 0 | 0 |
+| XAUUSD | 2008 | trend_following | 1,572 | 57,883 |
+| XAUUSD | 2008 | trendline_channel | 754 | 27,784 |
+| XAUUSD | 2008 | volume_profile_poc_vah_val | 1,459 | 53,730 |
+| XAUUSD | 2008 | vwap_reclaim_reject | 0 | 0 |
+| XAUUSD | 2008 | wyckoff_spring_upthrust | 0 | 0 |
+| XAUUSD | 2009 | bollinger | 0 | 0 |
+| XAUUSD | 2009 | candlestick_at_level | 25 | 922 |
+| XAUUSD | 2009 | chart_patterns | 502 | 18,534 |
+| XAUUSD | 2009 | donchian_atr_breakout | 0 | 0 |
+| XAUUSD | 2009 | dow_trend_confirmation | 0 | 0 |
+| XAUUSD | 2009 | fib_pullback | 0 | 0 |
+| XAUUSD | 2009 | fvg_retrace | 1,277 | 47,142 |
+| XAUUSD | 2009 | ichimoku_cloud | 1,468 | 54,180 |
+| XAUUSD | 2009 | liquidity_sweep | 3,144 | 112,814 |
+| XAUUSD | 2009 | ma_cross | 0 | 0 |
+| XAUUSD | 2009 | macd_signal | 0 | 0 |
+| XAUUSD | 2009 | market_structure_pullback | 0 | 0 |
+| XAUUSD | 2009 | order_block_retest | 0 | 0 |
+| XAUUSD | 2009 | ote_zone | 0 | 0 |
+| XAUUSD | 2009 | post_macro_event_reaction | 0 | 0 |
+| XAUUSD | 2009 | price_action_h2l2 | 0 | 0 |
+| XAUUSD | 2009 | range_breakout_nr4_nr7 | 0 | 0 |
+| XAUUSD | 2009 | round_number_reaction | 234 | 8,636 |
+| XAUUSD | 2009 | session_level_reaction | 15 | 547 |
+| XAUUSD | 2009 | sr_touch | 1,677 | 120,565 |
+| XAUUSD | 2009 | stochastic | 0 | 0 |
+| XAUUSD | 2009 | supply_demand_zone_retest | 0 | 0 |
+| XAUUSD | 2009 | trend_following | 1,566 | 57,802 |
+| XAUUSD | 2009 | trendline_channel | 791 | 29,198 |
+| XAUUSD | 2009 | volume_profile_poc_vah_val | 1,486 | 54,840 |
+| XAUUSD | 2009 | vwap_reclaim_reject | 0 | 0 |
+| XAUUSD | 2009 | wyckoff_spring_upthrust | 0 | 0 |
+| XAUUSD | 2010 | bollinger | 0 | 0 |
+| XAUUSD | 2010 | candlestick_at_level | 22 | 813 |
+| XAUUSD | 2010 | chart_patterns | 469 | 17,291 |
+| XAUUSD | 2010 | donchian_atr_breakout | 0 | 0 |
+| XAUUSD | 2010 | dow_trend_confirmation | 0 | 0 |
+| XAUUSD | 2010 | fib_pullback | 0 | 0 |
+| XAUUSD | 2010 | fvg_retrace | 1,269 | 46,798 |
+| XAUUSD | 2010 | ichimoku_cloud | 1,471 | 54,211 |
+| XAUUSD | 2010 | liquidity_sweep | 2,978 | 106,950 |
+| XAUUSD | 2010 | ma_cross | 0 | 0 |
+| XAUUSD | 2010 | macd_signal | 0 | 0 |
+| XAUUSD | 2010 | market_structure_pullback | 0 | 0 |
+| XAUUSD | 2010 | order_block_retest | 0 | 0 |
+| XAUUSD | 2010 | ote_zone | 0 | 0 |
+| XAUUSD | 2010 | post_macro_event_reaction | 0 | 0 |
+| XAUUSD | 2010 | price_action_h2l2 | 0 | 0 |
+| XAUUSD | 2010 | range_breakout_nr4_nr7 | 0 | 0 |
+| XAUUSD | 2010 | round_number_reaction | 180 | 6,636 |
+| XAUUSD | 2010 | session_level_reaction | 25 | 911 |
+| XAUUSD | 2010 | sr_touch | 2,755 | 198,075 |
+| XAUUSD | 2010 | stochastic | 0 | 0 |
+| XAUUSD | 2010 | supply_demand_zone_retest | 0 | 0 |
+| XAUUSD | 2010 | trend_following | 1,565 | 57,692 |
+| XAUUSD | 2010 | trendline_channel | 814 | 30,006 |
+| XAUUSD | 2010 | volume_profile_poc_vah_val | 1,467 | 54,054 |
+| XAUUSD | 2010 | vwap_reclaim_reject | 0 | 0 |
+| XAUUSD | 2010 | wyckoff_spring_upthrust | 0 | 0 |
+| XAUUSD | 2011 | bollinger | 0 | 0 |
+| XAUUSD | 2011 | candlestick_at_level | 12 | 441 |
+| XAUUSD | 2011 | chart_patterns | 451 | 16,593 |
+| XAUUSD | 2011 | donchian_atr_breakout | 0 | 0 |
+| XAUUSD | 2011 | dow_trend_confirmation | 0 | 0 |
+| XAUUSD | 2011 | fib_pullback | 0 | 0 |
+| XAUUSD | 2011 | fvg_retrace | 1,341 | 49,400 |
+| XAUUSD | 2011 | ichimoku_cloud | 1,458 | 53,640 |
+| XAUUSD | 2011 | liquidity_sweep | 3,103 | 111,346 |
+| XAUUSD | 2011 | ma_cross | 0 | 0 |
+| XAUUSD | 2011 | macd_signal | 0 | 0 |
+| XAUUSD | 2011 | market_structure_pullback | 0 | 0 |
+| XAUUSD | 2011 | order_block_retest | 0 | 0 |
+| XAUUSD | 2011 | ote_zone | 0 | 0 |
+| XAUUSD | 2011 | post_macro_event_reaction | 0 | 0 |
+| XAUUSD | 2011 | price_action_h2l2 | 0 | 0 |
+| XAUUSD | 2011 | range_breakout_nr4_nr7 | 0 | 0 |
+| XAUUSD | 2011 | round_number_reaction | 281 | 10,341 |
+| XAUUSD | 2011 | session_level_reaction | 31 | 1,128 |
+| XAUUSD | 2011 | sr_touch | 2,976 | 213,832 |
+| XAUUSD | 2011 | stochastic | 0 | 0 |
+| XAUUSD | 2011 | supply_demand_zone_retest | 2 | 72 |
+| XAUUSD | 2011 | trend_following | 1,555 | 57,224 |
+| XAUUSD | 2011 | trendline_channel | 742 | 27,291 |
+| XAUUSD | 2011 | volume_profile_poc_vah_val | 1,438 | 52,860 |
+| XAUUSD | 2011 | vwap_reclaim_reject | 0 | 0 |
+| XAUUSD | 2011 | wyckoff_spring_upthrust | 0 | 0 |
+| XAUUSD | 2012 | bollinger | 0 | 0 |
+| XAUUSD | 2012 | candlestick_at_level | 16 | 592 |
+| XAUUSD | 2012 | chart_patterns | 469 | 17,343 |
+| XAUUSD | 2012 | donchian_atr_breakout | 0 | 0 |
+| XAUUSD | 2012 | dow_trend_confirmation | 0 | 0 |
+| XAUUSD | 2012 | fib_pullback | 0 | 0 |
+| XAUUSD | 2012 | fvg_retrace | 1,260 | 46,599 |
+| XAUUSD | 2012 | ichimoku_cloud | 1,463 | 54,080 |
+| XAUUSD | 2012 | liquidity_sweep | 2,976 | 107,000 |
+| XAUUSD | 2012 | ma_cross | 0 | 0 |
+| XAUUSD | 2012 | macd_signal | 0 | 0 |
+| XAUUSD | 2012 | market_structure_pullback | 0 | 0 |
+| XAUUSD | 2012 | order_block_retest | 0 | 0 |
+| XAUUSD | 2012 | ote_zone | 0 | 0 |
+| XAUUSD | 2012 | post_macro_event_reaction | 0 | 0 |
+| XAUUSD | 2012 | price_action_h2l2 | 0 | 0 |
+| XAUUSD | 2012 | range_breakout_nr4_nr7 | 0 | 0 |
+| XAUUSD | 2012 | round_number_reaction | 206 | 7,619 |
+| XAUUSD | 2012 | session_level_reaction | 0 | 0 |
+| XAUUSD | 2012 | sr_touch | 2,339 | 168,371 |
+| XAUUSD | 2012 | stochastic | 0 | 0 |
+| XAUUSD | 2012 | supply_demand_zone_retest | 0 | 0 |
+| XAUUSD | 2012 | trend_following | 1,560 | 57,693 |
+| XAUUSD | 2012 | trendline_channel | 790 | 29,208 |
+| XAUUSD | 2012 | volume_profile_poc_vah_val | 1,563 | 57,698 |
+| XAUUSD | 2012 | vwap_reclaim_reject | 0 | 0 |
+| XAUUSD | 2012 | wyckoff_spring_upthrust | 0 | 0 |
+| XAUUSD | 2013 | bollinger | 0 | 0 |
+| XAUUSD | 2013 | candlestick_at_level | 18 | 666 |
+| XAUUSD | 2013 | chart_patterns | 447 | 16,532 |
+| XAUUSD | 2013 | donchian_atr_breakout | 0 | 0 |
+| XAUUSD | 2013 | dow_trend_confirmation | 0 | 0 |
+| XAUUSD | 2013 | fib_pullback | 0 | 0 |
+| XAUUSD | 2013 | fvg_retrace | 1,255 | 46,417 |
+| XAUUSD | 2013 | ichimoku_cloud | 1,435 | 53,075 |
+| XAUUSD | 2013 | liquidity_sweep | 3,108 | 111,636 |
+| XAUUSD | 2013 | ma_cross | 0 | 0 |
+| XAUUSD | 2013 | macd_signal | 0 | 0 |
+| XAUUSD | 2013 | market_structure_pullback | 0 | 0 |
+| XAUUSD | 2013 | order_block_retest | 0 | 0 |
+| XAUUSD | 2013 | ote_zone | 0 | 0 |
+| XAUUSD | 2013 | post_macro_event_reaction | 0 | 0 |
+| XAUUSD | 2013 | price_action_h2l2 | 0 | 0 |
+| XAUUSD | 2013 | range_breakout_nr4_nr7 | 0 | 0 |
+| XAUUSD | 2013 | round_number_reaction | 210 | 7,767 |
+| XAUUSD | 2013 | session_level_reaction | 5 | 185 |
+| XAUUSD | 2013 | sr_touch | 1,596 | 114,891 |
+| XAUUSD | 2013 | stochastic | 0 | 0 |
+| XAUUSD | 2013 | supply_demand_zone_retest | 0 | 0 |
+| XAUUSD | 2013 | trend_following | 1,538 | 56,875 |
+| XAUUSD | 2013 | trendline_channel | 775 | 28,660 |
+| XAUUSD | 2013 | volume_profile_poc_vah_val | 1,538 | 56,872 |
+| XAUUSD | 2013 | vwap_reclaim_reject | 0 | 0 |
+| XAUUSD | 2013 | wyckoff_spring_upthrust | 0 | 0 |
+| XAUUSD | 2014 | bollinger | 0 | 0 |
+| XAUUSD | 2014 | candlestick_at_level | 17 | 629 |
+| XAUUSD | 2014 | chart_patterns | 445 | 16,463 |
+| XAUUSD | 2014 | donchian_atr_breakout | 0 | 0 |
+| XAUUSD | 2014 | dow_trend_confirmation | 0 | 0 |
+| XAUUSD | 2014 | fib_pullback | 0 | 0 |
+| XAUUSD | 2014 | fvg_retrace | 1,279 | 47,318 |
+| XAUUSD | 2014 | ichimoku_cloud | 1,437 | 53,161 |
+| XAUUSD | 2014 | liquidity_sweep | 3,164 | 113,642 |
+| XAUUSD | 2014 | ma_cross | 0 | 0 |
+| XAUUSD | 2014 | macd_signal | 0 | 0 |
+| XAUUSD | 2014 | market_structure_pullback | 0 | 0 |
+| XAUUSD | 2014 | order_block_retest | 0 | 0 |
+| XAUUSD | 2014 | ote_zone | 0 | 0 |
+| XAUUSD | 2014 | post_macro_event_reaction | 0 | 0 |
+| XAUUSD | 2014 | price_action_h2l2 | 0 | 0 |
+| XAUUSD | 2014 | range_breakout_nr4_nr7 | 0 | 0 |
+| XAUUSD | 2014 | round_number_reaction | 171 | 6,326 |
+| XAUUSD | 2014 | session_level_reaction | 4 | 148 |
+| XAUUSD | 2014 | sr_touch | 1,309 | 94,235 |
+| XAUUSD | 2014 | stochastic | 0 | 0 |
+| XAUUSD | 2014 | supply_demand_zone_retest | 0 | 0 |
+| XAUUSD | 2014 | trend_following | 1,538 | 56,888 |
+| XAUUSD | 2014 | trendline_channel | 743 | 27,484 |
+| XAUUSD | 2014 | volume_profile_poc_vah_val | 1,538 | 56,890 |
+| XAUUSD | 2014 | vwap_reclaim_reject | 0 | 0 |
+| XAUUSD | 2014 | wyckoff_spring_upthrust | 0 | 0 |
+| XAUUSD | 2015 | bollinger | 0 | 0 |
+| XAUUSD | 2015 | candlestick_at_level | 8 | 296 |
+| XAUUSD | 2015 | chart_patterns | 460 | 17,015 |
+| XAUUSD | 2015 | donchian_atr_breakout | 0 | 0 |
+| XAUUSD | 2015 | dow_trend_confirmation | 0 | 0 |
+| XAUUSD | 2015 | fib_pullback | 0 | 0 |
+| XAUUSD | 2015 | fvg_retrace | 1,258 | 46,534 |
+| XAUUSD | 2015 | ichimoku_cloud | 1,440 | 53,258 |
+| XAUUSD | 2015 | liquidity_sweep | 3,177 | 114,116 |
+| XAUUSD | 2015 | ma_cross | 0 | 0 |
+| XAUUSD | 2015 | macd_signal | 0 | 0 |
+| XAUUSD | 2015 | market_structure_pullback | 0 | 0 |
+| XAUUSD | 2015 | order_block_retest | 0 | 0 |
+| XAUUSD | 2015 | ote_zone | 0 | 0 |
+| XAUUSD | 2015 | post_macro_event_reaction | 0 | 0 |
+| XAUUSD | 2015 | price_action_h2l2 | 0 | 0 |
+| XAUUSD | 2015 | range_breakout_nr4_nr7 | 0 | 0 |
+| XAUUSD | 2015 | round_number_reaction | 133 | 4,921 |
+| XAUUSD | 2015 | session_level_reaction | 8 | 296 |
+| XAUUSD | 2015 | sr_touch | 1,396 | 100,487 |
+| XAUUSD | 2015 | stochastic | 0 | 0 |
+| XAUUSD | 2015 | supply_demand_zone_retest | 0 | 0 |
+| XAUUSD | 2015 | trend_following | 1,539 | 56,917 |
+| XAUUSD | 2015 | trendline_channel | 777 | 28,735 |
+| XAUUSD | 2015 | volume_profile_poc_vah_val | 1,540 | 56,952 |
+| XAUUSD | 2015 | vwap_reclaim_reject | 0 | 0 |
+| XAUUSD | 2015 | wyckoff_spring_upthrust | 0 | 0 |
+| XAUUSD | 2016 | bollinger | 0 | 0 |
+| XAUUSD | 2016 | candlestick_at_level | 17 | 629 |
+| XAUUSD | 2016 | chart_patterns | 477 | 17,649 |
+| XAUUSD | 2016 | donchian_atr_breakout | 0 | 0 |
+| XAUUSD | 2016 | dow_trend_confirmation | 0 | 0 |
+| XAUUSD | 2016 | fib_pullback | 0 | 0 |
+| XAUUSD | 2016 | fvg_retrace | 1,274 | 47,138 |
+| XAUUSD | 2016 | ichimoku_cloud | 1,440 | 53,279 |
+| XAUUSD | 2016 | liquidity_sweep | 3,412 | 122,493 |
+| XAUUSD | 2016 | ma_cross | 0 | 0 |
+| XAUUSD | 2016 | macd_signal | 0 | 0 |
+| XAUUSD | 2016 | market_structure_pullback | 0 | 0 |
+| XAUUSD | 2016 | order_block_retest | 0 | 0 |
+| XAUUSD | 2016 | ote_zone | 0 | 0 |
+| XAUUSD | 2016 | post_macro_event_reaction | 0 | 0 |
+| XAUUSD | 2016 | price_action_h2l2 | 0 | 0 |
+| XAUUSD | 2016 | range_breakout_nr4_nr7 | 0 | 0 |
+| XAUUSD | 2016 | round_number_reaction | 154 | 5,698 |
+| XAUUSD | 2016 | session_level_reaction | 4 | 148 |
+| XAUUSD | 2016 | sr_touch | 406 | 29,232 |
+| XAUUSD | 2016 | stochastic | 0 | 0 |
+| XAUUSD | 2016 | supply_demand_zone_retest | 0 | 0 |
+| XAUUSD | 2016 | trend_following | 1,541 | 57,016 |
+| XAUUSD | 2016 | trendline_channel | 769 | 28,453 |
+| XAUUSD | 2016 | volume_profile_poc_vah_val | 1,541 | 57,011 |
+| XAUUSD | 2016 | vwap_reclaim_reject | 0 | 0 |
+| XAUUSD | 2016 | wyckoff_spring_upthrust | 0 | 0 |
+| XAUUSD | 2017 | bollinger | 0 | 0 |
+| XAUUSD | 2017 | candlestick_at_level | 11 | 407 |
+| XAUUSD | 2017 | chart_patterns | 458 | 16,946 |
+| XAUUSD | 2017 | donchian_atr_breakout | 0 | 0 |
+| XAUUSD | 2017 | dow_trend_confirmation | 0 | 0 |
+| XAUUSD | 2017 | fib_pullback | 0 | 0 |
+| XAUUSD | 2017 | fvg_retrace | 1,256 | 46,472 |
+| XAUUSD | 2017 | ichimoku_cloud | 1,436 | 53,132 |
+| XAUUSD | 2017 | liquidity_sweep | 3,409 | 122,378 |
+| XAUUSD | 2017 | ma_cross | 0 | 0 |
+| XAUUSD | 2017 | macd_signal | 0 | 0 |
+| XAUUSD | 2017 | market_structure_pullback | 0 | 0 |
+| XAUUSD | 2017 | order_block_retest | 0 | 0 |
+| XAUUSD | 2017 | ote_zone | 0 | 0 |
+| XAUUSD | 2017 | post_macro_event_reaction | 0 | 0 |
+| XAUUSD | 2017 | price_action_h2l2 | 0 | 0 |
+| XAUUSD | 2017 | range_breakout_nr4_nr7 | 0 | 0 |
+| XAUUSD | 2017 | round_number_reaction | 107 | 3,959 |
+| XAUUSD | 2017 | session_level_reaction | 0 | 0 |
+| XAUUSD | 2017 | sr_touch | 317 | 22,824 |
+| XAUUSD | 2017 | stochastic | 0 | 0 |
+| XAUUSD | 2017 | supply_demand_zone_retest | 0 | 0 |
+| XAUUSD | 2017 | trend_following | 1,535 | 56,795 |
+| XAUUSD | 2017 | trendline_channel | 791 | 29,267 |
+| XAUUSD | 2017 | volume_profile_poc_vah_val | 1,535 | 56,795 |
+| XAUUSD | 2017 | vwap_reclaim_reject | 0 | 0 |
+| XAUUSD | 2017 | wyckoff_spring_upthrust | 0 | 0 |
+| XAUUSD | 2018 | bollinger | 0 | 0 |
+| XAUUSD | 2018 | candlestick_at_level | 6 | 222 |
+| XAUUSD | 2018 | chart_patterns | 455 | 16,835 |
+| XAUUSD | 2018 | donchian_atr_breakout | 0 | 0 |
+| XAUUSD | 2018 | dow_trend_confirmation | 0 | 0 |
+| XAUUSD | 2018 | fib_pullback | 0 | 0 |
+| XAUUSD | 2018 | fvg_retrace | 1,272 | 47,064 |
+| XAUUSD | 2018 | ichimoku_cloud | 1,438 | 53,206 |
+| XAUUSD | 2018 | liquidity_sweep | 3,543 | 127,178 |
+| XAUUSD | 2018 | ma_cross | 0 | 0 |
+| XAUUSD | 2018 | macd_signal | 0 | 0 |
+| XAUUSD | 2018 | market_structure_pullback | 0 | 0 |
+| XAUUSD | 2018 | order_block_retest | 0 | 0 |
+| XAUUSD | 2018 | ote_zone | 0 | 0 |
+| XAUUSD | 2018 | post_macro_event_reaction | 0 | 0 |
+| XAUUSD | 2018 | price_action_h2l2 | 0 | 0 |
+| XAUUSD | 2018 | range_breakout_nr4_nr7 | 0 | 0 |
+| XAUUSD | 2018 | round_number_reaction | 146 | 5,402 |
+| XAUUSD | 2018 | session_level_reaction | 1 | 37 |
+| XAUUSD | 2018 | sr_touch | 145 | 10,440 |
+| XAUUSD | 2018 | stochastic | 0 | 0 |
+| XAUUSD | 2018 | supply_demand_zone_retest | 0 | 0 |
+| XAUUSD | 2018 | trend_following | 1,540 | 56,980 |
+| XAUUSD | 2018 | trendline_channel | 773 | 28,601 |
+| XAUUSD | 2018 | volume_profile_poc_vah_val | 1,540 | 56,980 |
+| XAUUSD | 2018 | vwap_reclaim_reject | 0 | 0 |
+| XAUUSD | 2018 | wyckoff_spring_upthrust | 0 | 0 |
+| XAUUSD | 2019 | bollinger | 0 | 0 |
+| XAUUSD | 2019 | candlestick_at_level | 11 | 407 |
+| XAUUSD | 2019 | chart_patterns | 455 | 16,833 |
+| XAUUSD | 2019 | donchian_atr_breakout | 0 | 0 |
+| XAUUSD | 2019 | dow_trend_confirmation | 0 | 0 |
+| XAUUSD | 2019 | fib_pullback | 0 | 0 |
+| XAUUSD | 2019 | fvg_retrace | 1,249 | 46,208 |
+| XAUUSD | 2019 | ichimoku_cloud | 1,433 | 53,012 |
+| XAUUSD | 2019 | liquidity_sweep | 3,364 | 120,788 |
+| XAUUSD | 2019 | ma_cross | 0 | 0 |
+| XAUUSD | 2019 | macd_signal | 0 | 0 |
+| XAUUSD | 2019 | market_structure_pullback | 0 | 0 |
+| XAUUSD | 2019 | order_block_retest | 0 | 0 |
+| XAUUSD | 2019 | ote_zone | 0 | 0 |
+| XAUUSD | 2019 | post_macro_event_reaction | 0 | 0 |
+| XAUUSD | 2019 | price_action_h2l2 | 0 | 0 |
+| XAUUSD | 2019 | range_breakout_nr4_nr7 | 0 | 0 |
+| XAUUSD | 2019 | round_number_reaction | 144 | 5,328 |
+| XAUUSD | 2019 | session_level_reaction | 10 | 370 |
+| XAUUSD | 2019 | sr_touch | 1,153 | 82,999 |
+| XAUUSD | 2019 | stochastic | 0 | 0 |
+| XAUUSD | 2019 | supply_demand_zone_retest | 0 | 0 |
+| XAUUSD | 2019 | trend_following | 1,541 | 57,011 |
+| XAUUSD | 2019 | trendline_channel | 761 | 28,154 |
+| XAUUSD | 2019 | volume_profile_poc_vah_val | 1,543 | 57,082 |
+| XAUUSD | 2019 | vwap_reclaim_reject | 0 | 0 |
+| XAUUSD | 2019 | wyckoff_spring_upthrust | 0 | 0 |
+| XAUUSD | 2020 | bollinger | 0 | 0 |
+| XAUUSD | 2020 | candlestick_at_level | 27 | 997 |
+| XAUUSD | 2020 | chart_patterns | 472 | 17,440 |
+| XAUUSD | 2020 | donchian_atr_breakout | 0 | 0 |
+| XAUUSD | 2020 | dow_trend_confirmation | 0 | 0 |
+| XAUUSD | 2020 | fib_pullback | 0 | 0 |
+| XAUUSD | 2020 | fvg_retrace | 1,269 | 46,905 |
+| XAUUSD | 2020 | ichimoku_cloud | 1,444 | 53,354 |
+| XAUUSD | 2020 | liquidity_sweep | 3,117 | 111,940 |
+| XAUUSD | 2020 | ma_cross | 0 | 0 |
+| XAUUSD | 2020 | macd_signal | 0 | 0 |
+| XAUUSD | 2020 | market_structure_pullback | 0 | 0 |
+| XAUUSD | 2020 | order_block_retest | 0 | 0 |
+| XAUUSD | 2020 | ote_zone | 0 | 0 |
+| XAUUSD | 2020 | post_macro_event_reaction | 0 | 0 |
+| XAUUSD | 2020 | price_action_h2l2 | 0 | 0 |
+| XAUUSD | 2020 | range_breakout_nr4_nr7 | 0 | 0 |
+| XAUUSD | 2020 | round_number_reaction | 333 | 12,307 |
+| XAUUSD | 2020 | session_level_reaction | 27 | 994 |
+| XAUUSD | 2020 | sr_touch | 1,714 | 123,296 |
+| XAUUSD | 2020 | stochastic | 0 | 0 |
+| XAUUSD | 2020 | supply_demand_zone_retest | 0 | 0 |
+| XAUUSD | 2020 | trend_following | 1,546 | 57,131 |
+| XAUUSD | 2020 | trendline_channel | 791 | 29,238 |
+| XAUUSD | 2020 | volume_profile_poc_vah_val | 1,516 | 56,019 |
+| XAUUSD | 2020 | vwap_reclaim_reject | 0 | 0 |
+| XAUUSD | 2020 | wyckoff_spring_upthrust | 0 | 0 |
+| XAUUSD | 2021 | bollinger | 0 | 0 |
+| XAUUSD | 2021 | candlestick_at_level | 21 | 777 |
+| XAUUSD | 2021 | chart_patterns | 460 | 17,018 |
+| XAUUSD | 2021 | donchian_atr_breakout | 0 | 0 |
+| XAUUSD | 2021 | dow_trend_confirmation | 0 | 0 |
+| XAUUSD | 2021 | fib_pullback | 0 | 0 |
+| XAUUSD | 2021 | fvg_retrace | 1,192 | 44,103 |
+| XAUUSD | 2021 | ichimoku_cloud | 1,432 | 52,976 |
+| XAUUSD | 2021 | liquidity_sweep | 3,024 | 108,593 |
+| XAUUSD | 2021 | ma_cross | 0 | 0 |
+| XAUUSD | 2021 | macd_signal | 0 | 0 |
+| XAUUSD | 2021 | market_structure_pullback | 0 | 0 |
+| XAUUSD | 2021 | order_block_retest | 0 | 0 |
+| XAUUSD | 2021 | ote_zone | 0 | 0 |
+| XAUUSD | 2021 | post_macro_event_reaction | 0 | 0 |
+| XAUUSD | 2021 | price_action_h2l2 | 0 | 0 |
+| XAUUSD | 2021 | range_breakout_nr4_nr7 | 0 | 0 |
+| XAUUSD | 2021 | round_number_reaction | 234 | 8,658 |
+| XAUUSD | 2021 | session_level_reaction | 0 | 0 |
+| XAUUSD | 2021 | sr_touch | 836 | 60,189 |
+| XAUUSD | 2021 | stochastic | 0 | 0 |
+| XAUUSD | 2021 | supply_demand_zone_retest | 0 | 0 |
+| XAUUSD | 2021 | trend_following | 1,541 | 57,014 |
+| XAUUSD | 2021 | trendline_channel | 760 | 28,118 |
+| XAUUSD | 2021 | volume_profile_poc_vah_val | 1,541 | 57,017 |
+| XAUUSD | 2021 | vwap_reclaim_reject | 0 | 0 |
+| XAUUSD | 2021 | wyckoff_spring_upthrust | 0 | 0 |
+| XAUUSD | 2022 | bollinger | 0 | 0 |
+| XAUUSD | 2022 | candlestick_at_level | 21 | 777 |
+| XAUUSD | 2022 | chart_patterns | 492 | 18,202 |
+| XAUUSD | 2022 | donchian_atr_breakout | 0 | 0 |
+| XAUUSD | 2022 | dow_trend_confirmation | 0 | 0 |
+| XAUUSD | 2022 | fib_pullback | 0 | 0 |
+| XAUUSD | 2022 | fvg_retrace | 1,225 | 45,325 |
+| XAUUSD | 2022 | ichimoku_cloud | 1,429 | 52,868 |
+| XAUUSD | 2022 | liquidity_sweep | 3,287 | 118,007 |
+| XAUUSD | 2022 | ma_cross | 0 | 0 |
+| XAUUSD | 2022 | macd_signal | 0 | 0 |
+| XAUUSD | 2022 | market_structure_pullback | 0 | 0 |
+| XAUUSD | 2022 | order_block_retest | 0 | 0 |
+| XAUUSD | 2022 | ote_zone | 0 | 0 |
+| XAUUSD | 2022 | post_macro_event_reaction | 0 | 0 |
+| XAUUSD | 2022 | price_action_h2l2 | 0 | 0 |
+| XAUUSD | 2022 | range_breakout_nr4_nr7 | 0 | 0 |
+| XAUUSD | 2022 | round_number_reaction | 286 | 10,581 |
+| XAUUSD | 2022 | session_level_reaction | 6 | 222 |
+| XAUUSD | 2022 | sr_touch | 530 | 38,154 |
+| XAUUSD | 2022 | stochastic | 0 | 0 |
+| XAUUSD | 2022 | supply_demand_zone_retest | 0 | 0 |
+| XAUUSD | 2022 | trend_following | 1,545 | 57,155 |
+| XAUUSD | 2022 | trendline_channel | 749 | 27,711 |
+| XAUUSD | 2022 | volume_profile_poc_vah_val | 1,546 | 57,194 |
+| XAUUSD | 2022 | vwap_reclaim_reject | 0 | 0 |
+| XAUUSD | 2022 | wyckoff_spring_upthrust | 0 | 0 |
+| XAUUSD | 2023 | bollinger | 0 | 0 |
+| XAUUSD | 2023 | candlestick_at_level | 20 | 740 |
+| XAUUSD | 2023 | chart_patterns | 478 | 17,677 |
+| XAUUSD | 2023 | donchian_atr_breakout | 0 | 0 |
+| XAUUSD | 2023 | dow_trend_confirmation | 0 | 0 |
+| XAUUSD | 2023 | fib_pullback | 0 | 0 |
+| XAUUSD | 2023 | fvg_retrace | 1,205 | 44,554 |
+| XAUUSD | 2023 | ichimoku_cloud | 1,431 | 52,898 |
+| XAUUSD | 2023 | liquidity_sweep | 3,232 | 116,033 |
+| XAUUSD | 2023 | ma_cross | 0 | 0 |
+| XAUUSD | 2023 | macd_signal | 0 | 0 |
+| XAUUSD | 2023 | market_structure_pullback | 0 | 0 |
+| XAUUSD | 2023 | order_block_retest | 0 | 0 |
+| XAUUSD | 2023 | ote_zone | 0 | 0 |
+| XAUUSD | 2023 | post_macro_event_reaction | 0 | 0 |
+| XAUUSD | 2023 | price_action_h2l2 | 0 | 0 |
+| XAUUSD | 2023 | range_breakout_nr4_nr7 | 0 | 0 |
+| XAUUSD | 2023 | round_number_reaction | 170 | 6,281 |
+| XAUUSD | 2023 | session_level_reaction | 1 | 36 |
+| XAUUSD | 2023 | sr_touch | 1,105 | 79,500 |
+| XAUUSD | 2023 | stochastic | 0 | 0 |
+| XAUUSD | 2023 | supply_demand_zone_retest | 0 | 0 |
+| XAUUSD | 2023 | trend_following | 1,539 | 56,897 |
+| XAUUSD | 2023 | trendline_channel | 745 | 27,544 |
+| XAUUSD | 2023 | volume_profile_poc_vah_val | 1,529 | 56,513 |
+| XAUUSD | 2023 | vwap_reclaim_reject | 0 | 0 |
+| XAUUSD | 2023 | wyckoff_spring_upthrust | 0 | 0 |
+| XAUUSD | 2024 | bollinger | 0 | 0 |
+| XAUUSD | 2024 | candlestick_at_level | 19 | 700 |
+| XAUUSD | 2024 | chart_patterns | 451 | 16,617 |
+| XAUUSD | 2024 | donchian_atr_breakout | 0 | 0 |
+| XAUUSD | 2024 | dow_trend_confirmation | 0 | 0 |
+| XAUUSD | 2024 | fib_pullback | 0 | 0 |
+| XAUUSD | 2024 | fvg_retrace | 1,221 | 44,982 |
+| XAUUSD | 2024 | ichimoku_cloud | 1,437 | 52,894 |
+| XAUUSD | 2024 | liquidity_sweep | 2,922 | 104,857 |
+| XAUUSD | 2024 | ma_cross | 0 | 0 |
+| XAUUSD | 2024 | macd_signal | 0 | 0 |
+| XAUUSD | 2024 | market_structure_pullback | 0 | 0 |
+| XAUUSD | 2024 | order_block_retest | 0 | 0 |
+| XAUUSD | 2024 | ote_zone | 0 | 0 |
+| XAUUSD | 2024 | post_macro_event_reaction | 0 | 0 |
+| XAUUSD | 2024 | price_action_h2l2 | 0 | 0 |
+| XAUUSD | 2024 | range_breakout_nr4_nr7 | 0 | 0 |
+| XAUUSD | 2024 | round_number_reaction | 304 | 11,183 |
+| XAUUSD | 2024 | session_level_reaction | 35 | 1,277 |
+| XAUUSD | 2024 | sr_touch | 2,523 | 181,302 |
+| XAUUSD | 2024 | stochastic | 0 | 0 |
+| XAUUSD | 2024 | supply_demand_zone_retest | 0 | 0 |
+| XAUUSD | 2024 | trend_following | 1,550 | 57,081 |
+| XAUUSD | 2024 | trendline_channel | 759 | 27,935 |
+| XAUUSD | 2024 | volume_profile_poc_vah_val | 1,399 | 51,471 |
+| XAUUSD | 2024 | vwap_reclaim_reject | 0 | 0 |
+| XAUUSD | 2024 | wyckoff_spring_upthrust | 0 | 0 |
+| XAUUSD | 2025 | bollinger | 0 | 0 |
+| XAUUSD | 2025 | candlestick_at_level | 31 | 1,144 |
+| XAUUSD | 2025 | chart_patterns | 461 | 16,979 |
+| XAUUSD | 2025 | donchian_atr_breakout | 0 | 0 |
+| XAUUSD | 2025 | dow_trend_confirmation | 0 | 0 |
+| XAUUSD | 2025 | fib_pullback | 0 | 0 |
+| XAUUSD | 2025 | fvg_retrace | 1,221 | 44,949 |
+| XAUUSD | 2025 | ichimoku_cloud | 1,431 | 52,662 |
+| XAUUSD | 2025 | liquidity_sweep | 2,718 | 97,472 |
+| XAUUSD | 2025 | ma_cross | 0 | 0 |
+| XAUUSD | 2025 | macd_signal | 0 | 0 |
+| XAUUSD | 2025 | market_structure_pullback | 0 | 0 |
+| XAUUSD | 2025 | order_block_retest | 0 | 0 |
+| XAUUSD | 2025 | ote_zone | 0 | 0 |
+| XAUUSD | 2025 | post_macro_event_reaction | 0 | 0 |
+| XAUUSD | 2025 | price_action_h2l2 | 0 | 0 |
+| XAUUSD | 2025 | range_breakout_nr4_nr7 | 0 | 0 |
+| XAUUSD | 2025 | round_number_reaction | 589 | 21,665 |
+| XAUUSD | 2025 | session_level_reaction | 54 | 1,975 |
+| XAUUSD | 2025 | sr_touch | 2,399 | 172,289 |
+| XAUUSD | 2025 | stochastic | 0 | 0 |
+| XAUUSD | 2025 | supply_demand_zone_retest | 0 | 0 |
+| XAUUSD | 2025 | trend_following | 1,544 | 56,823 |
+| XAUUSD | 2025 | trendline_channel | 764 | 28,092 |
+| XAUUSD | 2025 | volume_profile_poc_vah_val | 1,334 | 49,060 |
+| XAUUSD | 2025 | vwap_reclaim_reject | 0 | 0 |
+| XAUUSD | 2025 | wyckoff_spring_upthrust | 0 | 0 |
+| XAUUSD | 2026 | bollinger | 0 | 0 |
+| XAUUSD | 2026 | candlestick_at_level | 50 | 1,849 |
+| XAUUSD | 2026 | chart_patterns | 383 | 14,148 |
+| XAUUSD | 2026 | donchian_atr_breakout | 0 | 0 |
+| XAUUSD | 2026 | dow_trend_confirmation | 0 | 0 |
+| XAUUSD | 2026 | fib_pullback | 0 | 0 |
+| XAUUSD | 2026 | fvg_retrace | 1,070 | 39,537 |
+| XAUUSD | 2026 | ichimoku_cloud | 1,234 | 45,584 |
+| XAUUSD | 2026 | liquidity_sweep | 2,441 | 87,705 |
+| XAUUSD | 2026 | ma_cross | 0 | 0 |
+| XAUUSD | 2026 | macd_signal | 0 | 0 |
+| XAUUSD | 2026 | market_structure_pullback | 0 | 0 |
+| XAUUSD | 2026 | order_block_retest | 0 | 0 |
+| XAUUSD | 2026 | ote_zone | 0 | 0 |
+| XAUUSD | 2026 | post_macro_event_reaction | 0 | 0 |
+| XAUUSD | 2026 | price_action_h2l2 | 0 | 0 |
+| XAUUSD | 2026 | range_breakout_nr4_nr7 | 0 | 0 |
+| XAUUSD | 2026 | round_number_reaction | 847 | 31,268 |
+| XAUUSD | 2026 | session_level_reaction | 8 | 293 |
+| XAUUSD | 2026 | sr_touch | 1,854 | 133,363 |
+| XAUUSD | 2026 | stochastic | 0 | 0 |
+| XAUUSD | 2026 | supply_demand_zone_retest | 0 | 0 |
+| XAUUSD | 2026 | trend_following | 1,325 | 48,950 |
+| XAUUSD | 2026 | trendline_channel | 652 | 24,081 |
+| XAUUSD | 2026 | volume_profile_poc_vah_val | 1,264 | 46,689 |
+| XAUUSD | 2026 | vwap_reclaim_reject | 0 | 0 |
+| XAUUSD | 2026 | wyckoff_spring_upthrust | 0 | 0 |
+| ETHUSDT | 2018 | bollinger | 0 | 0 |
+| ETHUSDT | 2018 | btc_order_flow | 0 | 0 |
+| ETHUSDT | 2018 | candlestick_at_level | 44 | 1,603 |
+| ETHUSDT | 2018 | chart_patterns | 661 | 24,163 |
+| ETHUSDT | 2018 | donchian_atr_breakout | 0 | 0 |
+| ETHUSDT | 2018 | dow_trend_confirmation | 0 | 0 |
+| ETHUSDT | 2018 | fib_pullback | 0 | 0 |
+| ETHUSDT | 2018 | funding_extreme_fade | 0 | 0 |
+| ETHUSDT | 2018 | fvg_retrace | 1,641 | 60,505 |
+| ETHUSDT | 2018 | ichimoku_cloud | 2,021 | 73,665 |
+| ETHUSDT | 2018 | liquidity_sweep | 4,119 | 146,114 |
+| ETHUSDT | 2018 | ma_cross | 0 | 0 |
+| ETHUSDT | 2018 | macd_signal | 0 | 0 |
+| ETHUSDT | 2018 | market_structure_pullback | 0 | 0 |
+| ETHUSDT | 2018 | order_block_retest | 0 | 0 |
+| ETHUSDT | 2018 | ote_zone | 0 | 0 |
+| ETHUSDT | 2018 | post_macro_event_reaction | 0 | 0 |
+| ETHUSDT | 2018 | price_action_h2l2 | 0 | 0 |
+| ETHUSDT | 2018 | range_breakout_nr4_nr7 | 0 | 0 |
+| ETHUSDT | 2018 | round_number_reaction | 378 | 13,698 |
+| ETHUSDT | 2018 | session_level_reaction | 22 | 791 |
+| ETHUSDT | 2018 | sr_touch | 3,891 | 279,673 |
+| ETHUSDT | 2018 | stochastic | 0 | 0 |
+| ETHUSDT | 2018 | supply_demand_zone_retest | 0 | 0 |
+| ETHUSDT | 2018 | trend_following | 2,161 | 78,759 |
+| ETHUSDT | 2018 | trendline_channel | 1,149 | 41,269 |
+| ETHUSDT | 2018 | volume_profile_poc_vah_val | 2,008 | 71,823 |
+| ETHUSDT | 2018 | vwap_reclaim_reject | 0 | 0 |
+| ETHUSDT | 2018 | wyckoff_spring_upthrust | 0 | 0 |
+| ETHUSDT | 2019 | bollinger | 0 | 0 |
+| ETHUSDT | 2019 | btc_order_flow | 0 | 0 |
+| ETHUSDT | 2019 | candlestick_at_level | 4 | 144 |
+| ETHUSDT | 2019 | chart_patterns | 653 | 23,623 |
+| ETHUSDT | 2019 | donchian_atr_breakout | 0 | 0 |
+| ETHUSDT | 2019 | dow_trend_confirmation | 0 | 0 |
+| ETHUSDT | 2019 | fib_pullback | 0 | 0 |
+| ETHUSDT | 2019 | funding_extreme_fade | 0 | 0 |
+| ETHUSDT | 2019 | fvg_retrace | 1,670 | 61,689 |
+| ETHUSDT | 2019 | ichimoku_cloud | 2,039 | 73,138 |
+| ETHUSDT | 2019 | liquidity_sweep | 4,413 | 156,179 |
+| ETHUSDT | 2019 | ma_cross | 0 | 0 |
+| ETHUSDT | 2019 | macd_signal | 0 | 0 |
+| ETHUSDT | 2019 | market_structure_pullback | 0 | 0 |
+| ETHUSDT | 2019 | order_block_retest | 0 | 0 |
+| ETHUSDT | 2019 | ote_zone | 0 | 0 |
+| ETHUSDT | 2019 | post_macro_event_reaction | 0 | 0 |
+| ETHUSDT | 2019 | price_action_h2l2 | 0 | 0 |
+| ETHUSDT | 2019 | range_breakout_nr4_nr7 | 0 | 0 |
+| ETHUSDT | 2019 | round_number_reaction | 72 | 2,565 |
+| ETHUSDT | 2019 | session_level_reaction | 0 | 0 |
+| ETHUSDT | 2019 | sr_touch | 3,416 | 245,757 |
+| ETHUSDT | 2019 | stochastic | 0 | 0 |
+| ETHUSDT | 2019 | supply_demand_zone_retest | 0 | 0 |
+| ETHUSDT | 2019 | trend_following | 2,169 | 77,730 |
+| ETHUSDT | 2019 | trendline_channel | 1,208 | 42,864 |
+| ETHUSDT | 2019 | volume_profile_poc_vah_val | 2,154 | 76,437 |
+| ETHUSDT | 2019 | vwap_reclaim_reject | 0 | 0 |
+| ETHUSDT | 2019 | wyckoff_spring_upthrust | 0 | 0 |
+| ETHUSDT | 2020 | bollinger | 0 | 0 |
+| ETHUSDT | 2020 | btc_order_flow | 0 | 0 |
+| ETHUSDT | 2020 | candlestick_at_level | 4 | 146 |
+| ETHUSDT | 2020 | chart_patterns | 655 | 24,196 |
+| ETHUSDT | 2020 | donchian_atr_breakout | 0 | 0 |
+| ETHUSDT | 2020 | dow_trend_confirmation | 0 | 0 |
+| ETHUSDT | 2020 | fib_pullback | 0 | 0 |
+| ETHUSDT | 2020 | funding_extreme_fade | 0 | 0 |
+| ETHUSDT | 2020 | fvg_retrace | 1,807 | 66,851 |
+| ETHUSDT | 2020 | ichimoku_cloud | 2,038 | 75,217 |
+| ETHUSDT | 2020 | liquidity_sweep | 4,251 | 150,971 |
+| ETHUSDT | 2020 | ma_cross | 0 | 0 |
+| ETHUSDT | 2020 | macd_signal | 0 | 0 |
+| ETHUSDT | 2020 | market_structure_pullback | 0 | 0 |
+| ETHUSDT | 2020 | order_block_retest | 0 | 0 |
+| ETHUSDT | 2020 | ote_zone | 0 | 0 |
+| ETHUSDT | 2020 | post_macro_event_reaction | 0 | 0 |
+| ETHUSDT | 2020 | price_action_h2l2 | 0 | 0 |
+| ETHUSDT | 2020 | range_breakout_nr4_nr7 | 0 | 0 |
+| ETHUSDT | 2020 | round_number_reaction | 139 | 5,087 |
+| ETHUSDT | 2020 | session_level_reaction | 15 | 555 |
+| ETHUSDT | 2020 | sr_touch | 1,747 | 125,767 |
+| ETHUSDT | 2020 | stochastic | 0 | 0 |
+| ETHUSDT | 2020 | supply_demand_zone_retest | 0 | 0 |
+| ETHUSDT | 2020 | trend_following | 2,177 | 80,352 |
+| ETHUSDT | 2020 | trendline_channel | 1,195 | 43,436 |
+| ETHUSDT | 2020 | volume_profile_poc_vah_val | 2,193 | 78,705 |
+| ETHUSDT | 2020 | vwap_reclaim_reject | 0 | 0 |
+| ETHUSDT | 2020 | wyckoff_spring_upthrust | 0 | 0 |
+| ETHUSDT | 2021 | bollinger | 0 | 0 |
+| ETHUSDT | 2021 | btc_order_flow | 0 | 0 |
+| ETHUSDT | 2021 | candlestick_at_level | 80 | 2,957 |
+| ETHUSDT | 2021 | chart_patterns | 656 | 24,215 |
+| ETHUSDT | 2021 | donchian_atr_breakout | 0 | 0 |
+| ETHUSDT | 2021 | dow_trend_confirmation | 0 | 0 |
+| ETHUSDT | 2021 | fib_pullback | 0 | 0 |
+| ETHUSDT | 2021 | funding_extreme_fade | 0 | 0 |
+| ETHUSDT | 2021 | fvg_retrace | 1,743 | 64,340 |
+| ETHUSDT | 2021 | ichimoku_cloud | 2,036 | 75,129 |
+| ETHUSDT | 2021 | liquidity_sweep | 4,218 | 151,479 |
+| ETHUSDT | 2021 | ma_cross | 0 | 0 |
+| ETHUSDT | 2021 | macd_signal | 0 | 0 |
+| ETHUSDT | 2021 | market_structure_pullback | 0 | 0 |
+| ETHUSDT | 2021 | order_block_retest | 0 | 0 |
+| ETHUSDT | 2021 | ote_zone | 0 | 0 |
+| ETHUSDT | 2021 | post_macro_event_reaction | 0 | 0 |
+| ETHUSDT | 2021 | price_action_h2l2 | 0 | 0 |
+| ETHUSDT | 2021 | range_breakout_nr4_nr7 | 0 | 0 |
+| ETHUSDT | 2021 | round_number_reaction | 1,443 | 53,222 |
+| ETHUSDT | 2021 | session_level_reaction | 53 | 1,943 |
+| ETHUSDT | 2021 | sr_touch | 3,664 | 263,442 |
+| ETHUSDT | 2021 | stochastic | 0 | 0 |
+| ETHUSDT | 2021 | supply_demand_zone_retest | 0 | 0 |
+| ETHUSDT | 2021 | trend_following | 2,172 | 80,157 |
+| ETHUSDT | 2021 | trendline_channel | 1,148 | 42,373 |
+| ETHUSDT | 2021 | volume_profile_poc_vah_val | 2,062 | 76,005 |
+| ETHUSDT | 2021 | vwap_reclaim_reject | 0 | 0 |
+| ETHUSDT | 2021 | wyckoff_spring_upthrust | 0 | 0 |
+| ETHUSDT | 2022 | bollinger | 0 | 0 |
+| ETHUSDT | 2022 | btc_order_flow | 0 | 0 |
+| ETHUSDT | 2022 | candlestick_at_level | 58 | 2,146 |
+| ETHUSDT | 2022 | chart_patterns | 655 | 24,232 |
+| ETHUSDT | 2022 | donchian_atr_breakout | 0 | 0 |
+| ETHUSDT | 2022 | dow_trend_confirmation | 0 | 0 |
+| ETHUSDT | 2022 | fib_pullback | 0 | 0 |
+| ETHUSDT | 2022 | funding_extreme_fade | 0 | 0 |
+| ETHUSDT | 2022 | fvg_retrace | 1,820 | 67,331 |
+| ETHUSDT | 2022 | ichimoku_cloud | 2,037 | 75,352 |
+| ETHUSDT | 2022 | liquidity_sweep | 4,307 | 154,367 |
+| ETHUSDT | 2022 | ma_cross | 0 | 0 |
+| ETHUSDT | 2022 | macd_signal | 0 | 0 |
+| ETHUSDT | 2022 | market_structure_pullback | 0 | 0 |
+| ETHUSDT | 2022 | order_block_retest | 0 | 0 |
+| ETHUSDT | 2022 | ote_zone | 0 | 0 |
+| ETHUSDT | 2022 | post_macro_event_reaction | 0 | 0 |
+| ETHUSDT | 2022 | price_action_h2l2 | 0 | 0 |
+| ETHUSDT | 2022 | range_breakout_nr4_nr7 | 0 | 0 |
+| ETHUSDT | 2022 | round_number_reaction | 934 | 34,536 |
+| ETHUSDT | 2022 | session_level_reaction | 0 | 0 |
+| ETHUSDT | 2022 | sr_touch | 2,451 | 176,458 |
+| ETHUSDT | 2022 | stochastic | 0 | 0 |
+| ETHUSDT | 2022 | supply_demand_zone_retest | 0 | 0 |
+| ETHUSDT | 2022 | trend_following | 2,173 | 80,368 |
+| ETHUSDT | 2022 | trendline_channel | 1,184 | 43,721 |
+| ETHUSDT | 2022 | volume_profile_poc_vah_val | 2,189 | 80,594 |
+| ETHUSDT | 2022 | vwap_reclaim_reject | 0 | 0 |
+| ETHUSDT | 2022 | wyckoff_spring_upthrust | 0 | 0 |
+| ETHUSDT | 2023 | bollinger | 0 | 0 |
+| ETHUSDT | 2023 | btc_order_flow | 0 | 0 |
+| ETHUSDT | 2023 | candlestick_at_level | 72 | 2,664 |
+| ETHUSDT | 2023 | chart_patterns | 674 | 24,923 |
+| ETHUSDT | 2023 | donchian_atr_breakout | 0 | 0 |
+| ETHUSDT | 2023 | dow_trend_confirmation | 0 | 0 |
+| ETHUSDT | 2023 | fib_pullback | 0 | 0 |
+| ETHUSDT | 2023 | funding_extreme_fade | 0 | 0 |
+| ETHUSDT | 2023 | fvg_retrace | 1,872 | 69,236 |
+| ETHUSDT | 2023 | ichimoku_cloud | 2,038 | 75,358 |
+| ETHUSDT | 2023 | liquidity_sweep | 4,562 | 162,917 |
+| ETHUSDT | 2023 | ma_cross | 0 | 0 |
+| ETHUSDT | 2023 | macd_signal | 0 | 0 |
+| ETHUSDT | 2023 | market_structure_pullback | 0 | 0 |
+| ETHUSDT | 2023 | order_block_retest | 0 | 0 |
+| ETHUSDT | 2023 | ote_zone | 0 | 0 |
+| ETHUSDT | 2023 | post_macro_event_reaction | 0 | 0 |
+| ETHUSDT | 2023 | price_action_h2l2 | 0 | 0 |
+| ETHUSDT | 2023 | range_breakout_nr4_nr7 | 0 | 0 |
+| ETHUSDT | 2023 | round_number_reaction | 478 | 17,667 |
+| ETHUSDT | 2023 | session_level_reaction | 0 | 0 |
+| ETHUSDT | 2023 | sr_touch | 2,092 | 150,565 |
+| ETHUSDT | 2023 | stochastic | 0 | 0 |
+| ETHUSDT | 2023 | supply_demand_zone_retest | 0 | 0 |
+| ETHUSDT | 2023 | trend_following | 2,171 | 80,258 |
+| ETHUSDT | 2023 | trendline_channel | 1,102 | 40,654 |
+| ETHUSDT | 2023 | volume_profile_poc_vah_val | 2,189 | 80,121 |
+| ETHUSDT | 2023 | vwap_reclaim_reject | 0 | 0 |
+| ETHUSDT | 2023 | wyckoff_spring_upthrust | 0 | 0 |
+| ETHUSDT | 2024 | bollinger | 0 | 0 |
+| ETHUSDT | 2024 | btc_order_flow | 0 | 0 |
+| ETHUSDT | 2024 | candlestick_at_level | 57 | 2,109 |
+| ETHUSDT | 2024 | chart_patterns | 699 | 25,861 |
+| ETHUSDT | 2024 | donchian_atr_breakout | 0 | 0 |
+| ETHUSDT | 2024 | dow_trend_confirmation | 0 | 0 |
+| ETHUSDT | 2024 | fib_pullback | 0 | 0 |
+| ETHUSDT | 2024 | funding_extreme_fade | 0 | 0 |
+| ETHUSDT | 2024 | fvg_retrace | 1,853 | 68,554 |
+| ETHUSDT | 2024 | ichimoku_cloud | 2,038 | 75,397 |
+| ETHUSDT | 2024 | liquidity_sweep | 4,789 | 171,767 |
+| ETHUSDT | 2024 | ma_cross | 0 | 0 |
+| ETHUSDT | 2024 | macd_signal | 0 | 0 |
+| ETHUSDT | 2024 | market_structure_pullback | 0 | 0 |
+| ETHUSDT | 2024 | order_block_retest | 0 | 0 |
+| ETHUSDT | 2024 | ote_zone | 0 | 0 |
+| ETHUSDT | 2024 | post_macro_event_reaction | 0 | 0 |
+| ETHUSDT | 2024 | price_action_h2l2 | 0 | 0 |
+| ETHUSDT | 2024 | range_breakout_nr4_nr7 | 0 | 0 |
+| ETHUSDT | 2024 | round_number_reaction | 1,087 | 40,211 |
+| ETHUSDT | 2024 | session_level_reaction | 24 | 888 |
+| ETHUSDT | 2024 | sr_touch | 1,221 | 87,899 |
+| ETHUSDT | 2024 | stochastic | 0 | 0 |
+| ETHUSDT | 2024 | supply_demand_zone_retest | 0 | 0 |
+| ETHUSDT | 2024 | trend_following | 2,180 | 80,647 |
+| ETHUSDT | 2024 | trendline_channel | 1,161 | 42,948 |
+| ETHUSDT | 2024 | volume_profile_poc_vah_val | 2,196 | 81,217 |
+| ETHUSDT | 2024 | vwap_reclaim_reject | 0 | 0 |
+| ETHUSDT | 2024 | wyckoff_spring_upthrust | 0 | 0 |
+| ETHUSDT | 2025 | bollinger | 0 | 0 |
+| ETHUSDT | 2025 | btc_order_flow | 0 | 0 |
+| ETHUSDT | 2025 | candlestick_at_level | 71 | 2,626 |
+| ETHUSDT | 2025 | chart_patterns | 705 | 26,084 |
+| ETHUSDT | 2025 | donchian_atr_breakout | 0 | 0 |
+| ETHUSDT | 2025 | dow_trend_confirmation | 0 | 0 |
+| ETHUSDT | 2025 | fib_pullback | 0 | 0 |
+| ETHUSDT | 2025 | funding_extreme_fade | 0 | 0 |
+| ETHUSDT | 2025 | fvg_retrace | 1,839 | 68,035 |
+| ETHUSDT | 2025 | ichimoku_cloud | 2,041 | 75,514 |
+| ETHUSDT | 2025 | liquidity_sweep | 4,904 | 175,824 |
+| ETHUSDT | 2025 | ma_cross | 0 | 0 |
+| ETHUSDT | 2025 | macd_signal | 0 | 0 |
+| ETHUSDT | 2025 | market_structure_pullback | 0 | 0 |
+| ETHUSDT | 2025 | order_block_retest | 0 | 0 |
+| ETHUSDT | 2025 | ote_zone | 0 | 0 |
+| ETHUSDT | 2025 | post_macro_event_reaction | 0 | 0 |
+| ETHUSDT | 2025 | price_action_h2l2 | 0 | 0 |
+| ETHUSDT | 2025 | range_breakout_nr4_nr7 | 0 | 0 |
+| ETHUSDT | 2025 | round_number_reaction | 1,209 | 44,727 |
+| ETHUSDT | 2025 | session_level_reaction | 13 | 481 |
+| ETHUSDT | 2025 | sr_touch | 747 | 53,776 |
+| ETHUSDT | 2025 | stochastic | 0 | 0 |
+| ETHUSDT | 2025 | supply_demand_zone_retest | 0 | 0 |
+| ETHUSDT | 2025 | trend_following | 2,173 | 80,395 |
+| ETHUSDT | 2025 | trendline_channel | 1,148 | 42,475 |
+| ETHUSDT | 2025 | volume_profile_poc_vah_val | 2,190 | 80,975 |
+| ETHUSDT | 2025 | vwap_reclaim_reject | 0 | 0 |
+| ETHUSDT | 2025 | wyckoff_spring_upthrust | 0 | 0 |
+| ETHUSDT | 2026 | bollinger | 0 | 0 |
+| ETHUSDT | 2026 | btc_order_flow | 0 | 0 |
+| ETHUSDT | 2026 | candlestick_at_level | 48 | 1,776 |
+| ETHUSDT | 2026 | chart_patterns | 574 | 21,236 |
+| ETHUSDT | 2026 | donchian_atr_breakout | 0 | 0 |
+| ETHUSDT | 2026 | dow_trend_confirmation | 0 | 0 |
+| ETHUSDT | 2026 | fib_pullback | 0 | 0 |
+| ETHUSDT | 2026 | funding_extreme_fade | 0 | 0 |
+| ETHUSDT | 2026 | fvg_retrace | 1,568 | 58,013 |
+| ETHUSDT | 2026 | ichimoku_cloud | 1,698 | 62,825 |
+| ETHUSDT | 2026 | liquidity_sweep | 4,192 | 150,061 |
+| ETHUSDT | 2026 | ma_cross | 0 | 0 |
+| ETHUSDT | 2026 | macd_signal | 0 | 0 |
+| ETHUSDT | 2026 | market_structure_pullback | 0 | 0 |
+| ETHUSDT | 2026 | order_block_retest | 0 | 0 |
+| ETHUSDT | 2026 | ote_zone | 0 | 0 |
+| ETHUSDT | 2026 | post_macro_event_reaction | 0 | 0 |
+| ETHUSDT | 2026 | price_action_h2l2 | 0 | 0 |
+| ETHUSDT | 2026 | range_breakout_nr4_nr7 | 0 | 0 |
+| ETHUSDT | 2026 | round_number_reaction | 595 | 22,013 |
+| ETHUSDT | 2026 | session_level_reaction | 0 | 0 |
+| ETHUSDT | 2026 | sr_touch | 459 | 33,042 |
+| ETHUSDT | 2026 | stochastic | 0 | 0 |
+| ETHUSDT | 2026 | supply_demand_zone_retest | 0 | 0 |
+| ETHUSDT | 2026 | trend_following | 1,810 | 66,929 |
+| ETHUSDT | 2026 | trendline_channel | 955 | 35,317 |
+| ETHUSDT | 2026 | volume_profile_poc_vah_val | 1,824 | 67,326 |
+| ETHUSDT | 2026 | vwap_reclaim_reject | 0 | 0 |
+| ETHUSDT | 2026 | wyckoff_spring_upthrust | 0 | 0 |
 
-The label-grid packing path was changed after profiling to remove repeated pandas row indexing and repeated bar-array conversion. The 2022-01 output matched the saved pre-optimization output exactly, row-for-row and dtype-for-dtype; runtime improved from 4.083s to 0.798s (5.1×). The subsequent event/vectorization pass reduced the 2022 monthly levels profile from 2.888s to 0.539s and the S/R and sweep detectors from 2.056s/2.182s to 1.367s/1.357s. Jan 2024 outputs matched the saved pre-change VWAP and event results exactly. The full-year 2024 event diagnostic was not repeated after this optimization; see `performance_optimization.md` for current month profiles and the label-grid follow-up note.
+## Runtime and peak RSS per year
 
-## Memory and data readiness
+| Symbol | Year | Input bars | Feature rows | Labels | Runtime (s) | Peak RSS (GiB) |
+|---|---:|---:|---:|---:|---:|---:|
+| BTCUSDT | 2018 | 731,128 | 521,624 | 2,434,320 | 370.7 | 2.61 |
+| BTCUSDT | 2019 | 1,065,620 | 523,836 | 2,444,470 | 328.6 | 3.23 |
+| BTCUSDT | 2020 | 1,069,784 | 525,788 | 2,453,780 | 415.5 | 3.25 |
+| BTCUSDT | 2021 | 1,069,115 | 524,607 | 2,448,250 | 462.4 | 3.32 |
+| BTCUSDT | 2022 | 1,070,367 | 525,600 | 2,452,800 | 524.0 | 3.28 |
+| BTCUSDT | 2023 | 1,071,280 | 525,520 | 2,452,450 | 617.0 | 3.72 |
+| BTCUSDT | 2024 | 1,072,720 | 527,040 | 2,459,520 | 729.9 | 3.73 |
+| BTCUSDT | 2025 | 1,071,360 | 525,600 | 2,452,800 | 782.4 | 5.28 |
+| BTCUSDT | 2026 | 970,560 | 437,760 | 2,042,880 | 786.9 | 4.15 |
+| USATECHIDXUSD | 2018 | 21,228 | 13,158 | 57,470 | 5.9 | 0.51 |
+| USATECHIDXUSD | 2019 | 363,267 | 342,056 | 1,596,770 | 156.1 | 2.38 |
+| USATECHIDXUSD | 2020 | 693,507 | 340,779 | 1,588,790 | 206.1 | 2.82 |
+| USATECHIDXUSD | 2021 | 694,218 | 343,890 | 1,604,190 | 205.0 | 2.90 |
+| USATECHIDXUSD | 2022 | 698,676 | 342,703 | 1,596,420 | 255.0 | 3.33 |
+| USATECHIDXUSD | 2023 | 698,349 | 340,959 | 1,590,470 | 281.4 | 3.47 |
+| USATECHIDXUSD | 2024 | 696,088 | 342,197 | 1,589,630 | 292.1 | 3.65 |
+| USATECHIDXUSD | 2025 | 693,236 | 340,387 | 1,581,230 | 324.3 | 3.99 |
+| USATECHIDXUSD | 2026 | 638,121 | 293,681 | 1,370,180 | 319.1 | 3.80 |
+| USA500IDXUSD | 2018 | 21,038 | 13,034 | 57,330 | 5.8 | 0.50 |
+| USA500IDXUSD | 2019 | 329,558 | 308,972 | 1,494,220 | 126.3 | 2.28 |
+| USA500IDXUSD | 2020 | 654,444 | 334,863 | 1,570,660 | 196.2 | 2.77 |
+| USA500IDXUSD | 2021 | 678,196 | 334,363 | 1,576,050 | 195.8 | 3.00 |
+| USA500IDXUSD | 2022 | 687,689 | 341,606 | 1,594,180 | 244.8 | 3.20 |
+| USA500IDXUSD | 2023 | 687,985 | 332,219 | 1,567,300 | 270.0 | 3.43 |
+| USA500IDXUSD | 2024 | 680,010 | 334,939 | 1,577,940 | 278.8 | 3.15 |
+| USA500IDXUSD | 2025 | 684,083 | 338,785 | 1,581,300 | 317.9 | 3.44 |
+| USA500IDXUSD | 2026 | 636,165 | 293,261 | 1,368,990 | 311.3 | 3.98 |
+| XAUUSD | 2008 | 372,515 | 363,458 | 1,711,220 | 157.3 | 2.16 |
+| XAUUSD | 2009 | 737,394 | 363,585 | 1,715,770 | 200.7 | 2.52 |
+| XAUUSD | 2010 | 740,749 | 365,763 | 1,721,580 | 204.6 | 2.79 |
+| XAUUSD | 2011 | 742,358 | 363,822 | 1,720,600 | 232.5 | 2.61 |
+| XAUUSD | 2012 | 741,916 | 362,834 | 1,705,970 | 264.6 | 2.83 |
+| XAUUSD | 2013 | 727,626 | 352,337 | 1,652,280 | 313.0 | 3.00 |
+| XAUUSD | 2014 | 716,511 | 351,835 | 1,650,740 | 357.7 | 2.97 |
+| XAUUSD | 2015 | 716,520 | 353,761 | 1,654,940 | 402.9 | 3.14 |
+| XAUUSD | 2016 | 719,119 | 354,253 | 1,652,700 | 485.6 | 2.96 |
+| XAUUSD | 2017 | 720,771 | 352,751 | 1,646,960 | 543.6 | 3.14 |
+| XAUUSD | 2018 | 720,402 | 353,889 | 1,651,160 | 609.9 | 3.04 |
+| XAUUSD | 2019 | 719,495 | 353,211 | 1,646,750 | 614.1 | 4.17 |
+| XAUUSD | 2020 | 719,440 | 355,184 | 1,655,850 | 621.2 | 3.67 |
+| XAUUSD | 2021 | 719,394 | 354,305 | 1,652,420 | 700.2 | 4.00 |
+| XAUUSD | 2022 | 721,361 | 354,582 | 1,653,610 | 804.0 | 3.99 |
+| XAUUSD | 2023 | 722,644 | 352,898 | 1,644,930 | 811.2 | 4.02 |
+| XAUUSD | 2024 | 722,520 | 355,822 | 1,657,390 | 731.1 | 4.35 |
+| XAUUSD | 2025 | 721,174 | 354,343 | 1,651,930 | 751.0 | 4.73 |
+| XAUUSD | 2026 | 662,181 | 303,681 | 1,414,630 | 704.5 | 5.12 |
+| ETHUSDT | 2018 | 731,128 | 521,624 | 2,434,320 | 365.7 | 2.36 |
+| ETHUSDT | 2019 | 1,065,620 | 523,836 | 2,444,470 | 319.9 | 3.28 |
+| ETHUSDT | 2020 | 1,069,783 | 525,787 | 2,453,780 | 393.1 | 3.85 |
+| ETHUSDT | 2021 | 1,069,114 | 524,607 | 2,448,250 | 429.9 | 3.92 |
+| ETHUSDT | 2022 | 1,070,367 | 525,600 | 2,452,800 | 512.2 | 4.38 |
+| ETHUSDT | 2023 | 1,071,280 | 525,520 | 2,452,450 | 637.3 | 4.75 |
+| ETHUSDT | 2024 | 1,072,720 | 527,040 | 2,459,520 | 764.1 | 4.68 |
+| ETHUSDT | 2025 | 1,071,360 | 525,600 | 2,452,800 | 899.4 | 4.15 |
+| ETHUSDT | 2026 | 970,560 | 437,760 | 2,042,880 | 841.0 | 4.57 |
 
-A prior full-year BTC feature build peaked at 4.44 GiB, above the 3 GiB per-worker target. The month profile peaked below 0.7 GiB, but production month streaming with warm-up overlap is not yet wired end-to-end. Do not launch a multi-worker build until that memory issue is resolved.
+## Validation
 
-Overlap-era NSXUSD/SPXUSD HistData Parquets were rebuilt using full-day offset estimates, stale-expiry flags and independent held-out roll checks. Of 32 quarterly candidates per index, 19 NQ and 18 SPX rolls pass the <2-point held-out check; the rest remain unmeasured and are not applied. Adjusted values before the latest unresolved roll are NaN (valid segment starts 2018-06-14 for NQ and 2017-12-14 for SPX). The FRED CSV request needed to measure pre-2014 non-overlap rolls timed out; it was not retried. Do not build or evaluate index features across unresolved segments. BTC event counts are in `pilot_event_counts.md`; those rows are counts/guard checks only and do not evaluate outcomes.
-
-The Parquets under `data/events/` and `data/labels/` are retained legacy outputs from earlier definitions and the bar-count label contract. They are not valid outputs under the current frozen event definitions/time-based label contract and must be regenerated before modeling. They have not been deleted.
-
-## Tests
-
-Latest full run: `uv run pytest -q` — 86 passed. No model training or holdout metrics were generated.
+Rust label/reference agreement is tested on 10,000 seeded randomized cases. Build: PATH=/Users/bfhach/.cargo/bin:$PATH maturin develop --manifest-path rust/msd_kernels/Cargo.toml --offline. pytest summary is recorded at completion.

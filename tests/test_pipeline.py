@@ -383,6 +383,47 @@ def test_feature_store_keeps_close_time_metadata_and_float32_features():
     assert len(features.select_dtypes("float64").columns)==0
 
 
+def test_level_feature_join_normalizes_object_timestamp_columns():
+    from msd.processing.features import build_features
+    ts=pd.date_range("2024-01-01",periods=100,freq="min",tz="UTC")
+    bars=_bars(ts)
+    levels=pd.DataFrame({"price":[101.0],"type":["prior_day_high"],
+                         "timeframe":["1d"],"created_at":[ts[0].isoformat()],
+                         "known_at":[ts[0].isoformat()],"invalidated_at":[None],
+                         "direction":[0],"strength":[1.0]})
+    features=build_features(bars,"BTCUSDT",timeframes={},levels=levels)
+    assert len(features)==len(bars)
+    assert features.known_at.dtype=="datetime64[ns, UTC]"
+
+
+def test_zero_spread_dukas_ticks_get_nearest_valid_annual_spread():
+    from msd.processing.pipeline import _modelled_spread
+    ts=pd.date_range("2024-01-01",periods=3,freq="min",tz="UTC")
+    frame=pd.DataFrame({"ts":ts})
+    for field in "ohlc":
+        frame[f"bid_{field}"]=[100.,101.,102.]
+        frame[f"ask_{field}"]=[100.2,101.,102.4]
+    result=_modelled_spread(frame,"XAUUSD")
+    assert result.loc[1,"ask_o"]-result.loc[1,"bid_o"]==pytest.approx(0.3)
+    assert result.loc[0,"ask_o"]-result.loc[0,"bid_o"]==pytest.approx(0.2)
+    assert result.spread_modeled.tolist()==[False,True,False]
+
+
+def test_spread_modeled_bars_keep_label_costs_but_mask_spread_features():
+    from msd.processing.pipeline import _modelled_spread
+    from msd.processing.features import build_features
+    ts=pd.date_range("2024-01-01",periods=40,freq="min",tz="UTC")
+    bars=_bars(ts)
+    bars["spread_modeled"]=[False,True]*20
+    executable=_modelled_spread(bars,"BTCUSDT")
+    assert executable.spread_modeled.all()
+    assert (executable.ask_o>executable.bid_o).all()
+    features=build_features(executable,"BTCUSDT",timeframes={})
+    assert features.spread_modeled.dtype==bool
+    assert features.spread_modeled.all()
+    assert features.spread_atr.isna().all()
+
+
 def test_month_window_features_match_full_history_rows():
     from msd.processing.features import build_features,prepare_feature_cache
     ts=pd.date_range("2024-01-01",periods=2400,freq="min",tz="UTC")
@@ -499,6 +540,7 @@ def test_data_load_is_executable_by_default_and_raw_is_available(monkeypatch):
     raw=load("BTCUSDT",ts[0],ts[-1],raw=True)
     assert (executable.ask_o>executable.bid_o).all()
     assert np.allclose(executable.ask_o-executable.bid_o,BTC_SPREAD[2024])
+    assert executable.spread_modeled.dtype==bool and executable.spread_modeled.all()
     assert (raw.ask_o==raw.bid_o).all()
 
 
@@ -1024,3 +1066,81 @@ def test_macro_countdown_uses_only_prepublished_scheduled_events():
     assert "minutes_to_fomc_emergency" not in features
     assert np.isnan(features.minutes_since_fomc_emergency.iloc[0])
     assert features.minutes_since_fomc_emergency.iloc[1]==0.
+
+
+def _flat_filled(ts, keep):
+    """Bars for every minute in ts; the omitted ones repeat the prior close (no ticks)."""
+    full = _bars(ts)
+    for column in ("bid_o", "bid_h", "bid_l", "bid_c", "ask_o", "ask_h", "ask_l", "ask_c"):
+        side = "bid" if column.startswith("bid") else "ask"
+        full.loc[~keep, column] = np.nan
+        full[column] = full[column].fillna(full[f"{side}_c"].ffill()) if not column.endswith("_c") else full[column].ffill()
+    for side in ("bid", "ask"):
+        for field in "ohl":
+            full.loc[~keep, f"{side}_{field}"] = full.loc[~keep, f"{side}_c"]
+    return full
+
+
+def test_htf_bar_ohlc_is_unchanged_by_no_tick_minute_omissions():
+    from msd.processing.timeframes import build_timeframe
+    ts = pd.date_range("2024-01-01", periods=24 * 60, freq="min", tz="UTC")
+    keep = np.random.default_rng(7).random(len(ts)) > 0.10
+    keep[-1] = True  # the input must reach the last bucket's end for it to close
+    filled = _flat_filled(ts, keep)
+    sparse = filled.loc[keep].reset_index(drop=True)
+    for tf in ("15m", "1h", "4h"):
+        a = build_timeframe(sparse, "BTCUSDT", tf).set_index("ts")
+        b = build_timeframe(filled, "BTCUSDT", tf).set_index("ts")
+        assert len(b) == 24 * 60 // {"15m": 15, "1h": 60, "4h": 240}[tf]
+        assert a.index.isin(b.index).all() and len(a) >= 0.9 * len(b)  # random clusters can dip below 80%
+        # A bucket whose first minute had no ticks opens at its first tick, not
+        # at the carried prior close, so compare OHLC where the first minute traded.
+        first_traded = a.index[a.index.isin(ts[keep])]
+        assert len(first_traded) >= 0.8 * len(a)
+        cols = ["bid_o", "bid_h", "bid_l", "bid_c", "ask_o", "ask_h", "ask_l", "ask_c", "known_at"]
+        pd.testing.assert_frame_equal(a.loc[first_traded, cols], b.loc[first_traded, cols])
+        pd.testing.assert_series_equal(a.bid_c, b.loc[a.index, "bid_c"])
+
+
+def test_htf_bucket_below_coverage_is_absent_and_index_quote_gap_is_not_expected():
+    from msd.processing.timeframes import build_timeframe
+    ts = pd.date_range("2024-01-01", periods=120, freq="min", tz="UTC")
+    sparse = ts[(ts.minute % 4 != 0) | (ts.hour == 1)]  # hour 0 keeps 75%, hour 1 keeps 100%
+    frame = build_timeframe(_bars(sparse), "BTCUSDT", "1h")
+    assert frame.ts.tolist() == [pd.Timestamp("2024-01-01 01:00", tz="UTC")]
+    # NQ: the 16:00 ET bucket only has quotes until 16:14; 14:00 ET 4h bucket ends at 17:00.
+    start = pd.Timestamp("2024-06-02 18:00", tz="America/New_York")
+    ny = pd.date_range(start, pd.Timestamp("2024-06-03 20:00", tz="America/New_York"), freq="min")
+    local = ny.tz_convert("America/New_York")
+    minute = local.hour * 60 + local.minute
+    ny = ny[(minute < 16 * 60 + 15) | (minute >= 18 * 60)]
+    hours = build_timeframe(_bars(ny.tz_convert("UTC")), "USATECHIDXUSD", "1h")
+    four = build_timeframe(_bars(ny.tz_convert("UTC")), "USATECHIDXUSD", "4h")
+    sixteen = pd.Timestamp("2024-06-03 16:00", tz="America/New_York")
+    fourteen = pd.Timestamp("2024-06-03 14:00", tz="America/New_York")
+    assert sixteen in set(hours.ts.dt.tz_convert("America/New_York"))
+    row = four[four.ts.dt.tz_convert("America/New_York") == fourteen]
+    assert len(row) == 1 and row.known_at.iloc[0] == pd.Timestamp("2024-06-03 17:00", tz="America/New_York")
+
+
+def test_htf_partial_bucket_is_not_emitted_before_input_passes_its_end():
+    from msd.processing.timeframes import build_timeframe
+    ts = pd.date_range("2024-01-01", periods=600, freq="min", tz="UTC")
+    full = build_timeframe(_bars(ts), "BTCUSDT", "1h")
+    for cut_minute in (595, 590, 550, 549):  # 59/60, 50/60, 10/60 and 9/60 of the last bucket
+        cut = ts[0] + pd.Timedelta(minutes=cut_minute)
+        truncated = build_timeframe(_bars(ts[ts < cut]), "BTCUSDT", "1h")
+        assert truncated.known_at.max() <= cut
+        pd.testing.assert_frame_equal(truncated, full[full.known_at <= cut].reset_index(drop=True))
+
+
+def test_metal_daily_rollover_break_is_not_expected_in_utc_buckets():
+    from msd.processing.timeframes import build_timeframe
+    for day in ("2024-01-10", "2024-07-10"):  # 22:00 UTC in winter, 21:00 UTC in summer
+        ts = pd.date_range(f"{day} 00:00", periods=26 * 60, freq="min", tz="UTC")
+        local = ts.tz_convert("America/New_York")
+        ts = ts[local.hour != 17]
+        four = build_timeframe(_bars(ts), "XAUUSD", "4h")
+        assert pd.Timestamp(f"{day} 20:00", tz="UTC") in set(four.ts)
+        hours = build_timeframe(_bars(ts), "XAUUSD", "1h")
+        assert not hours.ts.dt.tz_convert("America/New_York").dt.hour.eq(17).any()

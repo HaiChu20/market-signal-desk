@@ -33,6 +33,9 @@ from msd.methods import (
 )
 
 TIER1 = ("USATECHIDXUSD", "USA500IDXUSD", "XAUUSD", "BTCUSDT", "ETHUSDT")
+# Keep the same 370-day overlap used by the validated chunk-equivalence path.
+# A shorter overlap changes long HTF rolling features even when levels/state
+# are persisted, so production chunks must retain this warm-up.
 MAX_LOOKBACK_DAYS = 370
 MAX_HOLD_TRADING_DAYS = 5
 INDEX_SPREAD_FALLBACK = {"USATECHIDXUSD": 2.881, "NSXUSD": 2.881,
@@ -41,7 +44,7 @@ BAR_DIR = Path("data/derived")
 LEVEL_DIR = Path("data/levels")
 FEATURE_DIR = Path("data/features")
 LABEL_DIR = Path("data/labels")
-MIN_FREE_BYTES = 65*1024**3
+MIN_FREE_BYTES = 15*1024**3  # user: keep >=10 GB free; 15 GiB leaves system headroom
 CASH_ERA_START = pd.Timestamp("2018-12-16 23:00:00",tz="UTC")
 # Explicit registry: every frozen detector is considered, then its SYMBOLS
 # declaration narrows the instrument scope. Keep pilots in the same path.
@@ -62,7 +65,7 @@ METHOD_REGISTRY = (
 def _check_disk() -> None:
     free=shutil.disk_usage(".").free
     if free<MIN_FREE_BYTES:
-        raise OSError(f"Pipeline stopped before writing: only {free/1024**3:.1f} GiB free (65 GiB minimum)")
+        raise OSError(f"Pipeline stopped before writing: only {free/1024**3:.1f} GiB free (15 GiB minimum)")
 
 
 def methods_for_symbol(symbol: str) -> tuple:
@@ -74,10 +77,44 @@ def methods_for_symbol(symbol: str) -> tuple:
 def _modelled_spread(frame: pd.DataFrame, symbol: str) -> pd.DataFrame:
     """Model HistData spread; preserve executable bid/ask quotes from Dukascopy."""
     result = frame.copy()
+    if "spread_modeled" not in result:
+        result["spread_modeled"] = False
+    else:
+        result["spread_modeled"] = result.spread_modeled.fillna(False).astype(bool)
     # Real Dukascopy quotes already carry executable bid/ask. Do not replace
     # their observed spread with a modeled cost unless this is a crypto trade
     # series, whose prices are intentionally single-price spot/UM bars.
-    if symbol not in {"BTCUSDT", "ETHUSDT"} and "ask_o" in result and (result.ask_o > result.bid_o).any() and "feed" not in result:
+    quote_fields=tuple(f"{side}_{field}" for side in ("bid","ask") for field in "ohlc")
+    if (symbol not in {"BTCUSDT","ETHUSDT"} and "feed" not in result
+            and all(column in result for column in quote_fields)
+            and (result.ask_o>result.bid_o).any()):
+        executable=np.ones(len(result),dtype=bool)
+        for field in "ohlc":
+            bid=result[f"bid_{field}"].to_numpy(float);ask=result[f"ask_{field}"].to_numpy(float)
+            executable &= np.isfinite(bid)&np.isfinite(ask)&(ask>bid)
+        if executable.all():
+            return result
+        observed=(result.ask_o-result.bid_o).to_numpy(float).copy()
+        spread_ok=np.isfinite(observed)&(observed>0)
+        annual=pd.Series(observed[spread_ok]).groupby(result.ts[spread_ok].dt.year.to_numpy()).median()
+        annual=annual[np.isfinite(annual)&(annual>0)]
+        available=annual.index.to_numpy(dtype=int)
+        if not len(available):
+            raise ValueError(f"No valid quoted spread to repair {symbol}")
+        observed[~spread_ok]=np.nan
+        fallback=np.full(len(result),np.nan)
+        for year in result.ts.dt.year.unique():
+            value=annual.get(int(year),np.nan)
+            if not np.isfinite(value):
+                value=float(annual.iloc[int(np.argmin(np.abs(available-int(year))))])
+            fallback[result.ts.dt.year.to_numpy()==year]=value
+        for field in "ohlc":
+            bid=result[f"bid_{field}"].to_numpy(float);ask=result[f"ask_{field}"].to_numpy(float)
+            midpoint=(bid+ask)/2
+            result.loc[~executable,f"bid_{field}"]=midpoint[~executable]-fallback[~executable]/2
+            result.loc[~executable,f"ask_{field}"]=midpoint[~executable]+fallback[~executable]/2
+        result["duka_spread"]=np.where(executable,observed,fallback)
+        result.loc[~executable,"spread_modeled"] = True
         return result
     reference_symbols={"BTCUSDT":"BTCUSD","ETHUSDT":"ETHUSD",
                        "USATECHIDXUSD":"USATECHIDXUSD","NSXUSD":"USATECHIDXUSD",
@@ -128,6 +165,7 @@ def _modelled_spread(frame: pd.DataFrame, symbol: str) -> pd.DataFrame:
             result[f"bid_{field}"]=mid-spread/2
             result[f"ask_{field}"]=mid+spread/2
         result["duka_spread"]=spread
+        result["spread_modeled"] = True
         return result
     if "feed" in result:
         already_executable=(result.ask_o.to_numpy(float)>result.bid_o.to_numpy(float))
@@ -156,6 +194,7 @@ def _modelled_spread(frame: pd.DataFrame, symbol: str) -> pd.DataFrame:
             mid=(result[f"bid_{field}"].to_numpy(float)+result[f"ask_{field}"].to_numpy(float))/2
             result.loc[valid,f"bid_{field}"] = mid[valid]-spread[valid]/2
             result.loc[valid,f"ask_{field}"] = mid[valid]+spread[valid]/2
+        result.loc[valid,"spread_modeled"] = True
     return result
 
 
@@ -316,6 +355,9 @@ def _history_start(symbol: str) -> pd.Timestamp:
     """Earliest permitted source timestamp used to seed cumulative state."""
     if symbol in INDEX_SYMBOLS:
         return CASH_ERA_START
+    if symbol == "XAUUSD":
+        # Early gold quotes are sparse; the registered pipeline starts 2008+.
+        return pd.Timestamp("2008-01-01",tz="UTC")
     roots = {
         "BTCUSDT": Path("data/bars/binance_spot/BTCUSDT"),
         "ETHUSDT": Path("data/bars/binance_spot/ETHUSDT"),
@@ -324,8 +366,11 @@ def _history_start(symbol: str) -> pd.Timestamp:
     files = sorted(roots.get(symbol, Path("data/bars/dukascopy") / symbol).glob("[0-9][0-9][0-9][0-9]-[0-9][0-9].parquet"))
     if not files:
         return pd.Timestamp(_first_year(symbol), 1, 1, tz="UTC")
-    first = pd.read_parquet(files[0], columns=["ts"]).ts
-    return pd.to_datetime(first, utc=True).min().floor("min")
+    for path in files:
+        first = pd.to_datetime(pd.read_parquet(path, columns=["ts"]).ts,utc=True).dropna()
+        if not first.empty:
+            return first.min().floor("min")
+    return pd.Timestamp(_first_year(symbol),1,1,tz="UTC")
 
 
 def _active_mask(bars: pd.DataFrame, symbol: str) -> np.ndarray:
@@ -466,6 +511,9 @@ def _event_feature_frame(bars: pd.DataFrame, timeframes: dict[str,pd.DataFrame])
 
 
 def write_feature_dictionary(columns: list[str]) -> Path:
+    # Symbol chains run concurrently. Merge feature names under a process lock
+    # and replace atomically so one worker cannot truncate another's entries.
+    import fcntl
     prefixes = {
         "return_": "Trailing close-to-close fractional return over the named bar window.",
         "realized_vol": "Trailing log-return standard deviation scaled by square root of window length.",
@@ -485,14 +533,28 @@ def write_feature_dictionary(columns: list[str]) -> Path:
         "dvol_": "Deribit DVOL level/change and trailing 24-hour realized-volatility premium, as-of the published observation.",
         "spread_": "Bid/ask spread divided by trailing ATR.",
     }
-    rows = ["# Feature dictionary", "", "Every row carries ts (bar open) and known_at (bar close). Values use observations known at or before known_at; joined higher-timeframe values appear only after that timeframe closes.", "",
+    path=Path("reports/data/feature_dictionary.md"); path.parent.mkdir(parents=True,exist_ok=True)
+    lock_path=Path("data/tmp/feature_dictionary.lock"); lock_path.parent.mkdir(parents=True,exist_ok=True)
+    with lock_path.open("a+") as lock:
+        fcntl.flock(lock.fileno(),fcntl.LOCK_EX)
+        names=set(columns)-{"ts","known_at"}
+        if path.exists():
+            for line in path.read_text().splitlines():
+                if line.startswith("|") and line.count("|")>=4:
+                    name=line.split("|",2)[1].strip()
+                    if name and name not in {"Feature","---"}:
+                        names.add(name)
+        rows = ["# Feature dictionary", "", "Every row carries ts (bar open) and known_at (bar close). Values use observations known at or before known_at; joined higher-timeframe values appear only after that timeframe closes.", "",
             "| Feature | Definition | Timeframe | Known-at rule |", "|---|---|---|---|"]
-    for name in sorted(set(columns)-{"ts", "known_at"}):
-        prefix = name.split("_", 1)[0]
-        tf = prefix if prefix in {"1m", "5m", "15m", "1h", "4h", "1d"} else "1m / calendar"
-        definition = next((text for key,text in prefixes.items() if name.startswith(key)), "Trailing causal feature or calendar encoding.")
-        rows.append(f"| {name} | {definition} | {tf} | Completed close at or before row known_at |" )
-    path=Path("reports/data/feature_dictionary.md"); path.parent.mkdir(parents=True,exist_ok=True); path.write_text("\n".join(rows)+"\n")
+        for name in sorted(names):
+            prefix = name.split("_", 1)[0]
+            tf = prefix if prefix in {"1m", "5m", "15m", "1h", "4h", "1d"} else "1m / calendar"
+            definition = next((text for key,text in prefixes.items() if name.startswith(key)), "Trailing causal feature or calendar encoding.")
+            rows.append(f"| {name} | {definition} | {tf} | Completed close at or before row known_at |" )
+        with tempfile.NamedTemporaryFile(mode="w",dir=path.parent,suffix=".md",delete=False) as handle:
+            temp=Path(handle.name);handle.write("\n".join(rows)+"\n")
+        os.replace(temp,path)
+        fcntl.flock(lock.fileno(),fcntl.LOCK_UN)
     return path
 
 
@@ -515,10 +577,15 @@ def label_method_events(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.D
     atr_map=features.set_index("ts")["1m_atr14"] if "1m_atr14" in features else pd.Series(dtype=float)
     close_mid=(event_bars.bid_c.to_numpy(float)+event_bars.ask_c.to_numpy(float))/2
     ts_pos=pd.Series(np.arange(len(event_bars)),index=event_bars.ts)
-    jobs=[]; metadata=[]; detected_counts={}; state_out={}; touch_rows=[]
+    label_frames=[]; detected_counts={}; state_out={}; touch_rows=[]
     prepared_levels=prepare_exit_levels(levels)
+    matrix=event_bars[["bid_o","bid_h","bid_l","bid_c","ask_o","ask_h","ask_l","ask_c"]].to_numpy(dtype="<f8")
+    stamps=pd.to_datetime(event_bars.ts,utc=True).astype("datetime64[ns, UTC]").astype("int64").to_numpy()//1_000_000_000
+    matrix_bytes=matrix.tobytes();stamp_bytes=np.asarray(stamps,dtype="<i8").tobytes()
+    outcome={1:"tp",-1:"sl",0:"time",-2:"no_fill"}
     for method in methods:
         method_started=time.perf_counter()
+        jobs=[]; metadata=[]
         detector_state=(method_states or {}).get(method.NAME)
         if "return_state" in inspect.signature(method.detect).parameters:
             if return_states:
@@ -581,40 +648,40 @@ def label_method_events(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.D
                     metadata.append({**oriented,"exit_kind":candidate["kind"],"sl":float(sl),"tp":float(tp),
                                      "deadline_ts":deadline,"entry_type":entry_type,
                                      "limit_price":limit_price,"expiry_at":expiry if limit_price is not None else None})
-    if not jobs:
+        if not jobs:
+            continue
+        if first_hit_batch is not None:
+            result=np.asarray(first_hit_batch(matrix_bytes,stamp_bytes,jobs,11)).reshape(-1,9)
+        else:
+            from .labels import first_hit_reference
+            result=[]
+            for event in metadata:
+                signal_i=int(ts_pos.get(event["ts"]))
+                ref=first_hit_reference(event_bars,signal_i,int(event["side"]),float(event["price"]),
+                    event["sl"],event["tp"],delay_bars=2,financing_per_night=finance,
+                    deadline_ts=event["deadline_ts"],instrument_class=instrument_class,
+                    limit_price=event.get("limit_price"),expiry_ts=event.get("expiry_at"),detailed=True)
+                reason,exit_i,exit_price,net,gross,fill,nights,entry_i,risk=ref
+                result.append(({"tp":1,"stop":-1,"time":0,"no_fill":-2}[reason],exit_i,fill,exit_price,
+                               net,gross,nights,entry_i,risk))
+            result=np.asarray(result,dtype=float)
+        records=[]
+        for event,row in zip(metadata,result):
+            code,exit_i,fill,exit_price,net_r,gross_r,nights,entry_i,risk=row
+            entry_i=int(entry_i);exit_i=int(exit_i)
+            records.append({**event,"entry_ts":event_bars.ts.iloc[entry_i] if 0<=entry_i<len(event_bars) else pd.NaT,
+                "entry_price":float(fill),"planned_risk":float(risk),
+                "outcome":outcome[int(code)],"exit_ts":event_bars.ts.iloc[exit_i] if 0<=exit_i<len(event_bars) else pd.NaT,
+                "exit_price":float(exit_price),"R":float(net_r),"gross_R":float(gross_r),
+                "financing_nights":int(nights)})
+        label_frames.append(pd.DataFrame(records))
+        del jobs, metadata, result, records
+    if not label_frames:
         empty = pd.DataFrame()
         if return_states:
             return empty, detected_counts, state_out, touch_rows
         return (empty, detected_counts) if return_event_counts else empty
-    matrix=event_bars[["bid_o","bid_h","bid_l","bid_c","ask_o","ask_h","ask_l","ask_c"]].to_numpy(dtype="<f8")
-    stamps=pd.to_datetime(event_bars.ts,utc=True).astype("datetime64[ns, UTC]").astype("int64").to_numpy()//1_000_000_000
-    if first_hit_batch is not None:
-        result=np.asarray(first_hit_batch(matrix.tobytes(),np.asarray(stamps,dtype="<i8").tobytes(),jobs,11)).reshape(-1,9)
-    else:
-        from .labels import first_hit_reference
-        result=[]
-        for event in metadata:
-            signal_i=int(ts_pos.get(event["ts"]))
-            ref=first_hit_reference(event_bars,signal_i,int(event["side"]),float(event["price"]),
-                event["sl"],event["tp"],delay_bars=2,financing_per_night=finance,
-                deadline_ts=event["deadline_ts"],instrument_class=instrument_class,
-                limit_price=event.get("limit_price"),expiry_ts=event.get("expiry_at"),detailed=True)
-            reason,exit_i,exit_price,net,gross,fill,nights,entry_i,risk=ref
-            result.append(({"tp":1,"stop":-1,"time":0,"no_fill":-2}[reason],exit_i,fill,exit_price,
-                           net,gross,nights,entry_i,risk))
-        result=np.asarray(result,dtype=float)
-    labels=[]
-    outcome={1:"tp",-1:"sl",0:"time",-2:"no_fill"}
-    for event,row in zip(metadata,result):
-        code,exit_i,fill,exit_price,net_r,gross_r,nights,entry_i,risk=row
-        entry_i=int(entry_i);exit_i=int(exit_i)
-        record={**event,"entry_ts":event_bars.ts.iloc[entry_i] if 0<=entry_i<len(event_bars) else pd.NaT,
-                "entry_price":float(fill),"planned_risk":float(risk),
-                "outcome":outcome[int(code)],"exit_ts":event_bars.ts.iloc[exit_i] if 0<=exit_i<len(event_bars) else pd.NaT,
-                "exit_price":float(exit_price),"R":float(net_r),"gross_R":float(gross_r),
-                "financing_nights":int(nights)}
-        labels.append(record)
-    result = pd.DataFrame(labels)
+    result=pd.concat(label_frames,ignore_index=True) if label_frames else pd.DataFrame()
     if return_states:
         return result, detected_counts, state_out, touch_rows
     return (result, detected_counts) if return_event_counts else result
@@ -633,12 +700,12 @@ def run_symbol(symbol: str, start_year: int | None = None, end_year: int | None 
     for year in range(start_year, end_year+1):
         year_started=time.perf_counter()
         year_start=pd.Timestamp(year,1,1,tz="UTC")
-        year_end = pd.Timestamp(year+1, month=1, day=1, tz="UTC")
+        year_end = pd.Timestamp(year=year+1, month=1, day=1, tz="UTC")
         state_root=Path("data/state/pipeline")/symbol
         previous_state_path=state_root/f"{year-1}.json"
         bootstrap=not previous_state_path.exists() or not (LEVEL_DIR/f"{symbol}.parquet").exists()
         # First chunk bootstraps from the permitted source start. Later chunks
-        # use bounded 370-day price warm-up plus persisted levels, HTF history,
+        # use the validated 370-day price warm-up plus persisted levels, HTF history,
         # and the prior year's exact event-state checkpoint.
         left = _history_start(symbol) if bootstrap else year_start-pd.Timedelta(days=MAX_LOOKBACK_DAYS)
         right = pd.Timestamp(year=year+1, month=1, day=1, tz="UTC") + pd.Timedelta(days=8)
@@ -657,7 +724,7 @@ def run_symbol(symbol: str, start_year: int | None = None, end_year: int | None 
         assert_executable_spread(bars,symbol)
         bars = _attach_market_auxiliary(bars,symbol)
         keep=["ts",*[f"{side}_{field}" for side in ("bid","ask") for field in "ohlc"],"volume"]
-        keep += [name for name in ("duka_spread","duka_volume","taker_buy_base","trades","quote_volume",
+        keep += [name for name in ("spread_modeled","duka_spread","duka_volume","taker_buy_base","trades","quote_volume",
                                     "funding_z20","open_interest","feed","roll") if name in bars]
         bars=bars.loc[:,keep].copy()
         active_bars=bars.loc[_active_mask(bars,symbol)].reset_index(drop=True)
@@ -794,6 +861,12 @@ def run_symbol(symbol: str, start_year: int | None = None, end_year: int | None 
                "event_unique":sum(x["unique_events"] for x in yearly_counts),
                "event_candidate_rows":sum(x["candidate_rows"] for x in yearly_counts),
                "label_rows":year_label_rows,"elapsed_seconds":elapsed},flush=True)
+        # Release the previous year before loading the next year's warm-up
+        # window; otherwise Python can briefly retain both large bar frames.
+        del bars,active_bars,tfs_current,tfs,prior_levels,current_levels,levels
+        del auxiliary,cross,method_features,scan_features,scan_bars,events,per_minute
+        del label_bars,label_atr,labels
+        gc.collect()
     result={"symbol": symbol, "features": features_written, "levels": level_rows,
             "bars": timeframes_written, "labels": labels_written,"events":events_written,
             "unique_events":sum(row["unique_events"] for row in event_year_counts),
@@ -845,6 +918,10 @@ def write_pipeline_report(results: list[dict]) -> Path:
     event_rows=[row for result in results for row in result.get("event_year_counts",[])]
     lines += [f"| {row['symbol']} | {row['year']} | {row['method']} | {row['unique_events']:,} | {row['candidate_rows']:,} |" for row in event_rows]
     if not event_rows: lines.append("| No events | — | — | 0 | 0 |")
+    year_rows=[row for result in results for row in result.get("year_resource_rows",[])]
+    lines += ["", "## Runtime and peak RSS per year", "", "| Symbol | Year | Input bars | Feature rows | Labels | Runtime (s) | Peak RSS (GiB) |", "|---|---:|---:|---:|---:|---:|---:|"]
+    lines += [f"| {row['symbol']} | {row['year']} | {row['input_bars']:,} | {row['feature_rows']:,} | {row['label_rows']:,} | {row['elapsed_seconds']:.1f} | {row['peak_rss_gib']:.2f} |" for row in year_rows]
+    if not year_rows: lines.append("| No completed years | — | 0 | 0 | 0 | 0 | 0 |")
     lines += ["", "## Validation", "", "Rust label/reference agreement is tested on 10,000 seeded randomized cases. Build: PATH=/Users/bfhach/.cargo/bin:$PATH maturin develop --manifest-path rust/msd_kernels/Cargo.toml --offline. pytest summary is recorded at completion.", ""]
     path=Path("reports/data/pipeline_report.md"); path.parent.mkdir(parents=True,exist_ok=True); path.write_text("\n".join(lines))
     return path
