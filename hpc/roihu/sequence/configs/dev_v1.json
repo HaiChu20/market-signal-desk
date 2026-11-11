@@ -1,0 +1,21 @@
+{
+  "name": "sequence_cnn_dev_v1",
+  "period": "dev",
+  "end_exclusive": "2023-01-01",
+  "symbols": ["USATECHIDXUSD", "USA500IDXUSD", "XAUUSD", "BTCUSDT", "ETHUSDT"],
+  "starts": {
+    "USATECHIDXUSD": "2019-01-01",
+    "USA500IDXUSD": "2019-01-01",
+    "XAUUSD": "2008-01-01",
+    "BTCUSDT": "2018-01-01",
+    "ETHUSDT": "2018-01-01"
+  },
+  "seeds": [7, 17, 27],
+  "folds": 5,
+  "epochs": 20,
+  "batch_size": 64,
+  "patience": 4,
+  "width": 24,
+  "checkpoint_every_steps": 100,
+  "windows": {"1m": 240, "15m": 96, "1h": 96, "4h": 60}
+}
