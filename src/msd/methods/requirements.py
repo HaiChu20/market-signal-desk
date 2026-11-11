@@ -27,7 +27,8 @@ for name in ('order_block_retest','fvg_retrace','market_structure_pullback','fib
     RULES[name] = SWING
 MARKET = {'btc_order_flow':'crypto','funding_extreme_fade':'crypto',
           'intraday_momentum':'indices','vix_spike_dip_buy':'indices',
-          'post_earnings_index_reaction':'indices','rsi2_mean_reversion':'indices'}
+          'post_earnings_index_reaction':'indices','post_macro_event_reaction':'indices',
+          'rsi2_mean_reversion':'indices'}
 
 def required_features(name: str) -> tuple[str, ...]:
     return tuple(sorted(COMMON | RULES.get(name,set())))

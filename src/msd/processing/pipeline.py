@@ -70,8 +70,11 @@ def _check_disk() -> None:
 
 def methods_for_symbol(symbol: str) -> tuple:
     """Select registered detectors whose declared scope includes an instrument."""
+    market=('crypto' if symbol in {'BTCUSDT','ETHUSDT'} else
+            'indices' if symbol in INDEX_SYMBOLS else 'gold' if symbol=='XAUUSD' else 'all')
     return tuple(method for method in METHOD_REGISTRY
-                 if not hasattr(method, "SYMBOLS") or symbol in method.SYMBOLS)
+                 if (not hasattr(method, "SYMBOLS") or symbol in method.SYMBOLS)
+                 and getattr(method,'MARKETS','all') in {'all',market})
 
 
 def _modelled_spread(frame: pd.DataFrame, symbol: str) -> pd.DataFrame:
@@ -591,7 +594,8 @@ def label_method_events(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.D
                         *, return_event_counts: bool = False, event_start=None, event_end=None,
                         method_states: dict | None = None, return_states: bool = False,
                         detector_features: pd.DataFrame | None = None,
-                        detector_bars: pd.DataFrame | None = None):
+                        detector_bars: pd.DataFrame | None = None,
+                        unavailable: list[dict] | None = None):
     try:
         from msd._msd_kernels import first_hit_batch
     except ImportError as error:
@@ -623,7 +627,13 @@ def label_method_events(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.D
         blank=sorted(name for name in required&set(current.columns)
                      if pd.to_numeric(current[name],errors='coerce').notna().sum()==0)
         if absent or blank:
-            raise ValueError(f'{symbol} {method.NAME}: required event features absent={absent}, all_nan={blank}')
+            reason=f'{symbol} {method.NAME}: required event features absent={absent}, all_nan={blank}'
+            if unavailable is None:raise ValueError(reason)
+            unavailable.append({'symbol':symbol,'method':method.NAME,
+                                'year':pd.Timestamp(event_start).year if event_start is not None else None,
+                                'reason':reason})
+            detected_counts[method.NAME]=0
+            continue
         detector_state=(method_states or {}).get(method.NAME)
         if "return_state" in inspect.signature(method.detect).parameters:
             if return_states:
@@ -921,7 +931,9 @@ def replay_events_only(symbol: str, start_year: int, end_year: int,
     """
     import json
     output_root=Path(output_root);source_root=Path(source_root)
-    state={};summaries=[]
+    state={};summaries=[];unavailable=[]
+    prior_state=output_root/'state'/symbol/f'{start_year-1}.json'
+    if prior_state.exists():state=json.loads(prior_state.read_text())
     source='binance_spot' if symbol in {'BTCUSDT','ETHUSDT'} else 'dukascopy'
     for year in range(start_year,end_year+1):
         year_start=pd.Timestamp(year,1,1,tz='UTC');year_end=pd.Timestamp(year+1,1,1,tz='UTC')
@@ -950,15 +962,25 @@ def replay_events_only(symbol: str, start_year: int, end_year: int,
         scan_bars=active[(active.ts>=(left if year==start_year else year_start))&(active.ts<year_end)]
         events,counts,state,touches=label_method_events(features,levels,active,symbol,
             return_states=True,event_start=year_start,event_end=year_end,
-            detector_features=scan,detector_bars=scan_bars,method_states=state)
+            detector_features=scan,detector_bars=scan_bars,method_states=state,
+            unavailable=unavailable)
         if len(events):_write_monthly(events,output_root,symbol)
         state_dir=output_root/'state'/symbol;state_dir.mkdir(parents=True,exist_ok=True)
         (state_dir/f'{year}.json').write_text(json.dumps(state,separators=(',',':')))
         grouped=events.groupby('method').size() if len(events) else pd.Series(dtype=int)
         summaries.extend({'symbol':symbol,'year':year,'method':method.NAME,
                           'events':int(counts.get(method.NAME,0)),
-                          'candidate_rows':int(grouped.get(method.NAME,0))}
+                          'candidate_rows':int(grouped.get(method.NAME,0)),
+                          'reason':next((item['reason'] for item in unavailable
+                                         if item['method']==method.NAME and item['symbol']==symbol
+                                         and item['year']==year),
+                                        'rule emitted no events with available inputs' if
+                                        counts.get(method.NAME,0)==0 else None)}
                          for method in methods_for_symbol(symbol))
+    if unavailable:
+        report=output_root/'unavailable.json';report.parent.mkdir(parents=True,exist_ok=True)
+        report.write_text(json.dumps({'rows':summaries,'unavailable':unavailable},indent=2))
+        raise RuntimeError(f'Replay refused incomplete feature data; details in {report}')
     return summaries
 
 
