@@ -335,3 +335,15 @@ Append-only notes from the autonomous review loop while the user sleeps.
   - Bundle: 8.17 GiB, 2,443 files; 8 missing are BTC/ETH 2017-12 pre-start warm-up files.
   - Follow-ups sent: ETH treated as index in benchmark.random_direction (financing/spread); move gate_open_signals to research/gating.py to avoid an add/add conflict with 2dcf8f09.
   - Noted: labels use index financing 0.02%/night for XAU vs protocol 0.015%. This is conservative, so it is documented as a deviation, with no relabel.
+- 08:35 PAUSED (user): Codex hit its WEEKLY limit; it resets 13:53. Hourly cron cancelled.
+  - Still running (no Codex needed): Dukascopy 1m (USDJPY onward), Dukascopy ticks (PID 89094), Bybit raw (24 GiB so far, at 2024-01), bookDepth (restarted by fe242257 after its parser fix, PID 29527), and 2dcf8f09's events-only BTC DRY RUN (writes data/tmp only).
+  - Unreviewed/uncommitted in the main checkout: src/msd/data/flow_features.py, its test, and the flow coverage reports. The report text says windows "require every minute", so check it implements the 80%-of-source rule before accepting.
+  - RESUME LIST:
+    (1) review 2dcf8f09's event-scan fix + dry run; then run the events-only replay for all 5 symbols into data/events;
+    (2) review/commit flow features;
+    (3) 66f270b0: ETH benchmark costs + gating.py;
+    (4) d271bffd: live shadow loop;
+    (5) fe242257: bookDepth rebuild + ticks to 4 workers when the 1m campaign ends;
+    (6) DEV tournament on production4 + replayed events;
+    (7) final Roihu bundle → user submits;
+    (8) stage 9 for the remaining markets (per-symbol sessions needed for DAX/FTSE/Nikkei).
