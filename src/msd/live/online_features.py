@@ -7,7 +7,6 @@ same warm-up bars and detector state, or replay them before accepting new bars.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from pathlib import Path
 
 import pandas as pd
 
@@ -15,9 +14,11 @@ from msd.processing.features import build_features
 from msd.processing.levels import build_levels, levels_asof
 from msd.processing.pipeline import methods_for_symbol
 from msd.processing.timeframes import build_all_timeframes
-from msd.methods import ma_cross, macd_signal, stochastic, bollinger, donchian_atr_breakout
+from msd.methods import (sr_touch, liquidity_sweep, rsi2_mean_reversion,
+                         ma_cross, macd_signal, stochastic, bollinger, donchian_atr_breakout)
 
 EXTRA_ONLINE_METHODS = (ma_cross, macd_signal, stochastic, bollinger, donchian_atr_breakout)
+VALIDATED_ONLINE_METHODS = (sr_touch, liquidity_sweep, rsi2_mean_reversion) + EXTRA_ONLINE_METHODS
 
 
 @dataclass
@@ -36,11 +37,10 @@ class OnlineFeatures:
 
     def __init__(self, symbol: str, history: pd.DataFrame | None = None):
         self.symbol = symbol
-        self.methods = methods_for_symbol(symbol) + EXTRA_ONLINE_METHODS
+        self.methods = tuple(method for method in VALIDATED_ONLINE_METHODS
+                             if not hasattr(method, "SYMBOLS") or symbol in method.SYMBOLS)
         self.available_methods = tuple(method.NAME for method in self.methods)
-        registry = {path.stem for path in Path(__file__).resolve().parents[1].joinpath("methods").glob("*.py")
-                    if not path.stem.startswith("_") and path.stem not in
-                    {"__init__", "common", "filters", "level_clusters"}}
+        registry = {method.NAME for method in methods_for_symbol(symbol)}
         self.unavailable_methods = tuple(sorted(registry - set(self.available_methods)))
         self.bars = pd.DataFrame() if history is None else history.copy().sort_values("ts").reset_index(drop=True)
         self.states: dict[str, dict] = {}

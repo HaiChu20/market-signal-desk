@@ -2,6 +2,7 @@
 import io
 import json
 from pathlib import Path
+from types import SimpleNamespace
 from urllib.parse import parse_qs, urlsplit
 
 import pandas as pd
@@ -9,11 +10,10 @@ import pytest
 
 from msd.live.binance import BinanceSpotFeed, parse_kline
 from msd.live.shadow import QualifiedModels, ShadowLoop, format_signal
-from msd.live.online_features import EXTRA_ONLINE_METHODS
+from msd.live.online_features import EXTRA_ONLINE_METHODS, VALIDATED_ONLINE_METHODS
 from msd.live.telegram import TelegramClient
 from msd.processing.features import build_features
 from msd.processing.levels import build_levels
-from msd.processing.pipeline import methods_for_symbol
 from msd.processing.timeframes import build_all_timeframes
 
 ARCHIVE = Path('/Users/bfhach/Projects/market-signal-desk/data/bars/binance_spot/BTCUSDT/2021-06.parquet')
@@ -141,6 +141,24 @@ def test_ungraded_report_card_cannot_load_model(tmp_path):
     assert QualifiedModels(tmp_path).get('BTCUSDT', 'sr_touch') is None
 
 
+def test_only_matching_graded_card_with_net_return_calibration_can_qualify(tmp_path, monkeypatch):
+    directory = tmp_path / 'BTCUSDT' / 'sr_touch'
+    directory.mkdir(parents=True)
+    config_hash = 'a' * 64
+    (directory / 'report_card.json').write_text(json.dumps({'grade': '✅', 'method': 'sr_touch',
+                                                            'symbol': 'BTCUSDT', 'config_hash': config_hash}))
+    (directory / 'manifest.json').write_text(json.dumps({'live_policy': {'side': 1,
+                    'candidate_kind': 'natural', 'entry_type': 'market'}}))
+    import msd.live.shadow as shadow
+    artifact = SimpleNamespace(config_hash=config_hash,
+                               calibration={'calibrated': [0., 1.], 'expected_net_R': [-1., 2.]})
+    monkeypatch.setattr(shadow, 'load_artifact', lambda _: artifact)
+    assert QualifiedModels(tmp_path).get('BTCUSDT', 'sr_touch') == (artifact, {'side': 1,
+                    'candidate_kind': 'natural', 'entry_type': 'market'})
+    artifact.calibration.pop('expected_net_R')
+    assert QualifiedModels(tmp_path).get('BTCUSDT', 'sr_touch') is None
+
+
 @pytest.mark.slow
 def test_archive_feed_and_shadow_replay_equals_offline(tmp_path):
     if not ARCHIVE.exists(): pytest.skip('read-only BTC archive unavailable')
@@ -159,7 +177,8 @@ def test_archive_feed_and_shadow_replay_equals_offline(tmp_path):
     tfs = build_all_timeframes(bars, 'BTCUSDT')
     levels = build_levels(bars, 'BTCUSDT', tfs)
     features = build_features(bars, 'BTCUSDT', tfs, levels)
-    expected = [event for method in methods_for_symbol('BTCUSDT')
+    expected = [event for method in VALIDATED_ONLINE_METHODS
+                if not hasattr(method, 'SYMBOLS') or 'BTCUSDT' in method.SYMBOLS
                 for event in method.detect(features, levels, bars)]
     assert expected
     target = min(int(bars.ts.searchsorted(event['ts'])) for event in expected
