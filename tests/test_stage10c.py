@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from msd.backtest import evaluate_bar, second_quotes
+from msd.backtest import evaluate_bar, second_quotes, timestamp_ints
 from msd.processing.labels import first_hit_reference, first_hit
 
 
@@ -24,9 +24,9 @@ def _batch(minute, seconds):
     from msd._msd_kernels import first_hit_batch
     cols=['bid_o','bid_h','bid_l','bid_c','ask_o','ask_h','ask_l','ask_c']
     raw=minute[cols].to_numpy(dtype='<f8').tobytes()
-    stamps=(minute.ts.astype('int64')//1_000_000_000).to_numpy(dtype='<i8').tobytes()
+    stamps=np.asarray(timestamp_ints(minute.ts,unit='s'),dtype='<i8').tobytes()
     second_raw=seconds[cols].to_numpy(dtype='<f8').tobytes()
-    second_stamps=(seconds.ts.astype('int64')//1_000_000_000).to_numpy(dtype='<i8').tobytes()
+    second_stamps=np.asarray(timestamp_ints(seconds.ts,unit='s'),dtype='<i8').tobytes()
     job=[0.,1.,100.,99.,101.,float('nan'),1.,0.,float('nan'),float('nan'),1.]
     return first_hit_batch(raw,stamps,job,11,second_raw,second_stamps,True)
 
@@ -68,3 +68,27 @@ def test_10000_randomized_rust_python_second_parity():
         assert rust[0]==reference[0]
         np.testing.assert_allclose(rust[1:9],reference[1:9],equal_nan=True)
         assert rust[9]==reference[9]
+        no_seconds_reference=first_hit_reference(minute,0,1,100.,99.,101.,delay_bars=1,
+                                                detailed=True,return_stats=True)
+        no_seconds_rust=first_hit(minute,0,1,100.,99.,101.,delay_bars=1,
+                                  detailed=True,return_stats=True)
+        assert no_seconds_rust[0]==no_seconds_reference[0]
+        np.testing.assert_allclose(no_seconds_rust[1:9],no_seconds_reference[1:9],equal_nan=True)
+        assert no_seconds_rust[9]==no_seconds_reference[9]
+
+
+@pytest.mark.parametrize('unit',['s','ms','us','ns'])
+def test_timestamp_resolution_does_not_change_rust_or_python_result(unit):
+    minute,seconds=fixture(10,20)
+    minute['ts']=minute.ts.dt.as_unit(unit)
+    seconds['ts']=seconds.ts.dt.as_unit(unit)
+    reference=first_hit_reference(minute,0,1,100.,99.,101.,delay_bars=1,
+                                  seconds=seconds,detailed=True,return_stats=True)
+    rust=first_hit(minute,0,1,100.,99.,101.,delay_bars=1,
+                   seconds=seconds,detailed=True,return_stats=True)
+    assert rust[0]==reference[0]=='tp'
+    np.testing.assert_allclose(rust[1:9],reference[1:9],equal_nan=True)
+    assert rust[9]==reference[9]
+    batch=_batch(minute,seconds)
+    assert int(batch[0])==1
+    assert list(map(int,batch[9:13]))==list(reference[9].values())

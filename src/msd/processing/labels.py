@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-from msd.backtest import AMBIGUITY_KEYS, evaluate_bar
+from msd.backtest import AMBIGUITY_KEYS, evaluate_bar, timestamp_ints
 
 _RUST_FALLBACK_WARNED = False
 
@@ -84,7 +84,7 @@ def first_hit_reference(bars: pd.DataFrame, entry_index: int, side: int, entry_p
     if entry_i>=n or (max_bars is not None and max_bars<1):
         return empty
     side=1 if side>0 else -1
-    timestamps=pd.to_datetime(bars.ts,utc=True)
+    timestamps=pd.to_datetime(bars.ts,utc=True).astype("datetime64[ns, UTC]")
     if deadline_ts is None and max_bars is not None:
         # Legacy convention is retained only for legacy callers.
         legacy_exit_i=min(entry_i+int(max_bars),n-1)
@@ -136,7 +136,8 @@ def first_hit_reference(bars: pd.DataFrame, entry_index: int, side: int, entry_p
         end_i=n
     reason=None;exit_i=-1;exit_price=float("nan")
     stats = dict.fromkeys(AMBIGUITY_KEYS, 0)
-    second_groups = ({stamp: frame for stamp,frame in seconds.groupby(pd.to_datetime(seconds.ts,utc=True).dt.floor("min"))}
+    second_groups = ({stamp: frame for stamp,frame in seconds.groupby(
+        pd.to_datetime(seconds.ts,utc=True).astype("datetime64[ns, UTC]").dt.floor("min"))}
                      if seconds is not None and not seconds.empty else {})
     for i in range(fill_i,end_i):
         bar=_row_bar(bars,i)
@@ -185,16 +186,16 @@ def first_hit(bars: pd.DataFrame, entry_index: int, side: int, entry_price: floa
     cols=["bid_o","bid_h","bid_l","bid_c","ask_o","ask_h","ask_l","ask_c"]
     rows=bars[cols].to_numpy(dtype=float).tolist()
     timestamps=pd.to_datetime(bars.ts,utc=True).astype("datetime64[ns, UTC]")
-    stamps=(timestamps.astype("int64")//1_000_000_000).tolist()
+    stamps=timestamp_ints(timestamps,unit="s").tolist()
     if deadline_ts is None and max_bars is not None and entry_index+delay_bars<len(bars):
         deadline_i=min(entry_index+delay_bars+int(max_bars),len(bars)-1)
         deadline_ts=timestamps.iloc[deadline_i]
-    deadline_seconds=None if deadline_ts is None else int(pd.Timestamp(deadline_ts).timestamp())
+    deadline_seconds=None if deadline_ts is None else int(timestamp_ints(deadline_ts,unit="s"))
     if expiry_ts is None and expiry_index is not None and expiry_index<len(bars):
         expiry_ts=timestamps.iloc[int(expiry_index)]
-    expiry_seconds=None if expiry_ts is None else int(pd.Timestamp(expiry_ts).timestamp())
+    expiry_seconds=None if expiry_ts is None else int(timestamp_ints(expiry_ts,unit="s"))
     second_rows = seconds[cols].to_numpy(float).tolist() if seconds is not None else None
-    second_stamps = (pd.to_datetime(seconds.ts,utc=True).astype("int64")//1_000_000_000).tolist() if seconds is not None else None
+    second_stamps = (timestamp_ints(seconds.ts,unit="s")).tolist() if seconds is not None else None
     if return_stats:
         from msd._msd_kernels import first_hit_with_stats as rust_call
     else:
@@ -223,17 +224,17 @@ def label_grid(bars: pd.DataFrame, atr: pd.Series, every_minutes: int=15,
         first_hit_batch=None
     stop_grid,tp_grid=(.5,1,1.5,2,3),(.5,1,1.5,2,3,4,6)
     stamps=pd.to_datetime(bars.ts,utc=True)
-    stamp_ns=stamps.astype("int64").to_numpy(dtype=np.int64)
+    stamp_ns=np.asarray(timestamp_ints(stamps,unit="ns"),dtype=np.int64)
     stamp_values=stamps.to_numpy()
     atr_values=atr.to_numpy(dtype=float)
     bar_columns=["bid_o","bid_h","bid_l","bid_c","ask_o","ask_h","ask_l","ask_c"]
     packed=bars[bar_columns].to_numpy(dtype="<f8")
     packed_bytes=packed.tobytes()
-    time_seconds=(stamp_ns//1_000_000_000).astype("<i8")
+    time_seconds=np.asarray(timestamp_ints(stamps,unit="s"),dtype="<i8")
     time_bytes=time_seconds.tobytes()
     second_bytes=(seconds[bar_columns].to_numpy(dtype="<f8").tobytes() if seconds is not None else None)
-    second_time_bytes=((pd.to_datetime(seconds.ts,utc=True).astype("int64").to_numpy()//1_000_000_000)
-                       .astype("<i8").tobytes() if seconds is not None else None)
+    second_time_bytes=(np.asarray(timestamp_ints(seconds.ts,unit="s"),dtype="<i8").tobytes()
+                       if seconds is not None else None)
     bid_c=packed[:,3];ask_c=packed[:,7]
     anchors=np.flatnonzero((stamps.dt.minute.to_numpy()%every_minutes)==0)
     if signal_start is not None:
@@ -258,7 +259,7 @@ def label_grid(bars: pd.DataFrame, atr: pd.Series, every_minutes: int=15,
             entry_stamp=pd.Timestamp(stamp_values[entry_i])
             entry_stamp=entry_stamp.tz_localize("UTC") if entry_stamp.tzinfo is None else entry_stamp.tz_convert("UTC")
             deadline=deadline_after_trading_days(entry_stamp,max_trading_days,instrument_class)
-            deadline_value=int(deadline.value)
+            deadline_value=int(timestamp_ints(deadline,unit="ns"))
             for side in (-1,1):
                 for sl_mult in stop_grid:
                     sl=mid-side*sl_mult*a

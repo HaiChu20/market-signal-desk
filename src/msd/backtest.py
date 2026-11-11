@@ -6,6 +6,20 @@ import numpy as np
 import pandas as pd
 
 
+def timestamp_ints(values, *, unit: str = "ns"):
+    """Normalize timestamps to UTC nanoseconds before integer conversion."""
+    stamps = pd.to_datetime(values, utc=True)
+    if isinstance(stamps, pd.Timestamp):
+        ns = stamps.as_unit("ns").value
+    else:
+        ns = stamps.astype("datetime64[ns, UTC]").astype("int64")
+    if unit == "ns":
+        return ns
+    if unit == "s":
+        return ns // 1_000_000_000
+    raise ValueError(unit)
+
+
 def _utc_naive_ns(value) -> np.datetime64:
     stamp = pd.Timestamp(value)
     stamp = stamp.tz_localize("UTC") if stamp.tzinfo is None else stamp.tz_convert("UTC")
@@ -41,9 +55,11 @@ def _resolve_second(side: int, stop: float, tp: float, seconds: pd.DataFrame | N
         return None
     start = pd.Timestamp(minute_ts)
     start = start.tz_localize("UTC") if start.tzinfo is None else start.tz_convert("UTC")
-    stamps = pd.to_datetime(seconds.ts, utc=True)
+    stamps = pd.to_datetime(seconds.ts, utc=True).astype("datetime64[ns, UTC]")
     expected = pd.date_range(start, periods=60, freq="s")
-    if not stamps.reset_index(drop=True).equals(pd.Series(expected)):
+    # Series.equals also compares the source column name (``ts`` vs None),
+    # which incorrectly rejected a complete, correctly ordered minute.
+    if not np.array_equal(stamps.to_numpy(), expected.to_numpy()):
         return None
     prefix = "bid" if side > 0 else "ask"
     for second in seconds.itertuples(index=False):
@@ -76,6 +92,8 @@ def evaluate_bar(side: int, stop: float, tp: float | None, bar: dict,
     tp_hit = tp is not None and (high >= float(tp) if side > 0 else low <= float(tp))
     if sl_hit and tp_hit and not close_only:
         if ambiguity_stats is not None:
+            for field in AMBIGUITY_KEYS:
+                ambiguity_stats.setdefault(field, 0)
             ambiguity_stats["ambiguous"] = ambiguity_stats.get("ambiguous", 0) + 1
         resolved = _resolve_second(side, current, float(tp), seconds, bar.get("ts"))
         key = "resolved_tp" if resolved and resolved[0] == "tp" else "resolved_sl" if resolved else "unresolved"
