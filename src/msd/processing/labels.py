@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-from msd.backtest import evaluate_bar
+from msd.backtest import AMBIGUITY_KEYS, evaluate_bar, timestamp_ints
 
 _RUST_FALLBACK_WARNED = False
 
@@ -70,7 +70,8 @@ def first_hit_reference(bars: pd.DataFrame, entry_index: int, side: int, entry_p
                         sl: float, tp: float|None, max_bars: int|None=None, delay_bars: int=2,
                         financing_per_night: float=0.0, limit_price: float|None=None,
                         expiry_index: int|None=None, *, deadline_ts=None, expiry_ts=None,
-                        instrument_class: str="index", detailed: bool=False):
+                        instrument_class: str="index", detailed: bool=False,
+                        seconds: pd.DataFrame | None=None, return_stats: bool=False):
     """Reference label; market entry is at signal index + delay bars.
 
     New callers pass deadline_ts/expiry_ts. max_bars and expiry_index remain
@@ -78,10 +79,12 @@ def first_hit_reference(bars: pd.DataFrame, entry_index: int, side: int, entry_p
     """
     n=len(bars);signal_i=int(entry_index);entry_i=signal_i+int(delay_bars)
     no_fill=("no_fill",-1,float("nan"),float("nan"),float("nan"),float("nan"),0,-1,float("nan"))
+    empty = no_fill if detailed else no_fill[:5]
+    if return_stats: empty = (*empty, dict.fromkeys(AMBIGUITY_KEYS, 0))
     if entry_i>=n or (max_bars is not None and max_bars<1):
-        return no_fill if detailed else no_fill[:5]
+        return empty
     side=1 if side>0 else -1
-    timestamps=pd.to_datetime(bars.ts,utc=True)
+    timestamps=pd.to_datetime(bars.ts,utc=True).astype("datetime64[ns, UTC]")
     if deadline_ts is None and max_bars is not None:
         # Legacy convention is retained only for legacy callers.
         legacy_exit_i=min(entry_i+int(max_bars),n-1)
@@ -99,11 +102,11 @@ def first_hit_reference(bars: pd.DataFrame, entry_index: int, side: int, entry_p
         mid=(float(bars.bid_o.iloc[fill_i])+float(bars.ask_o.iloc[fill_i]))/2
         risk=abs(mid-float(sl))
         if side*(entry_price-float(sl))<=0:
-            return no_fill if detailed else no_fill[:5]
+            return empty
     else:
         limit=float(limit_price)
         if side*(limit-float(sl))<=0:
-            return no_fill if detailed else no_fill[:5]
+            return empty
         if expiry_ts is None and expiry_index is not None:
             limit_end=min(int(expiry_index),n)
         else:
@@ -123,17 +126,22 @@ def first_hit_reference(bars: pd.DataFrame, entry_index: int, side: int, entry_p
                     fill=max(bar["bid_o"],limit)
                 break
         if fill_i<0:
-            return no_fill if detailed else no_fill[:5]
+            return empty
         risk=abs(limit-float(sl))
     if not np.isfinite(risk) or risk<=0:
-        return no_fill if detailed else no_fill[:5]
+        return empty
     if use_legacy_index:
         end_i=min(n,legacy_exit_i+1)
     else:
         end_i=n
     reason=None;exit_i=-1;exit_price=float("nan")
+    stats = dict.fromkeys(AMBIGUITY_KEYS, 0)
+    second_groups = ({stamp: frame for stamp,frame in seconds.groupby(
+        pd.to_datetime(seconds.ts,utc=True).astype("datetime64[ns, UTC]").dt.floor("min"))}
+                     if seconds is not None and not seconds.empty else {})
     for i in range(fill_i,end_i):
         bar=_row_bar(bars,i)
+        bar["ts"] = timestamps.iloc[i]
         at_deadline=(i==legacy_exit_i) if use_legacy_index else (deadline is not None and timestamps.iloc[i]>=deadline)
         # A time deadline exits at the first eligible bar's open, before touch checks.
         if at_deadline:
@@ -142,7 +150,9 @@ def first_hit_reference(bars: pd.DataFrame, entry_index: int, side: int, entry_p
         if limit_price is not None and i==fill_i:
             _,reason,exit_price=evaluate_bar(side,sl,None,bar)
         else:
-            _,reason,exit_price=evaluate_bar(side,sl,tp,bar)
+            _,reason,exit_price=evaluate_bar(side,sl,tp,bar,
+                                             seconds=second_groups.get(timestamps.iloc[i]),
+                                             ambiguity_stats=stats if return_stats else None)
         if reason:
             exit_i=i;break
     if reason is None:
@@ -155,14 +165,16 @@ def first_hit_reference(bars: pd.DataFrame, entry_index: int, side: int, entry_p
     gross=float(side*(exit_price-fill)/risk)
     net=float(gross-float(financing_per_night)*nights*fill/risk)
     result=(reason,exit_i,float(exit_price),net,gross,float(fill),int(nights),int(fill_i),float(risk))
-    return result if detailed else result[:5]
+    selected = result if detailed else result[:5]
+    return (*selected, stats) if return_stats else selected
 
 
 def first_hit(bars: pd.DataFrame, entry_index: int, side: int, entry_price: float,
               sl: float, tp: float|None, max_bars: int|None=None, delay_bars: int=2,
               financing_per_night: float=0.0, limit_price: float|None=None,
               expiry_index: int|None=None, *, deadline_ts=None, expiry_ts=None,
-              instrument_class: str="index", detailed: bool=False):
+              instrument_class: str="index", detailed: bool=False,
+              seconds: pd.DataFrame | None=None, return_stats: bool=False):
     """Run the shared-contract Rust kernel; retain the Python reference fallback."""
     try:
         from msd._msd_kernels import first_hit as rust_first_hit
@@ -170,31 +182,40 @@ def first_hit(bars: pd.DataFrame, entry_index: int, side: int, entry_price: floa
         rust_fallback(error)
         return first_hit_reference(bars,entry_index,side,entry_price,sl,tp,max_bars,delay_bars,
             financing_per_night,limit_price,expiry_index,deadline_ts=deadline_ts,expiry_ts=expiry_ts,
-            instrument_class=instrument_class,detailed=detailed)
+            instrument_class=instrument_class,detailed=detailed,seconds=seconds,return_stats=return_stats)
     cols=["bid_o","bid_h","bid_l","bid_c","ask_o","ask_h","ask_l","ask_c"]
     rows=bars[cols].to_numpy(dtype=float).tolist()
     timestamps=pd.to_datetime(bars.ts,utc=True).astype("datetime64[ns, UTC]")
-    stamps=(timestamps.astype("int64")//1_000_000_000).tolist()
+    stamps=timestamp_ints(timestamps,unit="s").tolist()
     if deadline_ts is None and max_bars is not None and entry_index+delay_bars<len(bars):
         deadline_i=min(entry_index+delay_bars+int(max_bars),len(bars)-1)
         deadline_ts=timestamps.iloc[deadline_i]
-    deadline_seconds=None if deadline_ts is None else int(pd.Timestamp(deadline_ts).timestamp())
+    deadline_seconds=None if deadline_ts is None else int(timestamp_ints(deadline_ts,unit="s"))
     if expiry_ts is None and expiry_index is not None and expiry_index<len(bars):
         expiry_ts=timestamps.iloc[int(expiry_index)]
-    expiry_seconds=None if expiry_ts is None else int(pd.Timestamp(expiry_ts).timestamp())
-    result=rust_first_hit(rows,stamps,int(entry_index),int(side),float(entry_price),float(sl),
+    expiry_seconds=None if expiry_ts is None else int(timestamp_ints(expiry_ts,unit="s"))
+    second_rows = seconds[cols].to_numpy(float).tolist() if seconds is not None else None
+    second_stamps = (timestamp_ints(seconds.ts,unit="s")).tolist() if seconds is not None else None
+    if return_stats:
+        from msd._msd_kernels import first_hit_with_stats as rust_call
+    else:
+        rust_call = rust_first_hit
+    result=rust_call(rows,stamps,int(entry_index),int(side),float(entry_price),float(sl),
         None if tp is None else float(tp),None,delay_bars,float(financing_per_night),limit_price,
-        expiry_index,deadline_seconds,expiry_seconds,instrument_class)
+        expiry_index,deadline_seconds,expiry_seconds,instrument_class,second_rows,second_stamps)
     reason={1:"tp",-1:"stop",0:"time",-2:"no_fill"}[int(result[0])]
     # Rust's audit tuple is outcome,index,fill,exit,net,gross,rollovers,entry,risk;
     # the Python contract keeps exit/net/gross before fill.
-    converted=(reason,result[1],result[3],result[4],result[5],result[2],result[6],result[7],result[8])
-    return converted if detailed else (reason,result[1],result[3],result[4],result[5])
+    converted=(reason,int(result[1]),result[3],result[4],result[5],result[2],
+               int(result[6]),int(result[7]),result[8])
+    selected = converted if detailed else converted[:5]
+    return (*selected, dict(zip(AMBIGUITY_KEYS, map(int,result[9:13])))) if return_stats else selected
 
 
 def label_grid(bars: pd.DataFrame, atr: pd.Series, every_minutes: int=15,
                max_bars: int|None=None, *, max_trading_days: int=5,
-               instrument_class: str="crypto", signal_start=None, signal_end=None) -> pd.DataFrame:
+               instrument_class: str="crypto", seconds: pd.DataFrame | None=None,
+               signal_start=None, signal_end=None) -> pd.DataFrame:
     """Both-side ATR-grid labels; holding limit is a timestamp deadline."""
     try:
         from msd._msd_kernels import first_hit_batch
@@ -203,14 +224,17 @@ def label_grid(bars: pd.DataFrame, atr: pd.Series, every_minutes: int=15,
         first_hit_batch=None
     stop_grid,tp_grid=(.5,1,1.5,2,3),(.5,1,1.5,2,3,4,6)
     stamps=pd.to_datetime(bars.ts,utc=True)
-    stamp_ns=stamps.astype("int64").to_numpy(dtype=np.int64)
+    stamp_ns=np.asarray(timestamp_ints(stamps,unit="ns"),dtype=np.int64)
     stamp_values=stamps.to_numpy()
     atr_values=atr.to_numpy(dtype=float)
     bar_columns=["bid_o","bid_h","bid_l","bid_c","ask_o","ask_h","ask_l","ask_c"]
     packed=bars[bar_columns].to_numpy(dtype="<f8")
     packed_bytes=packed.tobytes()
-    time_seconds=(stamp_ns//1_000_000_000).astype("<i8")
+    time_seconds=np.asarray(timestamp_ints(stamps,unit="s"),dtype="<i8")
     time_bytes=time_seconds.tobytes()
+    second_bytes=(seconds[bar_columns].to_numpy(dtype="<f8").tobytes() if seconds is not None else None)
+    second_time_bytes=(np.asarray(timestamp_ints(seconds.ts,unit="s"),dtype="<i8").tobytes()
+                       if seconds is not None else None)
     bid_c=packed[:,3];ask_c=packed[:,7]
     anchors=np.flatnonzero((stamps.dt.minute.to_numpy()%every_minutes)==0)
     if signal_start is not None:
@@ -235,7 +259,7 @@ def label_grid(bars: pd.DataFrame, atr: pd.Series, every_minutes: int=15,
             entry_stamp=pd.Timestamp(stamp_values[entry_i])
             entry_stamp=entry_stamp.tz_localize("UTC") if entry_stamp.tzinfo is None else entry_stamp.tz_convert("UTC")
             deadline=deadline_after_trading_days(entry_stamp,max_trading_days,instrument_class)
-            deadline_value=int(deadline.value)
+            deadline_value=int(timestamp_ints(deadline,unit="ns"))
             for side in (-1,1):
                 for sl_mult in stop_grid:
                     sl=mid-side*sl_mult*a
@@ -247,28 +271,33 @@ def label_grid(bars: pd.DataFrame, atr: pd.Series, every_minutes: int=15,
                         metadata.append((int(global_i),side,sl_mult,tp_mult,deadline_value))
         if not jobs:continue
         if first_hit_batch is not None:
-            results=np.asarray(first_hit_batch(packed_bytes,time_bytes,jobs,11),dtype=float).reshape(-1,9)
+            results=np.asarray(first_hit_batch(packed_bytes,time_bytes,jobs,11,second_bytes,
+                                               second_time_bytes,seconds is not None),dtype=float).reshape(
+                                                   -1,13 if seconds is not None else 9)
             for meta,res in zip(metadata,results):
                 signal_i,side,sl_mult,tp_mult,deadline_ns=meta
-                code,exit_i,fill,exit_price,net,gross,nights,entry_i,risk=res
+                code,exit_i,fill,exit_price,net,gross,nights,entry_i,risk=res[:9]
                 exit_i=int(exit_i);entry_i=int(entry_i)
                 rows.append((signal_i,side,sl_mult,tp_mult,int(code),exit_i-signal_i if exit_i>=0 else -1,
                              net,gross,fill,exit_price,stamp_ns[exit_i] if exit_i>=0 else np.iinfo(np.int64).min,
                              nights,stamp_ns[entry_i] if entry_i>=0 else np.iinfo(np.int64).min,risk,deadline_ns,
-                             {1:"tp",-1:"stop",0:"time",-2:"no_fill"}[int(code)]))
+                             {1:"tp",-1:"stop",0:"time",-2:"no_fill"}[int(code)],
+                             *res[9:]))
         else:
             for signal_i,side,sl_mult,tp_mult,deadline_ns in metadata:
                 mid=(float(bid_c[signal_i])+float(ask_c[signal_i]))/2
                 a=float(atr_values[signal_i]);sl=mid-side*sl_mult*a;tp=mid+side*tp_mult*a
                 deadline=pd.Timestamp(deadline_ns,tz="UTC")
                 res=first_hit_reference(bars,signal_i,side,mid,sl,tp,delay_bars=2,deadline_ts=deadline,
-                    instrument_class=instrument_class,detailed=True)
-                reason,exit_i,exit_price,net,gross,fill,nights,entry_i,risk=res
+                    instrument_class=instrument_class,detailed=True,seconds=seconds,return_stats=seconds is not None)
+                reason,exit_i,exit_price,net,gross,fill,nights,entry_i,risk=res[:9]
+                extra=tuple(res[9].values()) if seconds is not None else ()
                 rows.append((signal_i,side,sl_mult,tp_mult,outcome_code[reason],exit_i-signal_i if exit_i>=0 else -1,
                              net,gross,fill,exit_price,stamp_ns[exit_i] if exit_i>=0 else np.iinfo(np.int64).min,
-                             nights,stamp_ns[entry_i] if entry_i>=0 else np.iinfo(np.int64).min,risk,deadline_ns,reason))
+                             nights,stamp_ns[entry_i] if entry_i>=0 else np.iinfo(np.int64).min,risk,deadline_ns,reason,*extra))
     columns=["signal_index","side","sl_atr","tp_atr","outcome","exit_offset","net_R","gross_R",
              "fill_price","exit_price","exit_ts","financing_nights","entry_ts","planned_risk","deadline_ts","exit_reason"]
+    if seconds is not None: columns += list(AMBIGUITY_KEYS)
     result=pd.DataFrame(rows,columns=columns)
     if result.empty:return result
     for column in ("exit_ts","entry_ts","deadline_ts"):

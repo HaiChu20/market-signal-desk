@@ -17,7 +17,7 @@ from zoneinfo import ZoneInfo
 import numpy as np
 import pandas as pd
 
-from msd.backtest import evaluate_bar, ratchet_stop, simulate
+from msd.backtest import AMBIGUITY_KEYS, evaluate_bar, ratchet_stop, simulate
 from msd.data import load
 from msd.data.dukascopy import COLUMNS
 from msd.live.capital import CapitalClient
@@ -142,6 +142,7 @@ class SignalEngine:
         self.bars: dict[tuple[str, str], pd.DataFrame] = {}
         self.last_processed: dict[tuple[str, str], pd.Timestamp] = {}
         self.alarm: dict[str, StaleDataAlarm] = {}
+        self.ambiguity_stats = dict.fromkeys(AMBIGUITY_KEYS, 0)
 
     def send(self, message):
         self._send(("📝 PAPER " if self.mode == "paper" else "") + message)
@@ -149,7 +150,8 @@ class SignalEngine:
     def _strategy_bars(self, symbol, module):
         return self.bars.get((symbol, module.RESOLUTION), pd.DataFrame(columns=COLUMNS))
 
-    def process_completed(self, symbol: str, resolution: str, bar: dict):
+    def process_completed(self, symbol: str, resolution: str, bar: dict,
+                          seconds: pd.DataFrame | None = None):
         key = (symbol, resolution)
         row = dict(bar)
         row["ts"] = _utc(row["ts"])
@@ -161,7 +163,7 @@ class SignalEngine:
         frame = one if frame is None else pd.concat([frame, one], ignore_index=True)
         frame = frame.drop_duplicates("ts", keep="last").sort_values("ts").reset_index(drop=True)
         self.bars[key] = frame
-        self._check_exits(symbol, resolution, row)
+        self._check_exits(symbol, resolution, row, seconds=seconds)
         self._check_pending(symbol, resolution, row)
         for entry, module in self.strategies:
             if symbol not in module.SYMBOLS or module.RESOLUTION != resolution:
@@ -319,7 +321,7 @@ class SignalEngine:
             self.store.update(key, stop=new_stop)
             self.send(f"Move SL to {new_stop:.2f} ({module.NAME})")
 
-    def _check_exits(self, symbol, resolution, bar):
+    def _check_exits(self, symbol, resolution, bar, *, seconds=None):
         ts = _utc(bar["ts"])
         self.store.connection.row_factory = sqlite3.Row
         rows = self.store.connection.execute("SELECT * FROM signals WHERE symbol=? AND status='open'", (symbol,)).fetchall()
@@ -331,7 +333,9 @@ class SignalEngine:
             deadline = row.get("planned_exit_ts")
             time_exit = deadline is not None and ts >= _utc(deadline)
             _active_stop, reason, price = evaluate_bar(
-                side, stop, row.get("take_profit"), bar, time_exit=time_exit, time_at_open=time_exit)
+                side, stop, row.get("take_profit"), bar, time_exit=time_exit,
+                time_at_open=time_exit, seconds=seconds,
+                ambiguity_stats=self.ambiguity_stats if seconds is not None else None)
             if reason is None:
                 continue
             risk = max(float(row["planned_risk"] or 0), 1e-12)

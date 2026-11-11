@@ -4,11 +4,13 @@ use pyo3::prelude::*;
 struct Hit {
     outcome: i8, exit_index: isize, fill: f64, exit: f64,
     net_r: f64, gross_r: f64, rollovers: i64, entry_index: isize, planned_risk: f64,
+    stats: [u32; 4], // ambiguous, resolved_tp, resolved_sl, unresolved
 }
 
 fn no_fill() -> Hit {
     Hit { outcome: -2, exit_index: -1, fill: f64::NAN, exit: f64::NAN,
-          net_r: f64::NAN, gross_r: f64::NAN, rollovers: 0, entry_index: -1, planned_risk: f64::NAN }
+          net_r: f64::NAN, gross_r: f64::NAN, rollovers: 0, entry_index: -1, planned_risk: f64::NAN,
+          stats: [0; 4] }
 }
 
 fn days_from_civil(year: i64, month: i64, day: i64) -> i64 {
@@ -79,11 +81,29 @@ fn quote(row: &[f64; 8], side: i8) -> (f64, f64, f64, f64) {
     else { (row[4], row[5], row[6], row[7]) }
 }
 
+fn second_resolution(rows: &[[f64; 8]], stamps: &[i64], minute: i64,
+                     side: i8, sl: f64, tp: f64) -> Option<(i8, f64)> {
+    if rows.len() != stamps.len() { return None; }
+    let start = stamps.partition_point(|stamp| *stamp < minute);
+    if start + 60 > stamps.len() { return None; }
+    // A partial second stream cannot establish which threshold was first.
+    if (0..60).any(|offset| stamps[start + offset] != minute + offset as i64) { return None; }
+    for row in &rows[start..start + 60] {
+        let (op, high, low, _) = quote(row, side);
+        let stop = if side > 0 { low <= sl } else { high >= sl };
+        let target = if side > 0 { high >= tp } else { low <= tp };
+        if stop { return Some((-1, if side > 0 { op.min(sl) } else { op.max(sl) })); }
+        if target { return Some((1, tp)); }
+    }
+    None
+}
+
 // The single implementation used by scalar and batch entry points.
 fn simulate_one(rows: &[[f64; 8]], timestamps: &[i64], signal_index: usize, side: i8,
                 signal_price: f64, sl: f64, tp: Option<f64>, delay_bars: usize,
                 deadline_ts: Option<i64>, financing_per_rollover: f64, limit_price: Option<f64>,
-                expiry_ts: Option<i64>, crypto: bool, legacy_max_bars: Option<usize>) -> Hit {
+                expiry_ts: Option<i64>, crypto: bool, legacy_max_bars: Option<usize>,
+                seconds: Option<(&[[f64; 8]], &[i64])>) -> Hit {
     let n = rows.len();
     if n == 0 || timestamps.len() != n || signal_index >= n || side == 0 || !sl.is_finite() || !signal_price.is_finite() {
         return no_fill();
@@ -121,6 +141,7 @@ fn simulate_one(rows: &[[f64; 8]], timestamps: &[i64], signal_index: usize, side
         deadline = Some(timestamps[end_index]);
     }
     let mut result: Option<(i8, usize, f64)> = None;
+    let mut stats = [0_u32; 4];
     for i in entry_index..n {
         if deadline.map(|x| timestamps[i] >= x).unwrap_or(false) {
             let (op, _, _, _) = quote(&rows[i], side);
@@ -129,15 +150,25 @@ fn simulate_one(rows: &[[f64; 8]], timestamps: &[i64], signal_index: usize, side
         }
         let (op, high, low, close) = quote(&rows[i], side);
         let stop_hit = if side > 0 { low <= sl } else { high >= sl };
+        let tp_hit = !(limit_price.is_some() && i == entry_index) &&
+            tp.map(|target| if side > 0 { high >= target } else { low <= target }).unwrap_or(false);
+        if stop_hit && tp_hit {
+            stats[0] += 1;
+            let resolved = seconds.and_then(|(second_rows, second_stamps)|
+                second_resolution(second_rows, second_stamps, timestamps[i], side, sl, tp.unwrap()));
+            match resolved {
+                Some((1, price)) => { stats[1] += 1; result = Some((1, i, price)); },
+                Some((-1, price)) => { stats[2] += 1; result = Some((-1, i, price)); },
+                _ => { stats[3] += 1; result = Some((-1, i, if side > 0 { op.min(sl) } else { op.max(sl) })); },
+            }
+            break;
+        }
         if stop_hit {
             result = Some((-1, i, if side > 0 { op.min(sl) } else { op.max(sl) }));
             break;
         }
         // The fill bar for a limit order checks SL only; TP order is unknown.
-        if !(limit_price.is_some() && i == entry_index) {
-            let tp_hit = tp.map(|target| if side > 0 { high >= target } else { low <= target }).unwrap_or(false);
-            if tp_hit { result = Some((1, i, tp.unwrap())); break; }
-        }
+        if tp_hit { result = Some((1, i, tp.unwrap())); break; }
         if i + 1 == n { result = Some((0, i, close)); }
     }
     let (outcome, exit_index, exit_price) = result.unwrap_or_else(|| {
@@ -149,7 +180,7 @@ fn simulate_one(rows: &[[f64; 8]], timestamps: &[i64], signal_index: usize, side
     let net = gross - financing_per_rollover * nights as f64 * fill_price / planned_risk;
     Hit { outcome, exit_index: exit_index as isize, fill: fill_price, exit: exit_price,
           net_r: net, gross_r: gross, rollovers: nights, entry_index: entry_index as isize,
-          planned_risk }
+          planned_risk, stats }
 }
 
 fn rows_from_nested(rows: Vec<Vec<f64>>) -> PyResult<Vec<[f64; 8]>> {
@@ -167,17 +198,42 @@ fn hit_tuple(hit: Hit) -> (i8, isize, f64, f64, f64, f64, i64, isize, f64) {
 }
 
 #[pyfunction]
-#[pyo3(signature = (rows, timestamps, entry_index, side, entry_price, sl, tp, max_bars=None, delay_bars=2, financing_per_night=0.0, limit_price=None, expiry_index=None, deadline_ts=None, expiry_ts=None, instrument_class="index"))]
+#[pyo3(signature = (rows, timestamps, entry_index, side, entry_price, sl, tp, max_bars=None, delay_bars=2, financing_per_night=0.0, limit_price=None, expiry_index=None, deadline_ts=None, expiry_ts=None, instrument_class="index", second_rows=None, second_timestamps=None))]
 fn first_hit(rows: Vec<Vec<f64>>, timestamps: Vec<i64>, entry_index: usize, side: i8,
              entry_price: f64, sl: f64, tp: Option<f64>, max_bars: Option<usize>, delay_bars: usize,
              financing_per_night: f64, limit_price: Option<f64>, expiry_index: Option<usize>,
-             deadline_ts: Option<i64>, expiry_ts: Option<i64>, instrument_class: &str)
+             deadline_ts: Option<i64>, expiry_ts: Option<i64>, instrument_class: &str,
+             second_rows: Option<Vec<Vec<f64>>>, second_timestamps: Option<Vec<i64>>)
              -> PyResult<(i8, isize, f64, f64, f64, f64, i64, isize, f64)> {
     let bars = rows_from_nested(rows)?;
+    let second_bars = second_rows.map(rows_from_nested).transpose()?;
+    let second_data = second_bars.as_deref().zip(second_timestamps.as_deref());
     let expiry = expiry_ts.or_else(|| expiry_index.and_then(|i| timestamps.get(i).copied()));
     let crypto = instrument_class.eq_ignore_ascii_case("crypto") || instrument_class.eq_ignore_ascii_case("24x7");
     Ok(hit_tuple(simulate_one(&bars, &timestamps, entry_index, side, entry_price, sl, tp,
-        delay_bars, deadline_ts, financing_per_night, limit_price, expiry, crypto, max_bars)))
+        delay_bars, deadline_ts, financing_per_night, limit_price, expiry, crypto, max_bars,
+        second_data)))
+}
+
+#[pyfunction]
+#[pyo3(signature = (rows, timestamps, entry_index, side, entry_price, sl, tp, max_bars=None, delay_bars=2, financing_per_night=0.0, limit_price=None, expiry_index=None, deadline_ts=None, expiry_ts=None, instrument_class="index", second_rows=None, second_timestamps=None))]
+fn first_hit_with_stats(rows: Vec<Vec<f64>>, timestamps: Vec<i64>, entry_index: usize, side: i8,
+             entry_price: f64, sl: f64, tp: Option<f64>, max_bars: Option<usize>, delay_bars: usize,
+             financing_per_night: f64, limit_price: Option<f64>, expiry_index: Option<usize>,
+             deadline_ts: Option<i64>, expiry_ts: Option<i64>, instrument_class: &str,
+             second_rows: Option<Vec<Vec<f64>>>, second_timestamps: Option<Vec<i64>>)
+             -> PyResult<Vec<f64>> {
+    let bars = rows_from_nested(rows)?;
+    let second_bars = second_rows.map(rows_from_nested).transpose()?;
+    let second_data = second_bars.as_deref().zip(second_timestamps.as_deref());
+    let expiry = expiry_ts.or_else(|| expiry_index.and_then(|i| timestamps.get(i).copied()));
+    let crypto = instrument_class.eq_ignore_ascii_case("crypto") || instrument_class.eq_ignore_ascii_case("24x7");
+    let hit = simulate_one(&bars,&timestamps,entry_index,side,entry_price,sl,tp,delay_bars,
+        deadline_ts,financing_per_night,limit_price,expiry,crypto,max_bars,second_data);
+    let base = hit_tuple(hit);
+    Ok(vec![base.0 as f64,base.1 as f64,base.2,base.3,base.4,base.5,
+        base.6 as f64,base.7 as f64,base.8,hit.stats[0] as f64,
+        hit.stats[1] as f64,hit.stats[2] as f64,hit.stats[3] as f64])
 }
 
 #[pyfunction]
@@ -229,8 +285,10 @@ fn touch_track(low: Vec<f64>, high: Vec<f64>, close: Vec<f64>, prices: Vec<f64>,
 }
 
 #[pyfunction]
-#[pyo3(signature = (rows_bytes, timestamps_bytes, jobs, job_size=None))]
-fn first_hit_batch(rows_bytes: Vec<u8>, timestamps_bytes: Vec<u8>, jobs: Vec<f64>, job_size: Option<usize>) -> PyResult<Vec<f64>> {
+#[pyo3(signature = (rows_bytes, timestamps_bytes, jobs, job_size=None, second_rows_bytes=None, second_timestamps_bytes=None, return_stats=false))]
+fn first_hit_batch(rows_bytes: Vec<u8>, timestamps_bytes: Vec<u8>, jobs: Vec<f64>, job_size: Option<usize>,
+                   second_rows_bytes: Option<Vec<u8>>, second_timestamps_bytes: Option<Vec<u8>>,
+                   return_stats: bool) -> PyResult<Vec<f64>> {
     if rows_bytes.len() % 8 != 0 || timestamps_bytes.len() % 8 != 0 {
         return Err(pyo3::exceptions::PyValueError::new_err("invalid label batch buffer length"));
     }
@@ -251,8 +309,18 @@ fn first_hit_batch(rows_bytes: Vec<u8>, timestamps_bytes: Vec<u8>, jobs: Vec<f64
         }
         bars.push([row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7]]);
     }
+    let second_rows: Vec<f64> = second_rows_bytes.unwrap_or_default().chunks_exact(8)
+        .map(|b| f64::from_le_bytes(b.try_into().unwrap())).collect();
+    let second_stamps: Vec<i64> = second_timestamps_bytes.unwrap_or_default().chunks_exact(8)
+        .map(|b| i64::from_le_bytes(b.try_into().unwrap())).collect();
+    if second_rows.len() != second_stamps.len() * 8 {
+        return Err(pyo3::exceptions::PyValueError::new_err("second bar/timestamp length mismatch"));
+    }
+    let second_bars: Vec<[f64;8]> = second_rows.chunks_exact(8).map(|row|
+        [row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7]]).collect();
+    let seconds = if second_bars.is_empty() { None } else { Some((second_bars.as_slice(), second_stamps.as_slice())) };
     let output_width=if size==8 {5}else{9};
-    let mut output = Vec::with_capacity(jobs.len() / size * output_width);
+    let mut output = Vec::with_capacity(jobs.len() / size * (output_width + if return_stats {4}else{0}));
     for job in jobs.chunks_exact(size) {
         let signal=job[0] as usize; let side=job[1] as i8;
         let entry_price=job[2];let sl=job[3];let tp=if job[4].is_finite(){Some(job[4])}else{None};
@@ -265,13 +333,14 @@ fn first_hit_batch(rows_bytes: Vec<u8>, timestamps_bytes: Vec<u8>, jobs: Vec<f64
              if job[8].is_finite(){Some(job[8])}else{None},
              if job[9].is_finite(){Some(job[9] as i64)}else{None},job[10]!=0.0)
         };
-        let hit=simulate_one(&bars,&timestamps,signal,side,entry_price,sl,tp,delay,deadline,finance,limit,expiry,crypto,max_bars);
+        let hit=simulate_one(&bars,&timestamps,signal,side,entry_price,sl,tp,delay,deadline,finance,limit,expiry,crypto,max_bars,seconds);
         if size==8 {
             output.extend([hit.outcome as f64,hit.exit_index as f64,hit.exit,hit.net_r,hit.gross_r]);
         } else {
             output.extend([hit.outcome as f64,hit.exit_index as f64,hit.fill,hit.exit,hit.net_r,hit.gross_r,
                            hit.rollovers as f64,hit.entry_index as f64,hit.planned_risk]);
         }
+        if return_stats { output.extend(hit.stats.map(|value| value as f64)); }
     }
     Ok(output)
 }
@@ -279,6 +348,7 @@ fn first_hit_batch(rows_bytes: Vec<u8>, timestamps_bytes: Vec<u8>, jobs: Vec<f64
 #[pymodule]
 fn _msd_kernels(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(first_hit, m)?)?;
+    m.add_function(wrap_pyfunction!(first_hit_with_stats, m)?)?;
     m.add_function(wrap_pyfunction!(pivots, m)?)?;
     m.add_function(wrap_pyfunction!(touch_track, m)?)?;
     m.add_function(wrap_pyfunction!(first_hit_batch, m)?)?;
