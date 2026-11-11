@@ -136,3 +136,38 @@ def test_real_archive_first_arrow_block_if_available():
             block=next(iter(reader))
     assert set(flow.REQUIRED_COLUMNS).issubset(block.column_names)
     assert block.num_rows>0
+
+
+def test_duplicate_identical_csv_members_are_read_once(tmp_path):
+    import zipfile
+    from msd.data.aggtrades_flow import _stream_archive
+    body = b"1,100.0,2.0,1,1,1638316800000,False,True\n2,101.0,1.0,2,2,1638316801000,True,True\n"
+    archive = tmp_path / "spot" / "BTCUSDT" / "BTCUSDT-aggTrades-2021-12.zip"
+    archive.parent.mkdir(parents=True)
+    with zipfile.ZipFile(archive, "w") as zf:
+        zf.writestr("BTCUSDT-aggTrades-2021-12.csv", body)
+        zf.writestr("fsx-data/x/BTCUSDT-aggTrades-2021-12.csv", body)
+    minute, second, unit = _stream_archive(archive)
+    assert len(minute) == 1 and minute.buy_vol.iloc[0] == 2.0 and minute.sell_vol.iloc[0] == 1.0
+    different = tmp_path / "spot" / "BTCUSDT" / "BTCUSDT-aggTrades-2021-11.zip"
+    with zipfile.ZipFile(different, "w") as zf:
+        zf.writestr("a.csv", body)
+        zf.writestr("b.csv", body[:40] + b"\n")
+    import pytest
+    with pytest.raises(ValueError, match="Expected one CSV member"):
+        _stream_archive(different)
+
+
+def test_repeated_aggtrade_ids_are_dropped_and_differing_members_use_top_level(tmp_path):
+    import zipfile
+    from msd.data.aggtrades_flow import _stream_archive
+    rows = [b"1,100.0,2.0,1,1,1638316800000,False,True\n", b"2,101.0,1.0,2,2,1638316801000,True,True\n"]
+    archive = tmp_path / "spot" / "ETHUSDT" / "ETHUSDT-aggTrades-2018-01.zip"
+    archive.parent.mkdir(parents=True)
+    with zipfile.ZipFile(archive, "w") as zf:
+        zf.writestr("ETHUSDT-aggTrades-2018-01.csv", b"".join(r * 4 for r in rows))  # every trade 4x
+        zf.writestr("fsx-data/x/ETHUSDT-aggTrades-2018-01.csv", b"".join(rows))
+    minute, _, _ = _stream_archive(archive)
+    assert len(minute) == 1
+    assert minute.buy_vol.iloc[0] == 2.0 and minute.sell_vol.iloc[0] == 1.0
+    assert minute.id_gaps.iloc[0] == 0
