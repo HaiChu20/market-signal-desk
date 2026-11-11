@@ -277,3 +277,56 @@ Append-only notes from the autonomous review loop while the user sleeps.
 - 01:20: merged fe242257 33ef2ed keep-alive ticks (HTTP datafeed host; integrity via Content-Length + LZMA decode + price range + exact 1m OHLC match). 151 candidate hours/min, ETA ~1–3 days. Nov 2026 ticks 100% exact vs 1m for XAU/NQ/SPX.
 - 01:58 hourly: disk 289 GiB free (Bybit raw + aggTrades + 1s bars filling, ~40 GiB/h). Stage 9: NQ + SPX DONE through 2026; BTC on 2025; XAU waiting at 2020 (runner now 1 active). Codex usage limit until 02:42 (all workers). d271bffd found the 10C root cause: Rust receives second-resolution pandas timestamps but divides by 1e9 as if they were ns. Merge committed in its branch as 129cede; the fix is pending. 2dcf8f09 redesign pending. aggtrades_flow: 79 "FAILED" months were false alarms (ru_maxrss is a lifetime high-water mark checked after the verified writes); all 79 outputs verified complete. Replaced the raise with a WARN (7 tests pass) and restarted the job (it skips complete months). UM BTC 2024-11 kline match is only 75%; characterization pending (33128ce1).
 - RESUME after 02:42 (Codex reset): (1) d271bffd: apply the timestamp-unit fix (normalize to int64 ns via .astype('datetime64[ns, UTC]') before .view), Rust==Python 10k, full suite, commit. (2) 2dcf8f09: streaming any_minute + cost_R + tournament from production outputs. (3) 33128ce1: UM mismatch characterization, then part 2 flow features once production finishes. (4) fe242257: coverage audit + export manifest (msg 573, maybe undelivered/consumed by the limit, so resend). (5) Merge 2dcf8f09/d271bffd after review; run the full suite; checkpoint commit.
+- 02:10: UM aggTrades vs klines characterized (my own read-only check on BTC 2024-11..2026-05). The mismatch is symmetric minute-boundary attribution: the gap in minute t is exactly offset in t+1 (corr(u_t, u_t+1) = −0.50; example −0.520/+0.520). The monthly cumulative gap is 10.6 on 4.87M BTC (2e-6). h/l match 100%, o 99.5–100%. The share of mismatching minutes falls over time (25% in 2024-11, 9% in 2026-05). Verdict: benign; UM flow is usable. uncovered_volume stays as an audit column. No masking needed beyond the flag.
+- 02:12: checkpoint commit 2f446ae (production code, aggtrades_flow, guards, QA reports).
+- 02:53 RESUME (Codex reset):
+  - Production: NQ, SPX and BTC DONE through 2026; XAU on 2025.
+  - aggTrades download DONE (386 ok, 0 failed).
+  - aggtrades_flow: 213 done in the first pass; 2 failures were spot 2021-12 zips containing a duplicate identical CSV member. Fixed (identical size+CRC → read once, test added) and restarted over all 386 archives.
+  - Dukascopy 1m: XAG done, EURUSD in progress.
+  - Re-sent self-contained tasks: d271bffd (ns timestamp normalization + 10k parity), 2dcf8f09 (cost_R, streaming any_minute, production-fed tournament), fe242257 (coverage audit + export manifest + DATA_TRANSFER.md), 33128ce1 (augment-external + flow features after XAU finishes), 66f270b0 (Roihu submission package v1: index loader, configs, resume, OOF grading CLI, bundle list, smoke runs, README).
+- 02:56 hourly: disk 245 GiB free. XAU 2025 running (last production years). One Dukascopy 1m runner (EURUSD 2006) + ticks. aggtrades_flow re-run in progress (all 386). Found why d271bffd and 2dcf8f09 kept quitting after <1 min: their Codex panes had been switched to GPT-6-Luna (the cheap model, likely from the rate-limit prompt). Switched both to gpt-6-sol high via /model and re-sent their tasks. 33128ce1 is also on Luna; switch it when its turn ends.
+- 03:05: merged fe242257 a553df4 + f3270c2 (coverage audit, export manifest, hpc/roihu/DATA_TRANSFER.md); suite 279 passed.
+  - Audit starts: USA30 2018-05; DEU 2020-01; XAG 2020-01; BTC/ETH Dukascopy 2024 (affects the spread model only); XAU 2013 (kept at 2008, since production repairs nonpositive spreads with a flag).
+  - NQ/SPX keep the cash era.
+  - New issue: SPX 2019 Dukascopy coverage is 78–95% per month (production SPX 2019 = 309k rows vs NQ 342k). Asked fe242257 to characterize it and propose a HistData gap fill (report only; no loader change yet).
+- 03:10: d271bffd 10C ACCEPTED (f7ac8ee): pandas datetime64[us] was divided as ns. 10k Rust==Python with and without 1s data; 252 passed strict. Verified production labels unaffected (ns dtypes, entry = ts+2m 100%). Merge waits for XAU production to finish. d271bffd next: live shadow loop (Binance public feed, online==offline, Telegram formatter, replay-equality test, docker).
+- 03:15: reviewed 33128ce1 flow_features.py: windows were row-based (they span gaps), so asked for time-based rolling with min-count, as-of 60m return, 20D intensity; tick OFI windows for indices; Bybit mapping check. Then a full build after XAU and augment finish.
+- 03:20: merged fe242257 a4013ea. SPX gaps = short overnight no-tick omissions; HistData cash era is identical to Dukascopy (485,574 closes exact), so no fill: leave gaps. Told 33128ce1 to distinguish no-activity (0) from no-data (NaN) in the flow layer. fe242257 next: bookDepth features + ticks to 4 workers when the 1m campaign ends.
+- 03:30 CRITICAL BUG FOUND: production event scan uses pipeline._event_feature_frame, which has only 1m/1h ATR, 1d rsi2 and 1d ema200 distance. The 30 new detectors read MACD/EMA gaps/stoch/Bollinger/VWAP/Donchian/funding/VIX etc. via col(), and missing columns give NaN, so 0 events silently. BTC 2021: 17 of 29 methods = 0 events. The stored production features (399 cols) DO have the columns.
+  - Assigned the fix to 2dcf8f09 (gpt-6-sol high): REQUIRED_FEATURES/MARKETS per method, hard fail on missing/all-NaN, events-only rerun mode (reuse stored features/levels/augment, sequential years with checkpoint), integration test that every applicable method fires, dry run BTC + NQ 2021.
+  - Features and label grids are unaffected; only events and method candidate labels need a rerun (after augment-external).
+  - any_minute BTC DEV (4ffe7f9): 1.25 GiB, 9.78M OOF rows, Brier skill vs p0 +0.171. That is likely mostly structural (timeouts/spread vs geometric p0), so it is not evidence of edge yet. 0 signals after cost + shrinkage. Follow-ups: structural baseline and EV-decile table.
+- 03:45:
+  - aggTrades duplicates: um BTC/ETH 2022-09 (4.3M/13.4M repeated rows), spot BTC 2026-02 (3k), spot ETH 2018-01 (top-level CSV repeats every trade 4x; the nested member is correct). id_gaps clip(lower=0) had hidden this.
+    - Added strict agg_trade_id de-duplication (ids strictly increasing), a hard check trades ≤ id span, and top-level member choice with a WARN. Tests 9/9. Reprocessed the 4 months: ETH 2018-01 kline match 99.98%, BTC 2026-02 100%.
+    - Open: spot BTC 2017-08..2018-02 kline match 37–96%; investigate later (pre-DEV warm-up only).
+  - HTF COMPLETENESS BUG: timeframes.build_timeframe requires count == expected for intraday HTF bars.
+    - Sample: SPX 1h 59%, 4h 30%; NQ 4h 77% (the bucket with the Dukascopy 16:15–17:00 gap never completes). XAU and BTC are fine.
+    - Fix spec sent to 33128ce1: ≥80% of expected_effective, excluding the index daily gap; keep known_at = scheduled end; tests; chunk equivalence re-validated.
+  - PLAN: production4 full rerun after merging (a) HTF fix, (b) 2dcf8f09 event-scan fix, (c) d271bffd 10C. Then augment-external, flow features, tournament, Roihu bundle.
+  - 66f270b0 Roihu package v1 accepted in principle; on hold until production4. Asked for a stale-input guard and an anchor-discard coverage gate.
+- 03:55: merged fe242257 7907ee4 bookDepth features (BTC 2023-01..2026-01, 97.5% minute coverage; 416 MiB). Found: the bookDepth downloader had crashed on '-5.00' percentage at BTC 2026-01, so BTC after 2026-01 and all ETH are missing. fe242257 is fixing the parser (float bands, ±0.2), adding error logging that continues, and restarting. Suite 291 passed.
+- 04:00: Codex at usage limit until 07:52. Production3 + augment-external DONE (BTC/NQ/SPX/XAU). Merged d271bffd 10C (f7ac8ee); downloader add/add conflicts resolved to the fe242257 versions; stage11 prototype tests skipped as superseded. Rust rebuilt. Strict suite 299 passed; slow 10k parity 9/9 passed.
+- 04:30 (Claude, while Codex is limited): HTF completeness fix committed.
+  - Sample-month bar counts, old → new: SPX 1h 1715→2761, 4h 227→734; NQ 1h 2740→2937, 4h 576→764; XAU 4h 587→736 (metals rollover 17–18 ET excluded); BTC unchanged.
+  - Tests: OHLC is unchanged by no-tick omissions where the first minute traded; a <80% bucket is absent; the index gap bucket is present; truncation never emits a partial bucket early; the metals break. Suite 303 passed.
+  - NQ 2020-06→2021-06 real chunk equivalence re-running (features: 343,739 rows, 14 allowed rolling ULPs).
+  - Prepared production4 runner data/tmp/run_stage9_p4.py: BTC/NQ/SPX/XAU + ETH, 2 active children, separate p4 result names, augment-external per symbol at chain end.
+- 04:45: NQ real chunk equivalence PASSED with the new HTF rule: features 343,739 rows (14 allowed rolling ULPs); checkpoint state at the split equal; events sr 2,859 / sweep 3,002 equal; labels 1,604,190 rows monthly equal (12 months). The harness UnboundLocalError in cleanup was fixed (data/tmp only).
+- 04:47: PRODUCTION4 STARTED: data/tmp/run_stage9_p4.py (BTC 2018→, NQ/SPX cash era, XAU 2008→, ETH 2018→; 2 active; augment per symbol at chain end). Logs: data/logs/stage9_production4.log and stage9p4_*.
+  - Includes HTF fix 1db86a9 and the 10C merge 72e62d6.
+  - Events are still from the minimal event frame; they get replaced by the events-only replay after 2dcf8f09's fix.
+  - NO processing-code edits in the main checkout until it finishes.
+  - One-shot wake at 07:56 to re-dispatch Codex workers after their 07:52 reset.
+- 04:55 hourly: production4 actually started 04:12 (the earlier log time was approximate). NQ 2018–2025 DONE (2026 running); SPX through 2023; BTC through 2019; XAU 2008; ETH on 2021; peaks 2.2–4.0 GiB, 2 active, no failures. Disk 222 GiB free. One Dukascopy 1m runner (EURUSD 2019) + ticks + Bybit + bookDepth stopped (fix pending). Codex limited until 07:52.
+- 05:55 hourly: production4 has no failures. NQ DONE + augment exit 0. ETH on 2026; XAU on 2017; BTC (2021) and SPX (2024) are waiting: the scheduler favours the chain that just finished (no fairness), so they proceed once ETH and XAU finish. ETA ~2h. Disk 202 GiB. Dukascopy 1m on EURUSD 2025 (one runner) + ticks.
+- 06:55 hourly: production4 has no failures. ETH DONE + augment exit 0; NQ DONE + augment; BTC on 2026 (last year); XAU on 2023; SPX still waiting at 2024 (scheduler starvation; runs after BTC). Dukascopy 1m: EURUSD DONE, USDJPY in progress. Disk 198 GiB.
+- 07:55: PRODUCTION4 COMPLETE for BTC, NQ, SPX, XAU and ETH; augment-external exit 0 for all. Report: reports/data/pipeline_report.md (features 632 files / 11.5 GB; labels 631 / 1.25 GB).
+  - SPX 2019-11: 1h 82→371 rows, 4h missing→93.
+  - Codex reset: panes 3 and 6 had fallen back to Luna, switched to Sol high. Dispatched:
+    - 33128ce1: flow features finish + build;
+    - 2dcf8f09: event-scan fix + events-only dry run;
+    - d271bffd: live shadow;
+    - fe242257: bookDepth fix + restart;
+    - 66f270b0: stale guard + coverage gate + 5-symbol bundle.

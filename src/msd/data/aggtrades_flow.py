@@ -229,8 +229,21 @@ def _stream_archive(archive: Path, *, second_output_path: Path | None = None,
     second_sink = (_SecondParquetSink(second_output_path, source_sha or "")
                    if second_output_path is not None else None)
     time_unit = None
+    last_id, duplicates = -1, 0
     with ZipFile(archive) as zf:
         members = [info for info in zf.infolist() if info.filename.lower().endswith(".csv")]
+        # Some Binance archives (e.g. spot 2021-12) carry the same CSV twice
+        # under two paths; identical size and CRC means one physical copy.
+        if len({(info.file_size, info.CRC) for info in members}) == 1:
+            members = members[:1]
+        elif len(members) > 1:
+            # Differing copies (e.g. spot ETH 2018-01: the top-level CSV repeats
+            # every trade 4x). Read the top-level member; id de-duplication
+            # below removes repeats and kline validation checks the result.
+            top = [info for info in members if "/" not in info.filename]
+            if len(top) == 1:
+                print(f"WARN {archive.name}: {len(members)} differing CSV members; using {top[0].filename}", flush=True)
+                members = top
         if len(members) != 1:
             raise ValueError(f"Expected one CSV member in {archive}, found {len(members)}")
         member_info = members[0]
@@ -239,6 +252,16 @@ def _stream_archive(archive: Path, *, second_output_path: Path | None = None,
         with zf.open(member_info) as member:
             reader = _csv_reader(member, first_line)
             for batch in reader:
+                # aggTrade ids are strictly increasing; a repeated id is a
+                # duplicated source row (seen in um 2022-09, spot 2026-02).
+                ids = batch.column("agg_trade_id").to_numpy(zero_copy_only=False)
+                if len(ids):
+                    prior = np.maximum.accumulate(np.r_[last_id, ids[:-1]])
+                    keep = ids > prior
+                    last_id = max(last_id, int(ids.max()))
+                    if not keep.all():
+                        duplicates += int((~keep).sum())
+                        batch = batch.filter(pa.array(keep))
                 minute, second, time_unit = _aggregate_block(batch, time_unit)
                 if minute is not None:
                     minute_parts.append(minute)
@@ -248,7 +271,11 @@ def _stream_archive(archive: Path, *, second_output_path: Path | None = None,
                         else:
                             second_sink.add(second)
                 del minute, second, batch
+    if duplicates:
+        print(f"WARN {archive.name}: dropped {duplicates} duplicate aggTrade rows", flush=True)
     minute = _combine_partials(minute_parts, seconds=False)
+    if not minute.empty and ((minute.last_agg_id - minute.first_agg_id + 1) < minute.buy_n + minute.sell_n).any():
+        raise ValueError(f"More trades than aggTrade ids in a minute after de-duplication: {archive}")
     if second_sink is not None:
         second_sink.close()
         second = None
