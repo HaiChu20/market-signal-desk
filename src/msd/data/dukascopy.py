@@ -182,11 +182,27 @@ def _download_days(symbol: str, month: date, last: date, start: date) -> list[da
             and (symbol in CRYPTO_SYMBOLS or (month + timedelta(days=i)).weekday() != 5)]
 
 
+def _reference_sample_day(symbol: str, sample_day: date) -> date:
+    """Use the latest reference day with closes when the sample day has none (HistData WTIUSD ends 2023-12-01)."""
+    if _existing_daily_reference(symbol, sample_day) is not None:
+        return sample_day
+    for path in sorted(_reference_source_path(symbol).glob("????-??.parquet"), reverse=True):
+        if path.stem > sample_day.strftime("%Y-%m"):
+            continue
+        frame = pd.read_parquet(path, columns=["ts", "bid_c"]).dropna()
+        days = [day for day in frame.ts.dt.date.unique() if day <= sample_day]
+        if days:
+            return max(days)
+    return sample_day
+
+
 def calibrate_scale(symbol: str, sample_day: date = date(2024, 6, 12)) -> int:
     """Fetch BID samples with transport retries; a bad sample day doesn't block the symbol."""
     has_existing_reference=(symbol not in CRYPTO_SYMBOLS and _reference_source_path(symbol).exists())
     if symbol in SCALES and symbol not in CRYPTO_SYMBOLS and not has_existing_reference:
         return SCALES[symbol]
+    if has_existing_reference:
+        sample_day = _reference_sample_day(symbol, sample_day)
     if symbol not in PRICE_BANDS and symbol not in SCALES:
         raise ValueError(f"No calibration band configured for {symbol}")
     raw = None
