@@ -7,6 +7,7 @@ from msd.processing.labels import first_hit_reference
 
 DEV_END=pd.Timestamp('2023-01-01',tz='UTC')
 BAR_COLUMNS=['ts',*[f'{side}_{field}' for side in ('bid','ask') for field in 'ohlc']]
+CRYPTO = {'BTCUSDT', 'ETHUSDT'}
 
 def random_direction(signals:pd.DataFrame,data_root:Path,seeds=200):
     if signals.empty:return None,0,[]
@@ -17,14 +18,16 @@ def random_direction(signals:pd.DataFrame,data_root:Path,seeds=200):
     normal=[];opposite=[];manifest=[]
     work=signals.assign(month=pd.to_datetime(signals.ts,utc=True).dt.tz_localize(None).dt.to_period('M'))
     for (symbol,month),group in work.groupby(['sym','month']):
-        if symbol in {'USATECHIDXUSD','USA500IDXUSD'} and data_root.name=='data':
+        # ETH must use the pipeline's annual Dukascopy spread model. Raw
+        # Binance OHLC are mid prices and understate executable costs.
+        if symbol=='ETHUSDT' or (symbol in {'USATECHIDXUSD','USA500IDXUSD'} and data_root.name=='data'):
             from msd.research.sequence_data import load_executable_1m
             bars=load_executable_1m(symbol,pd.Timestamp(month.start_time,tz='UTC'),
                                     pd.Timestamp((month+1).end_time,tz='UTC'),data_root)
             if bars.empty:continue
             bars=bars[BAR_COLUMNS].sort_values('ts').drop_duplicates('ts').reset_index(drop=True)
         else:
-            source='binance_spot' if symbol in {'BTCUSDT','ETHUSDT'} else 'dukascopy'
+            source='binance_spot' if symbol in CRYPTO else 'dukascopy'
             directory=data_root/'bars'/source/symbol
             parts=[]
             for period in (month,month+1):
@@ -54,11 +57,11 @@ def random_direction(signals:pd.DataFrame,data_root:Path,seeds=200):
             side=-int(row.side)
             stop=float(row.price)-side*abs(float(row.price)-float(row.sl))
             tp=float(row.price)+side*abs(float(row.tp)-float(row.price))
-            rate=.0006 if symbol=='BTCUSDT' else .0002
+            rate=.0006 if symbol in CRYPTO else .0002
             deadline=pd.Timestamp(row.deadline_ts)
             if deadline>=DEV_END:continue
             jobs.extend([ix,side,float(row.price),stop,tp,int(deadline.timestamp()),2,rate,
-                         np.nan,np.nan,1 if symbol=='BTCUSDT' else 0])
+                         np.nan,np.nan,1 if symbol in CRYPTO else 0])
             rows.append(row)
         if not rows:continue
         if first_hit_batch is not None:
@@ -71,7 +74,7 @@ def random_direction(signals:pd.DataFrame,data_root:Path,seeds=200):
             for job in np.asarray(jobs,dtype=float).reshape(-1,11):
                 result=first_hit_reference(bars,int(job[0]),int(job[1]),job[2],job[3],job[4],
                     delay_bars=2,financing_per_night=job[7],deadline_ts=pd.Timestamp(job[5],unit='s',tz='UTC'),
-                    instrument_class='crypto' if symbol=='BTCUSDT' else 'index',detailed=True)
+                    instrument_class='crypto' if symbol in CRYPTO else 'index',detailed=True)
                 opposite_r.append(result[3])
         for row,r in zip(rows,opposite_r):
             if np.isfinite(r):normal.append(float(row.net_R));opposite.append(float(r))

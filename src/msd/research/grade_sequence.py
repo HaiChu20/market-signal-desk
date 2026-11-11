@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from msd.research.any_minute import gate_open_signals
+from msd.research.gating import gate_open_signals
 from msd.research.benchmark import random_direction
 from msd.research.dataset import DEV_END
 from msd.research.decision import choose
