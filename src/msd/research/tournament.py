@@ -1,41 +1,61 @@
-"""Generate preliminary DEV tournament summary from registered event detectors."""
+"""Preliminary DEV tournament from production method-event outcomes."""
 from __future__ import annotations
-import importlib,csv,json
+import importlib
 from pathlib import Path
 import pandas as pd
-from .report_card import metrics
 from .dataset import DEV_END
-from . import any_minute
+from .any_minute import SYMBOLS
 
 def registry_names():
- import msd.methods as package
- names=[]
- for path in Path(package.__file__).parent.glob('*.py'):
-  if path.name.startswith('_') or path.stem in {'__init__','common','filters'}:continue
-  module=importlib.import_module(f'msd.methods.{path.stem}')
-  name=getattr(module,'NAME',None)
-  if name and name not in names:names.append(name)
- return sorted(names)
+    import msd.methods as package
+    result=[]
+    for path in Path(package.__file__).parent.glob('*.py'):
+        if path.name.startswith('_') or path.stem in {'common','filters'}:continue
+        module=importlib.import_module(f'msd.methods.{path.stem}')
+        if hasattr(module,'NAME'):result.append(module.NAME)
+    return sorted(set(result))
+
+def summarize(root, names=None, symbols=SYMBOLS):
+    names=registry_names() if names is None else names
+    groups={name:[] for name in names};files={name:[] for name in names}
+    for sym in symbols:
+        event_dir=Path(root)/'events'/sym
+        for path in sorted(event_dir.glob('*.parquet')):
+            if path.stem[:4]>'2022':continue
+            cols=['method','sym','ts','side','known_at','exit_ts','R']
+            frame=pd.read_parquet(path,columns=cols)
+            frame=frame[(pd.to_datetime(frame.known_at,utc=True)<DEV_END)&
+                        (pd.to_datetime(frame.exit_ts,utc=True)<DEV_END)]
+            for name,part in frame.groupby('method'):
+                if name in groups:
+                    groups[name].append(part);files[name].append(str(path))
+    missing=[name for name in names if not files[name]]
+    if missing:raise FileNotFoundError('Missing production DEV event/label output for registered methods: '+', '.join(missing))
+    rows=[]
+    for name in names:
+        frame=pd.concat(groups[name],ignore_index=True)
+        rows.append({'method':name,'events':len(frame[['sym','ts','side']].drop_duplicates()),
+                     'candidate_rows':len(frame),'net_avg_R':float(pd.to_numeric(frame.R,errors='coerce').mean()),
+                     'files':len(files[name])})
+    return rows
 
 def main(root=Path('/Users/bfhach/Projects/market-signal-desk/data')):
- names=registry_names();rows=[]
- for method in names:
-  events=[]
-  for sym in any_minute.SYMBOLS:
-   for p in sorted((root/'events'/sym).glob('*.parquet')):
-    if p.stem[:4]>'2022':continue
-    try:d=pd.read_parquet(p,columns=['method','sym','known_at','outcome','R','exit_ts','entry_ts','gross_R'])
-    except Exception:continue
-    d=d[d.method.eq(method)];d=d[(pd.to_datetime(d.known_at,utc=True)<DEV_END)&(pd.to_datetime(d.exit_ts,utc=True)<DEV_END)]
-    events.append(d)
-  if events:
-   d=pd.concat(events,ignore_index=True)
-   n=len(d);r=pd.to_numeric(d.R,errors='coerce').dropna();rows.append({'method':method,'events':n,'candidate rows':n,'net avg R':r.mean() if n else None,'grade':'ungraded: DEV'})
-  else:rows.append({'method':method,'events':0,'candidate rows':0,'net avg R':None,'grade':'ungraded: DEV'})
- rows.append({'method':'any_minute_grid','events':None,'candidate rows':'15m anchors × SL/TP grid','net avg R':None,'grade':'see report'})
- out=Path('reports/research/tournament_dev.md');out.parent.mkdir(parents=True,exist_ok=True)
- lines=['# Preliminary development tournament','', 'DEV only (through 2022-12-31). Inputs are being regenerated; these counts and event outcomes are preliminary. Every method name is read from `src/msd/methods` NAME declarations. No test or final period evaluated.','', '| Method | Events | Candidate rows | Net avg R | Grade |','|---|---:|---:|---:|---|']
- for r in rows:lines.append(f"| {r['method']} | {r['events'] if r['events'] is not None else '—'} | {r['candidate rows']} | {r['net avg R'] if r['net avg R'] is not None else '—'} | {r['grade']} |")
- lines+=['','Any-minute model report: `reports/research/any_minute_grid_dev.json` (when generated).']
- out.write_text('\n'.join(lines)+'\n')
+    out=Path('reports/research/tournament_dev.md');out.parent.mkdir(parents=True,exist_ok=True)
+    try:
+        rows=summarize(root)
+    except FileNotFoundError as error:
+        out.write_text('# PRELIMINARY DEV tournament\n\nProduction method event outputs are incomplete. '
+            'The tournament table is withheld until every registered method has an output file.\n\n'
+            f'{error}\n')
+        raise
+    lines=['# PRELIMINARY DEV tournament','',
+           'Production `data/events/{symbol}/{month}.parquet` carries method event outcomes (labels). '
+           'Only decisions and exits before 2023 are included. Inputs may be regenerated.','',
+           '| Method | Events | Candidate rows | Net avg R | Source files |',
+           '|---|---:|---:|---:|---:|']
+    for r in rows:
+        lines.append(f"| {r['method']} | {r['events']} | {r['candidate_rows']} | {r['net_avg_R']:.4f} | {r['files']} |")
+    lines+=['','Any-minute grid is reported separately in `any_minute_grid_BTCUSDT_dev.md` pending the other two symbols.']
+    out.write_text('\n'.join(lines)+'\n')
+    return out
 if __name__=='__main__':main()
