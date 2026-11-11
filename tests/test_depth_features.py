@@ -8,7 +8,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 from pandas.testing import assert_frame_equal
 
-from msd.data.depth_features import build_month, make_features, parse_raw_zip
+from msd.data.depth_features import build_month, make_features, parse_raw_zip, write_month
 
 
 def snapshots(ts: pd.DatetimeIndex) -> pd.DataFrame:
@@ -107,3 +107,17 @@ def test_http_404_day_is_flagged_and_all_features_nan(tmp_path) -> None:
     recovered, stats = build_month(tmp_path, "ETHUSDT", "2023-02")
     assert stats["missing_day_minutes"] == 0
     assert not recovered.source_missing_day.any()
+
+
+def test_failed_row_count_check_removes_own_part_file(monkeypatch, tmp_path) -> None:
+    frame = pd.DataFrame({"ts": pd.to_datetime(["2023-01-01"], utc=True)})
+    real_metadata = pq.read_metadata
+
+    class WrongRows:
+        num_rows = 0
+
+    monkeypatch.setattr(pq, "read_metadata", lambda path: WrongRows()
+                       if ".part." in str(path) else real_metadata(path))
+    with np.testing.assert_raises_regex(ValueError, "row count mismatch"):
+        write_month(tmp_path, "BTCUSDT", "2023-01", frame)
+    assert not list((tmp_path / "data/features_depth/BTCUSDT").glob("*.part.*"))

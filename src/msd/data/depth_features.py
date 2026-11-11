@@ -221,10 +221,13 @@ def write_month(root: Path, symbol: str, month: str, frame: pd.DataFrame) -> Pat
     out = root / "data/features_depth" / symbol / f"{month}.parquet"
     out.parent.mkdir(parents=True, exist_ok=True)
     tmp = out.with_name(out.name + f".part.{os.getpid()}")
-    pq.write_table(pa.Table.from_pandas(frame, preserve_index=False), tmp, compression="zstd")
-    if pq.read_metadata(tmp).num_rows != len(frame):
-        raise ValueError(f"Parquet row count mismatch: {tmp}")
-    os.replace(tmp, out)
+    try:
+        pq.write_table(pa.Table.from_pandas(frame, preserve_index=False), tmp, compression="zstd")
+        if pq.read_metadata(tmp).num_rows != len(frame):
+            raise ValueError(f"Parquet row count mismatch: {tmp}")
+        os.replace(tmp, out)
+    finally:
+        tmp.unlink(missing_ok=True)
     return out
 
 
