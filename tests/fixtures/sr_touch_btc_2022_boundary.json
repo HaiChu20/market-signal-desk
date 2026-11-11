@@ -1,0 +1,47 @@
+[
+  {
+    "ts": "2022-01-02T18:23:00Z",
+    "cluster_id": 377527391404949055,
+    "cluster_price": 47086.80569263459,
+    "cluster_strength": 11153,
+    "cluster_types": ["prior_day_poc", "prior_day_vah", "prior_day_val", "round_number"],
+    "cluster_age_minutes": 472018.0,
+    "approach_direction": "from_above_support"
+  },
+  {
+    "ts": "2022-01-02T18:25:00Z",
+    "cluster_id": 145223782109535440,
+    "cluster_price": 47023.98943818471,
+    "cluster_strength": 12150,
+    "cluster_types": ["prior_day_poc", "prior_day_vah", "prior_day_val", "round_number"],
+    "cluster_age_minutes": 472020.0,
+    "approach_direction": "from_above_support"
+  },
+  {
+    "ts": "2022-01-03T20:22:00Z",
+    "cluster_id": 43241006685693843,
+    "cluster_price": 45717.28849206616,
+    "cluster_strength": 3338,
+    "cluster_types": ["prior_day_poc", "prior_day_vah", "prior_day_val"],
+    "cluster_age_minutes": 451943.0,
+    "approach_direction": "from_above_support"
+  },
+  {
+    "ts": "2022-01-03T20:24:00Z",
+    "cluster_id": 590659827230760929,
+    "cluster_price": 46033.39419950553,
+    "cluster_strength": 2956,
+    "cluster_types": ["prior_day_poc", "prior_day_vah", "prior_day_val", "round_number"],
+    "cluster_age_minutes": 473595.0,
+    "approach_direction": "from_below_resistance"
+  },
+  {
+    "ts": "2022-01-04T01:44:00Z",
+    "cluster_id": 43241006685693843,
+    "cluster_price": 46087.696813301765,
+    "cluster_strength": 5257,
+    "cluster_types": ["prior_day_poc", "prior_day_vah", "prior_day_val", "round_number"],
+    "cluster_age_minutes": 473915.0,
+    "approach_direction": "from_above_support"
+  }
+]

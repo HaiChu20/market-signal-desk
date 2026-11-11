@@ -105,6 +105,47 @@ def test_macro_et_conversion_dst_and_scale_sanity():
         infer_price_scale(bad, "XAUUSD")
 
 
+def test_crypto_cfd_scale_is_cross_checked_against_binance_within_two_percent():
+    from msd.data.dukascopy import CRYPTO_SYMBOLS, _binance_daily_reference, _download_days, infer_price_scale
+    day = date(2024, 6, 12)  # Wednesday
+    fields = [(0, 35_438, 35_440, 35_430, 35_439, 1.0),
+              (60, 35_439, 35_445, 35_435, 35_441, 1.0)]
+    raw = lzma.compress(b"".join(struct.pack(">5if", *row) for row in fields))
+
+    assert "ETHUSD" in CRYPTO_SYMBOLS
+    assert infer_price_scale(raw, "ETHUSD", reference_price=3543.84) == 10
+    with pytest.raises(ValueError, match="within 2%"):
+        infer_price_scale(raw, "ETHUSD", reference_price=3000.0)
+
+    assert _download_days("ETHUSD", date(2024, 6, 1), date(2024, 6, 2), date(2024, 6, 1)) == [date(2024, 6, 1), date(2024, 6, 2)]
+    assert date(2024, 6, 1) not in _download_days("XAUUSD", date(2024, 6, 1), date(2024, 6, 2), date(2024, 6, 1))
+
+
+def test_binance_crypto_scale_reference_uses_same_utc_day(tmp_path, monkeypatch):
+    from msd.data.dukascopy import _binance_daily_reference
+    monkeypatch.chdir(tmp_path)
+    root = tmp_path / "data/bars/binance_spot/ETHUSDT"
+    root.mkdir(parents=True)
+    frame = pd.DataFrame({
+        "ts": pd.to_datetime(["2024-06-12T00:00Z", "2024-06-12T00:01Z", "2024-06-13T00:00Z"]),
+        "bid_c": [3500.0, 3600.0, 9999.0],
+    })
+    frame.to_parquet(root / "2024-06.parquet")
+    assert _binance_daily_reference("ETHUSD", date(2024, 6, 12)) == 3550.0
+
+
+def test_archived_eth_cfd_scale_matches_binance_sample_when_available():
+    from pathlib import Path
+    from msd.data.dukascopy import _binance_daily_reference, infer_price_scale
+    day=date(2018,1,1)
+    raw_path=Path("data/raw/dukascopy/ETHUSD/2018-01-01_BID.bi5")
+    if not raw_path.exists():
+        pytest.skip("local ETHUSD calibration archive unavailable")
+    raw=raw_path.read_bytes()
+    reference=_binance_daily_reference("ETHUSD",day)
+    assert infer_price_scale(raw,"ETHUSD",reference_price=reference)==10
+
+
 def test_manifest_and_source_routing(tmp_path, monkeypatch):
     from msd.data.catalog import write_manifest
     from msd.data import load

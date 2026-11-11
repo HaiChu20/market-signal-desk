@@ -319,6 +319,9 @@ Every row carries ts (bar open) and known_at (bar close). Values use observation
 | 5m_vol_ratio14_50 | Trailing causal feature or calendar encoding. | 5m | Completed close at or before row known_at |
 | 5m_volume_ratio20 | Trailing causal feature or calendar encoding. | 5m | Completed close at or before row known_at |
 | 5m_volume_z20 | Trailing causal feature or calendar encoding. | 5m | Completed close at or before row known_at |
+| cross_BTCUSDT_return_1m_bars_15 | Other instrument's trailing return as-of its completed bar close. | 1m / calendar | Completed close at or before row known_at |
+| cross_BTCUSDT_return_1m_bars_240 | Other instrument's trailing return as-of its completed bar close. | 1m / calendar | Completed close at or before row known_at |
+| cross_BTCUSDT_return_1m_bars_60 | Other instrument's trailing return as-of its completed bar close. | 1m / calendar | Completed close at or before row known_at |
 | cross_ETHUSDT_return_1m_bars_15 | Other instrument's trailing return as-of its completed bar close. | 1m / calendar | Completed close at or before row known_at |
 | cross_ETHUSDT_return_1m_bars_240 | Other instrument's trailing return as-of its completed bar close. | 1m / calendar | Completed close at or before row known_at |
 | cross_ETHUSDT_return_1m_bars_60 | Other instrument's trailing return as-of its completed bar close. | 1m / calendar | Completed close at or before row known_at |
@@ -331,7 +334,20 @@ Every row carries ts (bar open) and known_at (bar close). Values use observation
 | cross_XAUUSD_return_1m_bars_15 | Other instrument's trailing return as-of its completed bar close. | 1m / calendar | Completed close at or before row known_at |
 | cross_XAUUSD_return_1m_bars_240 | Other instrument's trailing return as-of its completed bar close. | 1m / calendar | Completed close at or before row known_at |
 | cross_XAUUSD_return_1m_bars_60 | Other instrument's trailing return as-of its completed bar close. | 1m / calendar | Completed close at or before row known_at |
+| dix_level | SqueezeMetrics dealer-positioning series as-of the next New York day after publication. | 1m / calendar | Completed close at or before row known_at |
+| dix_percentile252 | SqueezeMetrics dealer-positioning series as-of the next New York day after publication. | 1m / calendar | Completed close at or before row known_at |
+| dix_z252 | SqueezeMetrics dealer-positioning series as-of the next New York day after publication. | 1m / calendar | Completed close at or before row known_at |
+| dvol_btc_change | Deribit DVOL level/change and trailing 24-hour realized-volatility premium, as-of the published observation. | 1m / calendar | Completed close at or before row known_at |
+| dvol_btc_level | Deribit DVOL level/change and trailing 24-hour realized-volatility premium, as-of the published observation. | 1m / calendar | Completed close at or before row known_at |
+| dvol_btc_minus_realized_vol30d | Deribit DVOL level/change and trailing 24-hour realized-volatility premium, as-of the published observation. | 1m / calendar | Completed close at or before row known_at |
+| dvol_eth_change | Deribit DVOL level/change and trailing 24-hour realized-volatility premium, as-of the published observation. | 1m / calendar | Completed close at or before row known_at |
+| dvol_eth_level | Deribit DVOL level/change and trailing 24-hour realized-volatility premium, as-of the published observation. | 1m / calendar | Completed close at or before row known_at |
+| dvol_eth_minus_realized_vol30d | Deribit DVOL level/change and trailing 24-hour realized-volatility premium, as-of the published observation. | 1m / calendar | Completed close at or before row known_at |
 | funding_z20 | Trailing causal feature or calendar encoding. | 1m / calendar | Completed close at or before row known_at |
+| gex_level | SqueezeMetrics gamma exposure as-of the next New York day after publication. | 1m / calendar | Completed close at or before row known_at |
+| gex_percentile252 | SqueezeMetrics gamma exposure as-of the next New York day after publication. | 1m / calendar | Completed close at or before row known_at |
+| gex_sign | SqueezeMetrics gamma exposure as-of the next New York day after publication. | 1m / calendar | Completed close at or before row known_at |
+| gex_z252 | SqueezeMetrics gamma exposure as-of the next New York day after publication. | 1m / calendar | Completed close at or before row known_at |
 | level_above_1_age_minutes | Nearest active level distance/type/strength/age, as-of joined by known_at. | 1m / calendar | Completed close at or before row known_at |
 | level_above_1_distance_atr | Nearest active level distance/type/strength/age, as-of joined by known_at. | 1m / calendar | Completed close at or before row known_at |
 | level_above_1_strength | Nearest active level distance/type/strength/age, as-of joined by known_at. | 1m / calendar | Completed close at or before row known_at |
@@ -356,6 +372,16 @@ Every row carries ts (bar open) and known_at (bar close). Values use observation
 | level_below_3_distance_atr | Nearest active level distance/type/strength/age, as-of joined by known_at. | 1m / calendar | Completed close at or before row known_at |
 | level_below_3_strength | Nearest active level distance/type/strength/age, as-of joined by known_at. | 1m / calendar | Completed close at or before row known_at |
 | level_below_3_type_code | Nearest active level distance/type/strength/age, as-of joined by known_at. | 1m / calendar | Completed close at or before row known_at |
+| minutes_since_earnings_aapl | Minutes since an observed event; minutes_to_* is emitted only for future dates in a pre-published schedule (CPI/NFP/FOMC/GDP/ISM), never for unscheduled actions or EDGAR acceptance times. | 1m / calendar | Completed close at or before row known_at |
+| minutes_since_earnings_amzn | Minutes since an observed event; minutes_to_* is emitted only for future dates in a pre-published schedule (CPI/NFP/FOMC/GDP/ISM), never for unscheduled actions or EDGAR acceptance times. | 1m / calendar | Completed close at or before row known_at |
+| minutes_since_earnings_avgo | Minutes since an observed event; minutes_to_* is emitted only for future dates in a pre-published schedule (CPI/NFP/FOMC/GDP/ISM), never for unscheduled actions or EDGAR acceptance times. | 1m / calendar | Completed close at or before row known_at |
+| minutes_since_earnings_cost | Minutes since an observed event; minutes_to_* is emitted only for future dates in a pre-published schedule (CPI/NFP/FOMC/GDP/ISM), never for unscheduled actions or EDGAR acceptance times. | 1m / calendar | Completed close at or before row known_at |
+| minutes_since_earnings_googl | Minutes since an observed event; minutes_to_* is emitted only for future dates in a pre-published schedule (CPI/NFP/FOMC/GDP/ISM), never for unscheduled actions or EDGAR acceptance times. | 1m / calendar | Completed close at or before row known_at |
+| minutes_since_earnings_meta | Minutes since an observed event; minutes_to_* is emitted only for future dates in a pre-published schedule (CPI/NFP/FOMC/GDP/ISM), never for unscheduled actions or EDGAR acceptance times. | 1m / calendar | Completed close at or before row known_at |
+| minutes_since_earnings_msft | Minutes since an observed event; minutes_to_* is emitted only for future dates in a pre-published schedule (CPI/NFP/FOMC/GDP/ISM), never for unscheduled actions or EDGAR acceptance times. | 1m / calendar | Completed close at or before row known_at |
+| minutes_since_earnings_nflx | Minutes since an observed event; minutes_to_* is emitted only for future dates in a pre-published schedule (CPI/NFP/FOMC/GDP/ISM), never for unscheduled actions or EDGAR acceptance times. | 1m / calendar | Completed close at or before row known_at |
+| minutes_since_earnings_nvda | Minutes since an observed event; minutes_to_* is emitted only for future dates in a pre-published schedule (CPI/NFP/FOMC/GDP/ISM), never for unscheduled actions or EDGAR acceptance times. | 1m / calendar | Completed close at or before row known_at |
+| minutes_since_earnings_tsla | Minutes since an observed event; minutes_to_* is emitted only for future dates in a pre-published schedule (CPI/NFP/FOMC/GDP/ISM), never for unscheduled actions or EDGAR acceptance times. | 1m / calendar | Completed close at or before row known_at |
 | minutes_since_session_open | Minutes since an observed event; minutes_to_* is emitted only for future dates in a pre-published schedule (CPI/NFP/FOMC/GDP/ISM), never for unscheduled actions or EDGAR acceptance times. | 1m / calendar | Completed close at or before row known_at |
 | open_interest_change | Trailing causal feature or calendar encoding. | 1m / calendar | Completed close at or before row known_at |
 | prior_day_high_distance_atr | Trailing causal feature or calendar encoding. | 1m / calendar | Completed close at or before row known_at |
@@ -365,6 +391,7 @@ Every row carries ts (bar open) and known_at (bar close). Values use observation
 | quote_volume_z20 | Trailing causal feature or calendar encoding. | 1m / calendar | Completed close at or before row known_at |
 | session_id | Trailing causal feature or calendar encoding. | 1m / calendar | Completed close at or before row known_at |
 | spread_atr | Bid/ask spread divided by trailing ATR. | 1m / calendar | Completed close at or before row known_at |
+| spread_modeled | Bid/ask spread divided by trailing ATR. | 1m / calendar | Completed close at or before row known_at |
 | taker_buy_ratio | Binance taker-buy base volume divided by total base volume. | 1m / calendar | Completed close at or before row known_at |
 | time_cos | Trailing causal feature or calendar encoding. | 1m / calendar | Completed close at or before row known_at |
 | time_sin | Trailing causal feature or calendar encoding. | 1m / calendar | Completed close at or before row known_at |
