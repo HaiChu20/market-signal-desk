@@ -330,3 +330,8 @@ Append-only notes from the autonomous review loop while the user sleeps.
     - d271bffd: live shadow;
     - fe242257: bookDepth fix + restart;
     - 66f270b0: stale guard + coverage gate + 5-symbol bundle.
+- 08:05: merged 66f270b0 Roihu sequence submission v1 (d4b5851). Suite 310 passed.
+  - Gates: production4 freshness + ≥80% anchor coverage per DEV year (all 5 symbols pass: BTC/ETH 2018 97.2%, NQ/SPX 2019 99.9%, XAU 2008 96.2%, otherwise 100%).
+  - Bundle: 8.17 GiB, 2,443 files; 8 missing are BTC/ETH 2017-12 pre-start warm-up files.
+  - Follow-ups sent: ETH treated as index in benchmark.random_direction (financing/spread); move gate_open_signals to research/gating.py to avoid an add/add conflict with 2dcf8f09.
+  - Noted: labels use index financing 0.02%/night for XAU vs protocol 0.015%. This is conservative, so it is documented as a deviation, with no relabel.
