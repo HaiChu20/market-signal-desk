@@ -17,19 +17,26 @@ def random_direction(signals:pd.DataFrame,data_root:Path,seeds=200):
     normal=[];opposite=[];manifest=[]
     work=signals.assign(month=pd.to_datetime(signals.ts,utc=True).dt.tz_localize(None).dt.to_period('M'))
     for (symbol,month),group in work.groupby(['sym','month']):
-        source='binance_spot' if symbol=='BTCUSDT' else 'dukascopy'
-        directory=data_root/'bars'/source/symbol
-        parts=[]
-        for period in (month,month+1):
-            if period.year>=2023:continue
-            path=directory/f'{period}.parquet'
-            if not path.exists():continue
-            before=path.stat();part=pd.read_parquet(path,columns=BAR_COLUMNS)
-            if path.stat().st_mtime_ns!=before.st_mtime_ns:raise RuntimeError(f'Source changed during read: {path}')
-            parts.append(part)
-            manifest.append({'path':str(path),'mtime_ns':before.st_mtime_ns,'size':before.st_size})
-        if not parts:continue
-        bars=pd.concat(parts,ignore_index=True).sort_values('ts').drop_duplicates('ts').reset_index(drop=True)
+        if symbol in {'USATECHIDXUSD','USA500IDXUSD'} and data_root.name=='data':
+            from msd.research.sequence_data import load_executable_1m
+            bars=load_executable_1m(symbol,pd.Timestamp(month.start_time,tz='UTC'),
+                                    pd.Timestamp((month+1).end_time,tz='UTC'),data_root)
+            if bars.empty:continue
+            bars=bars[BAR_COLUMNS].sort_values('ts').drop_duplicates('ts').reset_index(drop=True)
+        else:
+            source='binance_spot' if symbol in {'BTCUSDT','ETHUSDT'} else 'dukascopy'
+            directory=data_root/'bars'/source/symbol
+            parts=[]
+            for period in (month,month+1):
+                if period.year>=2023:continue
+                path=directory/f'{period}.parquet'
+                if not path.exists():continue
+                before=path.stat();part=pd.read_parquet(path,columns=BAR_COLUMNS)
+                if path.stat().st_mtime_ns!=before.st_mtime_ns:raise RuntimeError(f'Source changed during read: {path}')
+                parts.append(part)
+                manifest.append({'path':str(path),'mtime_ns':before.st_mtime_ns,'size':before.st_size})
+            if not parts:continue
+            bars=pd.concat(parts,ignore_index=True).sort_values('ts').drop_duplicates('ts').reset_index(drop=True)
         times=pd.to_datetime(bars.ts,utc=True)
         if symbol=='BTCUSDT':
             # Binance bars are mid-price bars. Use the decision-time modeled

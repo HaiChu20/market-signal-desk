@@ -306,3 +306,60 @@ Append-only notes from the autonomous review loop while the user sleeps.
     - Fix spec sent to 33128ce1: ≥80% of expected_effective, excluding the index daily gap; keep known_at = scheduled end; tests; chunk equivalence re-validated.
   - PLAN: production4 full rerun after merging (a) HTF fix, (b) 2dcf8f09 event-scan fix, (c) d271bffd 10C. Then augment-external, flow features, tournament, Roihu bundle.
   - 66f270b0 Roihu package v1 accepted in principle; on hold until production4. Asked for a stale-input guard and an anchor-discard coverage gate.
+- 03:55: merged fe242257 7907ee4 bookDepth features (BTC 2023-01..2026-01, 97.5% minute coverage; 416 MiB). Found: the bookDepth downloader had crashed on '-5.00' percentage at BTC 2026-01, so BTC after 2026-01 and all ETH are missing. fe242257 is fixing the parser (float bands, ±0.2), adding error logging that continues, and restarting. Suite 291 passed.
+- 04:00: Codex at usage limit until 07:52. Production3 + augment-external DONE (BTC/NQ/SPX/XAU). Merged d271bffd 10C (f7ac8ee); downloader add/add conflicts resolved to the fe242257 versions; stage11 prototype tests skipped as superseded. Rust rebuilt. Strict suite 299 passed; slow 10k parity 9/9 passed.
+- 04:30 (Claude, while Codex is limited): HTF completeness fix committed.
+  - Sample-month bar counts, old → new: SPX 1h 1715→2761, 4h 227→734; NQ 1h 2740→2937, 4h 576→764; XAU 4h 587→736 (metals rollover 17–18 ET excluded); BTC unchanged.
+  - Tests: OHLC is unchanged by no-tick omissions where the first minute traded; a <80% bucket is absent; the index gap bucket is present; truncation never emits a partial bucket early; the metals break. Suite 303 passed.
+  - NQ 2020-06→2021-06 real chunk equivalence re-running (features: 343,739 rows, 14 allowed rolling ULPs).
+  - Prepared production4 runner data/tmp/run_stage9_p4.py: BTC/NQ/SPX/XAU + ETH, 2 active children, separate p4 result names, augment-external per symbol at chain end.
+- 04:45: NQ real chunk equivalence PASSED with the new HTF rule: features 343,739 rows (14 allowed rolling ULPs); checkpoint state at the split equal; events sr 2,859 / sweep 3,002 equal; labels 1,604,190 rows monthly equal (12 months). The harness UnboundLocalError in cleanup was fixed (data/tmp only).
+- 04:47: PRODUCTION4 STARTED: data/tmp/run_stage9_p4.py (BTC 2018→, NQ/SPX cash era, XAU 2008→, ETH 2018→; 2 active; augment per symbol at chain end). Logs: data/logs/stage9_production4.log and stage9p4_*.
+  - Includes HTF fix 1db86a9 and the 10C merge 72e62d6.
+  - Events are still from the minimal event frame; they get replaced by the events-only replay after 2dcf8f09's fix.
+  - NO processing-code edits in the main checkout until it finishes.
+  - One-shot wake at 07:56 to re-dispatch Codex workers after their 07:52 reset.
+- 04:55 hourly: production4 actually started 04:12 (the earlier log time was approximate). NQ 2018–2025 DONE (2026 running); SPX through 2023; BTC through 2019; XAU 2008; ETH on 2021; peaks 2.2–4.0 GiB, 2 active, no failures. Disk 222 GiB free. One Dukascopy 1m runner (EURUSD 2019) + ticks + Bybit + bookDepth stopped (fix pending). Codex limited until 07:52.
+- 05:55 hourly: production4 has no failures. NQ DONE + augment exit 0. ETH on 2026; XAU on 2017; BTC (2021) and SPX (2024) are waiting: the scheduler favours the chain that just finished (no fairness), so they proceed once ETH and XAU finish. ETA ~2h. Disk 202 GiB. Dukascopy 1m on EURUSD 2025 (one runner) + ticks.
+- 06:55 hourly: production4 has no failures. ETH DONE + augment exit 0; NQ DONE + augment; BTC on 2026 (last year); XAU on 2023; SPX still waiting at 2024 (scheduler starvation; runs after BTC). Dukascopy 1m: EURUSD DONE, USDJPY in progress. Disk 198 GiB.
+- 07:55: PRODUCTION4 COMPLETE for BTC, NQ, SPX, XAU and ETH; augment-external exit 0 for all. Report: reports/data/pipeline_report.md (features 632 files / 11.5 GB; labels 631 / 1.25 GB).
+  - SPX 2019-11: 1h 82→371 rows, 4h missing→93.
+  - Codex reset: panes 3 and 6 had fallen back to Luna, switched to Sol high. Dispatched:
+    - 33128ce1: flow features finish + build;
+    - 2dcf8f09: event-scan fix + events-only dry run;
+    - d271bffd: live shadow;
+    - fe242257: bookDepth fix + restart;
+    - 66f270b0: stale guard + coverage gate + 5-symbol bundle.
+- 08:05: merged 66f270b0 Roihu sequence submission v1 (d4b5851). Suite 310 passed.
+  - Gates: production4 freshness + ≥80% anchor coverage per DEV year (all 5 symbols pass: BTC/ETH 2018 97.2%, NQ/SPX 2019 99.9%, XAU 2008 96.2%, otherwise 100%).
+  - Bundle: 8.17 GiB, 2,443 files; 8 missing are BTC/ETH 2017-12 pre-start warm-up files.
+  - Follow-ups sent: ETH treated as index in benchmark.random_direction (financing/spread); move gate_open_signals to research/gating.py to avoid an add/add conflict with 2dcf8f09.
+  - Noted: labels use index financing 0.02%/night for XAU vs protocol 0.015%. This is conservative, so it is documented as a deviation, with no relabel.
+- 08:35 PAUSED (user): Codex hit its WEEKLY limit; it resets 13:53. Hourly cron cancelled.
+  - Still running (no Codex needed): Dukascopy 1m (USDJPY onward), Dukascopy ticks (PID 89094), Bybit raw (24 GiB so far, at 2024-01), bookDepth (restarted by fe242257 after its parser fix, PID 29527), and 2dcf8f09's events-only BTC DRY RUN (writes data/tmp only).
+  - Unreviewed/uncommitted in the main checkout: src/msd/data/flow_features.py, its test, and the flow coverage reports. The report text says windows "require every minute", so check it implements the 80%-of-source rule before accepting.
+  - RESUME LIST:
+    (1) review 2dcf8f09's event-scan fix + dry run; then run the events-only replay for all 5 symbols into data/events;
+    (2) review/commit flow features;
+    (3) 66f270b0: ETH benchmark costs + gating.py;
+    (4) d271bffd: live shadow loop;
+    (5) fe242257: bookDepth rebuild + ticks to 4 workers when the 1m campaign ends;
+    (6) DEV tournament on production4 + replayed events;
+    (7) final Roihu bundle → user submits;
+    (8) stage 9 for the remaining markets (per-symbol sessions needed for DAX/FTSE/Nikkei).
+- 08:45: user asked about load and fan noise. Stopped 2dcf8f09's events-only BTC dry run (scratch only; rerun on resume). Removed this project's Docker test artifacts (container d271bffd-market-signal-desk-1; 8 msd-live/market-signal-desk images ~8 GB; build cache 18.4 GB). Left the user's crypto-dashboard containers, images and volumes untouched.
+- 08:50: on the user's instruction, removed the crypto-dashboard Docker stack (4 containers grafana/clickhouse/kafka/kafka-ui, their 4 images, volumes clickhouse-data/grafana-data/kafka-data ~13.2 GB) plus our d271bffd_live-state volume. Kept: ubuntu 22.04/20.04, debian 12-slim, terraform, clickhouse 25.3, grafana 11.6 (2.3 GB, not asked). The user chose to keep all downloads running.
+- 09:00: user going out, so PAUSED ALL DOWNLOADS (SIGTERM).
+  - Positions: Dukascopy 1m at GBPUSD 2009-07 (USDJPY done; WTI/Brent/FTSE/Nikkei left); ticks at USA500 2024-01; Bybit at BTCUSDT 2024-02-29; bookDepth BTC 2026-01→ (fixed code on cao/fe242257 1e0e43d, not merged yet).
+  - Resume all with: bash data/tmp/resume_downloads.sh (skips verified files; Dukascopy ≤4 connections).
+- 09:30 (user on a different, fast network): resumed downloads and measured.
+  - Link: 12 MB/s single stream; ~38 MB/s across 4 streams (Binance CDN).
+  - Binance/Bybit downloaders are CPU-bound (Python gzip/CSV parsing at ~100% of one core), not network-bound.
+  - Bybit split into 2 processes via the new MSD_BYBIT_SYMBOLS env (commit a510106 on cao/fe242257). ETH new data: 1.17 MB/s, ~40 days/min (home: 0.54 MB/s, both symbols in one process). BTC is re-verifying retained 2020–2024 raw first.
+  - Dukascopy on this network: HTTP → 301 to HTTPS, and HTTPS returns 429 (rate-limited IP). The tick downloader (HTTP keep-alive) can't follow it, so ticks are PAUSED here; resume at home. The 1m campaign continues with backoff (re-verifying; at EURUSD).
+  - bookDepth: ETH 2024 (CPU-bound month parsing).
+- 09:40: user meeting, so PAUSED all downloads again. Resume: bash data/tmp/resume_downloads.sh (on this network the ticks job will fail on Dukascopy's 301/429; start it at home).
+- 10:17: resumed all downloads (Dukascopy HTTP 200 again, so ticks are included).
+
+- 2026-11-11 11:15 EET: bookDepth download finished (BTC+ETH through 2026-11-10). Permanent source gaps (HTTP 404 on data.binance.vision, rechecked): BTCUSDT 2026-10-08; ETHUSDT 2023-02-08, 2023-02-09, 2026-10-08. Other downloads still running.
+- 14:00: USER DECISION: finish the old plan (Phase 1) to the end, then the every-minute model families + combiner (Phase 2). Written in docs/roadmap.md. Signal policy for both phases: Level 1 live data → own 1m bars → evaluate at each bar close → emit only when data is ready, the model is graded, and the edge after costs passes; silence is the default. Bybit raw: keep all (user). Bybit reader vectorised (a50dfb8 on cao/fe242257; exact vs old reader and all 85 stored months; now network-bound).

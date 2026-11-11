@@ -7,6 +7,9 @@ padding it with information from a different regime.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
+from contextlib import contextmanager
+import os
 
 import numpy as np
 import pandas as pd
@@ -18,6 +21,46 @@ FREQUENCIES = {"1m": "1min", "15m": "15min", "1h": "1h", "4h": "4h"}
 CHANNELS = ("open", "high", "low", "close", "spread", "volume_z")
 SL_GRID = (.5, 1., 1.5, 2., 3.)
 TP_GRID = (.5, 1., 1.5, 2., 3., 4., 6.)
+SYMBOL_START = {"USATECHIDXUSD": "2018-12-16T23:00:00Z",
+                "USA500IDXUSD": "2018-12-16T23:00:00Z",
+                "XAUUSD": "2008-01-01T00:00:00Z",
+                "BTCUSDT": "2017-01-01T00:00:00Z",
+                "ETHUSDT": "2017-01-01T00:00:00Z"}
+
+
+@contextmanager
+def _data_cwd(root: Path):
+    previous = Path.cwd()
+    os.chdir(root.resolve().parent)
+    try:
+        yield
+    finally:
+        os.chdir(previous)
+
+
+def load_executable_1m(symbol: str, start, end, data_root: Path) -> pd.DataFrame:
+    """Use the same source and adjusted executable price view as stage 9."""
+    from msd.data import load
+    from msd.processing.pipeline import (_adjusted_price_view, _cash_era_only,
+                                         _feature_label_bars, _modelled_spread,
+                                         assert_executable_spread)
+    if symbol not in SYMBOL_START:
+        raise ValueError(f"Unsupported symbol: {symbol}")
+    left = max(pd.Timestamp(start).tz_convert("UTC") if pd.Timestamp(start).tzinfo else
+               pd.Timestamp(start).tz_localize("UTC"), pd.Timestamp(SYMBOL_START[symbol]))
+    with _data_cwd(Path(data_root)):
+        # After the cash-era switch both index primaries are Dukascopy CFD
+        # quotes. Passing the source explicitly avoids an unused HistData
+        # catalog dependency on the transferred Roihu bundle.
+        source = "dukascopy" if symbol in {"USATECHIDXUSD", "USA500IDXUSD"} else None
+        bars = load(symbol, left, end, source=source)
+        bars = _cash_era_only(bars, symbol)
+        bars = _adjusted_price_view(bars.sort_values("ts").reset_index(drop=True))
+        bars = _feature_label_bars(bars)
+        bars = _modelled_spread(bars, symbol)
+        if not bars.empty:
+            assert_executable_spread(bars, symbol)
+    return bars
 
 
 @dataclass
@@ -128,8 +171,11 @@ def build_windows(bars: dict[str, pd.DataFrame], features: pd.DataFrame,
             if end < n:
                 break
             segment = prepared[tf].iloc[end - n:end]
-            # Do not bridge a missing bar with an older one.
-            if not segment.known_at.diff().iloc[1:].eq(pd.Timedelta(FREQUENCIES[tf])).all():
+            # Session gaps are expected for indices and gold. These are the
+            # last N *observed completed* bars; no missing bar is synthesized.
+            # A multi-day hole indicates an absent monthly input, not a
+            # routine weekend or exchange holiday.
+            if segment.known_at.diff().iloc[1:].gt(pd.Timedelta(days=7)).any():
                 break
             segments[tf] = segment
         if len(segments) != len(WINDOWS):

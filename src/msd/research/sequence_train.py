@@ -2,8 +2,11 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import os
 import random
+import signal
 from pathlib import Path
 
 import numpy as np
@@ -12,7 +15,14 @@ from sklearn.isotonic import IsotonicRegression
 
 from msd.research import decision, report_card, splits
 from msd.research.dataset import DEV_END
-from msd.research.sequence_data import SequenceData, build_windows
+from msd.research.sequence_data import SequenceData, SYMBOL_START, build_windows, load_executable_1m
+
+_STOP_REQUESTED = False
+
+
+def _request_checkpoint(signum, frame):
+    global _STOP_REQUESTED
+    _STOP_REQUESTED = True
 
 
 def _torch():
@@ -67,7 +77,7 @@ def _later_blocks(data: SequenceData, train_indices, embargo=splits.EMBARGO):
     return fit, early, cal
 
 
-def _candidates(data: SequenceData, indices, probabilities, symbol):
+def _candidates(data: SequenceData, indices, probabilities, symbol, config_sha256, fold, seed):
     rows = []
     label_index = data.labels.set_index(["known_at", "side", "sl_atr", "tp_atr"])
     for k, idx in enumerate(indices):
@@ -85,6 +95,7 @@ def _candidates(data: SequenceData, indices, probabilities, symbol):
                     price = float(anchor.price)
                     atr = float(anchor.atr)
                     rows.append({"known_at": anchor.known_at, "label_end_ts": label.exit_ts,
+                                 "ts": anchor.known_at - pd.Timedelta(minutes=1),
                                  "entry_ts": label.entry_ts, "sym": symbol, "side": side,
                                  "price": price, "sl": price - side * sl * atr,
                                  "tp": price + side * tp * atr,
@@ -92,8 +103,12 @@ def _candidates(data: SequenceData, indices, probabilities, symbol):
                                  "p0": float(data.p0[idx, si, i, j]),
                                  "tp_first": float(data.target[idx, si, i, j]),
                                  "net_R": float(label.net_R), "TP_R": tp / sl,
-                                 "cost_R": float(anchor.spread / (sl * atr)),
-                                 "financing_R": 0., "spread_R": float(anchor.spread / (sl * atr)),
+                                 "planned_risk": float(label.planned_risk) if "planned_risk" in label else sl * atr,
+                                 "deadline_ts": label.deadline_ts if "deadline_ts" in label else label.exit_ts,
+                                 "sl_atr": sl, "tp_atr": tp,
+                                 "config_sha256": config_sha256, "fold": fold, "seed": seed,
+                                 "cost_R": float(anchor.spread / (float(label.planned_risk) if "planned_risk" in label else sl * atr)),
+                                 "financing_R": 0., "spread_R": float(anchor.spread / (float(label.planned_risk) if "planned_risk" in label else sl * atr)),
                                  "event_key": f"{symbol}|{anchor.known_at}|{side}",
                                  "candidate_id": f"{symbol}|{anchor.known_at}|{side}|{sl}|{tp}"})
     return pd.DataFrame(rows)
@@ -101,12 +116,16 @@ def _candidates(data: SequenceData, indices, probabilities, symbol):
 
 def train_walk_forward(data: SequenceData, output: Path, *, n_folds: int = 5,
                        epochs: int = 20, batch_size: int = 64, patience: int = 4,
-                       seed: int = 7, symbol: str = "BTCUSDT", device: str | None = None):
+                       seed: int = 7, symbol: str = "BTCUSDT", device: str | None = None,
+                       width: int = 24, checkpoint_every: int = 100,
+                       config_sha256: str = "synthetic-test", max_steps: int | None = None):
     """Fit each fold using strictly earlier fit/stop/calibration blocks."""
     from msd.research.sequence_model import SequenceModel, barrier_loss
     torch = _torch()
     _dev_guard(data)
     seed_everything(seed)
+    signal.signal(signal.SIGUSR1, _request_checkpoint)
+    signal.signal(signal.SIGTERM, _request_checkpoint)
     output = Path(output)
     output.mkdir(parents=True, exist_ok=True)
     selected_device = device or ("cuda" if torch.cuda.is_available() else "cpu")
@@ -121,19 +140,52 @@ def train_walk_forward(data: SequenceData, output: Path, *, n_folds: int = 5,
         cal_idx = cal_idx[data.anchors.label_end_ts.iloc[cal_idx].lt(cutoff).to_numpy()]
         if not len(cal_idx):
             continue
-        model = SequenceModel(data.dense.shape[1]).to(selected_device)
+        torch.manual_seed(seed + fold)
+        model = SequenceModel(data.dense.shape[1], width=width).to(selected_device)
         optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3)
         stop_batch = _take(data, early_idx, selected_device)
         best_loss, best_state, stale = float("inf"), None, 0
-        for epoch in range(epochs):
+        fold_output = output / f"fold_{fold:02d}"
+        fold_output.mkdir(exist_ok=True)
+        checkpoint_path = fold_output / "resume.pt"
+        first_epoch, first_batch, step = 0, 0, 0
+        if checkpoint_path.exists():
+            state = torch.load(checkpoint_path, map_location=selected_device, weights_only=False)
+            if state["config_sha256"] != config_sha256 or state["seed"] != seed:
+                raise ValueError("Checkpoint config/seed mismatch")
+            model.load_state_dict(state["model"])
+            optimizer.load_state_dict(state["optimizer"])
+            best_loss, best_state, stale = state["best_loss"], state["best_state"], state["stale"]
+            first_epoch, first_batch, step = state["epoch"], state["batch"], state["step"]
+        def save_progress(next_epoch, next_batch):
+            state = {"config_sha256": config_sha256, "seed": seed, "model": model.state_dict(),
+                     "optimizer": optimizer.state_dict(), "best_loss": best_loss,
+                     "best_state": best_state, "stale": stale, "epoch": next_epoch,
+                     "batch": next_batch, "step": step}
+            temporary = checkpoint_path.with_suffix(".partial")
+            torch.save(state, temporary)
+            os.replace(temporary, checkpoint_path)
+        for epoch in range(first_epoch, epochs):
             model.train()
-            order = np.random.permutation(fit_idx)
-            for batch_idx in np.array_split(order, max(1, int(np.ceil(len(order) / batch_size)))):
+            order = np.random.default_rng(seed + fold * 10000 + epoch).permutation(fit_idx)
+            batches = np.array_split(order, max(1, int(np.ceil(len(order) / batch_size))))
+            for batch_number, batch_idx in enumerate(batches):
+                if epoch == first_epoch and batch_number < first_batch:
+                    continue
                 windows, dense, p0, target, mask = _take(data, batch_idx, selected_device)
                 optimizer.zero_grad(set_to_none=True)
                 loss = barrier_loss(model(windows, dense, p0), target, mask)
                 loss.backward()
                 optimizer.step()
+                step += 1
+                if step % checkpoint_every == 0:
+                    save_progress(epoch, batch_number + 1)
+                if _STOP_REQUESTED:
+                    save_progress(epoch, batch_number + 1)
+                    raise SystemExit(99)
+                if max_steps is not None and step >= max_steps:
+                    save_progress(epoch, batch_number + 1)
+                    return []
             model.eval()
             with torch.no_grad():
                 windows, dense, p0, target, mask = stop_batch
@@ -145,7 +197,9 @@ def train_walk_forward(data: SequenceData, output: Path, *, n_folds: int = 5,
             else:
                 stale += 1
                 if stale >= patience:
+                    save_progress(epoch + 1, 0)
                     break
+            save_progress(epoch + 1, 0)
         model.load_state_dict(best_state)
         def predict(ix):
             model.eval()
@@ -161,19 +215,21 @@ def train_walk_forward(data: SequenceData, output: Path, *, n_folds: int = 5,
         calibrator.fit(raw_cal[usable], data.target[cal_idx][usable])
         raw_test = predict(test_idx)
         calibrated = calibrator.transform(raw_test.ravel()).reshape(raw_test.shape)
-        candidates = _candidates(data, test_idx, calibrated, symbol)
+        candidates = _candidates(data, test_idx, calibrated, symbol, config_sha256, fold, seed)
         signals = decision.choose(candidates) if len(candidates) else candidates
-        fold_output = output / f"fold_{fold:02d}"
         checkpoint = {"state_dict": best_state, "feature_names": data.feature_names,
+                      "config_sha256": config_sha256,
                       "calibration_x": calibrator.X_thresholds_.tolist(),
                       "calibration_y": calibrator.y_thresholds_.tolist(),
                       "seed": seed, "epoch": epoch, "best_early_loss": best_loss}
         fold_output.mkdir(exist_ok=True)
         torch.save(checkpoint, fold_output / "model.pt")
+        candidates.to_parquet(fold_output / "oof.parquet", index=False)
         card = report_card.report("sequence_cnn", "dev", signals, candidates, [],
                                   output=fold_output)
         (fold_output / "metrics.json").write_text(json.dumps({"fit": len(fit_idx),
             "early": len(early_idx), "calibration": len(cal_idx), "test": len(test_idx),
+            "config_sha256": config_sha256, "seed": seed, "fold": fold,
             "best_early_loss": best_loss, "brier_skill_vs_p0": card["pooled"]["brier_skill_vs_p0"]}, indent=2))
         cards.append(card)
     if not cards:
@@ -184,35 +240,61 @@ def train_walk_forward(data: SequenceData, output: Path, *, n_folds: int = 5,
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-root", type=Path, required=True)
+    parser.add_argument("--config", type=Path, default=Path("hpc/roihu/sequence/configs/dev_v1.json"))
     parser.add_argument("--symbol", default="BTCUSDT")
-    parser.add_argument("--start", required=True)
-    parser.add_argument("--end", required=True, help="exclusive UTC end, at most 2023-01-01")
+    parser.add_argument("--seed", type=int)
+    parser.add_argument("--start")
+    parser.add_argument("--end", help="exclusive UTC end, at most 2023-01-01")
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--epochs", type=int, default=20)
-    parser.add_argument("--seed", type=int, default=7)
+    parser.add_argument("--smoke", action="store_true", help="two 2021 months, one epoch, tiny CNN")
     args = parser.parse_args()
-    start = pd.Timestamp(args.start, tz="UTC")
-    end = pd.Timestamp(args.end, tz="UTC")
+    raw_config = args.config.read_bytes()
+    config_sha256 = hashlib.sha256(raw_config).hexdigest()
+    config = json.loads(raw_config)
+    if config.get("period") != "dev" or args.symbol not in config["symbols"]:
+        parser.error("Configuration must be DEV and include the symbol")
+    if args.seed is not None and args.seed not in config["seeds"]:
+        parser.error("Seed must be listed in the config")
+    seed = args.seed if args.seed is not None else config["seeds"][0]
+    start = pd.Timestamp(args.start or config["starts"][args.symbol], tz="UTC")
+    end = pd.Timestamp(args.end or config["end_exclusive"], tz="UTC")
     if end > DEV_END or start >= end:
         parser.error("Only DEV dates through 2022-12-31 are allowed")
+    if args.smoke:
+        start, end = pd.Timestamp("2021-01-01", tz="UTC"), pd.Timestamp("2021-03-01", tz="UTC")
     root = args.data_root
     months = pd.period_range(start.tz_localize(None).to_period("M"),
                              (end - pd.Timedelta(nanoseconds=1)).tz_localize(None).to_period("M"), freq="M")
     # Extra preceding months supply the 4h/1h warmup. Read only DEV files.
-    warmup = (start - pd.Timedelta(days=12)).to_period("M")
+    warmup = (start - pd.Timedelta(days=12)).tz_localize(None).to_period("M")
     months = pd.period_range(warmup, months[-1], freq="M")
+    if start < pd.Timestamp(SYMBOL_START[args.symbol]):
+        parser.error(f"{args.symbol} cannot start before {SYMBOL_START[args.symbol]}")
     def load(folder):
         frames = [pd.read_parquet(folder / f"{m}.parquet") for m in months if (folder / f"{m}.parquet").exists()]
         if not frames:
             raise FileNotFoundError(folder)
         return pd.concat(frames, ignore_index=True)
-    bars = {tf: load((root / "bars/binance_spot" if tf == "1m" else root / "derived" / f"bars_{tf}") / args.symbol)
-            for tf in ("1m", "15m", "1h", "4h")}
+    bars = {"1m": load_executable_1m(args.symbol, start - pd.Timedelta(days=12),
+                                     end - pd.Timedelta(minutes=1), root)}
+    bars.update({tf: load(root / "derived" / f"bars_{tf}" / args.symbol)
+                 for tf in ("15m", "1h", "4h")})
     features = load(root / "features" / args.symbol)
     labels = load(root / "labels" / args.symbol)
     labels = labels[(pd.to_datetime(labels.ts, utc=True) >= start) & (pd.to_datetime(labels.ts, utc=True) < end)]
+    if args.smoke:
+        timestamps = pd.to_datetime(labels.ts, utc=True)
+        labels = labels[timestamps.dt.minute.eq(0) & timestamps.dt.hour.isin((0, 12))]
     data = build_windows(bars, features, labels)
-    train_walk_forward(data, args.output, epochs=args.epochs, seed=args.seed, symbol=args.symbol)
+    (args.output / "config_sha256.txt").parent.mkdir(parents=True, exist_ok=True)
+    (args.output / "config_sha256.txt").write_text(config_sha256 + "\n")
+    train_walk_forward(data, args.output, epochs=1 if args.smoke else config["epochs"],
+                       n_folds=3 if args.smoke else config["folds"],
+                       batch_size=16 if args.smoke else config["batch_size"],
+                       patience=config["patience"], seed=seed, symbol=args.symbol,
+                       width=8 if args.smoke else config["width"],
+                       checkpoint_every=1 if args.smoke else config["checkpoint_every_steps"],
+                       config_sha256=config_sha256)
 
 
 if __name__ == "__main__":

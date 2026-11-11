@@ -67,3 +67,7 @@ Purging: training rows whose label window overlaps the evaluation fold are dropp
   is frozen.
 - Method definitions (trigger rules, natural levels) are written in their module docstring
   **before** their first test evaluation.
+
+## Recorded deviations
+
+- 2026-11-11: label kernel charges XAUUSD the index financing rate (0.02%/night) instead of the gold/FX 0.015%/night stated above. This overstates cost by 0.005%/night (conservative); labels are not regenerated for it.

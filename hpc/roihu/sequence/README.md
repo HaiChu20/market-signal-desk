@@ -1,20 +1,105 @@
-# Sequence CNN on Roihu
+# Sequence CNN DEV submission v1
 
-Scripts only; these commands are for a synced Roihu checkout with existing
-`data/bars/binance_spot`, `data/derived/bars_{15m,1h,4h}`, `data/features`,
-and `data/labels` inputs. The loader currently uses Binance spot 1m bars, so
-submit BTCUSDT/ETHUSDT tasks only until a 1m source loader is added for indices.
-The template requests one GH200 GPU per array task on `gpumedium` (aarch64,
-RHEL 9). Confirm current CSC module names and Slurm GPU syntax before use.
+This package trains only on development labels ending before 2023-01-01. It
+writes purged walk-forward out-of-fold barrier predictions, one GPU job for
+each symbol and seed, then grades the fetched predictions on the laptop.
+The default submission uses all five symbols in the
+[config](configs/dev_v1.json), with three seeds each. Production4 completed
+the higher-timeframe inputs for all five. The only absent inventory paths are
+eight BTC/ETH 2017-12 derived/feature warm-up files, before their 2018 start.
+The builder discards initial anchors without enough history.
+
+## Laptop: ship code and the exact present inputs
+
+Run from the project checkout with the production `data/` directory. Only the
+CSC project **number** in the first command needs changing. `ship.sh` makes
+`bundle/files.txt` (rsync paths), `bundle/manifest.tsv` (path and byte size),
+`bundle/missing.txt`, `bundle/coverage.json`, and `bundle/stale.txt`; it prints
+the transfer size. It sends code and only
+those listed files to project scratch on Roihu-GPU.
 
 ```bash
-cd /path/to/market-signal-desk
-bash hpc/roihu/sequence/setup.sh
-mkdir -p logs reports/sequence
-START=2021-01-01 END=2022-01-01 OUTPUT_ROOT=reports/sequence \
-  sbatch --array=0-1 hpc/roihu/sequence/train.sbatch
+export CSC_PROJECT=2001234
+uv sync
+bash hpc/roihu/sequence/ship.sh
 ```
 
-`END` is exclusive and must be at most `2023-01-01`. Each output directory
-contains fold checkpoints, early-stop loss, calibration thresholds and a DEV
-report card. No Test or Final data is read by the CLI.
+The five-symbol inventory is **2,443 files, 8,776,100,580 bytes (8.17 GiB)**,
+with eight missing pre-2018 warm-up files. `ship.sh` refuses any missing DEV
+input, absent production4 completion marker, stale production4 output, or DEV
+year with less than 80% anchor coverage. It checks the per-symbol chain-done
+marker and each `data/tmp/stage9p4_{SYM}_{YEAR}.json` result. Since that result
+is written *after* the year's bars and labels, the freshness lower bound is
+its mtime minus the recorded `runtime_seconds` and a 60-second clock margin.
+Raw source bars are historical inputs and are exempt from this derived-output
+freshness check.
+
+Per-year anchor coverage (eligible resolved label anchors retained by the
+time, ATR and window-history gates):
+
+| Symbol | DEV years | Coverage by year |
+|---|---|---|
+| BTCUSDT | 2018–2022 | 97.2%, 100%, 100%, 100%, 100% |
+| ETHUSDT | 2018–2022 | 97.2%, 100%, 100%, 100%, 100% |
+| USATECHIDXUSD | 2019–2022 | 99.9%, 100%, 100%, 100% |
+| USA500IDXUSD | 2019–2022 | 99.9%, 100%, 100%, 100% |
+| XAUUSD | 2008–2022 | 96.2% in 2008, 100% in every year 2009–2022 |
+
+For Allas instead of
+rsync, upload the same `bundle/files.txt` paths under the same `data/` relative
+paths; see [CSC object storage](https://docs.csc.fi/data/Allas/).
+
+## Roihu-GPU: setup and submit
+
+```bash
+ssh roihu-gpu.csc.fi "cd /scratch/project_${CSC_PROJECT}/${USER}/market-signal-desk && bash hpc/roihu/sequence/setup.sh && CSC_PROJECT=${CSC_PROJECT} bash hpc/roihu/sequence/submit.sh"
+```
+
+`setup.sh` loads CSC's CUDA-enabled `python-pytorch/2.13`, makes a system-site
+virtual environment and installs this package. Each array task requests one
+GH200 GPU on `gpumedium`, 16 CPUs, 64 GiB, and 24 hours. The job checks that
+CUDA is available before loading data. Slurm sends `USR1` three minutes before
+timeout; the trainer checkpoints and the script requeues. The default checkpoint
+interval is 100 optimizer steps. A requeued task resumes the exact fold, epoch,
+and batch order. Change `SYMBOLS` and `SEEDS` as comma-separated environment
+variables before `submit.sh`; every seed must appear in the JSON config.
+
+## Monitor, fetch, grade
+
+```bash
+ssh roihu-gpu.csc.fi "squeue -u ${USER}; sacct -u ${USER} --format=JobID,State,Elapsed,ExitCode | tail"
+bash hpc/roihu/sequence/fetch.sh
+uv run python -m msd.research.grade_sequence --input reports/sequence --data-root data
+```
+
+Fetch after the array is complete. The grade CLI writes `grade/summary.json`
+and a DEV report card for each symbol/seed/config hash. It applies
+`decision.choose`, then the one-position gate (`label_end_ts + 1 minute`),
+then the existing random-direction benchmark. Treat smoke or DEV numbers as
+research diagnostics; the protocol grades only the later held-out Test period.
+The output includes per-fold `oof.parquet`, `model.pt`, `resume.pt`,
+`metrics.json`, and `config_sha256.txt`.
+
+## Local CPU smoke
+
+The following reads two 2021 months, selects two anchors per day, trains one
+epoch with a width-eight CNN, and leaves outputs under `data/tmp/sequence-smoke/`.
+
+```bash
+uv sync --extra gpu
+uv run python -m msd.research.sequence_train --data-root data --symbol BTCUSDT --output data/tmp/sequence-smoke/btc --smoke
+uv run python -m msd.research.sequence_train --data-root data --symbol USATECHIDXUSD --output data/tmp/sequence-smoke/nq --smoke
+uv run python -m msd.research.grade_sequence --input data/tmp/sequence-smoke --data-root data
+```
+
+## CSC settings and verification status
+
+[CSC's Roihu job script guide](https://docs.csc.fi/computing/running/creating-job-scripts-roihu/)
+confirms `gpumedium` and `--gres=gpu:gh200:1`. [CSC's PyTorch page](https://docs.csc.fi/apps/pytorch/)
+confirms `python-pytorch/2.13` on Roihu-GPU and its CUDA support.
+[Partition limits](https://docs.csc.fi/computing/running/batch-job-partitions/)
+allow 36 hours and 212 GiB per reserved GPU on `gpumedium`.
+**Unverified on Roihu:** the exact Python minor version and whether its module
+wrapper supports the `venv --system-site-packages` path in `setup.sh`, the
+project scratch quota, and the requeue signal delivery. The script checks Python
+>=3.12 and CUDA before training. No Roihu connection or job was made here.
