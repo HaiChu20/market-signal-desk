@@ -43,6 +43,7 @@ START = {"USATECHIDXUSD": date(2018, 12, 16),
 DTYPE = np.dtype([("ms", ">u4"), ("ask", ">u4"), ("bid", ">u4"),
                   ("ask_size", ">f4"), ("bid_size", ">f4")])
 HOST = "datafeed.dukascopy.com"
+REDIRECT_WAIT = 65
 _LOCAL = threading.local()
 
 
@@ -215,7 +216,9 @@ def fetch_hour(symbol: str, hour: datetime) -> tuple[datetime, Path | None, str]
         except Exception as error:
             last = error
         if attempt < 4:
-            time.sleep(min(60, 2 ** (attempt + 1)) + random.random())
+            # A 301 means DNS gave the HTTPS-only cloud proxy (60 s TTL); wait for the HTTP origin.
+            redirected = isinstance(last, OSError) and str(last).startswith("HTTP 301")
+            time.sleep((REDIRECT_WAIT if redirected else min(60, 2 ** (attempt + 1))) + random.random())
     raise RuntimeError(f"{symbol} {hour}: {type(last).__name__}: {last}")
 
 

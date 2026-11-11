@@ -33,6 +33,8 @@ BASE = "https://public.bybit.com/trading"
 # MSD_BYBIT_SYMBOLS lets BTC and ETH run as separate processes (one CPU core each).
 SYMBOLS = tuple(os.environ.get("MSD_BYBIT_SYMBOLS", "BTCUSDT,ETHUSDT").split(","))
 START = date(2020, 3, 25)
+# Parallel day downloads per process; one stream reaches only ~3 MB/s from public.bybit.com.
+THREADS = int(os.environ.get("MSD_BYBIT_THREADS", "2"))
 
 
 def url(symbol: str, day: date) -> str:
@@ -176,13 +178,25 @@ def log_missing(symbol: str, day: date, reason: str) -> None:
         writer.writerow([datetime.now(timezone.utc).isoformat(), symbol, day.isoformat(), reason])
 
 
+# Back off on CDN rate limiting instead of marking days missing: on 2026-11-11 a 403 burst
+# (after raising concurrency) lasted ~7 minutes and the short archive retries gave up.
+BLOCK_WAITS = (60, 120, 300, 600, 900)
+
+
 def fetch_day(symbol: str, day: date) -> tuple[date, Path | None, str]:
     target = RAW / symbol / f"{symbol}{day:%Y-%m-%d}.csv.gz"
-    expected = remote_size(url(symbol, day))
-    if expected is None:
-        return day, None, "HTTP 404"
-    digest = stream_archive(url(symbol, day), target, expected)
-    return day, target if digest else None, f"{expected} bytes"
+    for wait in (*BLOCK_WAITS, None):
+        try:
+            expected = remote_size(url(symbol, day))
+            if expected is None:
+                return day, None, "HTTP 404"
+            digest = stream_archive(url(symbol, day), target, expected)
+            return day, target if digest else None, f"{expected} bytes"
+        except Exception as error:
+            if wait is None or not any(code in str(error) for code in ("HTTP Error 403", "HTTP Error 429")):
+                raise
+            print(f"rate-limited on {symbol} {day} ({error}); retrying in {wait}s", flush=True)
+            time.sleep(wait)
 
 
 def fetch_no_raw_day(symbol: str, day: date) -> tuple[date, pd.DataFrame | None, dict | None, str]:
@@ -269,7 +283,7 @@ def run_no_raw(end: date | None = None) -> None:
             if not pending:
                 continue
             frames, updates = [], {}
-            with ThreadPoolExecutor(max_workers=2) as pool:
+            with ThreadPoolExecutor(max_workers=THREADS) as pool:
                 futures = {pool.submit(fetch_no_raw_day, symbol, day): day for day in pending}
                 for future in as_completed(futures):
                     day = futures[future]
@@ -308,7 +322,7 @@ def run(end: date | None = None) -> None:
             for day in month_days:
                 if day not in available:
                     log_missing(symbol, day, "absent from listing")
-            with ThreadPoolExecutor(max_workers=2) as pool:
+            with ThreadPoolExecutor(max_workers=THREADS) as pool:
                 futures = {pool.submit(fetch_day, symbol, day): day for day in jobs}
                 for future in as_completed(futures):
                     day = futures[future]
