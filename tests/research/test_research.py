@@ -120,3 +120,58 @@ def test_dev_excludes_labels_ending_in_test_period():
     out,audit=assemble(e,f,('1m_return_bars_5',),return_audit=True)
     assert len(out)==3
     assert audit['label_extends_beyond_dev']==1
+
+
+def test_eth_random_direction_uses_pipeline_spread_and_crypto_costs(monkeypatch, tmp_path):
+    import sys
+    from msd.processing import pipeline
+    from msd.processing.labels import first_hit_reference
+    from msd.research import benchmark, sequence_data
+
+    times = pd.date_range('2022-06-12 23:55', periods=68, freq='min', tz='UTC')
+    raw = pd.DataFrame({'ts': times})
+    for side in ('bid', 'ask'):
+        for field in 'ohlc':
+            raw[f'{side}_{field}'] = 100.
+    reference = pd.DataFrame({'ts': [times[0]], 'bid_o': [99.], 'ask_o': [101.]})
+    monkeypatch.setattr(pipeline, 'load', lambda *args, **kwargs: reference)
+    executable = pipeline._modelled_spread(raw, 'ETHUSDT')
+    assert np.allclose(executable.ask_c - executable.bid_c, 2.)
+    monkeypatch.setattr(sequence_data, 'load_executable_1m', lambda *args: executable)
+    monkeypatch.setitem(sys.modules, 'msd._msd_kernels', None)
+    captured = []
+    def checked_kernel(bars, entry_index, side, entry_price, sl, tp, *args, **kwargs):
+        result = first_hit_reference(bars, entry_index, side, entry_price, sl, tp, *args, **kwargs)
+        captured.append((bars.copy(), kwargs, result))
+        return result
+    monkeypatch.setattr(benchmark, 'first_hit_reference', checked_kernel)
+    signal = pd.DataFrame({'ts': [times[0]], 'sym': ['ETHUSDT'], 'side': [1],
+                           'price': [100.], 'sl': [90.], 'tp': [110.],
+                           'deadline_ts': [times[-1]], 'label_end_ts': [times[-1]],
+                           'spread_R': [.2], 'planned_risk': [10.], 'net_R': [0.]})
+    _, count, _ = benchmark.random_direction(signal, tmp_path, seeds=3)
+    assert count == 1 and len(captured) == 1
+    used_bars, options, observed = captured[0]
+    assert options['financing_per_night'] == .0006
+    assert options['instrument_class'] == 'crypto'
+    np.testing.assert_allclose(used_bars.ask_c - used_bars.bid_c, 2.)
+    expected = first_hit_reference(executable, 0, -1, 100., 110., 90.,
+        delay_bars=2, financing_per_night=.0006, deadline_ts=times[-1],
+        instrument_class='crypto', detailed=True)
+    assert observed[3] == pytest.approx(expected[3])
+    assert observed[6] == 1  # Sunday-to-Monday UTC midnight
+    assert observed[5] == pytest.approx(99.)  # short opens at modeled bid
+    assert observed[4] - observed[3] == pytest.approx(.0006 * observed[5] / observed[8])
+
+
+def test_shared_gate_allows_next_entry_at_exit_plus_one_minute():
+    from msd.research.gating import gate_open_signals
+    start = pd.Timestamp('2021-01-01 00:00', tz='UTC')
+    signals = pd.DataFrame({'known_at': [start, start + pd.Timedelta(minutes=1),
+                                               start + pd.Timedelta(minutes=5),
+                                               start + pd.Timedelta(minutes=6)],
+                            'label_end_ts': [start + pd.Timedelta(minutes=5)] * 4,
+                            'sym': ['BTCUSDT', 'ETHUSDT', 'BTCUSDT', 'BTCUSDT'],
+                            'event_key': ['a', 'b', 'c', 'd']})
+    chosen = gate_open_signals(signals)
+    assert chosen.event_key.tolist() == ['a', 'b', 'd']
