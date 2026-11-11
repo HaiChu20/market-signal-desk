@@ -92,9 +92,11 @@ def _finalize_dukascopy_symbol(symbol: str) -> None:
 
 def run(task_name: str) -> None:
     if task_name == "dukascopy":
+        # MSD_DUKA_SYMBOLS limits a resume to unfinished symbols (skips a long re-verification pass).
+        order = tuple(os.environ.get("MSD_DUKA_SYMBOLS", ",".join(DUKASCOPY_ORDER)).split(","))
         tasks = [(f"Dukascopy {symbol}", lambda symbol=symbol: download_dukas(
                     symbol, DUKASCOPY_START[symbol], datetime.now(timezone.utc).date(), workers=int(os.environ.get("MSD_DUKA_WORKERS", "4"))))
-                 for symbol in DUKASCOPY_ORDER]
+                 for symbol in order]
     elif task_name == "histdata":
         tasks = [(f"HistData {symbol}", lambda symbol=symbol: download_histdata(symbol, date(2010, 11, 1))) for symbol in ("GRXEUR", "WTIUSD")]
     elif task_name == "funding": tasks = [("Binance funding", download_funding)]

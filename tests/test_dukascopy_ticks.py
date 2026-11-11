@@ -163,3 +163,25 @@ def test_tick_workers_env(monkeypatch):
     assert ticks.tick_workers() == 2
     monkeypatch.setenv("MSD_TICK_WORKERS", "4")
     assert ticks.tick_workers() == 4
+
+
+def test_redirect_waits_out_dns_ttl_then_succeeds(monkeypatch, tmp_path):
+    monkeypatch.setattr(ticks, "RAW", tmp_path / "raw")
+    monkeypatch.setattr(ticks.shutil, "disk_usage", lambda _: type("Space", (), {"free": 100 * 1024**3})())
+    waits = []
+    monkeypatch.setattr(ticks.time, "sleep", waits.append)
+    ticks._disconnect()
+    made = []
+    class Redirected(Connection):
+        def getresponse(self):
+            response = Response(b"")
+            response.status = 301
+            return response
+    def factory(host, timeout):
+        conn = Redirected(b"") if not made else Connection(sample())
+        made.append(conn)
+        return conn
+    monkeypatch.setattr(ticks.http.client, "HTTPConnection", factory)
+    assert ticks.fetch_hour("USA500IDXUSD", HOUR)[1].exists()
+    assert len(made) == 2 and len(waits) == 1 and waits[0] >= ticks.REDIRECT_WAIT
+    ticks._disconnect()

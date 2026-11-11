@@ -109,6 +109,7 @@ def build_flow_features(primary: pd.DataFrame, *, spot: pd.DataFrame | None = No
     base["known_at"] = base.ts + pd.Timedelta(minutes=1)
     if base.known_at.duplicated().any():
         raise ValueError("primary bars must have unique known_at timestamps")
+    primary_known_at = pd.DatetimeIndex(base.known_at)
     if "close" in base:
         close = base.close
     elif {"bid_c", "ask_c"}.issubset(base.columns):
@@ -121,6 +122,16 @@ def build_flow_features(primary: pd.DataFrame, *, spot: pd.DataFrame | None = No
         close = pd.Series(np.nan, index=base.index, dtype="float64")
     grid = base[["ts", "known_at"]].copy()
     grid["_primary_close"] = close.to_numpy(dtype=np.float64)
+    # Quote-less minutes are absent from Dukascopy's primary bars. Tick flow is
+    # therefore calculated on a complete clock and sampled back to primary rows.
+    # Crypto keeps its original primary grid unchanged.
+    tick_clock = "ticks" in (covered_minutes or {})
+    if tick_clock and len(grid):
+        clock_known_at = pd.date_range(grid.known_at.min(), grid.known_at.max(), freq="min", tz="UTC")
+        clock = pd.DataFrame({"known_at": clock_known_at})
+        clock["ts"] = clock.known_at - pd.Timedelta(minutes=1)
+        grid = clock.merge(grid[["known_at", "_primary_close"]], on="known_at", how="left",
+                           validate="one_to_one", sort=True)
 
     source_frames = {"spot": spot, "perp": perp, "bybit": bybit}
     covered_minutes = covered_minutes or {}
@@ -223,7 +234,10 @@ def build_flow_features(primary: pd.DataFrame, *, spot: pd.DataFrame | None = No
     for column in columns:
         if column not in grid:
             grid[column] = np.nan
-    return grid[columns]
+    result = grid[columns]
+    if tick_clock:
+        result = result.loc[result.known_at.isin(primary_known_at)].reset_index(drop=True)
+    return result
 
 
 def join_by_known_at(features: pd.DataFrame, flow_features: pd.DataFrame,
@@ -241,8 +255,9 @@ def join_by_known_at(features: pd.DataFrame, flow_features: pd.DataFrame,
                            suffixes=("", "_flow"))
     if depth_path is not None:
         if depth_path.is_file():
-            depth = pd.read_parquet(depth_path).drop(columns=["ts", "snapshot_ts"], errors="ignore")
+            depth = pd.read_parquet(depth_path)
             depth = depth.rename(columns={"coverage": "depth_coverage"})
+            depth = depth[[column for column in ("known_at", *DEPTH_COLUMNS) if column in depth.columns]]
             depth["known_at"] = pd.to_datetime(depth.known_at, utc=True).astype("datetime64[ns, UTC]")
             joined = pd.merge_asof(joined.sort_values("known_at"), depth.sort_values("known_at"),
                                    on="known_at", direction="backward", tolerance=pd.Timedelta(minutes=1),
@@ -301,13 +316,14 @@ def _file_coverage(symbol: str, month: str, primary: pd.DataFrame, crypto: bool)
                 for row in csv.reader(stream):
                     if len(row) >= 4 and row[1] == symbol and "empty archive" in row[3]:
                         empty.add(pd.Timestamp(row[2]).floor("h"))
-        hours = pd.DatetimeIndex(times.dt.floor("h").unique())
+        clock_ts = pd.date_range(times.min().floor("min"), times.max().floor("min"), freq="min", tz="UTC")
+        hours = pd.DatetimeIndex(clock_ts.floor("h").unique())
         present = set(empty)
         for hour in hours:
             path = raw / hour.strftime("%Y/%m/%d/%Hh_ticks.bi5")
             if path.is_file() and path.with_suffix(".bi5.sha256").is_file():
                 present.add(hour)
-        result["ticks"] = pd.DatetimeIndex(known[times.dt.floor("h").isin(present)])
+        result["ticks"] = pd.DatetimeIndex(clock_ts[clock_ts.floor("h").isin(present)] + pd.Timedelta(minutes=1))
     return result
 
 

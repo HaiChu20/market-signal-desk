@@ -121,6 +121,23 @@ def test_crypto_cfd_scale_is_cross_checked_against_binance_within_two_percent():
     assert date(2024, 6, 1) not in _download_days("XAUUSD", date(2024, 6, 1), date(2024, 6, 2), date(2024, 6, 1))
 
 
+def test_calibration_sample_moves_inside_shorter_reference(tmp_path, monkeypatch):
+    from msd.data.dukascopy import _reference_sample_day, infer_price_scale
+    monkeypatch.chdir(tmp_path)
+    root = tmp_path / "data/bars/histdata/WTIUSD"
+    root.mkdir(parents=True)
+    for month, stamps in (("2023-11", ["2023-11-29T10:00Z", "2023-11-30T10:00Z"]), ("2023-12", ["2023-12-01T10:00Z"])):
+        pd.DataFrame({"ts": pd.to_datetime(stamps), "bid_c": 76.0}).to_parquet(root / f"{month}.parquet")
+    # The reference ends on 2023-12-01, before the default 2024 sample day.
+    assert _reference_sample_day("LIGHTCMDUSD", date(2024, 6, 12)) == date(2023, 12, 1)
+    assert _reference_sample_day("LIGHTCMDUSD", date(2023, 11, 30)) == date(2023, 11, 30)
+    assert _reference_sample_day("LIGHTCMDUSD", date(2023, 12, 25)) == date(2023, 12, 1)
+    raw = lzma.compress(struct.pack(">5if", 0, 78_438, 78_450, 78_420, 78_440, 1.))
+    with pytest.raises(ValueError, match="ambiguous"):
+        infer_price_scale(raw, "LIGHTCMDUSD")
+    assert infer_price_scale(raw, "LIGHTCMDUSD", reference_price=78.4) == 1000
+
+
 def test_binance_crypto_scale_reference_uses_same_utc_day(tmp_path, monkeypatch):
     from msd.data.dukascopy import _binance_daily_reference
     monkeypatch.chdir(tmp_path)

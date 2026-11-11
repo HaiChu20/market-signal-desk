@@ -4,11 +4,11 @@ Coverage includes verified source files with no activity; unavailable source per
 
 | Year | Source flag | Covered rows | Total rows | Coverage |
 |---:|---|---:|---:|---:|
-| 2023 | `bybit_flow_coverage` | 0 | 278275 | 0.00% |
-| 2023 | `flow_coverage` | 275905 | 278275 | 99.15% |
-| 2023 | `perp_flow_coverage` | 0 | 278275 | 0.00% |
-| 2023 | `spot_flow_coverage` | 0 | 278275 | 0.00% |
-| 2023 | `tick_flow_coverage` | 275905 | 278275 | 99.15% |
+| 2023 | `bybit_flow_coverage` | 0 | 304558 | 0.00% |
+| 2023 | `flow_coverage` | 301894 | 304558 | 99.13% |
+| 2023 | `perp_flow_coverage` | 0 | 304558 | 0.00% |
+| 2023 | `spot_flow_coverage` | 0 | 304558 | 0.00% |
+| 2023 | `tick_flow_coverage` | 301894 | 304558 | 99.13% |
 | 2024 | `bybit_flow_coverage` | 0 | 335016 | 0.00% |
 | 2024 | `flow_coverage` | 334301 | 335016 | 99.79% |
 | 2024 | `perp_flow_coverage` | 0 | 335016 | 0.00% |
