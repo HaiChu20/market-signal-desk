@@ -54,12 +54,12 @@ def load_executable_1m(symbol: str, start, end, data_root: Path) -> pd.DataFrame
         # catalog dependency on the transferred Roihu bundle.
         source = "dukascopy" if symbol in {"USATECHIDXUSD", "USA500IDXUSD"} else None
         bars = load(symbol, left, end, source=source)
-    bars = _cash_era_only(bars, symbol)
-    bars = _adjusted_price_view(bars.sort_values("ts").reset_index(drop=True))
-    bars = _feature_label_bars(bars)
-    bars = _modelled_spread(bars, symbol)
-    if not bars.empty:
-        assert_executable_spread(bars, symbol)
+        bars = _cash_era_only(bars, symbol)
+        bars = _adjusted_price_view(bars.sort_values("ts").reset_index(drop=True))
+        bars = _feature_label_bars(bars)
+        bars = _modelled_spread(bars, symbol)
+        if not bars.empty:
+            assert_executable_spread(bars, symbol)
     return bars
 
 

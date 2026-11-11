@@ -3,21 +3,19 @@
 This package trains only on development labels ending before 2023-01-01. It
 writes purged walk-forward out-of-fold barrier predictions, one GPU job for
 each symbol and seed, then grades the fetched predictions on the laptop.
-The default submission uses BTCUSDT and USATECHIDXUSD, three seeds each. The
-[config](configs/dev_v1.json) includes all five supported symbols; set
-`SYMBOLS=BTCUSDT,USATECHIDXUSD,USA500IDXUSD,XAUUSD,ETHUSDT` for all five once
-the missing files in `bundle/missing.txt` have been produced. At packaging,
-USA500 lacked `derived/bars_4h/USA500IDXUSD/2019-11.parquet`; ETH had 183
-missing derived/feature/label files. The default BTC/NQ bundle has four
-missing BTC 2017-12 warm-up derived/feature files. Those precede the configured
-BTC start and the builder drops anchors without enough history.
+The default submission uses all five symbols in the
+[config](configs/dev_v1.json), with three seeds each. Production4 completed
+the higher-timeframe inputs for all five. The only absent inventory paths are
+eight BTC/ETH 2017-12 derived/feature warm-up files, before their 2018 start.
+The builder discards initial anchors without enough history.
 
 ## Laptop: ship code and the exact present inputs
 
 Run from the project checkout with the production `data/` directory. Only the
 CSC project **number** in the first command needs changing. `ship.sh` makes
 `bundle/files.txt` (rsync paths), `bundle/manifest.tsv` (path and byte size),
-and `bundle/missing.txt`; it prints the transfer size. It sends code and only
+`bundle/missing.txt`, `bundle/coverage.json`, and `bundle/stale.txt`; it prints
+the transfer size. It sends code and only
 those listed files to project scratch on Roihu-GPU.
 
 ```bash
@@ -26,9 +24,28 @@ uv sync
 bash hpc/roihu/sequence/ship.sh
 ```
 
-The current default two-symbol inventory is **654 files, 2,807,573,355 bytes
-(2.61 GiB)**. The full five-symbol inventory is 2,142 present files,
-7,110,463,526 bytes (6.62 GiB), with 309 missing paths. For Allas instead of
+The five-symbol inventory is **2,443 files, 8,776,100,580 bytes (8.17 GiB)**,
+with eight missing pre-2018 warm-up files. `ship.sh` refuses any missing DEV
+input, absent production4 completion marker, stale production4 output, or DEV
+year with less than 80% anchor coverage. It checks the per-symbol chain-done
+marker and each `data/tmp/stage9p4_{SYM}_{YEAR}.json` result. Since that result
+is written *after* the year's bars and labels, the freshness lower bound is
+its mtime minus the recorded `runtime_seconds` and a 60-second clock margin.
+Raw source bars are historical inputs and are exempt from this derived-output
+freshness check.
+
+Per-year anchor coverage (eligible resolved label anchors retained by the
+time, ATR and window-history gates):
+
+| Symbol | DEV years | Coverage by year |
+|---|---|---|
+| BTCUSDT | 2018–2022 | 97.2%, 100%, 100%, 100%, 100% |
+| ETHUSDT | 2018–2022 | 97.2%, 100%, 100%, 100%, 100% |
+| USATECHIDXUSD | 2019–2022 | 99.9%, 100%, 100%, 100% |
+| USA500IDXUSD | 2019–2022 | 99.9%, 100%, 100%, 100% |
+| XAUUSD | 2008–2022 | 96.2% in 2008, 100% in every year 2009–2022 |
+
+For Allas instead of
 rsync, upload the same `bundle/files.txt` paths under the same `data/` relative
 paths; see [CSC object storage](https://docs.csc.fi/data/Allas/).
 

@@ -2,7 +2,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/../../.."
 : "${CSC_PROJECT:?Set CSC_PROJECT to your CSC project number}"
-SYMBOLS=${SYMBOLS:-BTCUSDT,USATECHIDXUSD}
+SYMBOLS=${SYMBOLS:-BTCUSDT,USATECHIDXUSD,USA500IDXUSD,XAUUSD,ETHUSDT}
 SEEDS=${SEEDS:-7,17,27}
 IFS=, read -r -a symbols <<< "$SYMBOLS"
 IFS=, read -r -a seeds <<< "$SEEDS"

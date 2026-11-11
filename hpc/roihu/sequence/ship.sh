@@ -2,7 +2,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/../../.."
 : "${CSC_PROJECT:?Set CSC_PROJECT to your CSC project number}"
-SYMBOLS=${SYMBOLS:-BTCUSDT,USATECHIDXUSD}
+SYMBOLS=${SYMBOLS:-BTCUSDT,USATECHIDXUSD,USA500IDXUSD,XAUUSD,ETHUSDT}
 DATA_ROOT=${DATA_ROOT:-data}
 remote="roihu-gpu.csc.fi:/scratch/project_${CSC_PROJECT}/${USER}/market-signal-desk"
 ./.venv/bin/python hpc/roihu/sequence/make_bundle.py \
