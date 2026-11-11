@@ -85,7 +85,8 @@ def write_reports(root: Path) -> None:
         measurements.append(measured); hourly.extend(cost)
     SPREAD_CSV.parent.mkdir(parents=True, exist_ok=True)
     with SPREAD_CSV.open("w", newline="") as stream:
-        writer = csv.DictWriter(stream, fieldnames=["symbol", "timezone", "local_hour", "median_spread", "p95_spread", "rows"])
+        writer = csv.DictWriter(stream, fieldnames=["symbol", "timezone", "local_hour", "median_spread", "p95_spread", "rows"],
+                                lineterminator="\n")
         writer.writeheader(); writer.writerows(hourly)
     lines = ["# Stage 9 remaining-market preparation", "",
              "Quote windows and hourly costs are measured from the latest twelve complete local Dukascopy months. A no-quote window requires <5% minute occupancy on that local weekday. Session rules use these recurring windows and timezone conversion remains DST-aware. The hourly cost artifact contains the median and P95 executable `ask_o − bid_o`; labels continue to consume the actual bid/ask path.", "",
