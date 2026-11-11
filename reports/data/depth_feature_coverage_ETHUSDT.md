@@ -57,6 +57,6 @@ Each archive CSV has `timestamp`, `percentage` (−5 through −1 bid; +1 throug
 | 2026-10 | parsed parquet | 83,368 | 44,640 | 41,686 | 93.38% | 1,440 | 1,514 | 1,440 | 30.0 | 177391 |
 | 2026-11 | parsed parquet | 28,800 | 14,400 | 14,400 | 100.00% | 0 | 0 | 0 | 30.0 | 48 |
 
-Total: **3,969,952** snapshots; **2,006,552/2,030,400** minutes covered (**98.83%**). Build runtime: **8.5 s**.
+Total: **3,969,952** snapshots; **2,006,552/2,030,400** minutes covered (**98.83%**). Build runtime: **6.2 s**.
 
 The final month is partial; output stops at the close of the last downloaded source day (2026-11-10).
