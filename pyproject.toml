@@ -11,6 +11,9 @@ dependencies = [
     "websockets>=15,<17",
 ]
 
+[project.optional-dependencies]
+gpu = ["torch"]
+
 [dependency-groups]
 dev = [
     "maturin>=1.16.0",

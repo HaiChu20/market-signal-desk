@@ -23,6 +23,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 
 SCALES = {"USA500IDXUSD": 1000, "USATECHIDXUSD": 1000, "BTCUSD": 10, "XAUUSD": 1000}
+CRYPTO_SYMBOLS = frozenset({"BTCUSD", "ETHUSD"})
 RANGES = {"USA500IDXUSD": (100, 100000), "USATECHIDXUSD": (100, 1000000), "BTCUSD": (1, 10000000), "XAUUSD": (200, 10000)}
 # Plausibility bands are calibration constraints, not assumed point scales.
 PRICE_BANDS = {
@@ -125,8 +126,8 @@ def infer_price_scale(raw: bytes, symbol: str, reference_price: float | None = N
     if reference_price is not None:
         candidates = [(abs(np.log((median / 10**power) / reference_price)), 10**power) for power in range(0, 8)]
         error, scale = min(candidates)
-        if error > np.log(1.25):
-            raise ValueError(f"No plausible point scale for {symbol} relative to reference")
+        if error > np.log(1.02):
+            raise ValueError(f"No point scale for {symbol} matches reference within 2%")
         return int(scale)
     if symbol not in PRICE_BANDS:
         raise ValueError(f"No calibrated range configured for {symbol}")
@@ -137,11 +138,56 @@ def infer_price_scale(raw: bytes, symbol: str, reference_price: float | None = N
     return matches[0]
 
 
+def _binance_daily_reference(symbol: str, day: date) -> float:
+    """Median Binance spot close for the UTC day, used to calibrate crypto CFDs."""
+    spot_symbol = symbol.removesuffix("USD") + "USDT"
+    path = Path("data/bars/binance_spot") / spot_symbol / f"{day:%Y-%m}.parquet"
+    if not path.exists():
+        raise FileNotFoundError(f"Missing Binance calibration month for {symbol}: {path}")
+    frame = pd.read_parquet(path, columns=["ts", "bid_c"])
+    mask = frame.ts.dt.strftime("%Y-%m-%d").eq(day.isoformat())
+    prices = frame.loc[mask, "bid_c"].to_numpy(dtype=float)
+    if not len(prices) or not np.isfinite(prices).all():
+        raise ValueError(f"No valid Binance spot closes for {spot_symbol} on {day}")
+    return float(np.median(prices))
+
+
+def _reference_source_path(symbol: str) -> Path:
+    aliases={"USATECHIDXUSD":"NSXUSD","USA500IDXUSD":"SPXUSD",
+             "DEUIDXEUR":"GRXEUR","LIGHTCMDUSD":"WTIUSD"}
+    return Path("data/bars/histdata")/aliases.get(symbol,symbol)
+
+
+def _existing_daily_reference(symbol: str, day: date) -> float | None:
+    """Use a local independent HistData close when one exists for this epic."""
+    path=_reference_source_path(symbol)/f"{day:%Y-%m}.parquet"
+    if not path.exists():
+        return None
+    frame=pd.read_parquet(path,columns=["ts","bid_c"])
+    mask=frame.ts.dt.strftime("%Y-%m-%d").eq(day.isoformat())
+    values=frame.loc[mask,"bid_c"].to_numpy(dtype=float)
+    values=values[np.isfinite(values)]
+    return float(np.median(values)) if len(values) else None
+
+
+def _calibration_reference_price(symbol: str, day: date) -> float | None:
+    if symbol in CRYPTO_SYMBOLS:
+        return _binance_daily_reference(symbol,day)
+    return _existing_daily_reference(symbol,day)
+
+
+def _download_days(symbol: str, month: date, last: date, start: date) -> list[date]:
+    return [month + timedelta(days=i) for i in range((last - month).days + 1)
+            if month + timedelta(days=i) >= start
+            and (symbol in CRYPTO_SYMBOLS or (month + timedelta(days=i)).weekday() != 5)]
+
+
 def calibrate_scale(symbol: str, sample_day: date = date(2024, 6, 12)) -> int:
     """Fetch BID samples with transport retries; a bad sample day doesn't block the symbol."""
-    if symbol in SCALES:
+    has_existing_reference=(symbol not in CRYPTO_SYMBOLS and _reference_source_path(symbol).exists())
+    if symbol in SCALES and symbol not in CRYPTO_SYMBOLS and not has_existing_reference:
         return SCALES[symbol]
-    if symbol not in PRICE_BANDS:
+    if symbol not in PRICE_BANDS and symbol not in SCALES:
         raise ValueError(f"No calibration band configured for {symbol}")
     raw = None
     failures = []
@@ -192,9 +238,12 @@ def calibrate_scale(symbol: str, sample_day: date = date(2024, 6, 12)) -> int:
     if not raw:
         detail = failures[-1] if failures else "no calibration data"
         raise OSError(f"Point-scale calibration failed for {symbol} after alternate sample days: {detail}")
-    scale = infer_price_scale(raw, symbol)
+    reference_price = _calibration_reference_price(symbol,day)
+    scale = infer_price_scale(raw, symbol, reference_price=reference_price)
+    if symbol in SCALES and SCALES[symbol] != scale:
+        raise ValueError(f"Cross-source calibration for {symbol} disagrees with configured scale {SCALES[symbol]}: inferred {scale}")
     SCALES[symbol] = scale
-    lo, hi = PRICE_BANDS[symbol]
+    lo, hi = PRICE_BANDS.get(symbol,RANGES.get(symbol,(float("-inf"),float("inf"))))
     RANGES[symbol] = (lo, hi)
     import json
     path = Path("data/aux/point_scales.json")
@@ -445,7 +494,7 @@ def download(symbol: str, start: date, end: date, root: Path = ROOT, workers: in
         _HTTP_503_COUNTS[symbol] = 0
         for key in [key for key in _ERROR_COUNTS if key[0] == symbol]:
             del _ERROR_COUNTS[key]
-    if symbol not in SCALES:
+    if symbol not in SCALES or symbol in CRYPTO_SYMBOLS or _reference_source_path(symbol).exists():
         try:
             calibrate_scale(symbol)
         except Exception:
@@ -461,7 +510,7 @@ def download(symbol: str, start: date, end: date, root: Path = ROOT, workers: in
     month = start.replace(day=1)
     with ThreadPoolExecutor(max_workers=workers) as pool:
         while month <= end:
-            if shutil.disk_usage(".").free < 65 * 1024**3:
+            if shutil.disk_usage(".").free < 15 * 1024**3:
                 raise OSError("Stopping Dukascopy download: less than 65 GiB free")
             next_month = (month.replace(day=28) + timedelta(days=4)).replace(day=1)
             last = min(end, next_month - timedelta(days=1))
@@ -472,7 +521,7 @@ def download(symbol: str, start: date, end: date, root: Path = ROOT, workers: in
             if complete and next_month <= today:
                 print(f"skip {path}", flush=True)
             else:
-                days = [month + timedelta(days=i) for i in range((last - month).days + 1) if month + timedelta(days=i) >= start and (symbol in ("BTCUSD", "ETHUSD") or (month + timedelta(days=i)).weekday() != 5)]
+                days = _download_days(symbol, month, last, start)
                 print(f"fetch {symbol} {month:%Y-%m} ({len(days)} days)", flush=True)
                 frames = []
                 quarantined_this_year={}

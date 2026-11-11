@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 import pytest
+import subprocess
+import sys
 
 
 def _event_frames(lows, highs, closes):
@@ -46,6 +48,20 @@ def test_sr_touch_state_checkpoint_matches_unbroken_scan():
     assert len(touches_a) + len(touches_b) > 0
 
 
+def test_sr_touch_checkpoint_carries_previous_close_for_first_bar_rearm():
+    from msd.methods.sr_touch import detect
+    features, levels, bars = _event_frames(
+        [99.9, 97.9, 99.9], [100.1, 98.1, 100.1], [100.0, 98.0, 100.0])
+    whole=detect(features,levels,bars)
+    first,state,_=detect(features.iloc[:2],levels,bars.iloc[:2],return_state=True)
+    second,final_state,_=detect(features.iloc[2:],levels,bars.iloc[2:],state=state,return_state=True)
+    assert len(whole)==1
+    assert first+second==whole
+    assert second[0]["ts"]==bars.ts.iloc[2]
+    assert state["last_close"]==98.0
+    assert final_state["last_close"]==100.0
+
+
 def test_level_ids_stay_stable_when_later_chunk_adds_levels():
     from msd.processing.levels import _stable_level_ids
     base = pd.DataFrame({
@@ -61,6 +77,23 @@ def test_level_ids_stay_stable_when_later_chunk_adds_levels():
         "known_at": [pd.Timestamp("2023-01-05", tz="UTC")], "direction": [1],
     })], ignore_index=True)
     assert _stable_level_ids(base).tolist() == _stable_level_ids(later)[:len(base)].tolist()
+
+
+def test_level_ids_are_identical_across_processes_and_collision_fails(monkeypatch):
+    from msd.processing import levels
+    rows={"price":[100.125,101.0],"type":["swing_high","prior_day_low"],
+          "timeframe":["15m","1d"],"created_at":["2023-01-01T00:00:00Z","2023-01-02T00:00:00Z"],
+          "known_at":["2023-01-01T01:00:00Z","2023-01-03T00:00:00Z"],"direction":[-1,1]}
+    frame=pd.DataFrame(rows)
+    expected=levels._stable_level_ids(frame).tolist()
+    code=("import pandas as pd; from msd.processing.levels import _stable_level_ids; "
+          f"print(_stable_level_ids(pd.DataFrame({rows!r})).tolist())")
+    other=eval(subprocess.check_output([sys.executable,"-c",code],text=True).strip())
+    assert other==expected
+
+    monkeypatch.setattr(levels.hashlib,"blake2b",lambda *_a,**_k:type("Digest",(),{"digest":lambda _self:b"\\0"*8})())
+    with pytest.raises(RuntimeError,match="collision"):
+        levels._stable_level_ids(frame)
 
 
 def test_sweep_fvg_pilot_returns_after_wick_back_inside():

@@ -383,6 +383,47 @@ def test_feature_store_keeps_close_time_metadata_and_float32_features():
     assert len(features.select_dtypes("float64").columns)==0
 
 
+def test_level_feature_join_normalizes_object_timestamp_columns():
+    from msd.processing.features import build_features
+    ts=pd.date_range("2024-01-01",periods=100,freq="min",tz="UTC")
+    bars=_bars(ts)
+    levels=pd.DataFrame({"price":[101.0],"type":["prior_day_high"],
+                         "timeframe":["1d"],"created_at":[ts[0].isoformat()],
+                         "known_at":[ts[0].isoformat()],"invalidated_at":[None],
+                         "direction":[0],"strength":[1.0]})
+    features=build_features(bars,"BTCUSDT",timeframes={},levels=levels)
+    assert len(features)==len(bars)
+    assert features.known_at.dtype=="datetime64[ns, UTC]"
+
+
+def test_zero_spread_dukas_ticks_get_nearest_valid_annual_spread():
+    from msd.processing.pipeline import _modelled_spread
+    ts=pd.date_range("2024-01-01",periods=3,freq="min",tz="UTC")
+    frame=pd.DataFrame({"ts":ts})
+    for field in "ohlc":
+        frame[f"bid_{field}"]=[100.,101.,102.]
+        frame[f"ask_{field}"]=[100.2,101.,102.4]
+    result=_modelled_spread(frame,"XAUUSD")
+    assert result.loc[1,"ask_o"]-result.loc[1,"bid_o"]==pytest.approx(0.3)
+    assert result.loc[0,"ask_o"]-result.loc[0,"bid_o"]==pytest.approx(0.2)
+    assert result.spread_modeled.tolist()==[False,True,False]
+
+
+def test_spread_modeled_bars_keep_label_costs_but_mask_spread_features():
+    from msd.processing.pipeline import _modelled_spread
+    from msd.processing.features import build_features
+    ts=pd.date_range("2024-01-01",periods=40,freq="min",tz="UTC")
+    bars=_bars(ts)
+    bars["spread_modeled"]=[False,True]*20
+    executable=_modelled_spread(bars,"BTCUSDT")
+    assert executable.spread_modeled.all()
+    assert (executable.ask_o>executable.bid_o).all()
+    features=build_features(executable,"BTCUSDT",timeframes={})
+    assert features.spread_modeled.dtype==bool
+    assert features.spread_modeled.all()
+    assert features.spread_atr.isna().all()
+
+
 def test_month_window_features_match_full_history_rows():
     from msd.processing.features import build_features,prepare_feature_cache
     ts=pd.date_range("2024-01-01",periods=2400,freq="min",tz="UTC")
@@ -396,6 +437,22 @@ def test_month_window_features_match_full_history_rows():
     chunks=pd.concat([build_features(bars,"BTCUSDT",timeframes={},output_start=start,output_end=ts[1500],cache=cache),
                       build_features(bars,"BTCUSDT",timeframes={},output_start=ts[1500],output_end=end,cache=cache)],ignore_index=True)
     pd.testing.assert_frame_equal(chunks,expected,check_dtype=True,check_exact=True)
+
+
+def test_bollinger_features_are_exact_across_truncated_history():
+    from msd.processing.features import indicator_frame
+    rng=np.random.default_rng(4102)
+    ts=pd.date_range("2021-01-01",periods=5000,freq="min",tz="UTC")
+    close=100+np.cumsum(rng.normal(0,.2,len(ts)))
+    bars=pd.DataFrame({"ts":ts,"bid_o":close,"bid_h":close+.15,"bid_l":close-.15,
+                       "bid_c":close,"ask_o":close+.01,"ask_h":close+.16,
+                       "ask_l":close-.14,"ask_c":close+.01,"volume":np.ones(len(ts))})
+    cut=3200
+    full=indicator_frame(bars)
+    truncated=indicator_frame(bars.iloc[cut-100:])
+    for column in ("bollinger_pctb20","bollinger_width20"):
+        np.testing.assert_array_equal(full[column].to_numpy()[cut:],
+                                      truncated[column].to_numpy()[100:])
 
 
 def test_feature_returns_are_timeframe_specific_and_no_infinities(tmp_path):
@@ -483,6 +540,7 @@ def test_data_load_is_executable_by_default_and_raw_is_available(monkeypatch):
     raw=load("BTCUSDT",ts[0],ts[-1],raw=True)
     assert (executable.ask_o>executable.bid_o).all()
     assert np.allclose(executable.ask_o-executable.bid_o,BTC_SPREAD[2024])
+    assert executable.spread_modeled.dtype==bool and executable.spread_modeled.all()
     assert (raw.ask_o==raw.bid_o).all()
 
 
@@ -653,6 +711,40 @@ def test_rsi2_uses_asof_transition_not_exact_htf_timestamp():
     assert len(detect(features,pd.DataFrame(),bars))==1
 
 
+def test_pipeline_registry_contains_new_detectors_and_filters_by_scope():
+    from msd.processing.pipeline import METHOD_REGISTRY, methods_for_symbol
+    names=[method.NAME for method in METHOD_REGISTRY]
+    assert len(names)==len(set(names))==33
+    btc={method.NAME for method in methods_for_symbol("BTCUSDT")}
+    index={method.NAME for method in methods_for_symbol("USATECHIDXUSD")}
+    assert "btc_order_flow" in btc and "btc_order_flow" not in index
+    assert "post_earnings_index_reaction" in index and "post_earnings_index_reaction" not in btc
+
+
+def test_event_limit_order_fields_are_passed_to_batch_labeler(monkeypatch):
+    from msd.processing import pipeline
+    import msd._msd_kernels as kernels
+    ts=pd.date_range("2024-01-02",periods=8,freq="min",tz="UTC")
+    bars=_bars(ts)
+    features=pd.DataFrame({"ts":ts,"1m_atr14":np.ones(len(ts))})
+    class LimitDummy:
+        NAME="limit_dummy"
+        @staticmethod
+        def detect(*_args):
+            return [{"ts":ts[0],"known_at":ts[0]+pd.Timedelta(minutes=1),"side":1,
+                     "price":100.5,"natural_sl":99.,"natural_tp":105.,"entry_type":"limit",
+                     "limit_price":101.,"expiry_at":ts[0]+pd.Timedelta(minutes=5)}]
+    monkeypatch.setattr(pipeline,"methods_for_symbol",lambda _symbol:(LimitDummy,))
+    seen=[]
+    def fake_batch(_rows,_times,jobs,job_size):
+        seen.extend(np.asarray(jobs,dtype=float).reshape(-1,job_size).tolist())
+        return np.tile([0.,len(ts)-1,101.,106.,0.,0.,0.,2.,2.],len(jobs)//job_size).tolist()
+    monkeypatch.setattr(kernels,"first_hit_batch",fake_batch)
+    pipeline.label_method_events(features,pd.DataFrame(),bars,"BTCUSDT")
+    assert seen and all(row[8]==101. for row in seen)
+    assert all(row[9]==ts[0].timestamp()+300 for row in seen)
+
+
 @pytest.mark.slow
 def test_real_btc_jan22_end_to_end_event_truncation():
     """Rebuild HTFs, levels, features and events at 20 real-data cut points."""
@@ -742,6 +834,79 @@ def test_real_btc_jan22_end_to_end_event_truncation():
     assert active_counts["liquidity_sweep"]>=15, f"sweep test is too often vacuous: {active_counts}"
     print(f"BTCUSDT 2022-01 causal event cuts: S/R {active_counts['sr_touch']}/20 {active_cut_times['sr_touch']}; "
           f"sweep {active_counts['liquidity_sweep']}/20 {active_cut_times['liquidity_sweep']}")
+
+
+@pytest.mark.slow
+def test_real_btc_year_checkpoint_restores_five_sr_boundary_events():
+    """A yearly detector checkpoint must preserve the five Jan 2022 S/R signatures."""
+    import json
+    from pathlib import Path
+    from msd.data import load
+    from msd.methods.sr_touch import detect
+    from msd.processing.levels import apply_level_invalidations, build_levels
+    from msd.processing.pipeline import _active_mask, _event_feature_frame
+    from msd.processing.timeframes import build_all_timeframes
+
+    if not Path("data/bars/binance_spot/BTCUSDT/2020-05.parquet").exists():
+        pytest.skip("local BTC bars for the checkpoint span are absent")
+
+    start=pd.Timestamp("2020-05-27",tz="UTC")
+    split=pd.Timestamp("2022-01-01",tz="UTC")
+    end=pd.Timestamp("2022-01-06",tz="UTC")
+    bars=load("BTCUSDT",start,end).sort_values("ts").reset_index(drop=True)
+    assert not bars.empty and bars.ts.min()<=start+pd.Timedelta(minutes=2)
+    bars=bars[(bars.ts>=start)&(bars.ts<end)].reset_index(drop=True)
+    active=bars.loc[_active_mask(bars,"BTCUSDT")].reset_index(drop=True)
+    tfs=build_all_timeframes(bars,"BTCUSDT")
+    features=_event_feature_frame(bars,tfs)
+    levels=build_levels(active,"BTCUSDT",tfs)
+    levels=levels.loc[levels.type.ne("session_vwap")].copy()
+    levels=apply_level_invalidations(active,levels)
+    first_bars=bars[bars.ts<split].reset_index(drop=True)
+    first_active=first_bars.loc[_active_mask(first_bars,"BTCUSDT")].reset_index(drop=True)
+    first_tfs=build_all_timeframes(first_bars,"BTCUSDT")
+    first_levels=build_levels(first_active,"BTCUSDT",first_tfs)
+    first_levels=first_levels.loc[first_levels.type.ne("session_vwap")].copy()
+    first_levels=first_levels[pd.to_datetime(first_levels.known_at,utc=True)<=split]
+    first_levels=apply_level_invalidations(first_active,first_levels)
+
+    full_events,full_state,_=detect(features,levels,active,return_state=True)
+    first_mask=active.ts<split
+    pre_events,full_boundary,_=detect(features[features.ts<split],levels,
+                                      active.loc[first_mask].reset_index(drop=True),return_state=True)
+    chunk_pre,chunk_boundary,_=detect(features[features.ts<split],first_levels,
+                                      active.loc[first_mask].reset_index(drop=True),return_state=True)
+    assert full_boundary==chunk_boundary
+    post_mask=active.ts>=split
+    chunk_post,chunk_final,_=detect(features[features.ts>=split],levels,
+                                    active.loc[post_mask].reset_index(drop=True),
+                                    state=chunk_boundary,return_state=True)
+    assert pre_events+chunk_post==full_events
+    assert chunk_final==full_state
+
+    fixture=json.loads(Path("tests/fixtures/sr_touch_btc_2022_boundary.json").read_text())
+    by_ts={pd.Timestamp(event["ts"]).isoformat():event for event in full_events}
+    for expected in fixture:
+        event=by_ts[pd.Timestamp(expected["ts"]).isoformat()]
+        assert int(event["cluster_id"])==expected["cluster_id"]
+        assert event["cluster_types"]==tuple(expected["cluster_types"])
+        for field in ("cluster_price","cluster_strength","cluster_age_minutes","approach_direction"):
+            assert event[field]==expected[field]
+        chunk_match=next(item for item in chunk_post if item["ts"]==event["ts"])
+        assert chunk_match==event
+
+    state_at_boundary={}
+    for expected in fixture:
+        key=str(expected["cluster_id"])
+        state_at_boundary[key]={
+            "full": {name:full_boundary.get(name,{}).get(key)
+                     for name in ("touch_counts","armed","last_emit")},
+            "chunked": {name:chunk_boundary.get(name,{}).get(key)
+                        for name in ("touch_counts","armed","last_emit")},
+        }
+    print({"BTCUSDT 2022-01-01 checkpoint":state_at_boundary,
+           "fixture_events":len(fixture),"full_events":len(full_events),
+           "chunked_events":len(pre_events)+len(chunk_post)})
 
 
 def test_returns_and_timeframes_do_not_mix_feed_regimes():
@@ -901,3 +1066,81 @@ def test_macro_countdown_uses_only_prepublished_scheduled_events():
     assert "minutes_to_fomc_emergency" not in features
     assert np.isnan(features.minutes_since_fomc_emergency.iloc[0])
     assert features.minutes_since_fomc_emergency.iloc[1]==0.
+
+
+def _flat_filled(ts, keep):
+    """Bars for every minute in ts; the omitted ones repeat the prior close (no ticks)."""
+    full = _bars(ts)
+    for column in ("bid_o", "bid_h", "bid_l", "bid_c", "ask_o", "ask_h", "ask_l", "ask_c"):
+        side = "bid" if column.startswith("bid") else "ask"
+        full.loc[~keep, column] = np.nan
+        full[column] = full[column].fillna(full[f"{side}_c"].ffill()) if not column.endswith("_c") else full[column].ffill()
+    for side in ("bid", "ask"):
+        for field in "ohl":
+            full.loc[~keep, f"{side}_{field}"] = full.loc[~keep, f"{side}_c"]
+    return full
+
+
+def test_htf_bar_ohlc_is_unchanged_by_no_tick_minute_omissions():
+    from msd.processing.timeframes import build_timeframe
+    ts = pd.date_range("2024-01-01", periods=24 * 60, freq="min", tz="UTC")
+    keep = np.random.default_rng(7).random(len(ts)) > 0.10
+    keep[-1] = True  # the input must reach the last bucket's end for it to close
+    filled = _flat_filled(ts, keep)
+    sparse = filled.loc[keep].reset_index(drop=True)
+    for tf in ("15m", "1h", "4h"):
+        a = build_timeframe(sparse, "BTCUSDT", tf).set_index("ts")
+        b = build_timeframe(filled, "BTCUSDT", tf).set_index("ts")
+        assert len(b) == 24 * 60 // {"15m": 15, "1h": 60, "4h": 240}[tf]
+        assert a.index.isin(b.index).all() and len(a) >= 0.9 * len(b)  # random clusters can dip below 80%
+        # A bucket whose first minute had no ticks opens at its first tick, not
+        # at the carried prior close, so compare OHLC where the first minute traded.
+        first_traded = a.index[a.index.isin(ts[keep])]
+        assert len(first_traded) >= 0.8 * len(a)
+        cols = ["bid_o", "bid_h", "bid_l", "bid_c", "ask_o", "ask_h", "ask_l", "ask_c", "known_at"]
+        pd.testing.assert_frame_equal(a.loc[first_traded, cols], b.loc[first_traded, cols])
+        pd.testing.assert_series_equal(a.bid_c, b.loc[a.index, "bid_c"])
+
+
+def test_htf_bucket_below_coverage_is_absent_and_index_quote_gap_is_not_expected():
+    from msd.processing.timeframes import build_timeframe
+    ts = pd.date_range("2024-01-01", periods=120, freq="min", tz="UTC")
+    sparse = ts[(ts.minute % 4 != 0) | (ts.hour == 1)]  # hour 0 keeps 75%, hour 1 keeps 100%
+    frame = build_timeframe(_bars(sparse), "BTCUSDT", "1h")
+    assert frame.ts.tolist() == [pd.Timestamp("2024-01-01 01:00", tz="UTC")]
+    # NQ: the 16:00 ET bucket only has quotes until 16:14; 14:00 ET 4h bucket ends at 17:00.
+    start = pd.Timestamp("2024-06-02 18:00", tz="America/New_York")
+    ny = pd.date_range(start, pd.Timestamp("2024-06-03 20:00", tz="America/New_York"), freq="min")
+    local = ny.tz_convert("America/New_York")
+    minute = local.hour * 60 + local.minute
+    ny = ny[(minute < 16 * 60 + 15) | (minute >= 18 * 60)]
+    hours = build_timeframe(_bars(ny.tz_convert("UTC")), "USATECHIDXUSD", "1h")
+    four = build_timeframe(_bars(ny.tz_convert("UTC")), "USATECHIDXUSD", "4h")
+    sixteen = pd.Timestamp("2024-06-03 16:00", tz="America/New_York")
+    fourteen = pd.Timestamp("2024-06-03 14:00", tz="America/New_York")
+    assert sixteen in set(hours.ts.dt.tz_convert("America/New_York"))
+    row = four[four.ts.dt.tz_convert("America/New_York") == fourteen]
+    assert len(row) == 1 and row.known_at.iloc[0] == pd.Timestamp("2024-06-03 17:00", tz="America/New_York")
+
+
+def test_htf_partial_bucket_is_not_emitted_before_input_passes_its_end():
+    from msd.processing.timeframes import build_timeframe
+    ts = pd.date_range("2024-01-01", periods=600, freq="min", tz="UTC")
+    full = build_timeframe(_bars(ts), "BTCUSDT", "1h")
+    for cut_minute in (595, 590, 550, 549):  # 59/60, 50/60, 10/60 and 9/60 of the last bucket
+        cut = ts[0] + pd.Timedelta(minutes=cut_minute)
+        truncated = build_timeframe(_bars(ts[ts < cut]), "BTCUSDT", "1h")
+        assert truncated.known_at.max() <= cut
+        pd.testing.assert_frame_equal(truncated, full[full.known_at <= cut].reset_index(drop=True))
+
+
+def test_metal_daily_rollover_break_is_not_expected_in_utc_buckets():
+    from msd.processing.timeframes import build_timeframe
+    for day in ("2024-01-10", "2024-07-10"):  # 22:00 UTC in winter, 21:00 UTC in summer
+        ts = pd.date_range(f"{day} 00:00", periods=26 * 60, freq="min", tz="UTC")
+        local = ts.tz_convert("America/New_York")
+        ts = ts[local.hour != 17]
+        four = build_timeframe(_bars(ts), "XAUUSD", "4h")
+        assert pd.Timestamp(f"{day} 20:00", tz="UTC") in set(four.ts)
+        hours = build_timeframe(_bars(ts), "XAUUSD", "1h")
+        assert not hours.ts.dt.tz_convert("America/New_York").dt.hour.eq(17).any()

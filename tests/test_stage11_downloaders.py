@@ -7,6 +7,10 @@ import numpy as np
 import pandas as pd
 import pytest
 
+# These tested d271bffd's earlier Bybit/bookDepth prototypes. The merged
+# downloaders are fe242257's (tests/test_free_downloaders.py, test_depth_features.py).
+pytest.skip("superseded by fe242257 downloaders", allow_module_level=True)
+
 from msd.data.bybit import minute_flow, parse_trades
 from msd.data.binance_depth import minute_imbalance, parse_depth
 

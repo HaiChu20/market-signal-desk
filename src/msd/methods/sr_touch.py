@@ -45,6 +45,7 @@ def detect(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.DataFrame, *, 
     touch_state[previous_touching] = True
     armed: dict[int, int] = {int(k): int(v) for k,v in state.get("armed", {}).items()}
     last_emit: dict[int, int] = {int(k): int(v) for k,v in state.get("last_emit", {}).items()}
+    prior_close = float(state.get("last_close", np.nan))
     events: list[dict] = []
     touch_rows: list[tuple] = []
     for i in range(len(frame)):
@@ -62,7 +63,7 @@ def detect(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.DataFrame, *, 
         previous_touching = touching
         clusters = bar_clusters(prices, known, invalid, ids, types, created, price_order,
                                 now, lows[i] - 0.6*a, highs[i] + 0.6*a, a, touches, CLUSTER_ATR)
-        previous_close = closes[i-1] if i else np.nan
+        previous_close = closes[i-1] if i else prior_close
         for cluster in clusters:
             key = cluster["key"]
             level = cluster["price"]
@@ -96,5 +97,6 @@ def detect(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.DataFrame, *, 
         "touching_ids": [int(ids[i]) for i in previous_touching],
         "armed": {str(k): int(v) for k,v in armed.items()},
         "last_emit": {str(k): int(v) for k,v in last_emit.items()},
+        "last_close": float(closes[-1]) if len(closes) else prior_close,
     }
     return events, state_out, touch_rows
