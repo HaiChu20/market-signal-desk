@@ -26,7 +26,10 @@ def detect_rule(name: str, features: pd.DataFrame, levels: pd.DataFrame, bars: p
     atr = np.where(np.isfinite(atr) & (atr > 0), atr, col('1m_atr14'))
     atr = np.where(np.isfinite(atr) & (atr > 0), atr, np.nan)
     def prev(a, k=1):
-        return np.r_[np.full(k, np.nan), a[:-k]]
+        out = np.full(len(a), np.nan)
+        if len(a) > k:
+            out[k:] = a[:-k]
+        return out
     def cross(a, threshold=0):
         return (a > threshold) & (prev(a) <= threshold)
     def fall(a, threshold=0):
