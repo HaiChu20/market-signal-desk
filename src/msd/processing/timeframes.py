@@ -11,6 +11,15 @@ NY = ZoneInfo("America/New_York")
 INDEX_SYMBOLS = {"USATECHIDXUSD", "USA500IDXUSD", "USA30IDXUSD", "DEUIDXEUR", "GBRIDXGBP", "JPNIDXJPY", "NSXUSD", "SPXUSD", "GRXEUR"}
 TIMEFRAMES = {"5m": 5, "15m": 15, "1h": 60, "4h": 240, "1d": 1440}
 BAR_COLUMNS = ["ts", "bid_o", "bid_h", "bid_l", "bid_c", "ask_o", "ask_h", "ask_l", "ask_c", "volume"]
+# Dukascopy US index CFDs publish no quotes 16:15-17:00 ET; those minutes are
+# never expected inside a bucket.
+US_INDEX_QUOTE_GAP_MINUTES = 45
+US_INDEX_SYMBOLS = {"USATECHIDXUSD", "USA500IDXUSD", "USA30IDXUSD", "NSXUSD", "SPXUSD"}
+# Dukascopy metals pause 17:00-18:00 ET (the NY rollover) every trading day.
+METAL_SYMBOLS = {"XAUUSD", "XAGUSD"}
+# A minute without ticks has no bar but leaves OHLC unchanged, so an intraday
+# bucket is complete once this share of its expected minutes is observed.
+MIN_COVERAGE = 0.80
 
 
 def _session_info(ts: pd.Timestamp, index_market: bool) -> tuple[date, pd.Timestamp, pd.Timestamp]:
@@ -58,6 +67,10 @@ def build_timeframe(bars: pd.DataFrame, symbol: str, timeframe: str) -> pd.DataF
         bucket_end = session_end if timeframe == "1d" else (bucket_open + pd.Timedelta(minutes=minutes)).where(
             bucket_open + pd.Timedelta(minutes=minutes) <= session_end, session_end)
         expected_for = ((bucket_end - bucket_open).dt.total_seconds() // 60).astype(np.int64)
+        gap_minutes = US_INDEX_QUOTE_GAP_MINUTES if symbol in US_INDEX_SYMBOLS else 0
+        gap_start = session_end - pd.Timedelta(minutes=gap_minutes)
+        overlap = ((bucket_end - np.maximum(bucket_open, gap_start)).dt.total_seconds() // 60).clip(lower=0)
+        effective_for = expected_for - overlap.astype(np.int64)
         expected = None
     else:
         day_open = ts.dt.floor("D")
@@ -66,13 +79,23 @@ def build_timeframe(bars: pd.DataFrame, symbol: str, timeframe: str) -> pd.DataF
         bucket_open = day_open + pd.to_timedelta(offsets, unit="m")
         expected = 1440 if timeframe == "1d" else minutes
         expected_for = np.full(len(source), expected, dtype=np.int64)
+        effective_for = expected_for
+        if symbol in METAL_SYMBOLS:
+            bucket_end = bucket_open + pd.Timedelta(minutes=expected)
+            break_start = (bucket_open.dt.tz_convert(NY).dt.tz_localize(None).dt.normalize()
+                           + pd.Timedelta(hours=17)).dt.tz_localize(NY).dt.tz_convert("UTC")
+            break_end = break_start + pd.Timedelta(hours=1)
+            overlap = ((np.minimum(bucket_end, break_end) - np.maximum(bucket_open, break_start))
+                       .dt.total_seconds() // 60).clip(lower=0)
+            effective_for = expected_for - overlap.astype(np.int64).to_numpy()
     if source.empty:
         return pd.DataFrame(columns=[*BAR_COLUMNS, "known_at", "observed_minutes", "expected_minutes"])
     source["_bucket"] = bucket_open.to_numpy()
     source["_expected"] = expected_for
+    source["_effective"] = np.asarray(effective_for, dtype=np.int64)
     source["_source_ts"] = ts.to_numpy()
     grouped = source.groupby("_bucket", sort=True)
-    agg = {"_source_ts": ["count", "min", "max"], "_expected": "first"}
+    agg = {"_source_ts": ["count", "min", "max"], "_expected": "first", "_effective": "first"}
     for side in ("bid", "ask"):
         agg.update({f"{side}_o": "first", f"{side}_h": "max", f"{side}_l": "min", f"{side}_c": "last"})
     if "feed" in source:
@@ -100,7 +123,13 @@ def build_timeframe(bars: pd.DataFrame, symbol: str, timeframe: str) -> pd.DataF
                     (last >= scheduled_end - pd.Timedelta(hours=1)) &
                     (first < scheduled_end))
     else:
-        complete = (count == expected_values) & ((last - first).dt.total_seconds() == (expected_values-1)*60)
+        effective_values = result["_effective_first"].astype(int)
+        scheduled_end = pd.to_datetime(result.index, utc=True) + pd.to_timedelta(expected_values.to_numpy(), unit="m")
+        # Partial coverage is accepted only for buckets the input has passed,
+        # so a truncated history never emits a bar the full history changes.
+        input_end = ts.max() + pd.Timedelta(minutes=1)
+        complete = ((effective_values > 0) & (count >= np.ceil(effective_values * MIN_COVERAGE))
+                    & ((count == expected_values) | (scheduled_end <= input_end)))
     if "feed_nunique" in result:
         complete &= result["feed_nunique"].eq(1)
     result = result.loc[complete]
