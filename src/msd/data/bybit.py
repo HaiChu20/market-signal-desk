@@ -29,7 +29,8 @@ RAW = MAIN / "data/raw/bybit"
 OUT = MAIN / "data/bars/bybit_flow"
 MISSING = MAIN / "data/logs/missing_bybit.csv"
 BASE = "https://public.bybit.com/trading"
-SYMBOLS = ("BTCUSDT", "ETHUSDT")
+# MSD_BYBIT_SYMBOLS lets BTC and ETH run as separate processes (one CPU core each).
+SYMBOLS = tuple(os.environ.get("MSD_BYBIT_SYMBOLS", "BTCUSDT,ETHUSDT").split(","))
 START = date(2020, 3, 25)
 
 
