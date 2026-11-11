@@ -52,6 +52,25 @@ def test_bybit_rejects_invalid_archives(row, header, message):
         bybit.aggregate_bytes(_archive(row, header=header), "2024-01")
 
 
+def test_bybit_fetch_day_waits_out_rate_limit_then_succeeds(monkeypatch):
+    calls, waits = [], []
+
+    def size(_):
+        calls.append(1)
+        if len(calls) < 3:
+            raise HTTPError("u", 403, "Forbidden", {}, None)
+        return 10
+
+    monkeypatch.setattr(bybit, "remote_size", size)
+    monkeypatch.setattr(bybit, "stream_archive", lambda *args: "digest")
+    monkeypatch.setattr(bybit.time, "sleep", waits.append)
+    assert bybit.fetch_day("BTCUSDT", date(2024, 1, 1))[2] == "10 bytes"
+    assert waits == list(bybit.BLOCK_WAITS[:2])
+    monkeypatch.setattr(bybit, "remote_size", lambda _: (_ for _ in ()).throw(HTTPError("u", 500, "x", {}, None)))
+    with pytest.raises(HTTPError):
+        bybit.fetch_day("BTCUSDT", date(2024, 1, 1))
+
+
 def test_bybit_zero_size_dust_trade_keeps_count():
     bars = bybit.aggregate_bytes(_archive("1593339590.1551,Sell,0.0,9055.5"), "2020-06")
     assert bars.trade_count.tolist() == [1] and bars.sell_trade_count.tolist() == [1]

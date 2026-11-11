@@ -178,13 +178,25 @@ def log_missing(symbol: str, day: date, reason: str) -> None:
         writer.writerow([datetime.now(timezone.utc).isoformat(), symbol, day.isoformat(), reason])
 
 
+# Back off on CDN rate limiting instead of marking days missing: on 2026-11-11 a 403 burst
+# (after raising concurrency) lasted ~7 minutes and the short archive retries gave up.
+BLOCK_WAITS = (60, 120, 300, 600, 900)
+
+
 def fetch_day(symbol: str, day: date) -> tuple[date, Path | None, str]:
     target = RAW / symbol / f"{symbol}{day:%Y-%m-%d}.csv.gz"
-    expected = remote_size(url(symbol, day))
-    if expected is None:
-        return day, None, "HTTP 404"
-    digest = stream_archive(url(symbol, day), target, expected)
-    return day, target if digest else None, f"{expected} bytes"
+    for wait in (*BLOCK_WAITS, None):
+        try:
+            expected = remote_size(url(symbol, day))
+            if expected is None:
+                return day, None, "HTTP 404"
+            digest = stream_archive(url(symbol, day), target, expected)
+            return day, target if digest else None, f"{expected} bytes"
+        except Exception as error:
+            if wait is None or not any(code in str(error) for code in ("HTTP Error 403", "HTTP Error 429")):
+                raise
+            print(f"rate-limited on {symbol} {day} ({error}); retrying in {wait}s", flush=True)
+            time.sleep(wait)
 
 
 def fetch_no_raw_day(symbol: str, day: date) -> tuple[date, pd.DataFrame | None, dict | None, str]:
