@@ -490,8 +490,37 @@ def _attach_market_auxiliary(bars: pd.DataFrame, symbol: str) -> pd.DataFrame:
     return result
 
 
-def _event_feature_frame(bars: pd.DataFrame, timeframes: dict[str,pd.DataFrame]) -> pd.DataFrame:
-    """Minimal causal feature columns needed to scan events over warm-up bars."""
+def _event_feature_frame(bars: pd.DataFrame, timeframes: dict[str,pd.DataFrame],
+                         symbol: str | None = None, feature_root: Path = FEATURE_DIR) -> pd.DataFrame:
+    """Read the persisted causal feature rows used by production detectors."""
+    if symbol is not None:
+        import pyarrow.parquet as pq
+        history=bars.sort_values('ts').reset_index(drop=True)
+        start=pd.to_datetime(history.ts.min(),utc=True);end=pd.to_datetime(history.ts.max(),utc=True)
+        wanted={'ts','known_at','1d_bar_known_at','1d_rsi2','1d_ema200_distance_atr','gex_level'}
+        for method in methods_for_symbol(symbol):wanted.update(method.REQUIRED_FEATURES)
+        chunks=[]
+        for path in sorted((feature_root/symbol).glob('*.parquet')):
+            try:month=pd.Timestamp(path.stem+'-01',tz='UTC')
+            except ValueError:continue
+            if month>end or month+pd.offsets.MonthBegin(1)<=start:continue
+            columns=[name for name in pq.read_schema(path).names if name in wanted or
+                     name.startswith('minutes_since_earnings_')]
+            before=path.stat();chunk=pd.read_parquet(path,columns=columns)
+            if path.stat().st_mtime_ns!=before.st_mtime_ns:raise RuntimeError(f'Feature file changed during read: {path}')
+            chunks.append(chunk)
+        if not chunks:raise FileNotFoundError(f'No persisted event features for {symbol} in {start}..{end}')
+        features=pd.concat(chunks,ignore_index=True).sort_values('ts').drop_duplicates('ts',keep='last')
+        if 'gex' not in features and 'gex_level' in features:features['gex']=features.gex_level
+        earnings=[c for c in features if c.startswith('minutes_since_earnings_')]
+        if earnings and 'earnings_minutes_since_event' not in features:
+            features['earnings_minutes_since_event']=features[earnings].min(axis=1)
+        left=history[['ts']].copy();left['decision_known_at']=pd.to_datetime(left.ts,utc=True)+pd.Timedelta(minutes=1)
+        result=left.merge(features,on='ts',how='left',validate='one_to_one')
+        known=pd.to_datetime(result.known_at,utc=True)
+        if (known>result.decision_known_at).any():raise AssertionError('Future event feature')
+        return result.drop(columns='decision_known_at')
+    # Backward-compatible in-memory path for focused unit fixtures.
     from .features import indicator_frame
     history=bars.sort_values("ts").reset_index(drop=True)
     result=pd.DataFrame({"ts":pd.to_datetime(history.ts,utc=True).astype("datetime64[ns, UTC]"),
@@ -586,6 +615,15 @@ def label_method_events(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.D
     for method in methods:
         method_started=time.perf_counter()
         jobs=[]; metadata=[]
+        required=set(getattr(method,'REQUIRED_FEATURES',()))
+        current=scan_features
+        if event_start is not None:current=current[pd.to_datetime(current.ts,utc=True)>=pd.Timestamp(event_start)]
+        if event_end is not None:current=current[pd.to_datetime(current.ts,utc=True)<pd.Timestamp(event_end)]
+        absent=sorted(required-set(current.columns))
+        blank=sorted(name for name in required&set(current.columns)
+                     if pd.to_numeric(current[name],errors='coerce').notna().sum()==0)
+        if absent or blank:
+            raise ValueError(f'{symbol} {method.NAME}: required event features absent={absent}, all_nan={blank}')
         detector_state=(method_states or {}).get(method.NAME)
         if "return_state" in inspect.signature(method.detect).parameters:
             if return_states:
@@ -795,7 +833,7 @@ def run_symbol(symbol: str, start_year: int | None = None, end_year: int | None 
         year_feature_paths=sorted((FEATURE_DIR/symbol).glob(f"{year}-*.parquet"))
         if year_feature_paths: feature_qa_files(year_feature_paths,symbol,append=True)
         gc.collect()
-        method_features=_event_feature_frame(bars,tfs)
+        method_features=_event_feature_frame(bars,tfs,symbol=symbol)
         method_features=method_features.loc[_active_mask(method_features,symbol)]
         scan_start=left if bootstrap else year_start
         scan_features=method_features[(method_features.ts>=scan_start)&(method_features.ts<year_end)]
@@ -875,6 +913,55 @@ def run_symbol(symbol: str, start_year: int | None = None, end_year: int | None 
     return result
 
 
+def replay_events_only(symbol: str, start_year: int, end_year: int,
+                       output_root: Path, source_root: Path = Path('/Users/bfhach/Projects/market-signal-desk/data')) -> list[dict]:
+    """Rebuild method events/labels from persisted bars, features and levels.
+
+    Source data is read-only. Detector state is carried in memory between years.
+    """
+    import json
+    output_root=Path(output_root);source_root=Path(source_root)
+    state={};summaries=[]
+    source='binance_spot' if symbol in {'BTCUSDT','ETHUSDT'} else 'dukascopy'
+    for year in range(start_year,end_year+1):
+        year_start=pd.Timestamp(year,1,1,tz='UTC');year_end=pd.Timestamp(year+1,1,1,tz='UTC')
+        left=year_start-pd.Timedelta(days=MAX_LOOKBACK_DAYS) if year>start_year else year_start-pd.Timedelta(days=MAX_LOOKBACK_DAYS)
+        right=year_end+pd.Timedelta(days=8)
+        parts=[]
+        for path in sorted((source_root/'bars'/source/symbol).glob('*.parquet')):
+            try:month=pd.Timestamp(path.stem+'-01',tz='UTC')
+            except ValueError:continue
+            if month>right or month+pd.offsets.MonthBegin(1)<=left:continue
+            before=path.stat();part=pd.read_parquet(path)
+            if path.stat().st_mtime_ns!=before.st_mtime_ns:raise RuntimeError(f'Bar source changed: {path}')
+            parts.append(part)
+        if not parts:raise FileNotFoundError(f'No persisted bars for {symbol} {year}')
+        bars=pd.concat(parts,ignore_index=True).sort_values('ts').drop_duplicates('ts').reset_index(drop=True)
+        bars=bars[(pd.to_datetime(bars.ts,utc=True)>=left)&(pd.to_datetime(bars.ts,utc=True)<right)].reset_index(drop=True)
+        bars=_feature_label_bars(_adjusted_price_view(bars))
+        bars=_modelled_spread(bars,symbol)
+        active=bars.loc[_active_mask(bars,symbol)].reset_index(drop=True)
+        path=source_root/'levels'/f'{symbol}.parquet'
+        if not path.exists():raise FileNotFoundError(path)
+        levels=pd.read_parquet(path).drop(columns=['touches_so_far'],errors='ignore')
+        levels=levels[pd.to_datetime(levels.known_at,utc=True)<=year_end]
+        features=_event_feature_frame(active,{},symbol=symbol,feature_root=source_root/'features')
+        scan=features[(features.ts>=(left if year==start_year else year_start))&(features.ts<year_end)]
+        scan_bars=active[(active.ts>=(left if year==start_year else year_start))&(active.ts<year_end)]
+        events,counts,state,touches=label_method_events(features,levels,active,symbol,
+            return_states=True,event_start=year_start,event_end=year_end,
+            detector_features=scan,detector_bars=scan_bars,method_states=state)
+        if len(events):_write_monthly(events,output_root,symbol)
+        state_dir=output_root/'state'/symbol;state_dir.mkdir(parents=True,exist_ok=True)
+        (state_dir/f'{year}.json').write_text(json.dumps(state,separators=(',',':')))
+        grouped=events.groupby('method').size() if len(events) else pd.Series(dtype=int)
+        summaries.extend({'symbol':symbol,'year':year,'method':method.NAME,
+                          'events':int(counts.get(method.NAME,0)),
+                          'candidate_rows':int(grouped.get(method.NAME,0))}
+                         for method in methods_for_symbol(symbol))
+    return summaries
+
+
 def _cash_era_only(bars: pd.DataFrame, symbol: str) -> pd.DataFrame:
     """Exclude every futures-era minute from index features and labels."""
     if symbol not in {"USATECHIDXUSD","USA500IDXUSD"} or bars.empty:
@@ -933,7 +1020,15 @@ def main() -> None:
     parser.add_argument("--start-year", type=int)
     parser.add_argument("--end-year", type=int)
     parser.add_argument("--augment-external", action="store_true", help="attach downloaded external sources to existing feature files only")
+    parser.add_argument('--events-only',action='store_true')
+    parser.add_argument('--output-root',type=Path)
+    parser.add_argument('--source-root',type=Path,default=Path('/Users/bfhach/Projects/market-signal-desk/data'))
     args = parser.parse_args()
+    if args.events_only:
+        if not (args.symbol and args.start_year and args.end_year and args.output_root):
+            parser.error('--events-only requires --symbol, --start-year, --end-year and --output-root')
+        print(replay_events_only(args.symbol,args.start_year,args.end_year,args.output_root,args.source_root),flush=True)
+        return
     if args.augment_external:
         if not args.symbol: parser.error("--augment-external requires --symbol")
         print(augment_external_feature_store(args.symbol),flush=True)

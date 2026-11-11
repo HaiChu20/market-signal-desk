@@ -100,3 +100,7 @@ def detect(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.DataFrame, *, 
         "last_close": float(closes[-1]) if len(closes) else prior_close,
     }
     return events, state_out, touch_rows
+
+from .requirements import required_features, market_for
+REQUIRED_FEATURES = required_features(NAME)
+MARKETS = market_for(NAME)

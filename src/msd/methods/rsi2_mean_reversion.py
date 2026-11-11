@@ -33,3 +33,7 @@ def detect(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.DataFrame) -> 
     return [{"ts": row.ts, "sym": "", "side": 1, "price": float((row.bid_c+row.ask_c)/2),
              "natural_sl": None, "natural_tp": None, "method": NAME, "known_at": row.known_at}
             for row in selected.itertuples(index=False)]
+
+from .requirements import required_features, market_for
+REQUIRED_FEATURES = required_features(NAME)
+MARKETS = market_for(NAME)
