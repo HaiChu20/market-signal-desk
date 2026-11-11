@@ -175,3 +175,25 @@ def test_shared_gate_allows_next_entry_at_exit_plus_one_minute():
                             'event_key': ['a', 'b', 'c', 'd']})
     chosen = gate_open_signals(signals)
     assert chosen.event_key.tolist() == ['a', 'b', 'd']
+
+
+def test_btc_random_direction_uses_pipeline_executable_loader(monkeypatch, tmp_path):
+    import sys
+    from msd.processing.labels import first_hit_reference
+    from msd.research import benchmark, sequence_data
+    times = pd.date_range('2021-01-01', periods=20, freq='min', tz='UTC')
+    bars = pd.DataFrame({'ts': times})
+    for side, shift in [('bid', -1.), ('ask', 1.)]:
+        for field in 'ohlc':
+            bars[f'{side}_{field}'] = 100. + shift
+    calls = []
+    monkeypatch.setattr(sequence_data, 'load_executable_1m',
+                        lambda symbol, *args: calls.append(symbol) or bars)
+    monkeypatch.setitem(sys.modules, 'msd._msd_kernels', None)
+    monkeypatch.setattr(benchmark, 'first_hit_reference', first_hit_reference)
+    signal = pd.DataFrame({'ts': [times[0]], 'sym': ['BTCUSDT'], 'side': [1],
+                           'price': [100.], 'sl': [90.], 'tp': [110.],
+                           'deadline_ts': [times[-1]], 'label_end_ts': [times[-1]],
+                           'spread_R': [999.], 'planned_risk': [10.], 'net_R': [0.]})
+    _, count, _ = benchmark.random_direction(signal, tmp_path, seeds=2)
+    assert count == 1 and calls == ['BTCUSDT']

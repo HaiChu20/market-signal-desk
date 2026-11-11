@@ -6,10 +6,33 @@ import json
 from pathlib import Path
 
 import pandas as pd
+import pyarrow.parquet as pq
 from msd.research.sequence_coverage import anchor_coverage
 
 SOURCES = {"USATECHIDXUSD": "dukascopy", "USA500IDXUSD": "dukascopy",
            "XAUUSD": "dukascopy", "BTCUSDT": "binance_spot", "ETHUSDT": "binance_spot"}
+
+
+def _flow_coverage(paths: list[Path], columns: list[str]) -> dict[str, float]:
+    total = 0
+    present = {column: 0 for column in columns}
+    for path in paths:
+        parquet = pq.ParquetFile(path)
+        total += parquet.metadata.num_rows
+        names = parquet.schema.names
+        for column in columns:
+            if column not in names:
+                continue
+            index = names.index(column)
+            for group in range(parquet.metadata.num_row_groups):
+                metadata = parquet.metadata.row_group(group)
+                statistics = metadata.column(index).statistics
+                if statistics is None or statistics.null_count is None:
+                    frame = pd.read_parquet(path, columns=[column])
+                    present[column] += int(frame[column].notna().sum())
+                    break
+                present[column] += metadata.num_rows - statistics.null_count
+    return {column: (count / total if total else 0.) for column, count in present.items()}
 
 
 def make_bundle(data_root: Path, config_path: Path, output: Path, symbols=None):
@@ -34,6 +57,8 @@ def make_bundle(data_root: Path, config_path: Path, output: Path, symbols=None):
                    pd.Timestamp("2017-01-01"))
         months = pd.period_range(warm.to_period("M"), (end - pd.Timedelta(nanoseconds=1)).to_period("M"), freq="M")
         label_months = set(pd.period_range(start.to_period("M"), (end - pd.Timedelta(nanoseconds=1)).to_period("M"), freq="M"))
+        flow_columns = config.get("flow_features", {}).get(symbol, [])
+        flow_paths = []
         for month in months:
             stem = f"{month}.parquet"
             paths = [Path("bars") / SOURCES[symbol] / symbol / stem,
@@ -41,10 +66,16 @@ def make_bundle(data_root: Path, config_path: Path, output: Path, symbols=None):
                      Path("features") / symbol / stem]
             if month in label_months:
                 paths.append(Path("labels") / symbol / stem)
+            if flow_columns:
+                paths.append(Path("features_flow") / symbol / stem)
             for relative in paths:
                 path = data_root / relative
                 if path.exists():
                     entries.append((relative.as_posix(), path.stat().st_size))
+                    if relative.parts[0] == "features_flow":
+                        flow_paths.append(path)
+                        if path.stat().st_mtime_ns < done.stat().st_mtime_ns:
+                            stale.append(f"{relative}: predates production4 completion")
                     if relative.parts[0] in {"derived", "features", "labels"} and month.year >= start.year:
                         year_marker = data_root / "tmp" / f"stage9p4_{symbol}_{month.year}.json"
                         if not year_marker.exists():
@@ -60,6 +91,12 @@ def make_bundle(data_root: Path, config_path: Path, output: Path, symbols=None):
                     missing.append(relative.as_posix())
                     if month >= start.to_period("M"):
                         stale.append(f"{relative}: missing DEV input")
+        if flow_columns:
+            dev_flow_paths = [path for path in flow_paths if start.year <= int(path.stem[:4]) < end.year]
+            minimum = float(config["flow_min_non_nan_coverage"])
+            for column, value in _flow_coverage(dev_flow_paths, flow_columns).items():
+                if value < minimum:
+                    stale.append(f"{symbol}/{column}: flow coverage {value:.1%}")
         for year in range(start.year, end.year):
             result = anchor_coverage(data_root, symbol, year)
             coverage.append(result)
@@ -96,7 +133,7 @@ def make_bundle(data_root: Path, config_path: Path, output: Path, symbols=None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-root", type=Path, default=Path("data"))
-    parser.add_argument("--config", type=Path, default=Path("hpc/roihu/sequence/configs/dev_v1.json"))
+    parser.add_argument("--config", type=Path, default=Path("hpc/roihu/sequence/configs/dev_v2.json"))
     parser.add_argument("--output", type=Path, default=Path("hpc/roihu/sequence/bundle"))
     parser.add_argument("--symbols", help="comma-separated subset; default is all five")
     args = parser.parse_args()

@@ -1,13 +1,13 @@
-# Sequence CNN DEV submission v1
+# Sequence CNN DEV submission v2
 
 This package trains only on development labels ending before 2023-01-01. It
 writes purged walk-forward out-of-fold barrier predictions, one GPU job for
 each symbol and seed, then grades the fetched predictions on the laptop.
 The default submission uses all five symbols in the
-[config](configs/dev_v1.json), with three seeds each. Production4 completed
-the higher-timeframe inputs for all five. The only absent inventory paths are
-eight BTC/ETH 2017-12 derived/feature warm-up files, before their 2018 start.
-The builder discards initial anchors without enough history.
+[v2 config](configs/dev_v2.json), with three seeds each. BTC and ETH add
+causal flow features from 2020 onward. The immutable [v1 config](configs/dev_v1.json)
+remains runnable by setting `CONFIG_PATH=hpc/roihu/sequence/configs/dev_v1.json`
+for both `ship.sh` and `submit.sh`; its hash and inputs are unchanged.
 
 ## Laptop: ship code and the exact present inputs
 
@@ -24,8 +24,8 @@ uv sync
 bash hpc/roihu/sequence/ship.sh
 ```
 
-The five-symbol inventory is **2,443 files, 8,776,100,580 bytes (8.17 GiB)**,
-with eight missing pre-2018 warm-up files. `ship.sh` refuses any missing DEV
+The v2 five-symbol inventory is **2,237 files, 8,531,143,626 bytes (7.95 GiB)**,
+with no missing files. `ship.sh` refuses any missing DEV
 input, absent production4 completion marker, stale production4 output, or DEV
 year with less than 80% anchor coverage. It checks the per-symbol chain-done
 marker and each `data/tmp/stage9p4_{SYM}_{YEAR}.json` result. Since that result
@@ -39,11 +39,20 @@ time, ATR and window-history gates):
 
 | Symbol | DEV years | Coverage by year |
 |---|---|---|
-| BTCUSDT | 2018–2022 | 97.2%, 100%, 100%, 100%, 100% |
-| ETHUSDT | 2018–2022 | 97.2%, 100%, 100%, 100%, 100% |
+| BTCUSDT | 2020–2022 | 100%, 100%, 100% |
+| ETHUSDT | 2020–2022 | 100%, 100%, 100% |
 | USATECHIDXUSD | 2019–2022 | 99.9%, 100%, 100%, 100% |
 | USA500IDXUSD | 2019–2022 | 99.9%, 100%, 100%, 100% |
 | XAUUSD | 2008–2022 | 96.2% in 2008, 100% in every year 2009–2022 |
+
+For BTC and ETH, the bundle also gates every selected flow column at least
+80% non-NaN coverage over 2020–2022. The selected dense inputs include their
+spot and UM coverage flags; BTC also includes its Bybit coverage flag. A
+missingness channel is added before dense zero imputation, so unavailable data
+does not become indistinguishable from a covered minute with zero activity.
+Depth and tick features are excluded because they have no DEV history. The
+bundle reads no 2023+ flow files and therefore does not depend on the ongoing
+2024+ Bybit flow rebuild.
 
 For Allas instead of
 rsync, upload the same `bundle/files.txt` paths under the same `data/` relative
@@ -83,12 +92,12 @@ The output includes per-fold `oof.parquet`, `model.pt`, `resume.pt`,
 ## Local CPU smoke
 
 The following reads two 2021 months, selects two anchors per day, trains one
-epoch with a width-eight CNN, and leaves outputs under `data/tmp/sequence-smoke/`.
+epoch with a width-eight CNN and the v2 BTC flow inputs, and leaves outputs
+under `data/tmp/sequence-smoke/`.
 
 ```bash
 uv sync --extra gpu
-uv run python -m msd.research.sequence_train --data-root data --symbol BTCUSDT --output data/tmp/sequence-smoke/btc --smoke
-uv run python -m msd.research.sequence_train --data-root data --symbol USATECHIDXUSD --output data/tmp/sequence-smoke/nq --smoke
+uv run python -m msd.research.sequence_train --data-root data --config hpc/roihu/sequence/configs/dev_v2.json --symbol BTCUSDT --output data/tmp/sequence-smoke/btc --smoke
 uv run python -m msd.research.grade_sequence --input data/tmp/sequence-smoke --data-root data
 ```
 

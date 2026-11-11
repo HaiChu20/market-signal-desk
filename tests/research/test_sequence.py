@@ -239,3 +239,24 @@ def test_cli_refuses_test_dates_even_in_smoke(monkeypatch, tmp_path):
     with pytest.raises(SystemExit) as caught:
         main()
     assert caught.value.code == 2
+
+
+def test_flow_join_is_backward_only_and_preserves_missing_vs_zero():
+    from msd.research.sequence_train import add_flow_features
+    stamps = pd.date_range("2021-01-01", periods=3, freq="min", tz="UTC")
+    dense = pd.DataFrame({"known_at": stamps, "base": [1., 2., 3.]})
+    flow = pd.DataFrame({"ts": stamps[[0, 2]] - pd.Timedelta(minutes=1),
+                         "known_at": stamps[[0, 2]], "spot_delta_1m": [0., 4.],
+                         "spot_flow_coverage": [True, True]})
+    joined = add_flow_features(dense, flow, ["spot_delta_1m", "spot_flow_coverage"], .6)
+    assert joined.spot_delta_1m.iloc[:2].tolist() == [0., 0.]
+    assert joined.spot_delta_1m.iloc[2] == 4.
+    assert not joined.spot_delta_1m_missing.any()
+    late = flow.iloc[1:].copy()
+    joined_late = add_flow_features(dense, late, ["spot_delta_1m"], .5)
+    assert joined_late.spot_delta_1m.iloc[:2].isna().all()
+    assert joined_late.spot_delta_1m_missing.tolist() == [True, True, False]
+    sparse = flow.copy()
+    sparse.loc[1, "spot_delta_1m"] = np.nan
+    with pytest.raises(ValueError, match="coverage"):
+        add_flow_features(dense, sparse, ["spot_delta_1m"], .8)

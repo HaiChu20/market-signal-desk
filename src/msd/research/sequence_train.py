@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 from sklearn.isotonic import IsotonicRegression
 
+from msd.data.flow_features import join_by_known_at
 from msd.research import decision, report_card, splits
 from msd.research.dataset import DEV_END
 from msd.research.sequence_data import SequenceData, SYMBOL_START, build_windows, load_executable_1m
@@ -60,6 +61,29 @@ def _dev_guard(data: SequenceData) -> None:
         raise ValueError("Training requires DEV anchors through 2022-12-31 only")
     if pd.to_datetime(data.anchors.label_end_ts, utc=True).ge(DEV_END).any():
         raise ValueError("Training labels must resolve by 2022-12-31")
+
+
+def add_flow_features(features: pd.DataFrame, flow: pd.DataFrame,
+                      columns: list[str], min_coverage: float = .8) -> pd.DataFrame:
+    """Causally add the pre-registered flow columns after a DEV coverage gate."""
+    missing = set(columns) - set(flow)
+    if missing:
+        raise ValueError(f"Missing configured flow columns: {sorted(missing)}")
+    coverage = flow[columns].notna().mean()
+    failed = coverage[coverage < min_coverage]
+    if len(failed):
+        details = ", ".join(f"{name}={value:.1%}" for name, value in failed.items())
+        raise ValueError(f"Flow feature coverage below {min_coverage:.0%}: {details}")
+    selected = flow[["ts", "known_at", *columns]].copy()
+    joined = join_by_known_at(features, selected)
+    if len(joined) != len(features):
+        raise AssertionError("Flow join changed dense feature row count")
+    # build_windows uses fixed zero imputation for dense tensors. Preserve the
+    # distinction between a covered no-activity zero and unavailable flow by
+    # adding an explicit missingness channel before that imputation.
+    for column in columns:
+        joined[f"{column}_missing"] = joined[column].isna()
+    return joined
 
 
 def _later_blocks(data: SequenceData, train_indices, embargo=splits.EMBARGO):
@@ -240,7 +264,7 @@ def train_walk_forward(data: SequenceData, output: Path, *, n_folds: int = 5,
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-root", type=Path, required=True)
-    parser.add_argument("--config", type=Path, default=Path("hpc/roihu/sequence/configs/dev_v1.json"))
+    parser.add_argument("--config", type=Path, default=Path("hpc/roihu/sequence/configs/dev_v2.json"))
     parser.add_argument("--symbol", default="BTCUSDT")
     parser.add_argument("--seed", type=int)
     parser.add_argument("--start")
@@ -270,8 +294,9 @@ def main():
     months = pd.period_range(warmup, months[-1], freq="M")
     if start < pd.Timestamp(SYMBOL_START[args.symbol]):
         parser.error(f"{args.symbol} cannot start before {SYMBOL_START[args.symbol]}")
-    def load(folder):
-        frames = [pd.read_parquet(folder / f"{m}.parquet") for m in months if (folder / f"{m}.parquet").exists()]
+    def load(folder, columns=None):
+        frames = [pd.read_parquet(folder / f"{m}.parquet", columns=columns)
+                  for m in months if (folder / f"{m}.parquet").exists()]
         if not frames:
             raise FileNotFoundError(folder)
         return pd.concat(frames, ignore_index=True)
@@ -280,6 +305,12 @@ def main():
     bars.update({tf: load(root / "derived" / f"bars_{tf}" / args.symbol)
                  for tf in ("15m", "1h", "4h")})
     features = load(root / "features" / args.symbol)
+    flow_columns = config.get("flow_features", {}).get(args.symbol)
+    if flow_columns:
+        flow = load(root / "features_flow" / args.symbol,
+                    columns=["ts", "known_at", *flow_columns])
+        features = add_flow_features(features, flow, flow_columns,
+                                     float(config["flow_min_non_nan_coverage"]))
     labels = load(root / "labels" / args.symbol)
     labels = labels[(pd.to_datetime(labels.ts, utc=True) >= start) & (pd.to_datetime(labels.ts, utc=True) < end)]
     if args.smoke:
