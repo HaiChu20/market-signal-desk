@@ -89,6 +89,35 @@ def test_depth_parser_and_imbalance():
         binance_depth.parse_depth_rows(rows[:-1])
 
 
+def test_depth_decimal_and_optional_band():
+    rows = [{"timestamp": "2026-01-15 00:00:09", "percentage": f"{p:.2f}",
+             "depth": "2" if p < 0 else "1", "notional": "4" if p < 0 else "2"}
+            for p in (-5, -4, -3, -2, -1, -0.2, 0.2, 1, 2, 3, 4, 5)]
+    frame = binance_depth.parse_depth_rows(rows)
+    assert frame.iloc[0].depth_bid_5pct == 2
+    assert frame.iloc[0].depth_ask_0p2pct == 1
+    assert frame.iloc[0].depth_imbalance_1pct == pytest.approx(1 / 3)
+    with pytest.raises(ValueError, match="invalid bookDepth band"):
+        binance_depth.parse_depth_rows([*rows, {**rows[0], "percentage": "0.50"}])
+    with pytest.raises(ValueError, match="incomplete optional"):
+        binance_depth.parse_depth_rows([r for r in rows if r["percentage"] != "0.20"])
+
+
+def test_depth_run_logs_day_and_month_errors_and_continues(monkeypatch, tmp_path):
+    missing = tmp_path / "missing_bookdepth.csv"
+    monkeypatch.setattr(binance_depth, "MISSING", missing)
+    def fetch(symbol, day):
+        if symbol == "BTCUSDT":
+            raise ValueError("bad day")
+        return day, tmp_path / f"{symbol}-bookDepth-{day}.zip", "verified"
+    monkeypatch.setattr(binance_depth, "fetch_day", fetch)
+    monkeypatch.setattr(binance_depth, "write_month", lambda *args: (_ for _ in ()).throw(ValueError("bad month")))
+    binance_depth.run(date(2023, 1, 1))
+    rows = list(csv.DictReader(missing.open()))
+    assert [(r["symbol"], r["scope"]) for r in rows] == [
+        ("BTCUSDT", "fetch_day"), ("ETHUSDT", "aggregate_month")]
+
+
 class FakeResponse(io.BytesIO):
     def __init__(self, data, length=None):
         super().__init__(data)

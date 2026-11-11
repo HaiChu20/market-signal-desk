@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import csv
 import hashlib
+import math
 import os
 import zipfile
 from collections import defaultdict
@@ -25,6 +26,19 @@ OUT = MAIN / "data/aux/binance_depth"
 BASE = "https://data.binance.vision/data/futures/um/daily/bookDepth"
 SYMBOLS = ("BTCUSDT", "ETHUSDT")
 START = date(2023, 1, 1)
+MISSING = MAIN / "data/logs/missing_bookdepth.csv"
+REQUIRED_BANDS = (-5, -4, -3, -2, -1, 1, 2, 3, 4, 5)
+OPTIONAL_BANDS = (-0.2, 0.2)
+
+
+def log_missing(symbol: str, day_or_month: str, scope: str, reason: str) -> None:
+    MISSING.parent.mkdir(parents=True, exist_ok=True)
+    with MISSING.open("a", newline="") as stream:
+        writer = csv.writer(stream)
+        if stream.tell() == 0:
+            writer.writerow(["symbol", "date_or_month", "scope", "reason"])
+        writer.writerow([symbol, day_or_month, scope, reason])
+    print(f"FAILED {symbol} {day_or_month} ({scope}): {reason}", flush=True)
 
 
 def url(symbol: str, day: date) -> str:
@@ -50,12 +64,13 @@ def parse_depth_rows(rows: list[dict[str, str]]) -> pd.DataFrame:
         if not {"timestamp", "percentage", "depth", "notional"} <= row.keys():
             raise ValueError("bookDepth schema missing required columns")
         ts = pd.to_datetime(row["timestamp"], utc=True)
-        pct = int(row["percentage"])
+        pct = float(row["percentage"])
         depth, notional = float(row["depth"]), float(row["notional"])
-        if pct == 0 or abs(pct) > 5 or depth < 0 or notional < 0:
+        if not all(map(math.isfinite, (pct, depth, notional))) or pct not in (*REQUIRED_BANDS, *OPTIONAL_BANDS) or depth < 0 or notional < 0:
             raise ValueError("invalid bookDepth band or value")
         side = "bid" if pct < 0 else "ask"
-        key = f"{side}_{abs(pct)}pct"
+        band = "0p2" if abs(pct) == 0.2 else str(int(abs(pct)))
+        key = f"{side}_{band}pct"
         record = snapshots[ts]
         if f"depth_{key}" in record:
             raise ValueError(f"duplicate bookDepth band: {ts} {pct}")
@@ -63,8 +78,13 @@ def parse_depth_rows(rows: list[dict[str, str]]) -> pd.DataFrame:
         record[f"notional_{key}"] = notional
     result = []
     for ts, values in sorted(snapshots.items()):
-        if len(values) != 20:
-            raise ValueError(f"incomplete bookDepth snapshot {ts}: {len(values)}/20 fields")
+        required = [f"{kind}_{side}_{abs(band)}pct" for band in REQUIRED_BANDS
+                    for kind in ("depth", "notional") for side in (("bid",) if band < 0 else ("ask",))]
+        if not all(key in values for key in required):
+            raise ValueError(f"incomplete bookDepth snapshot {ts}: missing required bands")
+        optional = [f"{kind}_{side}_0p2pct" for kind in ("depth", "notional") for side in ("bid", "ask")]
+        if sum(key in values for key in optional) not in (0, 4):
+            raise ValueError(f"incomplete optional 0.2% band at {ts}")
         record = {"ts": ts, "known_at": ts, **values}
         for band in range(1, 6):
             bid, ask = values[f"depth_bid_{band}pct"], values[f"depth_ask_{band}pct"]
@@ -99,7 +119,14 @@ def fetch_day(symbol: str, day: date) -> tuple[date, Path | None, str]:
 
 
 def write_month(symbol: str, month: str, paths: list[Path]) -> int:
-    frames = [parse_zip(path) for path in paths]
+    frames = []
+    for path in paths:
+        try:
+            frames.append(parse_zip(path))
+        except Exception as error:
+            log_missing(symbol, path.stem[-10:], "parse_day", f"{type(error).__name__}: {error}")
+    if not frames:
+        raise ValueError("no valid daily bookDepth archives")
     frame = pd.concat(frames, ignore_index=True).sort_values("ts")
     if frame.ts.duplicated().any() or (frame.ts.dt.strftime("%Y-%m") != month).any():
         raise ValueError(f"duplicate or out-of-month bookDepth timestamp in {month}")
@@ -121,12 +148,13 @@ def write_month(symbol: str, month: str, paths: list[Path]) -> int:
     return len(frame)
 
 
-def run(end: date | None = None) -> None:
+def run(end: date | None = None, btc_start: date = START) -> None:
     end = end or datetime.now(timezone.utc).date() - timedelta(days=1)
     for symbol in SYMBOLS:
+        first = btc_start if symbol == "BTCUSDT" else START
         months: dict[str, list[date]] = defaultdict(list)
-        for offset in range((end - START).days + 1):
-            day = START + timedelta(days=offset)
+        for offset in range((end - first).days + 1):
+            day = first + timedelta(days=offset)
             months[day.strftime("%Y-%m")].append(day)
         for month, days in sorted(months.items()):
             paths = []
@@ -140,20 +168,28 @@ def run(end: date | None = None) -> None:
                             paths.append(path)
                             print(f"verified {symbol} {day}: {message}", flush=True)
                         else:
-                            print(f"MISSING {symbol} {day}: {message}", flush=True)
+                            log_missing(symbol, day.isoformat(), "fetch_day", message)
                     except OSError as error:
                         if "15 GiB" in str(error):
                             pool.shutdown(cancel_futures=True)
                             raise
-                        print(f"FAILED {symbol} {day}: {error}", flush=True)
+                        log_missing(symbol, day.isoformat(), "fetch_day", f"{type(error).__name__}: {error}")
                     except Exception as error:
-                        print(f"FAILED {symbol} {day}: {error}", flush=True)
+                        log_missing(symbol, day.isoformat(), "fetch_day", f"{type(error).__name__}: {error}")
             if paths:
-                print(f"aggregated {symbol} {month}: {write_month(symbol, month, sorted(paths))} snapshots", flush=True)
+                try:
+                    print(f"aggregated {symbol} {month}: {write_month(symbol, month, sorted(paths))} snapshots", flush=True)
+                except OSError as error:
+                    if "15 GiB" in str(error):
+                        raise
+                    log_missing(symbol, month, "aggregate_month", f"{type(error).__name__}: {error}")
+                except Exception as error:
+                    log_missing(symbol, month, "aggregate_month", f"{type(error).__name__}: {error}")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--end", type=date.fromisoformat)
+    parser.add_argument("--btc-start", type=date.fromisoformat, default=START)
     args = parser.parse_args()
-    run(args.end)
+    run(args.end, args.btc_start)
