@@ -7,6 +7,7 @@ days of prior minute history for an identical time-based rolling z-score.
 from __future__ import annotations
 
 import argparse
+import csv
 import hashlib
 import os
 import time
@@ -25,6 +26,20 @@ WINDOWS = (5, 15, 60)
 STALE_SECONDS = 120
 COLUMNS = ["ts", *(f"depth_{side}_{band}pct" for band in BANDS for side in ("bid", "ask")),
            "notional_bid_5pct", "notional_ask_5pct"]
+
+
+def missing_archive_days(root: Path, symbol: str) -> set[str]:
+    log = root / "data/logs/missing_bookdepth.csv"
+    if not log.exists():
+        return set()
+    with log.open(newline="") as stream:
+        recorded = {row["date_or_month"] for row in csv.DictReader(stream)
+                    if row.get("symbol") == symbol and row.get("scope") == "fetch_day"
+                    and row.get("reason") == "HTTP 404"}
+    raw = root / "data/raw/binance/bookDepth" / symbol
+    return {day for day in recorded
+            if not ((raw / f"{symbol}-bookDepth-{day}.zip").exists()
+                    and (raw / f"{symbol}-bookDepth-{day}.zip.sha256").exists())}
 
 
 def month_bounds(month: str) -> tuple[pd.Timestamp, pd.Timestamp]:
@@ -180,11 +195,20 @@ def build_month(root: Path, symbol: str, month: str) -> tuple[pd.DataFrame, dict
     snapshots = read_snapshots(root, symbol, warm_start, end)
     frame = make_features(snapshots, warm_start, end)
     frame = frame.loc[(frame.ts >= start) & (frame.ts < end)].reset_index(drop=True)
+    frame["source_missing_day"] = frame.ts.dt.strftime("%Y-%m-%d").isin(missing_archive_days(root, symbol))
+    missing_mask = frame.source_missing_day
+    if missing_mask.any():
+        frame.loc[missing_mask, "coverage"] = False
+        frame.loc[missing_mask, "snapshot_ts"] = pd.NaT
+        frame.loc[missing_mask, "staleness_seconds"] = np.nan
+        features = [column for column in frame if column.startswith(("depth_imbalance_", "total_depth_"))]
+        frame.loc[missing_mask, features] = np.nan
     in_month = snapshots.loc[(snapshots.ts >= start) & (snapshots.ts < end)].sort_values("ts")
     cadence = in_month.ts.diff().dt.total_seconds()
     stats = {"month": month, "snapshots": len(in_month), "minutes": len(frame),
              "source": "parsed parquet" if (root / "data/aux/binance_depth" / symbol / f"{month}.parquet").exists() else "verified raw ZIP",
              "covered": int(frame.coverage.sum()), "stale": int((frame.staleness_seconds > STALE_SECONDS).sum()),
+             "missing_day_minutes": int(missing_mask.sum()),
              "no_prior": int(frame.staleness_seconds.isna().sum()),
              "first_snapshot": str(in_month.ts.min()) if len(in_month) else "none",
              "last_snapshot": str(in_month.ts.max()) if len(in_month) else "none",
@@ -197,13 +221,10 @@ def write_month(root: Path, symbol: str, month: str, frame: pd.DataFrame) -> Pat
     out = root / "data/features_depth" / symbol / f"{month}.parquet"
     out.parent.mkdir(parents=True, exist_ok=True)
     tmp = out.with_name(out.name + f".part.{os.getpid()}")
-    try:
-        pq.write_table(pa.Table.from_pandas(frame, preserve_index=False), tmp, compression="zstd")
-        if pq.read_metadata(tmp).num_rows != len(frame):
-            raise ValueError(f"Parquet row count mismatch: {tmp}")
-        os.replace(tmp, out)
-    finally:
-        tmp.unlink(missing_ok=True)
+    pq.write_table(pa.Table.from_pandas(frame, preserve_index=False), tmp, compression="zstd")
+    if pq.read_metadata(tmp).num_rows != len(frame):
+        raise ValueError(f"Parquet row count mismatch: {tmp}")
+    os.replace(tmp, out)
     return out
 
 
@@ -221,14 +242,18 @@ def write_report(root: Path, symbol: str, rows: list[dict], elapsed: float) -> P
     lines = [f"# Binance bookDepth feature coverage — {symbol}", "",
              f"Available snapshots: {first} through {rows[-1]['month']}. The public UM daily archive begins 2023-01-01 (2021–2022 URLs returned 404 during downloader discovery).",
              f"First parsed snapshot: `{rows[0]['first_snapshot']}`; last parsed snapshot: `{rows[-1]['last_snapshot']}`. Largest within-month snapshot gap: {max(r['max_gap_s'] for r in rows):,.0f} seconds.",
-             "", "Each archive CSV has `timestamp`, `percentage` (−5 through −1 bid; +1 through +5 ask), `depth` (base units), and `notional` (quote units). Some January 2026 archives encode integral bands as decimals (for example `-5.00`) and add an optional paired ±0.2% band; the existing parser stops at the decimal, so this feature build validates SHA256 sidecars and parses those raw ZIPs directly. Every snapshot must contain the ten required bands. The parser pivots them to one snapshot row and sets snapshot `known_at = timestamp`. Snapshot cadence is approximately 30 seconds. Features are minute-open rows with `known_at` at minute close. Every as-of snapshot time is ≤ `known_at`; observations older than 120 seconds have `coverage=False` and NaN features. The 5% total notional avoids double-counting nested bands. The z-score uses a trailing 7D minute grid with at least two valid values and population standard deviation; missing first-history observations remain NaN.",
-             "", "| Month | Source | Snapshots | Minutes | Covered | Coverage | Stale >120s | No prior | Median cadence (s) | Max gap (s) |",
-             "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|"]
+             "", "Each archive CSV has `timestamp`, `percentage` (−5 through −1 bid; +1 through +5 ask), `depth` (base units), and `notional` (quote units). January 2026 introduced decimal-form integral bands and an optional paired ±0.2% band. Every snapshot must contain the ten required bands. The parser pivots them to one snapshot row and sets snapshot `known_at = timestamp`. Snapshot cadence is approximately 30 seconds. Features are minute-open rows with `known_at` at minute close. Every as-of snapshot time is ≤ `known_at`; observations older than 120 seconds have `coverage=False` and NaN features. The 5% total notional avoids double-counting nested bands. The z-score uses a trailing 7D minute grid with at least two valid values and population standard deviation; missing first-history observations remain NaN.",
+             "", "`source_missing_day=True` marks a source archive confirmed HTTP 404. All market features, snapshot time and staleness are null on those days; coverage is false.",
+             "", "| Month | Source | Snapshots | Minutes | Covered | Coverage | Missing archive minutes | Stale >120s | No prior | Median cadence (s) | Max gap (s) |",
+             "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|"]
     for r in rows:
-        lines.append(f"| {r['month']} | {r['source']} | {r['snapshots']:,} | {r['minutes']:,} | {r['covered']:,} | {r['covered']/r['minutes']:.2%} | {r['stale']:,} | {r['no_prior']:,} | {r['cadence_median_s']:.1f} | {r['max_gap_s']:.0f} |")
+        lines.append(f"| {r['month']} | {r['source']} | {r['snapshots']:,} | {r['minutes']:,} | {r['covered']:,} | {r['covered']/r['minutes']:.2%} | {r['missing_day_minutes']:,} | {r['stale']:,} | {r['no_prior']:,} | {r['cadence_median_s']:.1f} | {r['max_gap_s']:.0f} |")
     minutes = sum(r["minutes"] for r in rows)
     covered = sum(r["covered"] for r in rows)
     lines += ["", f"Total: **{sum(r['snapshots'] for r in rows):,}** snapshots; **{covered:,}/{minutes:,}** minutes covered (**{covered/minutes:.2%}**). Build runtime: **{elapsed:.1f} s**.", ""]
+    if rows[-1]["minutes"] < int((month_bounds(rows[-1]["month"])[1] - month_bounds(rows[-1]["month"])[0]) / pd.Timedelta(minutes=1)):
+        lines.append(f"The final month is partial; output stops at the close of the last downloaded source day ({rows[-1]['last_snapshot'][:10]}).")
+        lines.append("")
     path.write_text("\n".join(lines))
     return path
 
@@ -246,6 +271,17 @@ def run(root: Path = ROOT, symbols: tuple[str, ...] = SYMBOLS) -> None:
         rows = []
         for month in months:
             frame, stats = build_month(root, symbol, month)
+            if month == months[-1] and stats["last_snapshot"] != "none":
+                final_day = pd.Timestamp(stats["last_snapshot"]).floor("D") + pd.Timedelta(days=1)
+                missing_days = [pd.Timestamp(day, tz="UTC") + pd.Timedelta(days=1)
+                                for day in missing_archive_days(root, symbol) if day.startswith(month)]
+                if missing_days:
+                    final_day = max(final_day, *missing_days)
+                frame = frame.loc[frame.ts < final_day].reset_index(drop=True)
+                stats.update(minutes=len(frame), covered=int(frame.coverage.sum()),
+                             stale=int((frame.staleness_seconds > STALE_SECONDS).sum()),
+                             no_prior=int(frame.staleness_seconds.isna().sum()),
+                             missing_day_minutes=int(frame.source_missing_day.sum()))
             path = write_month(root, symbol, month, frame)
             rows.append(stats)
             print(f"{symbol} {month}: {stats['covered']:,}/{stats['minutes']:,} covered; {stats['snapshots']:,} snapshots -> {path}", flush=True)
