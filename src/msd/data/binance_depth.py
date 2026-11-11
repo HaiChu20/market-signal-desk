@@ -60,10 +60,15 @@ def checksum(url_: str) -> str | None:
 
 def parse_depth_rows(rows: list[dict[str, str]]) -> pd.DataFrame:
     snapshots: dict[pd.Timestamp, dict[str, float]] = defaultdict(dict)
+    previous_text: str | None = None
+    previous_ts: pd.Timestamp | None = None
     for row in rows:
         if not {"timestamp", "percentage", "depth", "notional"} <= row.keys():
             raise ValueError("bookDepth schema missing required columns")
-        ts = pd.to_datetime(row["timestamp"], utc=True)
+        if row["timestamp"] != previous_text:
+            previous_text = row["timestamp"]
+            previous_ts = pd.to_datetime(previous_text, utc=True)
+        ts = previous_ts
         pct = float(row["percentage"])
         depth, notional = float(row["depth"]), float(row["notional"])
         if not all(map(math.isfinite, (pct, depth, notional))) or pct not in (*REQUIRED_BANDS, *OPTIONAL_BANDS) or depth < 0 or notional < 0:
