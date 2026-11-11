@@ -7,6 +7,8 @@ from zoneinfo import ZoneInfo
 import numpy as np
 import pandas as pd
 
+from .instruments import STAGE9_INSTRUMENTS
+
 NY = ZoneInfo("America/New_York")
 INDEX_SYMBOLS = {"USATECHIDXUSD", "USA500IDXUSD", "USA30IDXUSD", "DEUIDXEUR", "GBRIDXGBP", "JPNIDXJPY", "NSXUSD", "SPXUSD", "GRXEUR"}
 TIMEFRAMES = {"5m": 5, "15m": 15, "1h": 60, "4h": 240, "1d": 1440}
@@ -20,6 +22,42 @@ METAL_SYMBOLS = {"XAUUSD", "XAGUSD"}
 # A minute without ticks has no bar but leaves OHLC unchanged, so an intraday
 # bucket is complete once this share of its expected minutes is observed.
 MIN_COVERAGE = 0.80
+
+
+def _stage9_session_arrays(source: pd.DataFrame, ts: pd.Series, symbol: str, minutes: int,
+                           timeframe: str) -> tuple[pd.DataFrame, pd.Series, pd.Series, pd.Series, np.ndarray, np.ndarray]:
+    """Map quotes to measured, DST-aware sessions for the Stage 9 markets."""
+    rule = STAGE9_INSTRUMENTS[symbol]
+    if not rule.session_ready:
+        raise ValueError(f"{symbol} session is pending measurement from a completed local month")
+    opened, closed = int(rule.session_open_minute), int(rule.session_close_minute)
+    local = ts.dt.tz_convert(rule.timezone)
+    minute_of_day = local.dt.hour * 60 + local.dt.minute
+    local_day = pd.to_datetime(local.dt.date)
+    if opened == closed:  # rollover boundary, continuous 24-hour weekday session
+        open_day = local_day - pd.to_timedelta((minute_of_day < opened).astype(int), unit="D")
+        duration = 1440
+    elif opened < closed:  # same-local-day quote window
+        active = (minute_of_day >= opened) & (minute_of_day < closed)
+        source, ts, local_day, minute_of_day = source.loc[active].copy(), ts.loc[active], local_day.loc[active], minute_of_day.loc[active]
+        open_day = local_day
+        duration = closed - opened
+    else:  # session crosses local midnight
+        active = (minute_of_day >= opened) | (minute_of_day < closed)
+        source, ts, local_day, minute_of_day = source.loc[active].copy(), ts.loc[active], local_day.loc[active], minute_of_day.loc[active]
+        open_day = local_day - pd.to_timedelta((minute_of_day < closed).astype(int), unit="D")
+        duration = 1440 - opened + closed
+    session_open = (open_day.dt.tz_localize(rule.timezone) + pd.to_timedelta(opened, unit="m")).dt.tz_convert("UTC")
+    session_end = session_open + pd.Timedelta(minutes=duration)
+    trade_day = session_end.dt.tz_convert(rule.timezone).dt.day_of_week
+    weekday = trade_day < 5
+    source, ts, session_open, session_end = source.loc[weekday].copy(), ts.loc[weekday], session_open.loc[weekday], session_end.loc[weekday]
+    elapsed = ((ts - session_open).dt.total_seconds() // 60).astype(np.int64)
+    offsets = np.zeros(len(source), dtype=np.int64) if timeframe == "1d" else (elapsed // minutes) * minutes
+    bucket_open = session_open + pd.to_timedelta(offsets, unit="m")
+    bucket_end = session_end if timeframe == "1d" else np.minimum(bucket_open + pd.Timedelta(minutes=minutes), session_end)
+    expected = ((bucket_end - bucket_open).dt.total_seconds() // 60).astype(np.int64).to_numpy()
+    return source, ts, bucket_open, bucket_end, expected, expected.copy()
 
 
 def _session_info(ts: pd.Timestamp, index_market: bool) -> tuple[date, pd.Timestamp, pd.Timestamp]:
@@ -51,7 +89,12 @@ def build_timeframe(bars: pd.DataFrame, symbol: str, timeframe: str) -> pd.DataF
     source = bars.sort_values("ts").drop_duplicates("ts").reset_index(drop=True).copy()
     ts = pd.to_datetime(source.ts, utc=True).astype("datetime64[ns, UTC]")
     source["ts"] = ts
-    if index_market:
+    configured = symbol in STAGE9_INSTRUMENTS
+    if configured:
+        source, ts, bucket_open, bucket_end, expected_for, effective_for = _stage9_session_arrays(
+            source, ts, symbol, minutes, timeframe)
+        expected = None
+    elif index_market:
         local = ts.dt.tz_convert(NY)
         minute_of_day, dow = local.dt.hour * 60 + local.dt.minute, local.dt.day_of_week
         active = (((dow >= 0) & (dow <= 3) & ((minute_of_day < 17*60) | (minute_of_day >= 18*60))) |
