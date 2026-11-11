@@ -8,12 +8,11 @@ from urllib.parse import parse_qs, urlsplit
 import pandas as pd
 import pytest
 
-from msd.live.binance import BinanceSpotFeed, parse_kline
+from msd.live.binance import BinanceMinuteBarBuilder, BinanceSpotFeed, parse_kline
 from msd.live.shadow import QualifiedModels, ShadowLoop, format_signal
 from msd.live.online_features import EXTRA_ONLINE_METHODS, VALIDATED_ONLINE_METHODS
 from msd.live.online_features import OnlineRow
 from msd.live.signal_policy import SignalPolicy
-from msd.live.telegram import TelegramClient
 from msd.processing.features import build_features
 from msd.processing.levels import build_levels
 from msd.processing.timeframes import build_all_timeframes
@@ -112,26 +111,29 @@ def test_transport_reconnect_replays_missing_closed_minute():
     assert seen == [t0 + pd.Timedelta(minutes=i) for i in (1, 2, 3)]
 
 
-def test_telegram_format_and_mocked_http(monkeypatch):
+def test_paper_signal_format_contains_required_fields():
     order = {'side': 1, 'entry_type': 'limit', 'entry_price': 100, 'stop': 95, 'tp': 110,
              'confidence': .7, 'expiry_ts': pd.Timestamp('2025-01-01 01:00', tz='UTC')}
     event = {'price': 101, 'method': 'sr_touch'}
     text = format_signal('BTCUSDT', event, order, model_version='abcd', expected_net_R=1.0)
+    assert text.startswith('PAPER BTCUSDT')
     assert 'BUY LIMIT 100.00' in text and 'SL 95.00' in text and 'TP 110.00' in text
     assert 'Confidence 70.0% P(TP first)' in text and 'Expected net R +1.00' in text
-    requests = []
-    class Response(io.BytesIO): pass
-    def opener(req, timeout):
-        requests.append(req)
-        return Response(b'{}')
-    sender = TelegramClient(token='hidden-test-token', chat_id='42', opener=opener,
-                            monotonic=lambda: 1, sleep=lambda _: None)
-    sender.send_message(text)
-    assert len(requests) == 1 and b'chat_id=42' in requests[0].data
-    assert 'hidden-test-token' not in text
-    monkeypatch.delenv('TELEGRAM_BOT_TOKEN', raising=False)
-    monkeypatch.delenv('TELEGRAM_CHAT_ID', raising=False)
-    assert not TelegramClient().credentials_present
+
+
+def test_trade_and_book_ticker_build_executable_minute_bar():
+    builder = BinanceMinuteBarBuilder()
+    t0 = pd.Timestamp('2025-01-01', tz='UTC')
+    assert builder.update({'b': '99.9', 'a': '100.1'}, received_at=t0) == []
+    assert builder.update({'e': 'trade', 'T': int((t0+pd.Timedelta(seconds=10)).timestamp()*1000),
+                           'p': '100', 'q': '2', 'm': False}, received_at=t0) == []
+    assert builder.update({'b': '100.0', 'a': '100.2'}, received_at=t0+pd.Timedelta(seconds=30)) == []
+    closed = builder.update({'b': '100.1', 'a': '100.3'}, received_at=t0+pd.Timedelta(minutes=1))
+    assert len(closed) == 1
+    row = closed[0]
+    assert (row['bid_o'], row['bid_h'], row['bid_l'], row['bid_c']) == (99.9, 100., 99.9, 100.)
+    assert (row['ask_o'], row['ask_h'], row['ask_l'], row['ask_c']) == (100.1, 100.2, 100.1, 100.2)
+    assert row['volume'] == 2 and row['trades'] == 1 and row['taker_buy_base'] == 2
 
 
 def test_ungraded_report_card_cannot_load_model(tmp_path):
@@ -190,37 +192,33 @@ def test_one_structured_audit_reason_per_bar(tmp_path, reason):
                     'cost_R': .02, 'financing_R': 0.}
     class Models:
         def get(self, *_): return None if reason == 'model' else (FakeArtifact(), model_policy)
-    class Telegram:
-        credentials_present = True
-        messages = []
-        def send_message(self, message): self.messages.append(message)
     output = []
-    telegram = Telegram()
     policy = SignalPolicy(warmup_minutes=3, spread_min_samples=1,
                           spread_low_percentile=0., spread_high_percentile=1.)
-    loop = ShadowLoop('BTCUSDT', tmp_path/f'{reason}.sqlite3', models=Models(), telegram=telegram,
+    loop = ShadowLoop('BTCUSDT', tmp_path/f'{reason}.sqlite3', models=Models(),
                       output=output.append, policy=policy, replay=True,
                       blackout=lambda *_: reason == 'blackout')
     loop.online = FakeOnline()
     if reason == 'position':
         loop.connection.execute('INSERT INTO positions VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
                                 ('BTCUSDT', 'pending', 1, 'market',
-                                 (stamp+pd.Timedelta(minutes=10)).isoformat(), None, None,
+                                 stamp.isoformat(), None, None,
                                  90., 110., (stamp+pd.Timedelta(minutes=60)).isoformat(), None, None))
         loop.connection.commit()
     current = bar(stamp)
     if reason == 'data': current['ask_c'] = current['bid_c']
-    loop.process(current)
+    signals = loop.process(current)
     assert len(output) == 1
     record = json.loads(output[0])
     assert record['reason'] == reason
     assert loop.connection.execute('SELECT reason FROM bar_audit').fetchone()[0] == reason
     if reason == 'emitted':
-        assert len(telegram.messages) == 1
-        assert 'valid until 2025-01-01T00:09:00+00:00' in telegram.messages[0]
-        assert "don't chase outside 99.50–100.50" in telegram.messages[0]
+        assert len(signals) == 1
+        assert 'valid until 2025-01-01T00:09:00+00:00' in signals[0]
+        assert "don't chase outside 99.50–100.50" in signals[0]
+        assert json.loads(output[0])['signal'] == signals[0]
     else:
-        assert not telegram.messages
+        assert signals == []
     loop.close()
 
 
@@ -253,6 +251,34 @@ def test_position_reopens_one_minute_after_label_end(tmp_path):
     loop.close()
 
 
+def test_future_known_at_is_silent_and_audited_as_data(tmp_path):
+    stamp = pd.Timestamp('2025-01-01 00:03', tz='UTC')
+    def bar(ts):
+        return {'ts': ts, 'volume': 1., 'bid_o': 100., 'bid_h': 101., 'bid_l': 99.,
+                'bid_c': 100., 'ask_o': 100.1, 'ask_h': 101.1, 'ask_l': 99.1,
+                'ask_c': 100.1}
+    class FakeOnline:
+        def __init__(self):
+            self.bars = pd.DataFrame([bar(stamp-pd.Timedelta(minutes=2)),
+                                      bar(stamp-pd.Timedelta(minutes=1))])
+        def update(self, item):
+            self.bars = pd.concat([self.bars, pd.DataFrame([item])], ignore_index=True)
+            event = {'ts': stamp, 'known_at': stamp+pd.Timedelta(minutes=2),
+                     'method': 'sr_touch', 'side': 1, 'price': 100.,
+                     'natural_sl': None, 'natural_tp': None}
+            return OnlineRow(pd.Series({'known_at': stamp+pd.Timedelta(minutes=2),
+                                        '1m_atr14': 2.}), pd.DataFrame(), [event])
+    lines = []
+    loop = ShadowLoop('BTCUSDT', tmp_path/'future.sqlite3', output=lines.append, replay=True,
+                      policy=SignalPolicy(warmup_minutes=3, spread_min_samples=1,
+                                          spread_low_percentile=0., spread_high_percentile=1.))
+    loop.online = FakeOnline()
+    assert loop.process(bar(stamp)) == []
+    assert json.loads(lines[0])['reason'] == 'data'
+    assert json.loads(lines[0])['detail'] == 'future_known_at'
+    loop.close()
+
+
 @pytest.mark.slow
 def test_archive_feed_and_shadow_replay_equals_offline(tmp_path):
     if not ARCHIVE.exists(): pytest.skip('read-only BTC archive unavailable')
@@ -279,11 +305,8 @@ def test_archive_feed_and_shadow_replay_equals_offline(tmp_path):
                  if event['ts'] >= pd.Timestamp('2021-06-02 01:00', tz='UTC'))
     start, end = max(1, target-30), min(len(bars), target+31)
     shown = []
-    class NoSend:
-        credentials_present = True
-        def send_message(self, _): raise AssertionError('ungraded candidate reached Telegram')
     loop = ShadowLoop('BTCUSDT', tmp_path/'shadow.sqlite3', history=bars.iloc[:start],
-                      telegram=NoSend(), output=shown.append, replay=True)
+                      output=shown.append, replay=True)
     assert 'sr_touch' in loop.online.available_methods
     assert loop.online.unavailable_methods
     for row in bars.iloc[start:end].to_dict('records'):

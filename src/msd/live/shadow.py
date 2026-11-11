@@ -14,9 +14,9 @@ from msd.live.binance import BinanceSpotFeed, SYMBOLS
 from msd.live.model_serving import load_artifact, order_from_event
 from msd.live.online_features import OnlineFeatures
 from msd.live.signal_policy import SignalPolicy
-from msd.live.telegram import TelegramClient
 from msd.methods.common import exit_candidates
 from msd.research.decision import choose
+from msd.research.gating import gate_open_signals
 
 QUALIFIED_GRADES = {"✅", "🧪"}
 DEFAULT_STATE = Path("data/live/shadow.sqlite3")
@@ -93,15 +93,14 @@ class QualifiedModels:
 class ShadowLoop:
     """Replayable candidate logger; only qualified models may send alerts."""
     def __init__(self, symbol: str, state_path: Path, *, history: pd.DataFrame | None = None,
-                 models: QualifiedModels | None = None, telegram: TelegramClient | None = None,
-                 output=print, policy: SignalPolicy | None = None, blackout=None,
+                 models: QualifiedModels | None = None, output=print,
+                 policy: SignalPolicy | None = None, blackout=None,
                  clock=None, replay: bool = False):
         if symbol not in SYMBOLS:
             raise ValueError("public spot loop supports BTCUSDT and ETHUSDT")
         self.symbol = symbol
         self.online = OnlineFeatures(symbol, history)
         self.models = models or QualifiedModels()
-        self.telegram = telegram or TelegramClient()
         self.output = output
         self.policy = policy or SignalPolicy()
         self.blackout = blackout or (lambda _symbol, _stamp: False)
@@ -155,9 +154,22 @@ class ShadowLoop:
             self.connection.execute("UPDATE positions SET status='closed',label_end_ts=? WHERE symbol=?",
                                     (ts.isoformat(), self.symbol))
 
+    def _position_allowed(self, known_at: pd.Timestamp, planned_end: pd.Timestamp) -> bool:
+        row = self.connection.execute("SELECT entry_ts,planned_end_ts,label_end_ts FROM positions WHERE symbol=?",
+                                      (self.symbol,)).fetchone()
+        current = {"known_at": known_at, "label_end_ts": planned_end,
+                   "event_key": "current", "sym": self.symbol}
+        candidates = [current]
+        if row is not None:
+            entry, fallback_end, label_end = row
+            candidates.insert(0, {"known_at": pd.Timestamp(entry) - pd.Timedelta(minutes=1),
+                                  "label_end_ts": pd.Timestamp(label_end or fallback_end),
+                                  "event_key": "previous", "sym": self.symbol})
+        gated = gate_open_signals(pd.DataFrame(candidates))
+        return "current" in set(gated.event_key)
+
     def _position_busy(self, ts: pd.Timestamp) -> bool:
-        row = self.connection.execute("SELECT label_end_ts FROM positions WHERE symbol=?", (self.symbol,)).fetchone()
-        return bool(row and (row[0] is None or ts <= pd.Timestamp(row[0])))
+        return not self._position_allowed(ts, ts)
 
     def _edge_order(self, artifact, policy: dict, event: dict, features: pd.Series, levels: pd.DataFrame):
         if not {"candidate_sl_ATR", "candidate_tp_R"}.issubset(artifact.feature_dtypes):
@@ -217,11 +229,20 @@ class ShadowLoop:
         result = self.online.update(bar)
         self._advance_position(bar)
         data_detail = self.policy.data_reason(self.online.bars, self.clock(), replay=self.replay)
+        decision_known_at = stamp + pd.Timedelta(minutes=1)
+        feature_known_at = result.features.get("known_at")
+        if feature_known_at is not None and pd.Timestamp(feature_known_at) > decision_known_at:
+            data_detail = "future_known_at"
         messages = []
         reasons = []
         emitted = None
         for event in result.events:
             method = event["method"]
+            event_known_at = pd.Timestamp(event["known_at"])
+            if event_known_at.tzinfo is None:
+                event_known_at = event_known_at.tz_localize("UTC")
+            if event_known_at > decision_known_at:
+                data_detail = "future_known_at"
             sides = event.get("side_candidates", [event.get("side")])
             side_text = "/".join("BUY" if side == 1 else "SELL" for side in sides)
             message = (f"PRELIMINARY {self.symbol} | {side_text} candidate near {float(event['price']):.2f}"
@@ -241,7 +262,8 @@ class ShadowLoop:
                                                 result.features, result.levels)
                     if decision is None:
                         reasons.append("edge")
-                    elif self._position_busy(stamp):
+                    elif not self._position_allowed(event_known_at,
+                                                    stamp + pd.Timedelta(minutes=2 + self.policy.max_hold_minutes)):
                         reasons.append("position")
                     elif self.blackout(self.symbol, stamp):
                         reasons.append("blackout")
@@ -273,13 +295,14 @@ class ShadowLoop:
             serialized = json.dumps(event, default=_json_default, sort_keys=True)
             cursor = self.connection.execute("INSERT OR IGNORE INTO candidates VALUES (?,?,?,?,?,?)",
                                              (self.symbol, method, stamp.isoformat(), serialized, message, status))
-            if cursor.rowcount:
+            if cursor.rowcount and status == "EMITTED":
                 messages.append(message)
-        reason = ("data" if data_detail else "no_setup" if not result.events else
+        reason = ("data" if data_detail else "edge" if not result.events else
                   next((code for code in ("emitted", "blackout", "position", "edge", "model")
                         if code in reasons), "model"))
         audit = {"symbol": self.symbol, "ts": stamp.isoformat(), "reason": reason,
-                 "detail": data_detail or "", "events": len(result.events)}
+                 "detail": data_detail or ("no_setup" if not result.events else ""),
+                 "events": len(result.events)}
         if emitted is not None:
             audit["signal"] = emitted
         new_audit = self.connection.execute("INSERT OR IGNORE INTO bar_audit VALUES (?,?,?,?,?)",
@@ -289,8 +312,6 @@ class ShadowLoop:
         self.connection.commit()
         if new_audit:
             self.output(json.dumps(audit, sort_keys=True))
-        if emitted is not None and self.telegram.credentials_present:
-            self.telegram.send_message(emitted)
         return messages
 
     def close(self):

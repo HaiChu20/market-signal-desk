@@ -1,9 +1,6 @@
 services:
   market-signal-desk:
     build: .
-    environment:
-      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
-      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
     command: ["python", "-m", "msd.live.shadow"]
     volumes:
       - live-state:/app/data/live
