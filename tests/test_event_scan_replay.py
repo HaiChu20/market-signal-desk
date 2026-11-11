@@ -27,6 +27,9 @@ def test_missing_required_column_raises(monkeypatch):
     bars=pd.DataFrame({'ts':ts,**{f'{s}_{f}':np.ones(3) for s in ('bid','ask') for f in 'ohlc'}})
     with pytest.raises(ValueError,match='1h_macd_hist_atr'):
         pipeline.label_method_events(pd.DataFrame({'ts':ts,'1m_atr14':1.}),pd.DataFrame(),bars,'BTCUSDT')
+    with pytest.raises(ValueError,match='all_nan'):
+        pipeline.label_method_events(pd.DataFrame({'ts':ts,'1m_atr14':1.,
+            '1h_macd_hist_atr':np.nan}),pd.DataFrame(),bars,'BTCUSDT')
 
 def test_events_only_state_equivalence_across_year(monkeypatch,tmp_path):
     root=tmp_path/'source';sym='BTCUSDT';bars_dir=root/'bars/binance_spot'/sym;bars_dir.mkdir(parents=True)
