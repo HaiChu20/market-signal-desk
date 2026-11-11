@@ -7,6 +7,7 @@ from datetime import date
 from pathlib import Path
 from urllib.error import HTTPError
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -35,15 +36,51 @@ def test_bybit_parser_and_asof(tmp_path):
                         on="decision").delta.isna().all()
 
 
-def test_bybit_rejects_bad_side():
-    with pytest.raises(ValueError):
-        bybit.parse_trade({"timestamp": "1", "side": "Maker", "size": "1", "price": "2"})
+def _archive(*rows: str, header: str = "timestamp,side,size,price") -> bytes:
+    return gzip.compress(("\n".join((header, *rows)) + "\n").encode())
+
+
+@pytest.mark.parametrize("row, header, message", [
+    ("1704067200,Maker,1,2", "timestamp,side,size,price", "invalid taker side: maker"),
+    ("1704067200,Buy,-1,100", "timestamp,side,size,price", "invalid size or price"),
+    ("1704067200,Buy,1,0", "timestamp,side,size,price", "invalid size or price"),
+    ("1706745600,Buy,1,100", "timestamp,side,size,price", "outside archive month"),
+    ("1704067200,1", "timestamp,size", "schema mismatch"),
+])
+def test_bybit_rejects_invalid_archives(row, header, message):
+    with pytest.raises(ValueError, match=message):
+        bybit.aggregate_bytes(_archive(row, header=header), "2024-01")
 
 
 def test_bybit_zero_size_dust_trade_keeps_count():
-    stamp, buy, size, price = bybit.parse_trade({"timestamp": "1593339590.1551", "side": "Sell",
-                                                "size": "0.0", "price": "9055.5"})
-    assert not buy and size == 0 and price == 9055.5
+    bars = bybit.aggregate_bytes(_archive("1593339590.1551,Sell,0.0,9055.5"), "2020-06")
+    assert bars.trade_count.tolist() == [1] and bars.sell_trade_count.tolist() == [1]
+    assert bars.sell_taker_volume.tolist() == [0.0] and bars.vwap_sell.isna().all()
+
+
+def test_bybit_vectorised_sums_equal_sequential_row_loop(tmp_path):
+    rng = np.random.default_rng(7)
+    stamps = 1704067200 + np.sort(rng.uniform(0, 1200, 4000)).round(4)
+    rows = [f"{t},{rng.choice(['Buy', 'Sell'])},{rng.uniform(0, 3):.6f},{rng.uniform(4e4, 5e4):.2f}"
+            for t in stamps]
+    paths = []
+    # The split falls inside a minute, so that minute accumulates across two files.
+    for name, part in (("a", rows[:2001]), ("b", rows[2001:])):
+        paths.append(tmp_path / f"{name}.csv.gz")
+        paths[-1].write_bytes(_archive(*part))
+    acc = {}
+    for row in rows:
+        stamp, side, size, price = row.split(",")
+        size, price, s = float(size), float(price), 0 if side == "Buy" else 1
+        v = acc.setdefault(pd.to_datetime(float(stamp), unit="s", utc=True).floor("min"), [0.0] * 8)
+        v[s] += size; v[s + 2] += 1; v[s + 4] += size * price; v[6] = max(v[6], size); v[7] += 1
+    expected = pd.DataFrame.from_records(
+        [{"ts": ts, "known_at": ts + pd.Timedelta(minutes=1), "buy_taker_volume": v[0],
+          "sell_taker_volume": v[1], "delta": v[0] - v[1], "buy_trade_count": int(v[2]),
+          "sell_trade_count": int(v[3]), "vwap_buy": v[4] / v[0] if v[0] else float("nan"),
+          "vwap_sell": v[5] / v[1] if v[1] else float("nan"), "max_trade": v[6],
+          "trade_count": int(v[7])} for ts, v in sorted(acc.items())], columns=bybit.COLUMNS)
+    pd.testing.assert_frame_equal(bybit.aggregate_files(paths, "2024-01"), expected, check_exact=True)
 
 
 def test_bybit_memory_matches_disk_and_manifest_resume(monkeypatch, tmp_path):
@@ -87,6 +124,35 @@ def test_depth_parser_and_imbalance():
     assert frame.iloc[0].depth_imbalance_1pct == pytest.approx(1 / 3)
     with pytest.raises(ValueError):
         binance_depth.parse_depth_rows(rows[:-1])
+
+
+def test_depth_decimal_and_optional_band():
+    rows = [{"timestamp": "2026-01-15 00:00:09", "percentage": f"{p:.2f}",
+             "depth": "2" if p < 0 else "1", "notional": "4" if p < 0 else "2"}
+            for p in (-5, -4, -3, -2, -1, -0.2, 0.2, 1, 2, 3, 4, 5)]
+    frame = binance_depth.parse_depth_rows(rows)
+    assert frame.iloc[0].depth_bid_5pct == 2
+    assert frame.iloc[0].depth_ask_0p2pct == 1
+    assert frame.iloc[0].depth_imbalance_1pct == pytest.approx(1 / 3)
+    with pytest.raises(ValueError, match="invalid bookDepth band"):
+        binance_depth.parse_depth_rows([*rows, {**rows[0], "percentage": "0.50"}])
+    with pytest.raises(ValueError, match="incomplete optional"):
+        binance_depth.parse_depth_rows([r for r in rows if r["percentage"] != "0.20"])
+
+
+def test_depth_run_logs_day_and_month_errors_and_continues(monkeypatch, tmp_path):
+    missing = tmp_path / "missing_bookdepth.csv"
+    monkeypatch.setattr(binance_depth, "MISSING", missing)
+    def fetch(symbol, day):
+        if symbol == "BTCUSDT":
+            raise ValueError("bad day")
+        return day, tmp_path / f"{symbol}-bookDepth-{day}.zip", "verified"
+    monkeypatch.setattr(binance_depth, "fetch_day", fetch)
+    monkeypatch.setattr(binance_depth, "write_month", lambda *args: (_ for _ in ()).throw(ValueError("bad month")))
+    binance_depth.run(date(2023, 1, 1))
+    rows = list(csv.DictReader(missing.open()))
+    assert [(r["symbol"], r["scope"]) for r in rows] == [
+        ("BTCUSDT", "fetch_day"), ("ETHUSDT", "aggregate_month")]
 
 
 class FakeResponse(io.BytesIO):

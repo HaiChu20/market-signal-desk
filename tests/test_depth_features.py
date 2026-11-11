@@ -82,3 +82,28 @@ def test_raw_decimal_bands_are_integral_and_verified(tmp_path) -> None:
     assert len(result) == 1
     assert result.iloc[0].depth_bid_5pct == 95
     assert result.iloc[0].notional_ask_5pct == 1005
+
+
+def test_http_404_day_is_flagged_and_all_features_nan(tmp_path) -> None:
+    start = pd.Timestamp("2023-02-08", tz="UTC")
+    source = snapshots(pd.DatetimeIndex([start - pd.Timedelta(minutes=1), start + pd.Timedelta(minutes=1)]))
+    base = tmp_path / "data/aux/binance_depth/ETHUSDT"
+    base.mkdir(parents=True)
+    for month in ("2023-02",):
+        pq.write_table(pa.Table.from_pandas(source, preserve_index=False), base / f"{month}.parquet")
+    log = tmp_path / "data/logs/missing_bookdepth.csv"
+    log.parent.mkdir(parents=True)
+    log.write_text("symbol,date_or_month,scope,reason\nETHUSDT,2023-02-08,fetch_day,HTTP 404\n")
+    frame, stats = build_month(tmp_path, "ETHUSDT", "2023-02")
+    day = frame.loc[frame.ts.dt.strftime("%Y-%m-%d") == "2023-02-08"]
+    assert len(day) == 1440 and day.source_missing_day.all()
+    assert not day.coverage.any()
+    assert day[[c for c in day if c.startswith(("depth_imbalance_", "total_depth_"))]].isna().all().all()
+    assert stats["missing_day_minutes"] == 1440
+    raw = tmp_path / "data/raw/binance/bookDepth/ETHUSDT"
+    raw.mkdir(parents=True)
+    (raw / "ETHUSDT-bookDepth-2023-02-08.zip").write_bytes(b"verified")
+    (raw / "ETHUSDT-bookDepth-2023-02-08.zip.sha256").write_text("verified")
+    recovered, stats = build_month(tmp_path, "ETHUSDT", "2023-02")
+    assert stats["missing_day_minutes"] == 0
+    assert not recovered.source_missing_day.any()
