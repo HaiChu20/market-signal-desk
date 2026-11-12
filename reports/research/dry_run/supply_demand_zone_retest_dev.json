@@ -1,0 +1,272 @@
+{
+  "method": "supply_demand_zone_retest",
+  "period": "dev",
+  "preliminary": true,
+  "protocol": "v2",
+  "grade_in_dev": "not applicable; protocol section 5 grades test only",
+  "pooled": {
+    "n": 0,
+    "signals_per_year": 0,
+    "hit_rate": null,
+    "net_avg_R": null,
+    "t_stat": null,
+    "profit_factor": null,
+    "daily_sharpe": null,
+    "max_drawdown": null,
+    "brier": 0.21797898641407215,
+    "brier_skill_vs_p0": -2.220446049250313e-16,
+    "positive_dev_year_share": null,
+    "deflated_sharpe_ratio": null,
+    "random_direction_percentile": null,
+    "pbo": null,
+    "grade": "ungraded: development",
+    "random_direction_matched_signals": 0,
+    "row_accounting": {
+      "events": 9,
+      "candidate_rows": 326,
+      "assembled_rows": 108,
+      "drops": {
+        "invalid_geometry": 0,
+        "missing_outcome": 218
+      },
+      "cpcv_test_groups": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "cpcv_train_scores": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "cpcv_test_scores": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "oof_predicted_rows": 108,
+      "selected_signals": 0,
+      "no_oof_prediction": 0
+    },
+    "selection_comparison": {
+      "selected_n": 0,
+      "selected_avg_R": null,
+      "unselected_n": 108,
+      "unselected_avg_R": -1.1213949605342475,
+      "same_event_unselected_n": 0,
+      "same_event_unselected_avg_R": null
+    }
+  },
+  "per_instrument": {
+    "USA500IDXUSD": {
+      "n": 0,
+      "signals_per_year": 0,
+      "hit_rate": null,
+      "net_avg_R": null,
+      "t_stat": null,
+      "profit_factor": null,
+      "daily_sharpe": null,
+      "max_drawdown": null,
+      "brier": 0.21793245808084494,
+      "brier_skill_vs_p0": 0.0,
+      "positive_dev_year_share": null,
+      "deflated_sharpe_ratio": null,
+      "random_direction_percentile": null,
+      "pbo": null,
+      "grade": "ungraded: development"
+    },
+    "USATECHIDXUSD": {
+      "n": 0,
+      "signals_per_year": 0,
+      "hit_rate": null,
+      "net_avg_R": null,
+      "t_stat": null,
+      "profit_factor": null,
+      "daily_sharpe": null,
+      "max_drawdown": null,
+      "brier": 0.21807204308052658,
+      "brier_skill_vs_p0": 0.0,
+      "positive_dev_year_share": null,
+      "deflated_sharpe_ratio": null,
+      "random_direction_percentile": null,
+      "pbo": null,
+      "grade": "ungraded: development"
+    }
+  },
+  "input_manifest": [
+    {
+      "path": "data/events/USATECHIDXUSD/2020-12.parquet",
+      "mtime_ns": 1794363703274644315,
+      "size": 1061662
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2021-01.parquet",
+      "mtime_ns": 1794364412126981402,
+      "size": 1023469
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2020-12.parquet",
+      "mtime_ns": 1794365946557416900,
+      "size": 16252003
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2021-01.parquet",
+      "mtime_ns": 1794365946775552451,
+      "size": 14928145
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2019-01.parquet",
+      "mtime_ns": 1794363262569719085,
+      "size": 950996
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2019-02.parquet",
+      "mtime_ns": 1794363262589874118,
+      "size": 505412
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2019-07.parquet",
+      "mtime_ns": 1794363262693874562,
+      "size": 436904
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2019-11.parquet",
+      "mtime_ns": 1794363262798926239,
+      "size": 410874
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2019-01.parquet",
+      "mtime_ns": 1794374542248914437,
+      "size": 15038483
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2019-02.parquet",
+      "mtime_ns": 1794374542454599199,
+      "size": 12458556
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2019-07.parquet",
+      "mtime_ns": 1794374543531667412,
+      "size": 13066250
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2019-11.parquet",
+      "mtime_ns": 1794374544412081449,
+      "size": 11982544
+    },
+    {
+      "path": "data/events/XAUUSD/2011-04.parquet",
+      "mtime_ns": 1794367013270058546,
+      "size": 741673
+    },
+    {
+      "path": "data/events/XAUUSD/2011-08.parquet",
+      "mtime_ns": 1794367013466808327,
+      "size": 919090
+    },
+    {
+      "path": "data/features/XAUUSD/2011-04.parquet",
+      "mtime_ns": 1794375883552550486,
+      "size": 13451336
+    },
+    {
+      "path": "data/features/XAUUSD/2011-08.parquet",
+      "mtime_ns": 1794375884459361274,
+      "size": 15280982
+    }
+  ],
+  "limitations": [
+    "Stage 9 inputs may be rebuilt; inspect manifest before reuse.",
+    "PBO uses like-for-like CPCV train/test ranks across logged development configurations; null until at least two comparable configurations exist.",
+    "Random-direction benchmark uses the executable opposite-side label kernel on raw bars; coverage is reported.",
+    "For BTC, the raw mid-price bars use a monthly median of the modeled decision-time spread in the opposite-direction simulation.",
+    "DSR uses trial-ledger daily Sharpe dispersion; null if too few trials."
+  ],
+  "config_hash": "986247e055d9e4b88988dea5769bbc770a215552837371ea3cfb9c97dc751882",
+  "registry_id": 4,
+  "variant": null,
+  "dry_run": true,
+  "cpcv": {
+    "cpcv_test_groups": [
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        0,
+        4
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        3,
+        4
+      ]
+    ],
+    "cpcv_train_scores": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "cpcv_test_scores": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  }
+}

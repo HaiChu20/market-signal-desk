@@ -1,0 +1,548 @@
+{
+  "method": "rsi2_mean_reversion",
+  "period": "dev",
+  "preliminary": true,
+  "protocol": "v2",
+  "grade_in_dev": "not applicable; protocol section 5 grades test only",
+  "pooled": {
+    "n": 0,
+    "signals_per_year": 0,
+    "hit_rate": null,
+    "net_avg_R": null,
+    "t_stat": null,
+    "profit_factor": null,
+    "daily_sharpe": null,
+    "max_drawdown": null,
+    "brier": 0.20801195783479037,
+    "brier_skill_vs_p0": -0.04233990631802742,
+    "positive_dev_year_share": null,
+    "deflated_sharpe_ratio": null,
+    "random_direction_percentile": null,
+    "pbo": null,
+    "grade": "ungraded: development",
+    "random_direction_matched_signals": 0,
+    "row_accounting": {
+      "events": 71,
+      "candidate_rows": 2554,
+      "assembled_rows": 2554,
+      "drops": {
+        "invalid_geometry": 0,
+        "missing_outcome": 0
+      },
+      "cpcv_test_groups": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          1,
+          4
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "cpcv_train_scores": [
+        0.2669593452399042,
+        null,
+        null,
+        null,
+        0.5744448576783219,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "cpcv_test_scores": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "oof_predicted_rows": 2554,
+      "selected_signals": 0,
+      "no_oof_prediction": 0
+    },
+    "selection_comparison": {
+      "selected_n": 0,
+      "selected_avg_R": null,
+      "unselected_n": 2554,
+      "unselected_avg_R": -0.7030571635056064,
+      "same_event_unselected_n": 0,
+      "same_event_unselected_avg_R": null
+    }
+  },
+  "per_instrument": {
+    "USATECHIDXUSD": {
+      "n": 0,
+      "signals_per_year": 0,
+      "hit_rate": null,
+      "net_avg_R": null,
+      "t_stat": null,
+      "profit_factor": null,
+      "daily_sharpe": null,
+      "max_drawdown": null,
+      "brier": 0.2077001164688045,
+      "brier_skill_vs_p0": -0.06260456428043226,
+      "positive_dev_year_share": null,
+      "deflated_sharpe_ratio": null,
+      "random_direction_percentile": null,
+      "pbo": null,
+      "grade": "ungraded: development"
+    },
+    "USA500IDXUSD": {
+      "n": 0,
+      "signals_per_year": 0,
+      "hit_rate": null,
+      "net_avg_R": null,
+      "t_stat": null,
+      "profit_factor": null,
+      "daily_sharpe": null,
+      "max_drawdown": null,
+      "brier": 0.2083508050707064,
+      "brier_skill_vs_p0": -0.021243490237894402,
+      "positive_dev_year_share": null,
+      "deflated_sharpe_ratio": null,
+      "random_direction_percentile": null,
+      "pbo": null,
+      "grade": "ungraded: development"
+    }
+  },
+  "input_manifest": [
+    {
+      "path": "data/events/USATECHIDXUSD/2020-01.parquet",
+      "mtime_ns": 1794363702933948674,
+      "size": 833544
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2020-02.parquet",
+      "mtime_ns": 1794363702962590313,
+      "size": 848489
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2020-07.parquet",
+      "mtime_ns": 1794363703113446803,
+      "size": 1124674
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2020-08.parquet",
+      "mtime_ns": 1794363703141278715,
+      "size": 894341
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2020-09.parquet",
+      "mtime_ns": 1794363703176644421,
+      "size": 1224457
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2020-10.parquet",
+      "mtime_ns": 1794363703211028896,
+      "size": 1199721
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2021-02.parquet",
+      "mtime_ns": 1794364412173235725,
+      "size": 1001127
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2021-05.parquet",
+      "mtime_ns": 1794364412327775839,
+      "size": 1065363
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2021-06.parquet",
+      "mtime_ns": 1794364412378510012,
+      "size": 1043423
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2021-07.parquet",
+      "mtime_ns": 1794364412427696859,
+      "size": 1060332
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2021-08.parquet",
+      "mtime_ns": 1794364412484359248,
+      "size": 1023205
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2021-09.parquet",
+      "mtime_ns": 1794364412659208273,
+      "size": 1026223
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2021-10.parquet",
+      "mtime_ns": 1794364412718360258,
+      "size": 1109634
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2021-11.parquet",
+      "mtime_ns": 1794364412762912544,
+      "size": 1001927
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2021-12.parquet",
+      "mtime_ns": 1794364412820093319,
+      "size": 1359506
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2022-01.parquet",
+      "mtime_ns": 1794364672594599246,
+      "size": 1148282
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2020-01.parquet",
+      "mtime_ns": 1794365944045767566,
+      "size": 16066322
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2020-02.parquet",
+      "mtime_ns": 1794365944259901046,
+      "size": 14816068
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2020-07.parquet",
+      "mtime_ns": 1794365945393906874,
+      "size": 16936408
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2020-08.parquet",
+      "mtime_ns": 1794365945630134418,
+      "size": 15579912
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2020-09.parquet",
+      "mtime_ns": 1794365945859581047,
+      "size": 16455964
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2020-10.parquet",
+      "mtime_ns": 1794365946095866217,
+      "size": 16517790
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2021-02.parquet",
+      "mtime_ns": 1794365946990105188,
+      "size": 14986614
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2021-05.parquet",
+      "mtime_ns": 1794365947689392025,
+      "size": 15965346
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2021-06.parquet",
+      "mtime_ns": 1794365947918368187,
+      "size": 16543636
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2021-07.parquet",
+      "mtime_ns": 1794365948167614299,
+      "size": 16236619
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2021-08.parquet",
+      "mtime_ns": 1794365948409810700,
+      "size": 16543125
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2021-09.parquet",
+      "mtime_ns": 1794365948644822556,
+      "size": 16483967
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2021-10.parquet",
+      "mtime_ns": 1794365948869375972,
+      "size": 15949827
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2021-11.parquet",
+      "mtime_ns": 1794365949095260746,
+      "size": 16205931
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2021-12.parquet",
+      "mtime_ns": 1794365949348415136,
+      "size": 16635041
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2022-01.parquet",
+      "mtime_ns": 1794365949584258298,
+      "size": 15946038
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2020-06.parquet",
+      "mtime_ns": 1794363623101408019,
+      "size": 1245535
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2020-09.parquet",
+      "mtime_ns": 1794363623205709637,
+      "size": 1044603
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2020-10.parquet",
+      "mtime_ns": 1794363623241493102,
+      "size": 1178092
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2020-12.parquet",
+      "mtime_ns": 1794363623301613526,
+      "size": 1022205
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2021-01.parquet",
+      "mtime_ns": 1794363822405410222,
+      "size": 1015051
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2021-02.parquet",
+      "mtime_ns": 1794363822437591898,
+      "size": 976416
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2021-03.parquet",
+      "mtime_ns": 1794363822473769205,
+      "size": 1262471
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2021-05.parquet",
+      "mtime_ns": 1794363822535447664,
+      "size": 1092236
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2021-06.parquet",
+      "mtime_ns": 1794363822570112645,
+      "size": 1008471
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2021-07.parquet",
+      "mtime_ns": 1794363822597842680,
+      "size": 942265
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2021-09.parquet",
+      "mtime_ns": 1794363822659159465,
+      "size": 1133097
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2021-11.parquet",
+      "mtime_ns": 1794363822724686468,
+      "size": 1083286
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2021-12.parquet",
+      "mtime_ns": 1794363822759611580,
+      "size": 1214389
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2022-01.parquet",
+      "mtime_ns": 1794364072158422673,
+      "size": 1112695
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2022-04.parquet",
+      "mtime_ns": 1794364072242985684,
+      "size": 902320
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2022-08.parquet",
+      "mtime_ns": 1794364072360266383,
+      "size": 1168014
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2020-06.parquet",
+      "mtime_ns": 1794374545984443214,
+      "size": 16571385
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2020-09.parquet",
+      "mtime_ns": 1794374546712389747,
+      "size": 16398051
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2020-10.parquet",
+      "mtime_ns": 1794374546950617264,
+      "size": 16362144
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2020-12.parquet",
+      "mtime_ns": 1794374547415465092,
+      "size": 15588548
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2021-01.parquet",
+      "mtime_ns": 1794374547636794327,
+      "size": 14738364
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2021-02.parquet",
+      "mtime_ns": 1794374547852469773,
+      "size": 14603210
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2021-03.parquet",
+      "mtime_ns": 1794374548094977602,
+      "size": 17271995
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2021-05.parquet",
+      "mtime_ns": 1794374548540261110,
+      "size": 15367947
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2021-06.parquet",
+      "mtime_ns": 1794374548768192147,
+      "size": 15495946
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2021-07.parquet",
+      "mtime_ns": 1794374548998469301,
+      "size": 15456618
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2021-09.parquet",
+      "mtime_ns": 1794374549459157611,
+      "size": 15838826
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2021-11.parquet",
+      "mtime_ns": 1794374549922339915,
+      "size": 15623567
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2021-12.parquet",
+      "mtime_ns": 1794374550155730322,
+      "size": 16347499
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2022-01.parquet",
+      "mtime_ns": 1794374550384705791,
+      "size": 15871217
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2022-04.parquet",
+      "mtime_ns": 1794374551063206245,
+      "size": 15058977
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2022-08.parquet",
+      "mtime_ns": 1794374552025689701,
+      "size": 17387546
+    }
+  ],
+  "limitations": [
+    "Stage 9 inputs may be rebuilt; inspect manifest before reuse.",
+    "PBO uses like-for-like CPCV train/test ranks across logged development configurations; null until at least two comparable configurations exist.",
+    "Random-direction benchmark uses the executable opposite-side label kernel on raw bars; coverage is reported.",
+    "For BTC, the raw mid-price bars use a monthly median of the modeled decision-time spread in the opposite-direction simulation.",
+    "DSR uses trial-ledger daily Sharpe dispersion; null if too few trials."
+  ],
+  "config_hash": "35128da3d00dc964a2d74b4364f505516fd410ef13fdebcb786b161e75244429",
+  "registry_id": 39,
+  "variant": null,
+  "dry_run": true,
+  "cpcv": {
+    "cpcv_test_groups": [
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        0,
+        3
+      ],
+      [
+        0,
+        4
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        3,
+        4
+      ]
+    ],
+    "cpcv_train_scores": [
+      0.2669593452399042,
+      null,
+      null,
+      null,
+      0.5744448576783219,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "cpcv_test_scores": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  }
+}

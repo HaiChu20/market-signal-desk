@@ -140,6 +140,19 @@ def test_pbo_cscv_from_logged_dev_years():
     sharpes,pbo,count=trial_diagnostics(rows,'x')
     assert len(sharpes)==2 and count==2 and 0<=pbo<=1
 
+
+def test_pbo_uses_logged_cpcv_train_and_test_ranks():
+    import json
+    from msd.research.report_card import trial_diagnostics
+    rows=[
+        {'method':'x','period':'dev','metrics':json.dumps({'daily_sharpe':1.,
+            'cpcv_train_scores':[2.,0.], 'cpcv_test_scores':[-2.,0.]})},
+        {'method':'x','period':'dev','metrics':json.dumps({'daily_sharpe':.5,
+            'cpcv_train_scores':[0.,2.], 'cpcv_test_scores':[0.,-2.]})},
+    ]
+    _,pbo,count=trial_diagnostics(rows,'x')
+    assert count==2 and pbo==1.0
+
 def test_dev_excludes_labels_ending_in_test_period():
     e,f=fixture_events()
     e.loc[3,'exit_ts']=pd.Timestamp('2023-01-01',tz='UTC')

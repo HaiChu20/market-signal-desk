@@ -5,7 +5,8 @@ import csv
 from pathlib import Path
 
 
-FIELDS = ('trial_id','date','config_hash','method','parameters','data_range','period','metrics','notes')
+# Match the existing append-only ledger exactly; never rewrite its header.
+FIELDS = ('run_id','date','config_hash','method','parameters','data_range','period','metrics','note')
 DEV_PERIODS = {'dev','development'}
 
 

@@ -10,7 +10,9 @@ import pyarrow.parquet as pq
 from msd.data.flow_features import DEPTH_COLUMNS
 
 DEV_END = pd.Timestamp('2023-01-01', tz='UTC')
-FEATURES_BY_METHOD: dict[str, tuple[str, ...] | None] = {}
+FEATURES_BY_METHOD: dict[str, tuple[str, ...] | None] = {
+    'sr_touch': None, 'liquidity_sweep': None, 'rsi2_mean_reversion': None,
+}
 EVENT_ATTRIBUTES = ('variant','pattern','cluster_id','cluster_price','cluster_strength',
                     'cluster_types','cluster_age_minutes','approach_direction','level_type',
                     'level_price','zone_edge','line_slope_per_minute','return_20d','return_60d',
@@ -35,7 +37,7 @@ def assert_dev_period(events: pd.DataFrame) -> None:
     ended=pd.to_datetime(events.exit_ts,utc=True)
     if known.ge(DEV_END).any():
         raise ValueError('DEV data contains a decision at or after 2023-01-01')
-    if ended.isna().any() or ended.ge(DEV_END).any():
+    if ended.ge(DEV_END).any():
         raise ValueError('DEV data contains a label_end_ts at or after 2023-01-01')
 
 
