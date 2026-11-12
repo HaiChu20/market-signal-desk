@@ -190,6 +190,10 @@ def run_one(spec: MethodSpec, data_root: Path, output: Path, *, dry_run: bool,
 def write_summary(stats: list[dict], registry: tuple[MethodSpec,...], output: Path, *, dry_run: bool) -> Path:
     rec=reconciliation(registry);path=output/('dev_tournament_dry_run.md' if dry_run else 'dev_tournament_summary.md')
     title='Protocol-v2 DEV tournament dry run' if dry_run else 'Protocol-v2 DEV tournament'
+    passes=sum(row['status']=='passes DEV diagnostics' for row in stats)
+    failures=sum(row['status']=='fails DEV diagnostics' for row in stats)
+    silent=sum(row['status']=='silent: 0 selected signals' for row in stats)
+    no_events=sum(row['status'].startswith('no DEV events:') for row in stats)
     lines=[f'# {title}','',
         '**Development only. Test and Final were neither loaded nor evaluated.**','',
         '## Registry reconciliation','',
@@ -197,6 +201,8 @@ def write_summary(stats: list[dict], registry: tuple[MethodSpec,...], output: Pa
         f"{rec['pilot_modules']} pilots = {rec['detector_modules']} detector modules. "
         f"Bollinger and post-macro each add one extra frozen variant, producing "
         f"{rec['tournament_units']} tournament units. #34 is inputs-pending and excluded.",'',
+        f'Outcome counts: {passes} pass DEV diagnostics; {failures} fail DEV diagnostics; '
+        f'{silent} are silent after selection; {no_events} have no DEV events.','',
         '| Unit | Candidates | Signals | Signals/yr | Hit | Net avg R | t | PF | Sharpe | MDD | Brier skill | DSR | PBO | Random pct | DEV status | Runtime s | Peak MiB |',
         '|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|---:|']
     def fmt(value):return 'NA' if value is None else f'{value:.4f}'
@@ -210,6 +216,20 @@ def write_summary(stats: list[dict], registry: tuple[MethodSpec,...], output: Pa
             f"{fmt(item.get('deflated_sharpe_ratio'))} | {fmt(item.get('pbo'))} | "
             f"{fmt(item.get('random_direction_percentile'))} | {row['status']} | "
             f"{row['runtime_s']:.2f} | {row['peak_rss_mib']:.1f} |")
+    if not dry_run:
+        high_memory=[row for row in stats if row['peak_rss_mib']>8192]
+        lines+=['','## Run notes','',
+            f"Recorded per-unit runtime totals {sum(row['runtime_s'] for row in stats):.2f} seconds. "
+            'The sr_touch runtime includes a deliberate SIGSTOP while the machine was unattended.','',
+            'The two post-macro variants have no DEV events because '
+            '`macro_minutes_since_event` is absent from the frozen DEV features. ETH contributes '
+            'no candidates because executable spread calibration is absent; the frozen replay '
+            'contains BTC, NQ, SPX and XAU only.','']
+        if high_memory:
+            detail=', '.join(f"{row['method']} ({row['peak_rss_mib']:.1f} MiB)" for row in high_memory)
+            lines.append('Memory note: the following completed units exceeded the 8 GiB guard: '+detail+'. '
+                         'The stale `data/tournament_logs/FAILED` marker refers to the completed '
+                         'Ichimoku run; the relaunched serial driver continued to DONE.')
     path.parent.mkdir(parents=True,exist_ok=True);path.write_text('\n'.join(lines)+'\n')
     return path
 
