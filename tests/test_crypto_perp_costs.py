@@ -20,7 +20,9 @@ def test_perp_cost_has_one_spread_fees_and_signed_funding():
          "fill_price": 100 + side*entry_half, "exit_price": 101 - side*exit_half,
          "gross_R": side*((101-side*exit_half)-(100+side*entry_half)), "net_R": 0.}
         for side in (-1, 1)])
-    funding = pd.DataFrame({"ts": [ts[2]], "funding_rate": [.001]})
+    # Production funding parquet uses microseconds while labels use nanoseconds.
+    funding = pd.DataFrame({"ts": pd.Series([ts[2]]).astype("datetime64[us, UTC]"),
+                            "funding_rate": [.001]})
     result = apply_perp_costs(labels, bars, funding)
     expected_spread = entry_half + exit_half
     assert np.allclose(result.spread_R, expected_spread)  # one half at each side

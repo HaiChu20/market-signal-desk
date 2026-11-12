@@ -56,12 +56,14 @@ def funding_sums(labels: pd.DataFrame, funding: pd.DataFrame) -> np.ndarray:
     """Sum settlements strictly after entry through and including exit."""
     if funding.empty:
         return np.zeros(len(labels), dtype=float)
-    times = pd.to_datetime(funding.ts, utc=True).astype("int64").to_numpy()
+    def ns(values) -> np.ndarray:
+        return pd.to_datetime(values, utc=True).to_numpy(dtype="datetime64[ns]").astype(np.int64)
+    times = ns(funding.ts)
     rates = pd.to_numeric(funding.funding_rate, errors="raise").to_numpy(float)
     order = np.argsort(times, kind="stable"); times = times[order]; rates = rates[order]
     cumulative = np.concatenate(([0.0], np.cumsum(rates)))
-    entry = pd.to_datetime(labels.entry_ts, utc=True).astype("int64").to_numpy()
-    exit_ = pd.to_datetime(labels.exit_ts, utc=True).astype("int64").to_numpy()
+    entry = ns(labels.entry_ts)
+    exit_ = ns(labels.exit_ts)
     left = np.searchsorted(times, entry, side="right")
     right = np.searchsorted(times, exit_, side="right")
     return cumulative[right] - cumulative[left]
