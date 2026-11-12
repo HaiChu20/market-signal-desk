@@ -50,6 +50,13 @@ For BTC and ETH, the bundle also gates every selected flow column at least
 spot and UM coverage flags; BTC also includes its Bybit coverage flag. A
 missingness channel is added before dense zero imputation, so unavailable data
 does not become indistinguishable from a covered minute with zero activity.
+The market inputs are scale-free imbalances, trade-intensity z-scores clipped
+to ±10, and cumulative-delta divergence. A runtime guard rejects any selected
+flow value outside ±20 after clipping. Raw deltas, venue delta spreads,
+uncovered volume, and the UM mismatch diagnostic are excluded because their
+scale drifts or encodes data-period quality rather than market state. V2 has
+20 configured flow columns for BTC and 14 for ETH; each gets a paired
+missingness channel.
 Depth and tick features are excluded because they have no DEV history. The
 bundle reads no 2023+ flow files and therefore does not depend on the ongoing
 2024+ Bybit flow rebuild.
@@ -91,7 +98,7 @@ The output includes per-fold `oof.parquet`, `model.pt`, `resume.pt`,
 
 ## Local CPU smoke
 
-The following reads two 2021 months, selects two anchors per day, trains one
+The following reads one 2021 month plus its warm-up, selects two anchors per day, trains one
 epoch with a width-eight CNN and the v2 BTC flow inputs, and leaves outputs
 under `data/tmp/sequence-smoke/`.
 

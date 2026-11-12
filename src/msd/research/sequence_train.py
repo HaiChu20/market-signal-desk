@@ -75,6 +75,13 @@ def add_flow_features(features: pd.DataFrame, flow: pd.DataFrame,
         details = ", ".join(f"{name}={value:.1%}" for name, value in failed.items())
         raise ValueError(f"Flow feature coverage below {min_coverage:.0%}: {details}")
     selected = flow[["ts", "known_at", *columns]].copy()
+    intensity = [column for column in columns if column.endswith("_trade_intensity_z20d")]
+    selected[intensity] = selected[intensity].clip(-10., 10.)
+    magnitude = selected[columns].abs().max(skipna=True)
+    unsafe = magnitude[magnitude > 20.]
+    if len(unsafe):
+        details = ", ".join(f"{name}={value:g}" for name, value in unsafe.items())
+        raise ValueError(f"Unscaled flow feature exceeds |20| after clipping: {details}")
     joined = join_by_known_at(features, selected)
     if len(joined) != len(features):
         raise AssertionError("Flow join changed dense feature row count")
@@ -285,7 +292,7 @@ def main():
     if end > DEV_END or start >= end:
         parser.error("Only DEV dates through 2022-12-31 are allowed")
     if args.smoke:
-        start, end = pd.Timestamp("2021-01-01", tz="UTC"), pd.Timestamp("2021-03-01", tz="UTC")
+        start, end = pd.Timestamp("2021-01-01", tz="UTC"), pd.Timestamp("2021-02-01", tz="UTC")
     root = args.data_root
     months = pd.period_range(start.tz_localize(None).to_period("M"),
                              (end - pd.Timedelta(nanoseconds=1)).tz_localize(None).to_period("M"), freq="M")

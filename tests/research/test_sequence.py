@@ -246,17 +246,30 @@ def test_flow_join_is_backward_only_and_preserves_missing_vs_zero():
     stamps = pd.date_range("2021-01-01", periods=3, freq="min", tz="UTC")
     dense = pd.DataFrame({"known_at": stamps, "base": [1., 2., 3.]})
     flow = pd.DataFrame({"ts": stamps[[0, 2]] - pd.Timedelta(minutes=1),
-                         "known_at": stamps[[0, 2]], "spot_delta_1m": [0., 4.],
+                         "known_at": stamps[[0, 2]], "spot_imbalance_1m": [0., .4],
                          "spot_flow_coverage": [True, True]})
-    joined = add_flow_features(dense, flow, ["spot_delta_1m", "spot_flow_coverage"], .6)
-    assert joined.spot_delta_1m.iloc[:2].tolist() == [0., 0.]
-    assert joined.spot_delta_1m.iloc[2] == 4.
-    assert not joined.spot_delta_1m_missing.any()
+    joined = add_flow_features(dense, flow, ["spot_imbalance_1m", "spot_flow_coverage"], .6)
+    assert joined.spot_imbalance_1m.iloc[:2].tolist() == [0., 0.]
+    assert joined.spot_imbalance_1m.iloc[2] == .4
+    assert not joined.spot_imbalance_1m_missing.any()
     late = flow.iloc[1:].copy()
-    joined_late = add_flow_features(dense, late, ["spot_delta_1m"], .5)
-    assert joined_late.spot_delta_1m.iloc[:2].isna().all()
-    assert joined_late.spot_delta_1m_missing.tolist() == [True, True, False]
+    joined_late = add_flow_features(dense, late, ["spot_imbalance_1m"], .5)
+    assert joined_late.spot_imbalance_1m.iloc[:2].isna().all()
+    assert joined_late.spot_imbalance_1m_missing.tolist() == [True, True, False]
     sparse = flow.copy()
-    sparse.loc[1, "spot_delta_1m"] = np.nan
+    sparse.loc[1, "spot_imbalance_1m"] = np.nan
     with pytest.raises(ValueError, match="coverage"):
-        add_flow_features(dense, sparse, ["spot_delta_1m"], .8)
+        add_flow_features(dense, sparse, ["spot_imbalance_1m"], .8)
+
+
+def test_flow_join_clips_intensity_and_rejects_raw_delta_scale():
+    from msd.research.sequence_train import add_flow_features
+    stamps = pd.date_range("2021-01-01", periods=2, freq="min", tz="UTC")
+    dense = pd.DataFrame({"known_at": stamps})
+    flow = pd.DataFrame({"ts": stamps - pd.Timedelta(minutes=1), "known_at": stamps,
+                         "spot_trade_intensity_z20d": [-45., 31.]})
+    joined = add_flow_features(dense, flow, ["spot_trade_intensity_z20d"])
+    assert joined.spot_trade_intensity_z20d.tolist() == [-10., 10.]
+    raw = flow.rename(columns={"spot_trade_intensity_z20d": "spot_delta_60m"})
+    with pytest.raises(ValueError, match="Unscaled flow feature"):
+        add_flow_features(dense, raw, ["spot_delta_60m"])
