@@ -117,9 +117,27 @@ def test_pbo_cscv_from_logged_dev_years():
 def test_dev_excludes_labels_ending_in_test_period():
     e,f=fixture_events()
     e.loc[3,'exit_ts']=pd.Timestamp('2023-01-01',tz='UTC')
-    out,audit=assemble(e,f,('1m_return_bars_5',),return_audit=True)
-    assert len(out)==3
-    assert audit['label_extends_beyond_dev']==1
+    with pytest.raises(ValueError,match='label_end_ts'):
+        assemble(e,f,('1m_return_bars_5',),return_audit=True)
+
+
+def test_supplemental_asof_join_is_causal_and_missing_layer_is_nan():
+    e,f=fixture_events()
+    flow=pd.DataFrame({'known_at':[e.known_at.iloc[0]-pd.Timedelta(minutes=1),
+                                         e.known_at.iloc[2]+pd.Timedelta(minutes=1)],
+                       'flow_coverage':[True,True],'spot_delta_5m':[2.,99.]})
+    depth=pd.DataFrame(columns=['known_at','depth_coverage','depth_imbalance_1pct'])
+    out=assemble(e,f,('1m_return_bars_5',),supplemental={'flow':flow,'depth':depth})
+    assert out.spot_delta_5m.tolist()==[2,2,2,99]
+    assert out.flow_feature_known_at.le(out.known_at).all()
+    assert out.depth_coverage.isna().all() and out.depth_imbalance_1pct.isna().all()
+
+    # A future perturbation cannot alter any joined value at or before the cut.
+    cut=e.known_at.iloc[1]
+    perturbed=flow.copy();perturbed.loc[perturbed.known_at>cut,'spot_delta_5m']=-12345
+    truncated=assemble(e[e.known_at<=cut],f,('1m_return_bars_5',),supplemental={'flow':perturbed})
+    pd.testing.assert_series_equal(out.loc[out.known_at<=cut,'spot_delta_5m'].reset_index(drop=True),
+                                   truncated.spot_delta_5m.reset_index(drop=True))
 
 
 def test_eth_random_direction_uses_pipeline_spread_and_crypto_costs(monkeypatch, tmp_path):
