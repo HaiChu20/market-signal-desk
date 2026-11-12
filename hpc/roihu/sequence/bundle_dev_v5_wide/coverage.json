@@ -1,0 +1,205 @@
+[
+  {
+    "symbol": "USATECHIDXUSD",
+    "year": 2019,
+    "anchors": 22811,
+    "kept": 22795,
+    "coverage": 0.9992985840164833
+  },
+  {
+    "symbol": "USATECHIDXUSD",
+    "year": 2020,
+    "anchors": 22697,
+    "kept": 22697,
+    "coverage": 1.0
+  },
+  {
+    "symbol": "USATECHIDXUSD",
+    "year": 2021,
+    "anchors": 22917,
+    "kept": 22917,
+    "coverage": 1.0
+  },
+  {
+    "symbol": "USATECHIDXUSD",
+    "year": 2022,
+    "anchors": 22806,
+    "kept": 22806,
+    "coverage": 1.0
+  },
+  {
+    "symbol": "USA500IDXUSD",
+    "year": 2019,
+    "anchors": 21346,
+    "kept": 21330,
+    "coverage": 0.9992504450482526
+  },
+  {
+    "symbol": "USA500IDXUSD",
+    "year": 2020,
+    "anchors": 22438,
+    "kept": 22438,
+    "coverage": 1.0
+  },
+  {
+    "symbol": "USA500IDXUSD",
+    "year": 2021,
+    "anchors": 22515,
+    "kept": 22515,
+    "coverage": 1.0
+  },
+  {
+    "symbol": "USA500IDXUSD",
+    "year": 2022,
+    "anchors": 22774,
+    "kept": 22774,
+    "coverage": 1.0
+  },
+  {
+    "symbol": "XAUUSD",
+    "year": 2008,
+    "anchors": 24446,
+    "kept": 23518,
+    "coverage": 0.9620387793504049
+  },
+  {
+    "symbol": "XAUUSD",
+    "year": 2009,
+    "anchors": 24511,
+    "kept": 24511,
+    "coverage": 1.0
+  },
+  {
+    "symbol": "XAUUSD",
+    "year": 2010,
+    "anchors": 24594,
+    "kept": 24594,
+    "coverage": 1.0
+  },
+  {
+    "symbol": "XAUUSD",
+    "year": 2011,
+    "anchors": 24580,
+    "kept": 24580,
+    "coverage": 1.0
+  },
+  {
+    "symbol": "XAUUSD",
+    "year": 2012,
+    "anchors": 24371,
+    "kept": 24371,
+    "coverage": 1.0
+  },
+  {
+    "symbol": "XAUUSD",
+    "year": 2013,
+    "anchors": 23604,
+    "kept": 23604,
+    "coverage": 1.0
+  },
+  {
+    "symbol": "XAUUSD",
+    "year": 2014,
+    "anchors": 23582,
+    "kept": 23582,
+    "coverage": 1.0
+  },
+  {
+    "symbol": "XAUUSD",
+    "year": 2015,
+    "anchors": 23642,
+    "kept": 23642,
+    "coverage": 1.0
+  },
+  {
+    "symbol": "XAUUSD",
+    "year": 2016,
+    "anchors": 23610,
+    "kept": 23610,
+    "coverage": 1.0
+  },
+  {
+    "symbol": "XAUUSD",
+    "year": 2017,
+    "anchors": 23528,
+    "kept": 23528,
+    "coverage": 1.0
+  },
+  {
+    "symbol": "XAUUSD",
+    "year": 2018,
+    "anchors": 23588,
+    "kept": 23588,
+    "coverage": 1.0
+  },
+  {
+    "symbol": "XAUUSD",
+    "year": 2019,
+    "anchors": 23525,
+    "kept": 23525,
+    "coverage": 1.0
+  },
+  {
+    "symbol": "XAUUSD",
+    "year": 2020,
+    "anchors": 23655,
+    "kept": 23655,
+    "coverage": 1.0
+  },
+  {
+    "symbol": "XAUUSD",
+    "year": 2021,
+    "anchors": 23606,
+    "kept": 23606,
+    "coverage": 1.0
+  },
+  {
+    "symbol": "XAUUSD",
+    "year": 2022,
+    "anchors": 23619,
+    "kept": 23619,
+    "coverage": 1.0
+  },
+  {
+    "symbol": "BTCUSDT",
+    "year": 2020,
+    "anchors": 35054,
+    "kept": 35054,
+    "coverage": 1.0
+  },
+  {
+    "symbol": "BTCUSDT",
+    "year": 2021,
+    "anchors": 34975,
+    "kept": 34975,
+    "coverage": 1.0
+  },
+  {
+    "symbol": "BTCUSDT",
+    "year": 2022,
+    "anchors": 35040,
+    "kept": 35040,
+    "coverage": 1.0
+  },
+  {
+    "symbol": "ETHUSDT",
+    "year": 2020,
+    "anchors": 35054,
+    "kept": 35054,
+    "coverage": 1.0
+  },
+  {
+    "symbol": "ETHUSDT",
+    "year": 2021,
+    "anchors": 34975,
+    "kept": 34975,
+    "coverage": 1.0
+  },
+  {
+    "symbol": "ETHUSDT",
+    "year": 2022,
+    "anchors": 35040,
+    "kept": 35040,
+    "coverage": 1.0
+  }
+]
