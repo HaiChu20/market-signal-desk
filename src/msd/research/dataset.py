@@ -77,7 +77,12 @@ def assemble(events: pd.DataFrame, features: pd.DataFrame, feature_cols=None, *,
         raise AssertionError('Outcome field used as a feature')
     if 'known_at' not in events or 'known_at' not in features:
         raise ValueError('Both events and features require known_at')
-    out=_asof(events,features,list(feature_cols),'feature_known_at')
+    join_columns=list(feature_cols)
+    # Executable cost inputs are required independently of the configured
+    # predictive feature subset.
+    join_columns.extend(column for column in ('spread_atr','1m_atr14')
+                        if column in features and column not in join_columns)
+    out=_asof(events,features,join_columns,'feature_known_at')
     for name,frame in (supplemental or {}).items():
         # Layer readers expose only approved numeric/boolean columns.  Keep
         # their schema even when the requested period has no source files so

@@ -15,7 +15,7 @@ def fixture_events():
         'exit_ts':t+pd.Timedelta(hours=2),'outcome':['tp','sl','tp','sl'],
         'R':[1,-1,1,-1],'gross_R':[1,-1,1,-1]})
     features=pd.DataFrame({'known_at':[t[0]-pd.Timedelta(minutes=1),t[2]+pd.Timedelta(minutes=1)],
-        '1m_return_bars_5':[3,99]})
+        '1m_return_bars_5':[3,99], 'spread_atr':[.01,.01], '1m_atr14':[1.,1.]})
     return events,features
 
 def test_causal_asof_and_outcome_exclusion():
