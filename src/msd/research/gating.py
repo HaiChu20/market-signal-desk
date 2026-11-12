@@ -20,14 +20,19 @@ LABELS = ('ts','side','sl_atr','tp_atr','outcome','net_R','gross_R','exit_ts',
 
 def gate_open_signals(candidates, open_known_at=None, *, return_state=False):
     """Exit bar starts at label_end_ts; it becomes known one minute later."""
-    opened = open_known_at or pd.Timestamp.min.tz_localize('UTC')
+    floor=pd.Timestamp.min.tz_localize('UTC')
+    states=dict(open_known_at) if isinstance(open_known_at,dict) else {}
+    default=floor if open_known_at is None or isinstance(open_known_at,dict) else open_known_at
     rows = []
     for row in candidates.sort_values('known_at').itertuples():
+        key=str(getattr(row,'sym',''))
+        opened=states.get(key,default)
         if row.known_at >= opened:
             rows.append(row.Index)
-            opened = pd.Timestamp(row.label_end_ts) + pd.Timedelta(minutes=1)
+            states[key]=pd.Timestamp(row.label_end_ts) + pd.Timedelta(minutes=1)
     selected=candidates.loc[rows]
-    return (selected, opened) if return_state else selected
+    state=next(iter(states.values()),default) if len(states)<=1 else states
+    return (selected, state) if return_state else selected
 
 def paths_for(root, symbol):
     return sorted(p for p in (root/'labels'/symbol).glob('*.parquet') if p.stem[:4] <= '2022')

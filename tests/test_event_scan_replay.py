@@ -45,6 +45,8 @@ def test_events_only_state_equivalence_across_year(monkeypatch,tmp_path):
     class Method: NAME='fixture'
     monkeypatch.setattr(pipeline,'methods_for_symbol',lambda s:(Method,))
     def fake(features,levels,bars,symbol,**kwargs):
+        if kwargs['event_start'].year==2021:
+            assert pd.to_datetime(kwargs['detector_features'].ts,utc=True).min()>=kwargs['event_start']
         state=kwargs['method_states'];count=state.get('fixture',0)+1
         frame=pd.DataFrame({'ts':[kwargs['event_start']],'method':['fixture']})
         return frame,{'fixture':count},{'fixture':count},[]
@@ -54,3 +56,12 @@ def test_events_only_state_equivalence_across_year(monkeypatch,tmp_path):
     first=pipeline.replay_events_only(sym,2020,2020,tmp_path/'split',root)
     second=pipeline.replay_events_only(sym,2021,2021,tmp_path/'split',root)
     assert whole==first+second
+
+
+def test_replay_drops_unresolved_and_cross_boundary_labels():
+    boundary=pd.Timestamp('2023-01-01',tz='UTC')
+    frame=pd.DataFrame({'method':['a','a','b'],
+        'exit_ts':[boundary-pd.Timedelta(minutes=1),boundary,pd.NaT]})
+    kept,dropped=pipeline._drop_labels_crossing_boundary(frame,boundary)
+    assert len(kept)==1 and kept.iloc[0].method=='a'
+    assert dropped.to_dict()=={'a':1,'b':1}

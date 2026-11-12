@@ -923,6 +923,14 @@ def run_symbol(symbol: str, start_year: int | None = None, end_year: int | None 
     return result
 
 
+def _drop_labels_crossing_boundary(events: pd.DataFrame, boundary: pd.Timestamp):
+    """Keep only labels whose realized outcome is known before the period boundary."""
+    if 'exit_ts' not in events:return events,pd.Series(dtype='int64')
+    resolved=pd.to_datetime(events.exit_ts,utc=True,errors='coerce').lt(boundary)
+    dropped=events.loc[~resolved].groupby('method').size()
+    return events.loc[resolved].reset_index(drop=True),dropped
+
+
 def replay_events_only(symbol: str, start_year: int, end_year: int,
                        output_root: Path, source_root: Path = Path('/Users/bfhach/Projects/market-signal-desk/data')) -> list[dict]:
     """Rebuild method events/labels from persisted bars, features and levels.
@@ -933,7 +941,8 @@ def replay_events_only(symbol: str, start_year: int, end_year: int,
     output_root=Path(output_root);source_root=Path(source_root)
     state={};summaries=[];unavailable=[]
     prior_state=output_root/'state'/symbol/f'{start_year-1}.json'
-    if prior_state.exists():state=json.loads(prior_state.read_text())
+    has_prior_state=prior_state.exists()
+    if has_prior_state:state=json.loads(prior_state.read_text())
     source='binance_spot' if symbol in {'BTCUSDT','ETHUSDT'} else 'dukascopy'
     for year in range(start_year,end_year+1):
         year_start=pd.Timestamp(year,1,1,tz='UTC');year_end=pd.Timestamp(year+1,1,1,tz='UTC')
@@ -951,26 +960,56 @@ def replay_events_only(symbol: str, start_year: int, end_year: int,
         bars=pd.concat(parts,ignore_index=True).sort_values('ts').drop_duplicates('ts').reset_index(drop=True)
         bars=bars[(pd.to_datetime(bars.ts,utc=True)>=left)&(pd.to_datetime(bars.ts,utc=True)<right)].reset_index(drop=True)
         bars=_feature_label_bars(_adjusted_price_view(bars))
-        bars=_modelled_spread(bars,symbol)
+        try:
+            bars=_modelled_spread(bars,symbol)
+        except ValueError as error:
+            if symbol!='ETHUSDT' or 'modeled spread history' not in str(error):raise
+            # Production4 persisted the modeled ETH spread on every causal
+            # feature row. Reuse it when the optional ETHUSD calibration bars
+            # are absent; no archive request is made during an events replay.
+            spread_parts=[]
+            for feature_path in sorted((source_root/'features'/symbol).glob('*.parquet')):
+                try:month=pd.Timestamp(feature_path.stem+'-01',tz='UTC')
+                except ValueError:continue
+                if month>right or month+pd.offsets.MonthBegin(1)<=left:continue
+                spread_parts.append(pd.read_parquet(feature_path,columns=['ts','spread_atr','1m_atr14']))
+            if not spread_parts:raise ValueError('No persisted modeled ETH spread for replay') from error
+            spread_frame=pd.concat(spread_parts,ignore_index=True).drop_duplicates('ts',keep='last')
+            spread_frame['persisted_spread']=pd.to_numeric(spread_frame.spread_atr,errors='coerce')*pd.to_numeric(spread_frame['1m_atr14'],errors='coerce')
+            bars=bars.merge(spread_frame[['ts','persisted_spread']],on='ts',how='left',validate='one_to_one')
+            spread=bars.pop('persisted_spread').to_numpy(float)
+            if not np.isfinite(spread).any():raise ValueError('Persisted modeled ETH spread is all-NaN') from error
+            for field in 'ohlc':
+                mid=(bars[f'bid_{field}'].to_numpy(float)+bars[f'ask_{field}'].to_numpy(float))/2
+                bars[f'bid_{field}']=mid-spread/2;bars[f'ask_{field}']=mid+spread/2
+            bars['duka_spread']=spread;bars['spread_modeled']=True
         active=bars.loc[_active_mask(bars,symbol)].reset_index(drop=True)
         path=source_root/'levels'/f'{symbol}.parquet'
         if not path.exists():raise FileNotFoundError(path)
         levels=pd.read_parquet(path).drop(columns=['touches_so_far'],errors='ignore')
         levels=levels[pd.to_datetime(levels.known_at,utc=True)<=year_end]
         level_known=pd.to_datetime(levels.known_at,utc=True,errors='coerce')
-        impossible=(pd.to_datetime(levels.invalidated_at,utc=True,errors='coerce')<=level_known)
+        invalidated=levels.get('invalidated_at',pd.Series(pd.NaT,index=levels.index))
+        impossible=(pd.to_datetime(invalidated,utc=True,errors='coerce')<=level_known)
         repair=levels.loc[impossible & level_known.ge(left)].copy()
         if len(repair):
             repair['invalidated_at']=pd.NaT
             repair=apply_level_invalidations(active,repair)
             levels.loc[repair.index,'invalidated_at']=repair.invalidated_at
         features=_event_feature_frame(active,{},symbol=symbol,feature_root=source_root/'features')
-        scan=features[(features.ts>=(left if year==start_year else year_start))&(features.ts<year_end)]
-        scan_bars=active[(active.ts>=(left if year==start_year else year_start))&(active.ts<year_end)]
+        scan_start=year_start if year>start_year or has_prior_state else left
+        scan=features[(features.ts>=scan_start)&(features.ts<year_end)]
+        scan_bars=active[(active.ts>=scan_start)&(active.ts<year_end)]
         events,counts,state,touches=label_method_events(features,levels,active,symbol,
             return_states=True,event_start=year_start,event_end=year_end,
             detector_features=scan,detector_bars=scan_bars,method_states=state,
             unavailable=unavailable)
+        boundary_dropped=pd.Series(dtype='int64')
+        if year==end_year:
+            # A DEV label is usable only when its outcome is known inside DEV.
+            # Run the kernel on the look-ahead bars, then discard unresolved or
+            # crossing candidates instead of censoring them at 2022-12-31.
+            events,boundary_dropped=_drop_labels_crossing_boundary(events,year_end)
         if len(events):_write_monthly(events,output_root,symbol)
         state_dir=output_root/'state'/symbol;state_dir.mkdir(parents=True,exist_ok=True)
         (state_dir/f'{year}.json').write_text(json.dumps(state,separators=(',',':')))
@@ -978,6 +1017,7 @@ def replay_events_only(symbol: str, start_year: int, end_year: int,
         summaries.extend({'symbol':symbol,'year':year,'method':method.NAME,
                           'events':int(counts.get(method.NAME,0)),
                           'candidate_rows':int(grouped.get(method.NAME,0)),
+                          'boundary_dropped_rows':int(boundary_dropped.get(method.NAME,0)),
                           'reason':next((item['reason'] for item in unavailable
                                          if item['method']==method.NAME and item['symbol']==symbol
                                          and item['year']==year),
@@ -985,7 +1025,7 @@ def replay_events_only(symbol: str, start_year: int, end_year: int,
                                         counts.get(method.NAME,0)==0 else None)}
                          for method in methods_for_symbol(symbol))
     if unavailable:
-        report=output_root/'unavailable.json';report.parent.mkdir(parents=True,exist_ok=True)
+        report=output_root/'unavailable'/f'{symbol}.json';report.parent.mkdir(parents=True,exist_ok=True)
         report.write_text(json.dumps({'rows':summaries,'unavailable':unavailable},indent=2))
         raise RuntimeError(f'Replay refused incomplete feature data; details in {report}')
     return summaries
