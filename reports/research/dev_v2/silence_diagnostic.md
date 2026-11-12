@@ -4,6 +4,91 @@
 
 No trading rule, threshold, model configuration, or trial-ledger row was changed.
 
+## BTC executable-price forensic
+
+The BTC result is not a bps/percent conversion error. `BTC_SPREAD` is explicitly
+USD price units. The modeled fills below reproduce `entry mid +/- spread/2` to
+within $0.002, and the kernel's stored gross R is reproduced from the persisted
+fill, exit, and planned risk to within 0.00002 R.
+
+The extreme losses happen because the historical Dukascopy BTC CFD spread is
+often wider than the small ATR stop. For example, the 2018-07-12 short has a
+$130 spread, a $16.43 intended half-ATR distance, and a $15.76 kernel risk. It
+fills on the bid at 6249.60 and the ask is already beyond the stop, so it exits
+at 6379.60: exactly one $130 spread, or -8.247 R. This is economically possible
+for a trade whose stop is inside the spread; it is not a scale-conversion
+artifact.
+
+| Year | Anchor | Side | Exit | Mid | 1h ATR | Spread USD | Entry mid | Fill | Exit | Kernel risk | 0.5 ATR | Gross R | Net R |
+|---:|---|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2018 | 2018-01-29 10:30 | -1 | tp | 11479.00 | 186.61 | 130.00 | 11461.08 | 11396.08 | 11376.61 | 102.13 | 93.30 | 0.191 | 0.191 |
+| 2018 | 2018-01-31 11:15 | 1 | tp | 10199.17 | 274.38 | 130.00 | 10178.00 | 10243.00 | 10327.19 | 125.19 | 137.19 | 0.672 | 0.672 |
+| 2018 | 2018-07-12 05:15 | -1 | stop | 6310.54 | 32.87 | 130.00 | 6314.60 | 6249.60 | 6379.60 | 15.76 | 16.43 | -8.247 | -8.247 |
+| 2018 | 2018-07-11 07:00 | 1 | stop | 6306.01 | 50.37 | 130.00 | 6309.46 | 6374.46 | 6244.46 | 28.03 | 25.18 | -4.637 | -4.637 |
+| 2019 | 2019-06-30 08:00 | -1 | stop | 11728.81 | 205.19 | 115.10 | 11700.00 | 11642.45 | 11797.02 | 97.02 | 102.59 | -1.593 | -1.593 |
+| 2019 | 2019-07-10 17:30 | -1 | tp | 12250.00 | 205.59 | 115.10 | 12268.93 | 12211.38 | 12165.40 | 102.07 | 102.80 | 0.450 | 0.450 |
+| 2019 | 2019-07-01 11:00 | 1 | stop | 10994.45 | 247.10 | 115.10 | 11008.43 | 11065.98 | 10893.08 | 115.35 | 123.55 | -1.499 | -1.499 |
+| 2019 | 2019-07-06 12:15 | 1 | tp | 11325.94 | 174.89 | 115.10 | 11301.35 | 11358.90 | 11387.45 | 88.80 | 87.45 | 0.321 | 0.321 |
+| 2020 | 2020-06-26 19:15 | -1 | stop | 9166.45 | 77.00 | 112.60 | 9162.85 | 9106.55 | 9219.15 | 39.78 | 38.50 | -2.831 | -2.831 |
+| 2020 | 2020-06-26 21:45 | 1 | stop | 9177.21 | 75.51 | 112.60 | 9177.05 | 9233.35 | 9120.75 | 38.44 | 37.75 | -2.929 | -2.929 |
+| 2020 | 2020-11-19 03:15 | -1 | tp | 17953.07 | 268.29 | 112.60 | 17972.66 | 17916.36 | 17832.35 | 127.97 | 134.14 | 0.656 | 0.656 |
+| 2020 | 2020-11-23 09:00 | 1 | tp | 18575.01 | 197.31 | 112.60 | 18555.78 | 18612.08 | 18650.56 | 102.52 | 98.65 | 0.375 | 0.375 |
+| 2021 | 2021-06-25 06:15 | -1 | tp | 34454.61 | 463.55 | 91.80 | 34482.53 | 34436.63 | 34168.22 | 149.25 | 231.78 | 1.798 | 1.798 |
+| 2021 | 2021-06-26 04:15 | 1 | tp | 31939.51 | 695.93 | 91.80 | 32013.50 | 32059.40 | 32355.66 | 353.76 | 347.96 | 0.837 | 0.837 |
+| 2021 | 2021-07-06 22:30 | -1 | stop | 33950.95 | 463.75 | 91.80 | 34008.64 | 33962.74 | 34248.79 | 240.15 | 231.87 | -1.191 | -1.191 |
+| 2021 | 2021-07-07 01:30 | 1 | stop | 34228.93 | 425.46 | 91.80 | 34203.22 | 34249.12 | 34024.19 | 179.03 | 212.73 | -1.256 | -1.256 |
+| 2022 | 2022-05-16 03:00 | -1 | tp | 30496.36 | 401.76 | 81.70 | 30470.91 | 30430.06 | 30305.39 | 236.24 | 200.88 | 0.528 | 0.528 |
+| 2022 | 2022-05-17 04:30 | 1 | tp | 30265.55 | 402.15 | 81.70 | 30312.19 | 30353.04 | 30501.08 | 213.27 | 201.08 | 0.694 | 0.694 |
+| 2022 | 2022-07-27 06:45 | -1 | stop | 21202.52 | 176.76 | 81.70 | 21190.51 | 21149.66 | 21288.97 | 98.46 | 88.38 | -1.415 | -1.415 |
+| 2022 | 2022-07-26 08:30 | 1 | stop | 21070.02 | 262.61 | 81.70 | 21077.76 | 21118.61 | 20938.10 | 139.66 | 131.30 | -1.292 | -1.292 |
+
+The year decomposition confirms that 2018--2020 dominate the pooled result:
+
+| Year | n | Mean gross R | Median planned risk USD | Median half-spread R | Stop share |
+|---:|---:|---:|---:|---:|---:|
+| 2018 | 69,552 | -5.106 | 34.88 | 1.864 | 95.2% |
+| 2019 | 69,842 | -6.561 | 28.37 | 2.029 | 97.1% |
+| 2020 | 70,108 | -3.445 | 39.48 | 1.426 | 94.6% |
+| 2021 | 69,950 | -0.380 | 279.58 | 0.164 | 58.7% |
+| 2022 | 70,080 | -1.111 | 114.74 | 0.356 | 71.7% |
+
+Raw Dukascopy BTCUSD confirms the scale: annual median observed spreads are
+$120.0, $114.8, $111.7, $80.9, and $81.7 for 2018--2022. They are real CFD
+quotes (roughly 180, 146, 107, 19, and 34 median bps), not values accidentally
+interpreted as dollars. The fixed annual model is therefore coarse, but close
+to the source medians.
+
+Two separate correctness issues remain:
+
+1. `features.py` deliberately replaces modeled `spread_atr` with NaN, and
+   `dataset.py` turns that NaN into zero. That explains the reported BTC
+   `cost_R=0` and makes ex-ante BTC selection blind to a very real modeled
+   spread. The provenance is already retained by `spread_modeled`, so the
+   numeric spread should also be retained.
+2. The kernel normalizes by entry-mid-to-anchor-stop distance, not the frozen
+   anchor half-ATR distance. This creates extreme outliers when the two-minute
+   entry delay moves toward the stop. It is secondary: using 0.5 ATR as the
+   denominator still gives -2.945 R mean versus -3.317 R persisted for the
+   pooled 0.5/0.5 cell.
+
+The minimal fix depends on the intended execution venue. For BTC CFD research,
+retain the modeled spread feature and reject or abstain from geometries whose
+stop lies inside the executable spread; the historical economics themselves
+are real. For BTCUSDT spot execution, the venue model is wrong: replace the
+Dukascopy BTCUSD CFD spread with a causally calibrated Binance executable
+spread plus fees/slippage. In either case, first preserve `spread_atr` for
+modeled rows and add a regression test proving that BTC cost R is nonzero and
+that fills use exactly one spread.
+
+Affected implementation points are `src/msd/data/binance.py:27`,
+`src/msd/processing/pipeline.py:135`, `src/msd/processing/features.py:413`,
+`src/msd/processing/labels.py:258`, `rust/msd_kernels/src/lib.rs:133`, and
+`src/msd/research/dataset.py:96`. A venue/spread correction requires rebuilding
+BTC features, label-grid labels, method event candidate labels, BTC tournament
+rows/report cards, and the Roihu bundle. Merely exposing the already-modeled
+spread requires rebuilding BTC features and research/tournament outputs, but
+not the executable label outcomes.
+
 ## Conclusion
 
 The silence is attributable to both economics and limited incremental ranking skill: 4/4 markets have a negative best fixed label-grid cell, while only 2/5 frozen models beat a fold-trained geometry-cell base rate. The cost-sanity table determines whether the economic conclusion is genuine or contaminated by a spread unit mismatch.
