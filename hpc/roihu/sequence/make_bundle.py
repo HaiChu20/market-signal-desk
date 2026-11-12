@@ -45,6 +45,7 @@ def make_bundle(data_root: Path, config_path: Path, output: Path, symbols=None):
     if not set(chosen) <= set(config["symbols"]):
         raise ValueError("Requested symbols must be in the config")
     for symbol in chosen:
+        override = config.get("venue_overrides", {}).get(symbol, {})
         done = data_root / "tmp" / f"stage9p4_{symbol}_year_chain_done.json"
         if not done.exists():
             raise RuntimeError(f"Missing production4 completion marker: {done}")
@@ -55,17 +56,21 @@ def make_bundle(data_root: Path, config_path: Path, output: Path, symbols=None):
         warm = max(start - pd.Timedelta(days=12), pd.Timestamp("2008-01-01") if symbol == "XAUUSD" else
                    pd.Timestamp("2018-12-16") if symbol in {"USATECHIDXUSD", "USA500IDXUSD"} else
                    pd.Timestamp("2017-01-01"))
+        if override.get("available_from"):
+            warm = max(warm, pd.Timestamp(override["available_from"]))
         months = pd.period_range(warm.to_period("M"), (end - pd.Timedelta(nanoseconds=1)).to_period("M"), freq="M")
         label_months = set(pd.period_range(start.to_period("M"), (end - pd.Timedelta(nanoseconds=1)).to_period("M"), freq="M"))
         flow_columns = config.get("flow_features", {}).get(symbol, [])
         flow_paths = []
         for month in months:
             stem = f"{month}.parquet"
-            paths = [Path("bars") / SOURCES[symbol] / symbol / stem,
+            paths = [Path(override.get("bars_1m", Path("bars") / SOURCES[symbol] / symbol)) / stem,
                      *(Path("derived") / f"bars_{tf}" / symbol / stem for tf in ("15m", "1h", "4h")),
                      Path("features") / symbol / stem]
             if month in label_months:
-                paths.append(Path("labels") / symbol / stem)
+                paths.append(Path(override.get("labels", Path("labels") / symbol)) / stem)
+                if override.get("features_overlay"):
+                    paths.append(Path(override["features_overlay"]) / stem)
             if flow_columns:
                 paths.append(Path("features_flow") / symbol / stem)
             for relative in paths:
@@ -102,7 +107,7 @@ def make_bundle(data_root: Path, config_path: Path, output: Path, symbols=None):
             coverage.append(result)
             if result["anchors"] == 0 or result["coverage"] < .8:
                 stale.append(f"{symbol}/{year}: anchor coverage {result['coverage']:.1%}")
-        if symbol == "ETHUSDT":
+        if symbol == "ETHUSDT" and override.get("venue") != "binance_perp":
             # Stage 9's executable ETH spread is calibrated from June 12-14
             # Dukascopy ETHUSD quotes; its loader scans this entire range.
             reference_months = pd.period_range("2018-06", (end - pd.Timedelta(nanoseconds=1)).to_period("M"), freq="M")
@@ -123,7 +128,8 @@ def make_bundle(data_root: Path, config_path: Path, output: Path, symbols=None):
     (output / "stale.txt").write_text("\n".join(stale) + ("\n" if stale else ""))
     total = sum(size for _, size in entries)
     print(f"{len(entries)} files, {total} bytes ({total / 1024**3:.2f} GiB); {len(missing)} missing")
-    print(f"coverage years: {len(coverage)}, minimum: {min(row['coverage'] for row in coverage):.1%}; stale/failed: {len(stale)}")
+    minimum_coverage = min((row["coverage"] for row in coverage), default=float("nan"))
+    print(f"coverage years: {len(coverage)}, minimum: {minimum_coverage:.1%}; stale/failed: {len(stale)}")
     print(f"rsync file list: {output / 'files.txt'}")
     if stale:
         raise RuntimeError(f"Refusing stale or low-coverage inputs; inspect {output / 'stale.txt'}")

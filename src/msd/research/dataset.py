@@ -77,7 +77,12 @@ def assemble(events: pd.DataFrame, features: pd.DataFrame, feature_cols=None, *,
         raise AssertionError('Outcome field used as a feature')
     if 'known_at' not in events or 'known_at' not in features:
         raise ValueError('Both events and features require known_at')
-    out=_asof(events,features,list(feature_cols),'feature_known_at')
+    join_columns=list(feature_cols)
+    # Executable cost inputs are required independently of the configured
+    # predictive feature subset.
+    join_columns.extend(column for column in ('spread_atr','1m_atr14')
+                        if column in features and column not in join_columns)
+    out=_asof(events,features,join_columns,'feature_known_at')
     for name,frame in (supplemental or {}).items():
         # Layer readers expose only approved numeric/boolean columns.  Keep
         # their schema even when the requested period has no source files so
@@ -93,7 +98,12 @@ def assemble(events: pd.DataFrame, features: pd.DataFrame, feature_cols=None, *,
     out['SL_R']=1.0
     out['TP_R']=reward/risk
     out['p0']=risk/(risk+reward)
-    out['spread_R']=(pd.to_numeric(out.get('spread_atr',pd.Series(0,index=out.index)),errors='coerce')*pd.to_numeric(out.get('1m_atr14',pd.Series(0,index=out.index)),errors='coerce')/pd.to_numeric(out.planned_risk,errors='coerce')).clip(lower=0).fillna(0)
+    spread_atr=pd.to_numeric(out.get('spread_atr',pd.Series(np.nan,index=out.index)),errors='coerce')
+    out['spread_R']=(spread_atr*pd.to_numeric(out.get('1m_atr14',pd.Series(np.nan,index=out.index)),errors='coerce')/pd.to_numeric(out.planned_risk,errors='coerce')).clip(lower=0)
+    crypto=out.sym.isin(['BTCUSDT','ETHUSDT'])
+    if out.loc[crypto,'spread_R'].isna().any():
+        raise ValueError('Crypto candidate has no executable spread cost')
+    out['spread_R']=out.spread_R.fillna(0)
     out['cost_R']=out.spread_R
     rate=np.where(out.sym.isin(['BTCUSDT','ETHUSDT']),.0006,
                   np.where(out.sym.eq('XAUUSD'),.00015,.0002))

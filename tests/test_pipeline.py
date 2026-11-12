@@ -422,7 +422,7 @@ def test_zero_spread_dukas_ticks_get_nearest_valid_annual_spread():
     assert result.spread_modeled.tolist()==[False,True,False]
 
 
-def test_spread_modeled_bars_keep_label_costs_but_mask_spread_features():
+def test_spread_modeled_bars_keep_label_costs_and_spread_features():
     from msd.processing.pipeline import _modelled_spread
     from msd.processing.features import build_features
     ts=pd.date_range("2024-01-01",periods=40,freq="min",tz="UTC")
@@ -434,7 +434,8 @@ def test_spread_modeled_bars_keep_label_costs_but_mask_spread_features():
     features=build_features(executable,"BTCUSDT",timeframes={})
     assert features.spread_modeled.dtype==bool
     assert features.spread_modeled.all()
-    assert features.spread_atr.isna().all()
+    assert features.spread_atr.notna().any()
+    assert (features.spread_atr.dropna()>0).all()
 
 
 def test_month_window_features_match_full_history_rows():
