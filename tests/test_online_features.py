@@ -5,10 +5,9 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from msd.live.online_features import OnlineFeatures
+from msd.live.online_features import OnlineFeatures, VALIDATED_ONLINE_METHODS
 from msd.processing.features import build_features
 from msd.processing.levels import build_levels, levels_asof
-from msd.processing.pipeline import methods_for_symbol
 from msd.processing.timeframes import build_all_timeframes
 
 SOURCE = Path('/Users/bfhach/Projects/market-signal-desk/data/bars/binance_spot/BTCUSDT/2021-06.parquet')
@@ -23,7 +22,8 @@ def test_real_btc_online_equals_offline_event_stretch():
     tfs = build_all_timeframes(bars, 'BTCUSDT')
     levels = build_levels(bars, 'BTCUSDT', tfs)
     features = build_features(bars, 'BTCUSDT', tfs, levels)
-    offline_events = [event for method in methods_for_symbol('BTCUSDT')
+    offline_events = [event for method in VALIDATED_ONLINE_METHODS
+                      if not hasattr(method, 'SYMBOLS') or 'BTCUSDT' in method.SYMBOLS
                       for event in method.detect(features, levels, bars)]
     assert offline_events, 'replay must exercise a pilot method event'
     target = min(int(bars.ts.searchsorted(event['ts'])) for event in offline_events

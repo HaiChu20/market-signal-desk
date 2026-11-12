@@ -56,6 +56,19 @@ def test_level_invalidation_is_causal_and_persistable():
     assert levels_asof(updated,invalidated).empty
 
 
+def test_level_invalidation_ignores_prices_before_level_is_known():
+    from msd.processing.levels import apply_level_invalidations
+    ts=pd.date_range("2024-01-01",periods=80,freq="min",tz="UTC")
+    close=np.r_[np.full(30,110.),np.full(30,100.),np.full(20,110.)]
+    bars=pd.DataFrame({"ts":ts,"bid_o":close,"bid_h":close+.1,
+                       "bid_l":close-.1,"bid_c":close})
+    levels=pd.DataFrame({"level_id":[7],"price":[105.],"type":["prior_day_high"],
+        "timeframe":["1d"],"created_at":[ts[20]],"known_at":[ts[40]+pd.Timedelta(minutes=1)],
+        "invalidated_at":[pd.NaT],"strength":[1.],"direction":[-1]})
+    invalidated=apply_level_invalidations(bars,levels).invalidated_at.iloc[0]
+    assert invalidated==ts[60]+pd.Timedelta(minutes=1)
+
+
 def test_nearest_level_ties_use_stable_level_id_not_input_order():
     from msd.processing.features import _nearest_level_features
     base = pd.DataFrame({"known_at": pd.to_datetime(["2024-01-02"], utc=True),
@@ -434,7 +447,7 @@ def test_zero_spread_dukas_ticks_get_nearest_valid_annual_spread():
     assert result.spread_modeled.tolist()==[False,True,False]
 
 
-def test_spread_modeled_bars_keep_label_costs_but_mask_spread_features():
+def test_spread_modeled_bars_keep_label_costs_and_spread_features():
     from msd.processing.pipeline import _modelled_spread
     from msd.processing.features import build_features
     ts=pd.date_range("2024-01-01",periods=40,freq="min",tz="UTC")
@@ -446,7 +459,8 @@ def test_spread_modeled_bars_keep_label_costs_but_mask_spread_features():
     features=build_features(executable,"BTCUSDT",timeframes={})
     assert features.spread_modeled.dtype==bool
     assert features.spread_modeled.all()
-    assert features.spread_atr.isna().all()
+    assert features.spread_atr.notna().any()
+    assert (features.spread_atr.dropna()>0).all()
 
 
 def test_month_window_features_match_full_history_rows():

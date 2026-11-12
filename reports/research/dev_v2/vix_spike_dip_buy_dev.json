@@ -1,0 +1,739 @@
+{
+  "method": "vix_spike_dip_buy",
+  "period": "dev",
+  "preliminary": true,
+  "protocol": "v2",
+  "grade_in_dev": "not applicable; protocol section 5 grades test only",
+  "pooled": {
+    "n": 3,
+    "signals_per_year": 0.7932437439327068,
+    "hit_rate": 0.0,
+    "net_avg_R": -0.7021357872344643,
+    "t_stat": -2.1961020299318212,
+    "profit_factor": 0.0,
+    "daily_sharpe": -1.9010228376233984,
+    "max_drawdown": -0.01050273691549497,
+    "positive_dev_year_share": 0.0,
+    "per_year": {
+      "2022": -0.7021357872344641
+    },
+    "spread_1_5x_net_avg_R": -0.725990039996573,
+    "random_direction_percentile": 47.5,
+    "pbo": null,
+    "grade": "ungraded: development",
+    "brier": 0.2444781489576929,
+    "brier_skill_vs_p0": -0.09810214886477042,
+    "reliability_by_year": {
+      "2019": {
+        "n": 185,
+        "predicted": 0.31081191233732,
+        "observed": 0.2864864864864865
+      },
+      "2020": {
+        "n": 3330,
+        "predicted": 0.37354971745601034,
+        "observed": 0.46216216216216216
+      },
+      "2021": {
+        "n": 37,
+        "predicted": 0.40880390285026796,
+        "observed": 0.35135135135135137
+      },
+      "2022": {
+        "n": 1036,
+        "predicted": 0.573501345697849,
+        "observed": 0.40057915057915056
+      }
+    },
+    "reliability_by_vol_tercile": {
+      "high": {
+        "n": 1529,
+        "predicted": 0.3993259026352382,
+        "observed": 0.48463047743623283
+      },
+      "low": {
+        "n": 1530,
+        "predicted": 0.4830351058326065,
+        "observed": 0.38300653594771245
+      },
+      "middle": {
+        "n": 1529,
+        "predicted": 0.3669593750203944,
+        "observed": 0.45323741007194246
+      }
+    },
+    "deflated_sharpe_ratio": null,
+    "random_direction_matched_signals": 3,
+    "row_accounting": {
+      "events": 124,
+      "candidate_rows": 4588,
+      "assembled_rows": 4588,
+      "drops": {
+        "invalid_geometry": 0,
+        "missing_outcome": 0
+      },
+      "cpcv_test_groups": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          1,
+          4
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "cpcv_train_scores": [
+        null,
+        null,
+        null,
+        1.4448420851358497,
+        null,
+        null,
+        0.6607782867875794,
+        null,
+        0.24687672502875443,
+        1.8203816115595424
+      ],
+      "cpcv_test_scores": [
+        null,
+        null,
+        null,
+        -0.8527711250448676,
+        null,
+        null,
+        0.16518912612854048,
+        null,
+        1.2223214364669006,
+        -0.3527722187844315
+      ],
+      "oof_predicted_rows": 4588,
+      "selected_signals": 3,
+      "no_oof_prediction": 0
+    },
+    "selection_comparison": {
+      "selected_n": 3,
+      "selected_avg_R": -0.7021357872344643,
+      "unselected_n": 4585,
+      "unselected_avg_R": -0.37205611886476186,
+      "same_event_unselected_n": 108,
+      "same_event_unselected_avg_R": -0.3962190694256197
+    }
+  },
+  "per_instrument": {
+    "USA500IDXUSD": {
+      "n": 1,
+      "signals_per_year": 0.2644145813109023,
+      "hit_rate": 0.0,
+      "net_avg_R": -0.06269792642900338,
+      "t_stat": null,
+      "profit_factor": 0.0,
+      "daily_sharpe": null,
+      "max_drawdown": -0.00031348963214505865,
+      "positive_dev_year_share": 0.0,
+      "per_year": {
+        "2022": -0.06269792642900338
+      },
+      "spread_1_5x_net_avg_R": -0.09386568372221653,
+      "random_direction_percentile": null,
+      "pbo": null,
+      "grade": "ungraded: development",
+      "brier": 0.24829178764771445,
+      "brier_skill_vs_p0": -0.07255628703078854,
+      "reliability_by_year": {
+        "2019": {
+          "n": 111,
+          "predicted": 0.3187146254462517,
+          "observed": 0.22522522522522523
+        },
+        "2020": {
+          "n": 1813,
+          "predicted": 0.38762649583742054,
+          "observed": 0.5019305019305019
+        },
+        "2022": {
+          "n": 370,
+          "predicted": 0.6094455975244015,
+          "observed": 0.35405405405405405
+        }
+      },
+      "reliability_by_vol_tercile": {
+        "high": {
+          "n": 765,
+          "predicted": 0.4232988510874069,
+          "observed": 0.46797385620915033
+        },
+        "low": {
+          "n": 765,
+          "predicted": 0.46468337121027037,
+          "observed": 0.3202614379084967
+        },
+        "middle": {
+          "n": 764,
+          "predicted": 0.37216313011005603,
+          "observed": 0.606020942408377
+        }
+      },
+      "deflated_sharpe_ratio": null
+    },
+    "USATECHIDXUSD": {
+      "n": 2,
+      "signals_per_year": 0.6255013459410379,
+      "hit_rate": 0.0,
+      "net_avg_R": -1.0218547176371948,
+      "t_stat": -1739.2575475622298,
+      "profit_factor": 0.0,
+      "daily_sharpe": -3.424509989166853,
+      "max_drawdown": -0.010192442508402566,
+      "positive_dev_year_share": 0.0,
+      "per_year": {
+        "2022": -1.0218547176371948
+      },
+      "spread_1_5x_net_avg_R": -1.042052218133751,
+      "random_direction_percentile": null,
+      "pbo": null,
+      "grade": "ungraded: development",
+      "brier": 0.24066451026767133,
+      "brier_skill_vs_p0": -0.1257651026866915,
+      "reliability_by_year": {
+        "2019": {
+          "n": 74,
+          "predicted": 0.2989578426739223,
+          "observed": 0.3783783783783784
+        },
+        "2020": {
+          "n": 1517,
+          "predicted": 0.3567262506099347,
+          "observed": 0.4146341463414634
+        },
+        "2021": {
+          "n": 37,
+          "predicted": 0.40880390285026796,
+          "observed": 0.35135135135135137
+        },
+        "2022": {
+          "n": 666,
+          "predicted": 0.5535323169053199,
+          "observed": 0.4264264264264264
+        }
+      },
+      "reliability_by_vol_tercile": {
+        "high": {
+          "n": 765,
+          "predicted": 0.37717868037819746,
+          "observed": 0.4875816993464052
+        },
+        "low": {
+          "n": 765,
+          "predicted": 0.502841887829011,
+          "observed": 0.43790849673202614
+        },
+        "middle": {
+          "n": 764,
+          "predicted": 0.35842818759035294,
+          "observed": 0.3219895287958115
+        }
+      },
+      "deflated_sharpe_ratio": null
+    }
+  },
+  "input_manifest": [
+    {
+      "path": "data/events/USATECHIDXUSD/2019-08.parquet",
+      "mtime_ns": 1794463276334265342,
+      "size": 1455342
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2020-02.parquet",
+      "mtime_ns": 1794463499815242941,
+      "size": 1409458
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2020-03.parquet",
+      "mtime_ns": 1794463499877034561,
+      "size": 1398547
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2020-04.parquet",
+      "mtime_ns": 1794463499948488671,
+      "size": 1444350
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2021-12.parquet",
+      "mtime_ns": 1794463712737643771,
+      "size": 1828951
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2022-01.parquet",
+      "mtime_ns": 1794490198525243934,
+      "size": 1639172
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2022-02.parquet",
+      "mtime_ns": 1794490198594351934,
+      "size": 1453938
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2022-03.parquet",
+      "mtime_ns": 1794490198662331917,
+      "size": 1637261
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2022-04.parquet",
+      "mtime_ns": 1794490198725063651,
+      "size": 1438392
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2022-05.parquet",
+      "mtime_ns": 1794490198789463202,
+      "size": 1575015
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2022-09.parquet",
+      "mtime_ns": 1794490199053036042,
+      "size": 1520675
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2022-10.parquet",
+      "mtime_ns": 1794490199122343379,
+      "size": 1488481
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2019-08.parquet",
+      "mtime_ns": 1794365942874088851,
+      "size": 16522336
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2020-02.parquet",
+      "mtime_ns": 1794365944259901046,
+      "size": 14816068
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2020-03.parquet",
+      "mtime_ns": 1794365944475568886,
+      "size": 14991263
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2020-04.parquet",
+      "mtime_ns": 1794365944699401915,
+      "size": 15910705
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2021-12.parquet",
+      "mtime_ns": 1794365949348415136,
+      "size": 16635041
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2022-01.parquet",
+      "mtime_ns": 1794365949584258298,
+      "size": 15946038
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2022-02.parquet",
+      "mtime_ns": 1794365949826272237,
+      "size": 15245748
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2022-03.parquet",
+      "mtime_ns": 1794365950071088977,
+      "size": 17638881
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2022-04.parquet",
+      "mtime_ns": 1794365950288785396,
+      "size": 15272363
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2022-05.parquet",
+      "mtime_ns": 1794365950522338517,
+      "size": 16794503
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2022-09.parquet",
+      "mtime_ns": 1794365951463471332,
+      "size": 16621785
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2022-10.parquet",
+      "mtime_ns": 1794365951695846514,
+      "size": 16133476
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2019-01.parquet",
+      "mtime_ns": 1794464094251229699,
+      "size": 1472888
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2019-08.parquet",
+      "mtime_ns": 1794464094528354497,
+      "size": 1628526
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2020-02.parquet",
+      "mtime_ns": 1794464309888912348,
+      "size": 1448350
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2020-03.parquet",
+      "mtime_ns": 1794464309960784360,
+      "size": 1576595
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2020-04.parquet",
+      "mtime_ns": 1794464310026519744,
+      "size": 1429457
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2022-02.parquet",
+      "mtime_ns": 1794490412310747134,
+      "size": 1380898
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2022-03.parquet",
+      "mtime_ns": 1794490412375615610,
+      "size": 1597380
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2022-04.parquet",
+      "mtime_ns": 1794490412433040343,
+      "size": 1361936
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2022-05.parquet",
+      "mtime_ns": 1794490412506088988,
+      "size": 1651998
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2022-09.parquet",
+      "mtime_ns": 1794490412777791623,
+      "size": 1522116
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2022-10.parquet",
+      "mtime_ns": 1794490412841108116,
+      "size": 1516623
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2019-01.parquet",
+      "mtime_ns": 1794374542248914437,
+      "size": 15038483
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2019-08.parquet",
+      "mtime_ns": 1794374543764497186,
+      "size": 15379647
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2020-02.parquet",
+      "mtime_ns": 1794374545047234035,
+      "size": 14340569
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2020-03.parquet",
+      "mtime_ns": 1794374545271605313,
+      "size": 15078742
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2020-04.parquet",
+      "mtime_ns": 1794374545509242156,
+      "size": 15949593
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2022-02.parquet",
+      "mtime_ns": 1794374550600320820,
+      "size": 15147927
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2022-03.parquet",
+      "mtime_ns": 1794374550844841052,
+      "size": 17510786
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2022-04.parquet",
+      "mtime_ns": 1794374551063206245,
+      "size": 15058977
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2022-05.parquet",
+      "mtime_ns": 1794374551302930325,
+      "size": 16723959
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2022-09.parquet",
+      "mtime_ns": 1794374552264731313,
+      "size": 16511111
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2022-10.parquet",
+      "mtime_ns": 1794374552494937841,
+      "size": 16058528
+    }
+  ],
+  "limitations": [
+    "Stage 9 inputs may be rebuilt; inspect manifest before reuse.",
+    "PBO uses like-for-like CPCV train/test ranks across logged development configurations; null until at least two comparable configurations exist.",
+    "Random-direction benchmark uses the executable opposite-side label kernel on raw bars; coverage is reported.",
+    "For BTC, the raw mid-price bars use a monthly median of the modeled decision-time spread in the opposite-direction simulation.",
+    "DSR uses trial-ledger daily Sharpe dispersion; null if too few trials."
+  ],
+  "config_hash": "dae0d112c46157c63ceda7d3c995b6e2696d1813de501b33fb55fb2b5392ebfe",
+  "registry_id": 44,
+  "variant": null,
+  "dry_run": false,
+  "cpcv": {
+    "cpcv_test_groups": [
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        0,
+        3
+      ],
+      [
+        0,
+        4
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        3,
+        4
+      ]
+    ],
+    "cpcv_train_scores": [
+      null,
+      null,
+      null,
+      1.4448420851358497,
+      null,
+      null,
+      0.6607782867875794,
+      null,
+      0.24687672502875443,
+      1.8203816115595424
+    ],
+    "cpcv_test_scores": [
+      null,
+      null,
+      null,
+      -0.8527711250448676,
+      null,
+      null,
+      0.16518912612854048,
+      null,
+      1.2223214364669006,
+      -0.3527722187844315
+    ]
+  },
+  "status": "fails DEV diagnostics",
+  "run_stats": {
+    "method": "vix_spike_dip_buy",
+    "candidates": 4588,
+    "signals": 3,
+    "runtime_s": 4.731759499991313,
+    "peak_rss_mib": 1072.6875,
+    "report": "reports/research/dev_v2/vix_spike_dip_buy_dev.json",
+    "status": "fails DEV diagnostics",
+    "pooled": {
+      "n": 3,
+      "signals_per_year": 0.7932437439327068,
+      "hit_rate": 0.0,
+      "net_avg_R": -0.7021357872344643,
+      "t_stat": -2.1961020299318212,
+      "profit_factor": 0.0,
+      "daily_sharpe": -1.9010228376233984,
+      "max_drawdown": -0.01050273691549497,
+      "positive_dev_year_share": 0.0,
+      "per_year": {
+        "2022": -0.7021357872344641
+      },
+      "spread_1_5x_net_avg_R": -0.725990039996573,
+      "random_direction_percentile": 47.5,
+      "pbo": null,
+      "grade": "ungraded: development",
+      "brier": 0.2444781489576929,
+      "brier_skill_vs_p0": -0.09810214886477042,
+      "reliability_by_year": {
+        "2019": {
+          "n": 185,
+          "predicted": 0.31081191233732,
+          "observed": 0.2864864864864865
+        },
+        "2020": {
+          "n": 3330,
+          "predicted": 0.37354971745601034,
+          "observed": 0.46216216216216216
+        },
+        "2021": {
+          "n": 37,
+          "predicted": 0.40880390285026796,
+          "observed": 0.35135135135135137
+        },
+        "2022": {
+          "n": 1036,
+          "predicted": 0.573501345697849,
+          "observed": 0.40057915057915056
+        }
+      },
+      "reliability_by_vol_tercile": {
+        "high": {
+          "n": 1529,
+          "predicted": 0.3993259026352382,
+          "observed": 0.48463047743623283
+        },
+        "low": {
+          "n": 1530,
+          "predicted": 0.4830351058326065,
+          "observed": 0.38300653594771245
+        },
+        "middle": {
+          "n": 1529,
+          "predicted": 0.3669593750203944,
+          "observed": 0.45323741007194246
+        }
+      },
+      "deflated_sharpe_ratio": null,
+      "random_direction_matched_signals": 3,
+      "row_accounting": {
+        "events": 124,
+        "candidate_rows": 4588,
+        "assembled_rows": 4588,
+        "drops": {
+          "invalid_geometry": 0,
+          "missing_outcome": 0
+        },
+        "cpcv_test_groups": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            1,
+            4
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            2,
+            4
+          ],
+          [
+            3,
+            4
+          ]
+        ],
+        "cpcv_train_scores": [
+          null,
+          null,
+          null,
+          1.4448420851358497,
+          null,
+          null,
+          0.6607782867875794,
+          null,
+          0.24687672502875443,
+          1.8203816115595424
+        ],
+        "cpcv_test_scores": [
+          null,
+          null,
+          null,
+          -0.8527711250448676,
+          null,
+          null,
+          0.16518912612854048,
+          null,
+          1.2223214364669006,
+          -0.3527722187844315
+        ],
+        "oof_predicted_rows": 4588,
+        "selected_signals": 3,
+        "no_oof_prediction": 0
+      },
+      "selection_comparison": {
+        "selected_n": 3,
+        "selected_avg_R": -0.7021357872344643,
+        "unselected_n": 4585,
+        "unselected_avg_R": -0.37205611886476186,
+        "same_event_unselected_n": 108,
+        "same_event_unselected_avg_R": -0.3962190694256197
+      }
+    }
+  }
+}

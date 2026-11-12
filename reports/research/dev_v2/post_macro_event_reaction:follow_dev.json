@@ -1,0 +1,51 @@
+{
+  "method": "post_macro_event_reaction:follow",
+  "period": "dev",
+  "preliminary": true,
+  "protocol": "v2",
+  "status": "no DEV events: macro_minutes_since_event is absent from the frozen DEV features",
+  "grade_in_dev": "silent: no DEV events",
+  "pooled": {
+    "signals_per_year": null,
+    "hit_rate": null,
+    "net_avg_R": null,
+    "t_stat": null,
+    "profit_factor": null,
+    "daily_sharpe": null,
+    "max_drawdown": null,
+    "brier_skill_vs_p0": null,
+    "deflated_sharpe_ratio": null,
+    "pbo": null,
+    "random_direction_percentile": null,
+    "n": 0
+  },
+  "per_instrument": {},
+  "input_manifest": [],
+  "config_hash": "53505c4d55c1275574771b6e66f680493c15566a2f5c4399d7afcaa1f9e556b5",
+  "registry_id": 33,
+  "variant": "follow",
+  "dry_run": false,
+  "cpcv": null,
+  "run_stats": {
+    "method": "post_macro_event_reaction:follow",
+    "candidates": 0,
+    "signals": 0,
+    "runtime_s": 3.7222119579673745,
+    "peak_rss_mib": 845.8125,
+    "status": "no DEV events: macro_minutes_since_event is absent from the frozen DEV features",
+    "pooled": {
+      "signals_per_year": null,
+      "hit_rate": null,
+      "net_avg_R": null,
+      "t_stat": null,
+      "profit_factor": null,
+      "daily_sharpe": null,
+      "max_drawdown": null,
+      "brier_skill_vs_p0": null,
+      "deflated_sharpe_ratio": null,
+      "pbo": null,
+      "random_direction_percentile": null,
+      "n": 0
+    }
+  }
+}

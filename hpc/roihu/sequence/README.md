@@ -1,13 +1,19 @@
-# Sequence CNN DEV submission v1
+# Sequence CNN DEV submission v3
 
 This package trains only on development labels ending before 2023-01-01. It
 writes purged walk-forward out-of-fold barrier predictions, one GPU job for
 each symbol and seed, then grades the fetched predictions on the laptop.
 The default submission uses all five symbols in the
-[config](configs/dev_v1.json), with three seeds each. Production4 completed
-the higher-timeframe inputs for all five. The only absent inventory paths are
-eight BTC/ETH 2017-12 derived/feature warm-up files, before their 2018 start.
-The builder discards initial anchors without enough history.
+[v3 config](configs/dev_v3.json), with three seeds each. BTC and ETH add
+causal flow features from 2020 onward. The immutable [v1 config](configs/dev_v1.json)
+and [v2 config](configs/dev_v2.json) remain byte-identical and runnable by
+setting `CONFIG_PATH` for both `ship.sh` and `submit.sh`.
+
+V3 standardizes every dense column per walk-forward fold using only that
+fold's FIT rows, then clips values to ±10. The FIT mean and standard deviation
+are stored in both `resume.pt` and `model.pt`; early-stop, calibration and test
+rows all use those same saved statistics. This fixes the unscaled dense-input
+failure seen in the first GPU pilot without changing the model or input files.
 
 ## Laptop: ship code and the exact present inputs
 
@@ -24,8 +30,8 @@ uv sync
 bash hpc/roihu/sequence/ship.sh
 ```
 
-The five-symbol inventory is **2,443 files, 8,776,100,580 bytes (8.17 GiB)**,
-with eight missing pre-2018 warm-up files. `ship.sh` refuses any missing DEV
+The v3 five-symbol inventory is **2,237 files, 8,531,143,626 bytes (7.95 GiB)**,
+with no missing files. `ship.sh` refuses any missing DEV
 input, absent production4 completion marker, stale production4 output, or DEV
 year with less than 80% anchor coverage. It checks the per-symbol chain-done
 marker and each `data/tmp/stage9p4_{SYM}_{YEAR}.json` result. Since that result
@@ -39,17 +45,78 @@ time, ATR and window-history gates):
 
 | Symbol | DEV years | Coverage by year |
 |---|---|---|
-| BTCUSDT | 2018–2022 | 97.2%, 100%, 100%, 100%, 100% |
-| ETHUSDT | 2018–2022 | 97.2%, 100%, 100%, 100%, 100% |
+| BTCUSDT | 2020–2022 | 100%, 100%, 100% |
+| ETHUSDT | 2020–2022 | 100%, 100%, 100% |
 | USATECHIDXUSD | 2019–2022 | 99.9%, 100%, 100%, 100% |
 | USA500IDXUSD | 2019–2022 | 99.9%, 100%, 100%, 100% |
 | XAUUSD | 2008–2022 | 96.2% in 2008, 100% in every year 2009–2022 |
+
+For BTC and ETH, the bundle also gates every selected flow column at least
+80% non-NaN coverage over 2020–2022. The selected dense inputs include their
+spot and UM coverage flags; BTC also includes its Bybit coverage flag. A
+missingness channel is added before dense zero imputation, so unavailable data
+does not become indistinguishable from a covered minute with zero activity.
+The market inputs are scale-free imbalances, trade-intensity z-scores clipped
+to ±10, and cumulative-delta divergence. A runtime guard rejects any selected
+flow value outside ±20 after clipping. Raw deltas, venue delta spreads,
+uncovered volume, and the UM mismatch diagnostic are excluded because their
+scale drifts or encodes data-period quality rather than market state. V2 has
+20 configured flow columns for BTC and 14 for ETH; each gets a paired
+missingness channel.
+Depth and tick features are excluded because they have no DEV history. The
+bundle reads no 2023+ flow files and therefore does not depend on the ongoing
+2024+ Bybit flow rebuild.
 
 For Allas instead of
 rsync, upload the same `bundle/files.txt` paths under the same `data/` relative
 paths; see [CSC object storage](https://docs.csc.fi/data/Allas/).
 
-## Roihu-GPU: setup and submit
+## Allas route
+
+This is the transfer flow used for the pilot. Data files keep their `data/`
+relative paths at the bucket root, the same layout as the full derived-data
+backup, so they are uploaded once. Code lives under `code/` and results under
+`results/`. On the Mac (use `uv sync --inexact`; a plain sync removes the
+locally built `msd-kernels`):
+
+```bash
+export CSC_PROJECT=2021849
+./.venv/bin/python hpc/roihu/sequence/make_bundle.py --data-root data \
+  --config hpc/roihu/sequence/configs/dev_v3.json \
+  --symbols BTCUSDT,USATECHIDXUSD,USA500IDXUSD,XAUUSD,ETHUSDT
+rclone copy data "s3allas:${CSC_PROJECT}-msd-derived" \
+  --files-from hpc/roihu/sequence/bundle/files.txt --transfers 8 --progress
+rclone copy . "s3allas:${CSC_PROJECT}-msd-derived/code" \
+  --exclude '/.git/**' --exclude '/.venv/**' --exclude '/.cao/**' --exclude '/data/**' \
+  --exclude '/reports/**' --exclude '/rust/**/target/**' --exclude '__pycache__/**' --progress
+```
+
+On the Roihu GPU login node (`uname -m` must print `aarch64`):
+
+```bash
+export CSC_PROJECT=2021849
+D=/scratch/project_${CSC_PROJECT}/${USER}/market-signal-desk
+module load allas
+allas-conf   # once; asks the CSC password
+mkdir -p "$D" && cd "$D"
+rclone copy "s3allas:${CSC_PROJECT}-msd-derived/code" . --transfers 16
+rclone copy "s3allas:${CSC_PROJECT}-msd-derived" data \
+  --files-from hpc/roihu/sequence/bundle/files.txt --transfers 16 --progress
+rclone check "s3allas:${CSC_PROJECT}-msd-derived" data \
+  --files-from hpc/roihu/sequence/bundle/files.txt --one-way
+bash hpc/roihu/sequence/setup.sh   # once; the editable install picks up later code updates
+CSC_PROJECT=${CSC_PROJECT} bash hpc/roihu/sequence/submit.sh
+squeue --me
+```
+
+After the array completes, upload results on Roihu and fetch them on the Mac:
+
+```bash
+rclone copy reports/sequence "s3allas:${CSC_PROJECT}-msd-derived/results/sequence" --transfers 16
+rclone copy "s3allas:${CSC_PROJECT}-msd-derived/results/sequence" reports/sequence   # on the Mac
+```
+
+## Roihu-GPU: direct-rsync setup and submit
 
 ```bash
 ssh roihu-gpu.csc.fi "cd /scratch/project_${CSC_PROJECT}/${USER}/market-signal-desk && bash hpc/roihu/sequence/setup.sh && CSC_PROJECT=${CSC_PROJECT} bash hpc/roihu/sequence/submit.sh"
@@ -67,7 +134,7 @@ variables before `submit.sh`; every seed must appear in the JSON config.
 ## Monitor, fetch, grade
 
 ```bash
-ssh roihu-gpu.csc.fi "squeue -u ${USER}; sacct -u ${USER} --format=JobID,State,Elapsed,ExitCode | tail"
+ssh roihu-gpu.csc.fi "squeue --me; sacct --format=JobID,State,Elapsed,ExitCode | tail"
 bash hpc/roihu/sequence/fetch.sh
 uv run python -m msd.research.grade_sequence --input reports/sequence --data-root data
 ```
@@ -82,13 +149,13 @@ The output includes per-fold `oof.parquet`, `model.pt`, `resume.pt`,
 
 ## Local CPU smoke
 
-The following reads two 2021 months, selects two anchors per day, trains one
-epoch with a width-eight CNN, and leaves outputs under `data/tmp/sequence-smoke/`.
+The following reads one 2021 month plus its warm-up, selects two anchors per day, trains one
+epoch with a width-eight CNN and the v3 BTC flow inputs, and leaves outputs
+under `data/tmp/sequence-smoke/`.
 
 ```bash
 uv sync --extra gpu
-uv run python -m msd.research.sequence_train --data-root data --symbol BTCUSDT --output data/tmp/sequence-smoke/btc --smoke
-uv run python -m msd.research.sequence_train --data-root data --symbol USATECHIDXUSD --output data/tmp/sequence-smoke/nq --smoke
+uv run python -m msd.research.sequence_train --data-root data --config hpc/roihu/sequence/configs/dev_v3.json --symbol BTCUSDT --output data/tmp/sequence-smoke/btc --smoke
 uv run python -m msd.research.grade_sequence --input data/tmp/sequence-smoke --data-root data
 ```
 

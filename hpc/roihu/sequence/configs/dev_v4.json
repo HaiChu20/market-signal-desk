@@ -1,0 +1,57 @@
+{
+  "name": "sequence_cnn_dev_v4_binance_perp_costs",
+  "period": "dev",
+  "end_exclusive": "2023-01-01",
+  "symbols": ["USATECHIDXUSD", "USA500IDXUSD", "XAUUSD", "BTCUSDT", "ETHUSDT"],
+  "starts": {
+    "USATECHIDXUSD": "2019-01-01",
+    "USA500IDXUSD": "2019-01-01",
+    "XAUUSD": "2008-01-01",
+    "BTCUSDT": "2020-01-01",
+    "ETHUSDT": "2020-01-01"
+  },
+  "seeds": [7, 17, 27],
+  "folds": 5,
+  "epochs": 20,
+  "batch_size": 64,
+  "patience": 4,
+  "width": 24,
+  "checkpoint_every_steps": 100,
+  "windows": {"1m": 240, "15m": 96, "1h": 96, "4h": 60},
+  "venue_overrides": {
+    "BTCUSDT": {
+      "venue": "binance_perp",
+      "available_from": "2020-01-01",
+      "bars_1m": "bars/binance_um/BTCUSDT",
+      "labels": "venues/binance_perp/labels/BTCUSDT",
+      "features_overlay": "venues/binance_perp/features/BTCUSDT"
+    },
+    "ETHUSDT": {
+      "venue": "binance_perp",
+      "available_from": "2020-01-01",
+      "bars_1m": "bars/binance_um/ETHUSDT",
+      "labels": "venues/binance_perp/labels/ETHUSDT",
+      "features_overlay": "venues/binance_perp/features/ETHUSDT"
+    }
+  },
+  "flow_features": {
+    "BTCUSDT": [
+      "flow_coverage", "spot_flow_coverage", "spot_trade_intensity_z20d",
+      "spot_imbalance_1m", "spot_imbalance_5m", "spot_imbalance_15m", "spot_imbalance_60m",
+      "perp_flow_coverage", "perp_trade_intensity_z20d", "perp_imbalance_1m",
+      "perp_imbalance_5m", "perp_imbalance_15m", "perp_imbalance_60m",
+      "bybit_flow_coverage", "bybit_trade_intensity_z20d", "bybit_imbalance_1m",
+      "bybit_imbalance_5m", "bybit_imbalance_15m", "bybit_imbalance_60m",
+      "cum_delta_divergence_60m"
+    ],
+    "ETHUSDT": [
+      "flow_coverage", "spot_flow_coverage", "spot_trade_intensity_z20d",
+      "spot_imbalance_1m", "spot_imbalance_5m", "spot_imbalance_15m", "spot_imbalance_60m",
+      "perp_flow_coverage", "perp_trade_intensity_z20d", "perp_imbalance_1m",
+      "perp_imbalance_5m", "perp_imbalance_15m", "perp_imbalance_60m",
+      "cum_delta_divergence_60m"
+    ]
+  },
+  "flow_min_non_nan_coverage": 0.8,
+  "excluded_inputs": ["features_depth", "tick_features"]
+}

@@ -12,3 +12,7 @@ NAME = "wyckoff_spring_upthrust"
 
 def detect(features, levels, bars, *, state=None, return_state=False):
     return detect_checkpointed(NAME, features, levels, bars, state=state, return_state=return_state)
+
+from .requirements import required_features, market_for
+REQUIRED_FEATURES = required_features(NAME)
+MARKETS = market_for(NAME)

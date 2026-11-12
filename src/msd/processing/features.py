@@ -411,7 +411,8 @@ def build_features(bars: pd.DataFrame, symbol: str, timeframes: dict[str,pd.Data
     if "duka_spread" in source: spread=source.duka_spread.to_numpy(float)
     else: spread=out.spread.to_numpy(float)
     out["spread_atr"]=np.divide(spread,safe_atr,out=np.full(len(out),np.nan),where=np.isfinite(safe_atr))
-    out.loc[spread_modeled,"spread_atr"] = np.nan
+    # Modeled quotes are still the executable cost assumption. Preserve their
+    # numeric spread for the edge gate; spread_modeled retains provenance.
     volume_column = "duka_volume" if "duka_volume" in history and history.duka_volume.notna().any() else "volume"
     volume_history=history[volume_column].to_numpy(float) if volume_column in history else np.full(len(history),np.nan)
     volume=volume_history[output_mask]

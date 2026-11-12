@@ -15,7 +15,7 @@ def fixture_events():
         'exit_ts':t+pd.Timedelta(hours=2),'outcome':['tp','sl','tp','sl'],
         'R':[1,-1,1,-1],'gross_R':[1,-1,1,-1]})
     features=pd.DataFrame({'known_at':[t[0]-pd.Timedelta(minutes=1),t[2]+pd.Timedelta(minutes=1)],
-        '1m_return_bars_5':[3,99]})
+        '1m_return_bars_5':[3,99], 'spread_atr':[.01,.01], '1m_atr14':[1.,1.]})
     return events,features
 
 def test_causal_asof_and_outcome_exclusion():
@@ -36,6 +36,32 @@ def test_purge_and_forward():
                 pass
     for train,test in walk_forward(frame,3):
         assert frame.known_at.iloc[train].max()<frame.known_at.iloc[test].min()
+
+
+def test_cpcv_embargo_is_one_weekday_and_purge_removes_overlap():
+    from msd.research.splits import _purge
+    t=pd.to_datetime(['2022-01-06 12:00','2022-01-07 12:00','2022-01-10 11:59',
+                      '2022-01-10 12:00','2022-01-11 12:00'],utc=True)
+    frame=pd.DataFrame({'known_at':t,'label_end_ts':t})
+    kept=_purge(frame,np.array([1]))
+    assert kept.tolist()==[0,4]  # Friday test embargoes through Monday 12:00 inclusive.
+
+    overlap=pd.DataFrame({'known_at':pd.to_datetime(['2022-01-01','2022-01-03'],utc=True),
+                          'label_end_ts':pd.to_datetime(['2022-01-04','2022-01-03'],utc=True)})
+    assert len(_purge(overlap,np.array([1])))==0
+
+
+def test_trial_ledger_is_append_only_and_capped(tmp_path):
+    from msd.research.ledger import append_trial,read_trials,FIELDS
+    path=tmp_path/'trials.csv'
+    def row(i):
+        return dict(zip(FIELDS,[f't{i}','2026-11-12',f'h{i}','method','{}','2019/2022',
+                                'dev','{}','dry']))
+    append_trial(path,row(0),max_configs=2);before=path.read_bytes()
+    append_trial(path,row(1),max_configs=2)
+    assert path.read_bytes().startswith(before) and len(read_trials(path))==2
+    with pytest.raises(ValueError,match='already present'):append_trial(path,row(1),max_configs=2)
+    with pytest.raises(ValueError,match='limit'):append_trial(path,row(2),max_configs=2)
 
 def synthetic(edge=False):
     rng=np.random.default_rng(7);n=3000
@@ -114,12 +140,43 @@ def test_pbo_cscv_from_logged_dev_years():
     sharpes,pbo,count=trial_diagnostics(rows,'x')
     assert len(sharpes)==2 and count==2 and 0<=pbo<=1
 
+
+def test_pbo_uses_logged_cpcv_train_and_test_ranks():
+    import json
+    from msd.research.report_card import trial_diagnostics
+    rows=[
+        {'method':'x','period':'dev','metrics':json.dumps({'daily_sharpe':1.,
+            'cpcv_train_scores':[2.,0.], 'cpcv_test_scores':[-2.,0.]})},
+        {'method':'x','period':'dev','metrics':json.dumps({'daily_sharpe':.5,
+            'cpcv_train_scores':[0.,2.], 'cpcv_test_scores':[0.,-2.]})},
+    ]
+    _,pbo,count=trial_diagnostics(rows,'x')
+    assert count==2 and pbo==1.0
+
 def test_dev_excludes_labels_ending_in_test_period():
     e,f=fixture_events()
     e.loc[3,'exit_ts']=pd.Timestamp('2023-01-01',tz='UTC')
-    out,audit=assemble(e,f,('1m_return_bars_5',),return_audit=True)
-    assert len(out)==3
-    assert audit['label_extends_beyond_dev']==1
+    with pytest.raises(ValueError,match='label_end_ts'):
+        assemble(e,f,('1m_return_bars_5',),return_audit=True)
+
+
+def test_supplemental_asof_join_is_causal_and_missing_layer_is_nan():
+    e,f=fixture_events()
+    flow=pd.DataFrame({'known_at':[e.known_at.iloc[0]-pd.Timedelta(minutes=1),
+                                         e.known_at.iloc[2]+pd.Timedelta(minutes=1)],
+                       'flow_coverage':[True,True],'spot_delta_5m':[2.,99.]})
+    depth=pd.DataFrame(columns=['known_at','depth_coverage','depth_imbalance_1pct'])
+    out=assemble(e,f,('1m_return_bars_5',),supplemental={'flow':flow,'depth':depth})
+    assert out.spot_delta_5m.tolist()==[2,2,2,99]
+    assert out.flow_feature_known_at.le(out.known_at).all()
+    assert out.depth_coverage.isna().all() and out.depth_imbalance_1pct.isna().all()
+
+    # A future perturbation cannot alter any joined value at or before the cut.
+    cut=e.known_at.iloc[1]
+    perturbed=flow.copy();perturbed.loc[perturbed.known_at>cut,'spot_delta_5m']=-12345
+    truncated=assemble(e[e.known_at<=cut],f,('1m_return_bars_5',),supplemental={'flow':perturbed})
+    pd.testing.assert_series_equal(out.loc[out.known_at<=cut,'spot_delta_5m'].reset_index(drop=True),
+                                   truncated.spot_delta_5m.reset_index(drop=True))
 
 
 def test_eth_random_direction_uses_pipeline_spread_and_crypto_costs(monkeypatch, tmp_path):
@@ -175,3 +232,25 @@ def test_shared_gate_allows_next_entry_at_exit_plus_one_minute():
                             'event_key': ['a', 'b', 'c', 'd']})
     chosen = gate_open_signals(signals)
     assert chosen.event_key.tolist() == ['a', 'b', 'd']
+
+
+def test_btc_random_direction_uses_pipeline_executable_loader(monkeypatch, tmp_path):
+    import sys
+    from msd.processing.labels import first_hit_reference
+    from msd.research import benchmark, sequence_data
+    times = pd.date_range('2021-01-01', periods=20, freq='min', tz='UTC')
+    bars = pd.DataFrame({'ts': times})
+    for side, shift in [('bid', -1.), ('ask', 1.)]:
+        for field in 'ohlc':
+            bars[f'{side}_{field}'] = 100. + shift
+    calls = []
+    monkeypatch.setattr(sequence_data, 'load_executable_1m',
+                        lambda symbol, *args: calls.append(symbol) or bars)
+    monkeypatch.setitem(sys.modules, 'msd._msd_kernels', None)
+    monkeypatch.setattr(benchmark, 'first_hit_reference', first_hit_reference)
+    signal = pd.DataFrame({'ts': [times[0]], 'sym': ['BTCUSDT'], 'side': [1],
+                           'price': [100.], 'sl': [90.], 'tp': [110.],
+                           'deadline_ts': [times[-1]], 'label_end_ts': [times[-1]],
+                           'spread_R': [999.], 'planned_risk': [10.], 'net_R': [0.]})
+    _, count, _ = benchmark.random_direction(signal, tmp_path, seeds=2)
+    assert count == 1 and calls == ['BTCUSDT']

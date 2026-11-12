@@ -42,3 +42,31 @@ def test_bundle_refuses_old_output_and_low_coverage(tmp_path, monkeypatch):
     with pytest.raises(RuntimeError, match="stale"):
         bundle.make_bundle(data, config, tmp_path / "freshness")
     assert "features/BTCUSDT/2021-06.parquet" in (tmp_path / "freshness/stale.txt").read_text()
+
+
+def test_bundle_uses_versioned_venue_paths(tmp_path, monkeypatch):
+    data = tmp_path / "data"
+    config = tmp_path / "config.json"
+    config.write_text(json.dumps({"period": "dev", "end_exclusive": "2021-02-01",
+        "symbols": ["BTCUSDT"], "starts": {"BTCUSDT": "2021-01-01"},
+        "venue_overrides": {"BTCUSDT": {"venue": "binance_perp",
+            "available_from": "2021-01-01",
+            "bars_1m": "bars/binance_um/BTCUSDT",
+            "labels": "venues/binance_perp/labels/BTCUSDT",
+            "features_overlay": "venues/binance_perp/features/BTCUSDT"}}}))
+    marker = data/"tmp/stage9p4_BTCUSDT_year_chain_done.json"
+    marker.parent.mkdir(parents=True); marker.write_text(json.dumps({"symbol": "BTCUSDT", "end_year": 2022}))
+    marker.with_name("stage9p4_BTCUSDT_2021.json").write_text(json.dumps({"runtime_seconds": 0}))
+    for relative in ("bars/binance_um/BTCUSDT/2021-01.parquet",
+                     *(f"derived/bars_{tf}/BTCUSDT/2021-01.parquet" for tf in ("15m", "1h", "4h")),
+                     "features/BTCUSDT/2021-01.parquet",
+                     "venues/binance_perp/labels/BTCUSDT/2021-01.parquet",
+                     "venues/binance_perp/features/BTCUSDT/2021-01.parquet"):
+        path=data/relative;path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(b"x")
+    monkeypatch.setattr(bundle, "anchor_coverage", lambda *a: {"anchors": 10, "kept": 10, "coverage": 1.})
+    bundle.make_bundle(data, config, tmp_path/"bundle")
+    files=(tmp_path/"bundle/files.txt").read_text()
+    assert "bars/binance_um/BTCUSDT/2021-01.parquet" in files
+    assert "venues/binance_perp/labels/BTCUSDT/2021-01.parquet" in files
+    assert "venues/binance_perp/features/BTCUSDT/2021-01.parquet" in files
+    assert "bars/binance_spot" not in files

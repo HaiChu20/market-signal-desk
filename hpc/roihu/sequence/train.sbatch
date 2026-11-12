@@ -20,12 +20,13 @@ seed_count=${#seeds[@]}
 index=${SLURM_ARRAY_TASK_ID}
 symbol=${symbols[$((index / seed_count))]}
 seed=${seeds[$((index % seed_count))]}
-config_sha=$(sha256sum hpc/roihu/sequence/configs/dev_v1.json | cut -d' ' -f1)
+config=${CONFIG_PATH:-hpc/roihu/sequence/configs/dev_v3.json}
+config_sha=$(sha256sum "$config" | cut -d' ' -f1)
 output="reports/sequence/${config_sha}/${symbol}/seed_${seed}"
 mkdir -p "$output"
 set +e
 srun ./.venv-roihu/bin/python -m msd.research.sequence_train \
-  --data-root data --config hpc/roihu/sequence/configs/dev_v1.json \
+  --data-root data --config "$config" \
   --symbol "$symbol" --seed "$seed" --output "$output"
 result=$?
 set -e

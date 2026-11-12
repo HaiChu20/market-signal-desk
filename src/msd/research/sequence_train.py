@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 from sklearn.isotonic import IsotonicRegression
 
+from msd.data.flow_features import join_by_known_at
 from msd.research import decision, report_card, splits
 from msd.research.dataset import DEV_END
 from msd.research.sequence_data import SequenceData, SYMBOL_START, build_windows, load_executable_1m
@@ -45,11 +46,30 @@ def seed_everything(seed: int) -> None:
         torch.backends.cudnn.benchmark = False
 
 
-def _take(data: SequenceData, indices, device):
+def _dense_stats(dense: np.ndarray, fit_indices) -> tuple[np.ndarray, np.ndarray]:
+    """Return per-column scaling learned exclusively from a fold's FIT rows."""
+    fit = np.asarray(dense[np.asarray(fit_indices, dtype=int)], dtype=np.float64)
+    mean = fit.mean(axis=0)
+    std = fit.std(axis=0)
+    std = np.where(std < 1e-6, 1., std)
+    if not (np.isfinite(mean).all() and np.isfinite(std).all()):
+        raise ValueError("Dense FIT scaling statistics must be finite")
+    return mean.astype("float32"), std.astype("float32")
+
+
+def _scale_dense(dense: np.ndarray, stats: tuple[np.ndarray, np.ndarray]) -> np.ndarray:
+    mean, std = stats
+    return np.clip((dense - mean) / std, -10., 10.).astype("float32", copy=False)
+
+
+def _take(data: SequenceData, indices, device, dense_stats=None):
     torch = _torch()
     ix = np.asarray(indices, dtype=int)
+    dense = data.dense[ix]
+    if dense_stats is not None:
+        dense = _scale_dense(dense, dense_stats)
     return ({tf: torch.as_tensor(v[ix], device=device) for tf, v in data.windows.items()},
-            torch.as_tensor(data.dense[ix], device=device),
+            torch.as_tensor(dense, device=device),
             torch.as_tensor(data.p0[ix], device=device),
             torch.as_tensor(data.target[ix], device=device),
             torch.as_tensor(data.mask[ix], device=device))
@@ -60,6 +80,36 @@ def _dev_guard(data: SequenceData) -> None:
         raise ValueError("Training requires DEV anchors through 2022-12-31 only")
     if pd.to_datetime(data.anchors.label_end_ts, utc=True).ge(DEV_END).any():
         raise ValueError("Training labels must resolve by 2022-12-31")
+
+
+def add_flow_features(features: pd.DataFrame, flow: pd.DataFrame,
+                      columns: list[str], min_coverage: float = .8) -> pd.DataFrame:
+    """Causally add the pre-registered flow columns after a DEV coverage gate."""
+    missing = set(columns) - set(flow)
+    if missing:
+        raise ValueError(f"Missing configured flow columns: {sorted(missing)}")
+    coverage = flow[columns].notna().mean()
+    failed = coverage[coverage < min_coverage]
+    if len(failed):
+        details = ", ".join(f"{name}={value:.1%}" for name, value in failed.items())
+        raise ValueError(f"Flow feature coverage below {min_coverage:.0%}: {details}")
+    selected = flow[["ts", "known_at", *columns]].copy()
+    intensity = [column for column in columns if column.endswith("_trade_intensity_z20d")]
+    selected[intensity] = selected[intensity].clip(-10., 10.)
+    magnitude = selected[columns].abs().max(skipna=True)
+    unsafe = magnitude[magnitude > 20.]
+    if len(unsafe):
+        details = ", ".join(f"{name}={value:g}" for name, value in unsafe.items())
+        raise ValueError(f"Unscaled flow feature exceeds |20| after clipping: {details}")
+    joined = join_by_known_at(features, selected)
+    if len(joined) != len(features):
+        raise AssertionError("Flow join changed dense feature row count")
+    # build_windows uses fixed zero imputation for dense tensors. Preserve the
+    # distinction between a covered no-activity zero and unavailable flow by
+    # adding an explicit missingness channel before that imputation.
+    for column in columns:
+        joined[f"{column}_missing"] = joined[column].isna()
+    return joined
 
 
 def _later_blocks(data: SequenceData, train_indices, embargo=splits.EMBARGO):
@@ -143,7 +193,7 @@ def train_walk_forward(data: SequenceData, output: Path, *, n_folds: int = 5,
         torch.manual_seed(seed + fold)
         model = SequenceModel(data.dense.shape[1], width=width).to(selected_device)
         optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3)
-        stop_batch = _take(data, early_idx, selected_device)
+        dense_stats = _dense_stats(data.dense, fit_idx)
         best_loss, best_state, stale = float("inf"), None, 0
         fold_output = output / f"fold_{fold:02d}"
         fold_output.mkdir(exist_ok=True)
@@ -153,15 +203,25 @@ def train_walk_forward(data: SequenceData, output: Path, *, n_folds: int = 5,
             state = torch.load(checkpoint_path, map_location=selected_device, weights_only=False)
             if state["config_sha256"] != config_sha256 or state["seed"] != seed:
                 raise ValueError("Checkpoint config/seed mismatch")
+            dense_stats = (np.asarray(state["dense_mean"], dtype="float32"),
+                           np.asarray(state["dense_std"], dtype="float32"))
             model.load_state_dict(state["model"])
             optimizer.load_state_dict(state["optimizer"])
             best_loss, best_state, stale = state["best_loss"], state["best_state"], state["stale"]
             first_epoch, first_batch, step = state["epoch"], state["batch"], state["step"]
+        stop_batch = _take(data, early_idx, selected_device, dense_stats)
+        if best_state is None:
+            model.eval()
+            with torch.no_grad():
+                windows, dense, p0, target, mask = stop_batch
+                best_loss = float(barrier_loss(model(windows, dense, p0), target, mask))
+            best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
         def save_progress(next_epoch, next_batch):
             state = {"config_sha256": config_sha256, "seed": seed, "model": model.state_dict(),
                      "optimizer": optimizer.state_dict(), "best_loss": best_loss,
                      "best_state": best_state, "stale": stale, "epoch": next_epoch,
-                     "batch": next_batch, "step": step}
+                     "batch": next_batch, "step": step,
+                     "dense_mean": dense_stats[0], "dense_std": dense_stats[1]}
             temporary = checkpoint_path.with_suffix(".partial")
             torch.save(state, temporary)
             os.replace(temporary, checkpoint_path)
@@ -172,7 +232,8 @@ def train_walk_forward(data: SequenceData, output: Path, *, n_folds: int = 5,
             for batch_number, batch_idx in enumerate(batches):
                 if epoch == first_epoch and batch_number < first_batch:
                     continue
-                windows, dense, p0, target, mask = _take(data, batch_idx, selected_device)
+                windows, dense, p0, target, mask = _take(
+                    data, batch_idx, selected_device, dense_stats)
                 optimizer.zero_grad(set_to_none=True)
                 loss = barrier_loss(model(windows, dense, p0), target, mask)
                 loss.backward()
@@ -206,7 +267,8 @@ def train_walk_forward(data: SequenceData, output: Path, *, n_folds: int = 5,
             chunks = []
             with torch.no_grad():
                 for batch in np.array_split(ix, max(1, int(np.ceil(len(ix) / batch_size)))):
-                    windows, dense, p0, _, _ = _take(data, batch, selected_device)
+                    windows, dense, p0, _, _ = _take(
+                        data, batch, selected_device, dense_stats)
                     chunks.append(model(windows, dense, p0).sigmoid().cpu().numpy())
             return np.concatenate(chunks)
         raw_cal = predict(cal_idx)
@@ -219,6 +281,7 @@ def train_walk_forward(data: SequenceData, output: Path, *, n_folds: int = 5,
         signals = decision.choose(candidates) if len(candidates) else candidates
         checkpoint = {"state_dict": best_state, "feature_names": data.feature_names,
                       "config_sha256": config_sha256,
+                      "dense_mean": dense_stats[0], "dense_std": dense_stats[1],
                       "calibration_x": calibrator.X_thresholds_.tolist(),
                       "calibration_y": calibrator.y_thresholds_.tolist(),
                       "seed": seed, "epoch": epoch, "best_early_loss": best_loss}
@@ -227,10 +290,13 @@ def train_walk_forward(data: SequenceData, output: Path, *, n_folds: int = 5,
         candidates.to_parquet(fold_output / "oof.parquet", index=False)
         card = report_card.report("sequence_cnn", "dev", signals, candidates, [],
                                   output=fold_output)
+        early_loss_finite = bool(np.isfinite(best_loss))
         (fold_output / "metrics.json").write_text(json.dumps({"fit": len(fit_idx),
             "early": len(early_idx), "calibration": len(cal_idx), "test": len(test_idx),
             "config_sha256": config_sha256, "seed": seed, "fold": fold,
-            "best_early_loss": best_loss, "brier_skill_vs_p0": card["pooled"]["brier_skill_vs_p0"]}, indent=2))
+            "best_early_loss": best_loss, "early_loss_finite": early_loss_finite,
+            "early_loss_warning": (not early_loss_finite) or best_loss > 1.5,
+            "brier_skill_vs_p0": card["pooled"]["brier_skill_vs_p0"]}, indent=2))
         cards.append(card)
     if not cards:
         raise ValueError("No purged fold has sufficient fit, early-stop and calibration data")
@@ -240,7 +306,7 @@ def train_walk_forward(data: SequenceData, output: Path, *, n_folds: int = 5,
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-root", type=Path, required=True)
-    parser.add_argument("--config", type=Path, default=Path("hpc/roihu/sequence/configs/dev_v1.json"))
+    parser.add_argument("--config", type=Path, default=Path("hpc/roihu/sequence/configs/dev_v3.json"))
     parser.add_argument("--symbol", default="BTCUSDT")
     parser.add_argument("--seed", type=int)
     parser.add_argument("--start")
@@ -261,7 +327,7 @@ def main():
     if end > DEV_END or start >= end:
         parser.error("Only DEV dates through 2022-12-31 are allowed")
     if args.smoke:
-        start, end = pd.Timestamp("2021-01-01", tz="UTC"), pd.Timestamp("2021-03-01", tz="UTC")
+        start, end = pd.Timestamp("2021-01-01", tz="UTC"), pd.Timestamp("2021-02-01", tz="UTC")
     root = args.data_root
     months = pd.period_range(start.tz_localize(None).to_period("M"),
                              (end - pd.Timedelta(nanoseconds=1)).tz_localize(None).to_period("M"), freq="M")
@@ -270,17 +336,32 @@ def main():
     months = pd.period_range(warmup, months[-1], freq="M")
     if start < pd.Timestamp(SYMBOL_START[args.symbol]):
         parser.error(f"{args.symbol} cannot start before {SYMBOL_START[args.symbol]}")
-    def load(folder):
-        frames = [pd.read_parquet(folder / f"{m}.parquet") for m in months if (folder / f"{m}.parquet").exists()]
+    def load(folder, columns=None):
+        frames = [pd.read_parquet(folder / f"{m}.parquet", columns=columns)
+                  for m in months if (folder / f"{m}.parquet").exists()]
         if not frames:
             raise FileNotFoundError(folder)
         return pd.concat(frames, ignore_index=True)
+    venue_override = config.get("venue_overrides", {}).get(args.symbol, {})
     bars = {"1m": load_executable_1m(args.symbol, start - pd.Timedelta(days=12),
-                                     end - pd.Timedelta(minutes=1), root)}
+                                     end - pd.Timedelta(minutes=1), root,
+                                     venue=venue_override.get("venue"))}
     bars.update({tf: load(root / "derived" / f"bars_{tf}" / args.symbol)
                  for tf in ("15m", "1h", "4h")})
     features = load(root / "features" / args.symbol)
-    labels = load(root / "labels" / args.symbol)
+    overlay_path = venue_override.get("features_overlay")
+    if overlay_path:
+        overlay = load(root / overlay_path)
+        replace = [column for column in overlay if column not in {"ts", "known_at"}]
+        features = features.drop(columns=replace, errors="ignore").merge(
+            overlay, on=["ts", "known_at"], how="left", validate="one_to_one")
+    flow_columns = config.get("flow_features", {}).get(args.symbol)
+    if flow_columns:
+        flow = load(root / "features_flow" / args.symbol,
+                    columns=["ts", "known_at", *flow_columns])
+        features = add_flow_features(features, flow, flow_columns,
+                                     float(config["flow_min_non_nan_coverage"]))
+    labels = load(root / venue_override.get("labels", f"labels/{args.symbol}"))
     labels = labels[(pd.to_datetime(labels.ts, utc=True) >= start) & (pd.to_datetime(labels.ts, utc=True) < end)]
     if args.smoke:
         timestamps = pd.to_datetime(labels.ts, utc=True)
