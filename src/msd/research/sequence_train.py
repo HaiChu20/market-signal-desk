@@ -342,18 +342,26 @@ def main():
         if not frames:
             raise FileNotFoundError(folder)
         return pd.concat(frames, ignore_index=True)
+    venue_override = config.get("venue_overrides", {}).get(args.symbol, {})
     bars = {"1m": load_executable_1m(args.symbol, start - pd.Timedelta(days=12),
-                                     end - pd.Timedelta(minutes=1), root)}
+                                     end - pd.Timedelta(minutes=1), root,
+                                     venue=venue_override.get("venue"))}
     bars.update({tf: load(root / "derived" / f"bars_{tf}" / args.symbol)
                  for tf in ("15m", "1h", "4h")})
     features = load(root / "features" / args.symbol)
+    overlay_path = venue_override.get("features_overlay")
+    if overlay_path:
+        overlay = load(root / overlay_path)
+        replace = [column for column in overlay if column not in {"ts", "known_at"}]
+        features = features.drop(columns=replace, errors="ignore").merge(
+            overlay, on=["ts", "known_at"], how="left", validate="one_to_one")
     flow_columns = config.get("flow_features", {}).get(args.symbol)
     if flow_columns:
         flow = load(root / "features_flow" / args.symbol,
                     columns=["ts", "known_at", *flow_columns])
         features = add_flow_features(features, flow, flow_columns,
                                      float(config["flow_min_non_nan_coverage"]))
-    labels = load(root / "labels" / args.symbol)
+    labels = load(root / venue_override.get("labels", f"labels/{args.symbol}"))
     labels = labels[(pd.to_datetime(labels.ts, utc=True) >= start) & (pd.to_datetime(labels.ts, utc=True) < end)]
     if args.smoke:
         timestamps = pd.to_datetime(labels.ts, utc=True)

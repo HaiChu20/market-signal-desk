@@ -38,7 +38,7 @@ def _data_cwd(root: Path):
         os.chdir(previous)
 
 
-def load_executable_1m(symbol: str, start, end, data_root: Path) -> pd.DataFrame:
+def load_executable_1m(symbol: str, start, end, data_root: Path, *, venue: str | None=None) -> pd.DataFrame:
     """Use the same source and adjusted executable price view as stage 9."""
     from msd.data import load
     from msd.processing.pipeline import (_adjusted_price_view, _cash_era_only,
@@ -48,6 +48,10 @@ def load_executable_1m(symbol: str, start, end, data_root: Path) -> pd.DataFrame
         raise ValueError(f"Unsupported symbol: {symbol}")
     left = max(pd.Timestamp(start).tz_convert("UTC") if pd.Timestamp(start).tzinfo else
                pd.Timestamp(start).tz_localize("UTC"), pd.Timestamp(SYMBOL_START[symbol]))
+    if venue == "binance_perp":
+        from msd.processing.crypto_perp import _read_range, executable_perp_bars
+        return executable_perp_bars(
+            _read_range(Path(data_root)/"bars"/"binance_um", symbol, left, pd.Timestamp(end)), symbol)
     with _data_cwd(Path(data_root)):
         # After the cash-era switch both index primaries are Dukascopy CFD
         # quotes. Passing the source explicitly avoids an unused HistData
