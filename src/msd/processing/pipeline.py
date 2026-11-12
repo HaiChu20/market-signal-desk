@@ -232,6 +232,39 @@ def _feature_label_bars(frame: pd.DataFrame) -> pd.DataFrame:
     return frame.loc[mask].copy().reset_index(drop=True)
 
 
+def _exclude_nonexecutable_oil_quotes(
+    frame: pd.DataFrame,
+    symbol: str,
+    audit_start: pd.Timestamp | None = None,
+    audit_end: pd.Timestamp | None = None,
+) -> pd.DataFrame:
+    """Drop observed oil quotes that cannot support an executable entry."""
+    if symbol not in {"LIGHTCMDUSD", "BRENTCMDUSD"} or frame.empty:
+        return frame
+    bid = frame[[f"bid_{field}" for field in "ohlc"]].to_numpy(float)
+    ask = frame[[f"ask_{field}" for field in "ohlc"]].to_numpy(float)
+    finite = np.isfinite(bid) & np.isfinite(ask)
+    nonfinite = ~finite.all(axis=1)
+    zero = (finite & (ask == bid)).any(axis=1)
+    crossed = (finite & (ask < bid)).any(axis=1)
+    excluded = nonfinite | zero | crossed
+
+    audit = np.ones(len(frame), dtype=bool)
+    if audit_start is not None:
+        audit &= frame.ts.ge(audit_start).to_numpy()
+    if audit_end is not None:
+        audit &= frame.ts.lt(audit_end).to_numpy()
+    month_values = frame.ts.dt.strftime("%Y-%m").to_numpy()
+    for month in pd.unique(month_values[audit]):
+        mask = audit & (month_values == month)
+        print({"symbol": symbol, "phase": "oil_quote_audit", "month": month,
+               "rows": int(mask.sum()), "excluded": int((mask & excluded).sum()),
+               "nonfinite": int((mask & nonfinite).sum()),
+               "zero_spread": int((mask & zero).sum()),
+               "crossed": int((mask & crossed).sum())}, flush=True)
+    return frame.loc[~excluded].reset_index(drop=True)
+
+
 def _adjusted_price_view(frame: pd.DataFrame) -> pd.DataFrame:
     """Use back-adjusted bid prices for indicators while preserving source flags."""
     out=frame.copy()
@@ -788,7 +821,10 @@ def run_symbol(symbol: str, start_year: int | None = None, end_year: int | None 
         # and the prior year's exact event-state checkpoint.
         left = _history_start(symbol) if bootstrap else year_start-pd.Timedelta(days=MAX_LOOKBACK_DAYS)
         right = pd.Timestamp(year=year+1, month=1, day=1, tz="UTC") + pd.Timedelta(days=8)
-        bars = load(symbol, left, right)
+        # Oil's early Dukascopy feed has explicitly audited zero/crossed
+        # quotes. Load it raw so those rows can be removed, never repaired.
+        bars = load(symbol, left, right,
+                    raw=symbol in {"LIGHTCMDUSD", "BRENTCMDUSD"})
         if bars.empty:
             continue
         bars=_cash_era_only(bars,symbol)
@@ -799,6 +835,11 @@ def run_symbol(symbol: str, start_year: int | None = None, end_year: int | None 
         if "bad_tick" in bars:
             bad_tick_count+=int(bars.bad_tick.fillna(False).astype(bool).sum())
         bars=_feature_label_bars(bars)
+        bars=_exclude_nonexecutable_oil_quotes(bars,symbol,year_start,year_end)
+        if bars.empty:
+            print({"symbol": symbol, "year": year,
+                   "phase": "no_executable_quotes"}, flush=True)
+            continue
         bars = _modelled_spread(bars, symbol)
         assert_executable_spread(bars,symbol)
         bars = _attach_market_auxiliary(bars,symbol)

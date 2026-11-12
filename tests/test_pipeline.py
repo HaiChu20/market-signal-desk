@@ -537,6 +537,31 @@ def test_bad_tick_flag_is_preserved_in_source_but_excluded_from_features_labels(
     assert derived.ts.tolist()==[source.ts.iloc[0],source.ts.iloc[2]]
 
 
+def test_oil_nonexecutable_quotes_are_excluded_and_audited(capsys):
+    from msd.processing.pipeline import (
+        _exclude_nonexecutable_oil_quotes,
+        assert_executable_spread,
+    )
+    ts=pd.date_range("2020-04-01",periods=4,freq="min",tz="UTC")
+    source=_bars(ts)
+    source.loc[1,"ask_o"]=source.loc[1,"bid_o"]
+    source.loc[2,"ask_c"]=source.loc[2,"bid_c"]-.01
+    source.loc[3,"ask_h"]=np.nan
+
+    result=_exclude_nonexecutable_oil_quotes(
+        source,"LIGHTCMDUSD",ts[0],ts[-1]+pd.Timedelta(minutes=1))
+    assert result.ts.tolist()==[ts[0]]
+    assert_executable_spread(result,"LIGHTCMDUSD")
+    audit=capsys.readouterr().out
+    assert "'excluded': 3" in audit
+    assert "'nonfinite': 1" in audit
+    assert "'zero_spread': 1" in audit
+    assert "'crossed': 1" in audit
+
+    untouched=_exclude_nonexecutable_oil_quotes(source,"EURUSD")
+    assert len(untouched)==4
+
+
 def test_modeled_btc_spread_is_baked_into_every_label_bar(monkeypatch):
     from msd.processing import pipeline
     from msd.data.binance import BTC_SPREAD
