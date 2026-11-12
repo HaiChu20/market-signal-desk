@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -u
+export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
 
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 cd "$script_dir/.." || exit 1
