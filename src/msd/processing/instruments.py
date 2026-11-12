@@ -35,8 +35,8 @@ STAGE9_INSTRUMENTS: dict[str, InstrumentSpec] = {
     "EURUSD": InstrumentSpec("America/New_York", 17 * 60, 17 * 60, "fx", .00015, "2026-10", 100000),
     "USDJPY": InstrumentSpec("America/New_York", 17 * 60, 17 * 60, "fx", .00015, "2026-10", 1000),
     "GBPUSD": InstrumentSpec("America/New_York", 17 * 60, 17 * 60, "fx", .00015, "2026-10", 100000),
-    "LIGHTCMDUSD": InstrumentSpec("America/New_York", 18 * 60, 17 * 60, "energy", .00015, "2026-10", 1000),
-    "BRENTCMDUSD": InstrumentSpec("Europe/London", 0, 22 * 60, "energy", .00015, "2026-10", 1000),
+    "LIGHTCMDUSD": InstrumentSpec("America/New_York", 18 * 60, 17 * 60, "energy", .0002, "2026-10", 1000),
+    "BRENTCMDUSD": InstrumentSpec("Europe/London", 0, 22 * 60, "energy", .0002, "2026-10", 1000),
 }
 
 
