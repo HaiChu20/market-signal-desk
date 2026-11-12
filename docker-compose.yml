@@ -3,7 +3,7 @@ services:
     build: .
     command: ["python", "-m", "msd.live.shadow"]
     volumes:
-      - live-state:/app/data/live
+      - ./data/live:/app/data/live
       - ./live.toml:/app/live.toml
     restart: unless-stopped
     healthcheck:
@@ -12,5 +12,3 @@ services:
       timeout: 5s
       retries: 3
       start_period: 2m
-volumes:
-  live-state:

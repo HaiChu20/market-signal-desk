@@ -19,6 +19,7 @@ from msd.research.decision import choose
 from msd.research.gating import gate_open_signals
 
 QUALIFIED_GRADES = {"✅", "🧪"}
+MAX_HOLD_MINUTES = 5 * 24 * 60
 DEFAULT_STATE = Path("data/live/shadow.sqlite3")
 HEARTBEAT = Path("data/live/heartbeat")
 
@@ -75,6 +76,19 @@ class QualifiedModels:
         policy = manifest.get("live_policy")
         if not isinstance(policy, dict) or not {"side", "candidate_kind", "entry_type", "cost_R", "financing_R"} <= policy.keys():
             return None
+        policy = dict(policy)
+        label_config = manifest.get("label_config", {})
+        hold = policy.get("hold_minutes")
+        if hold is None and isinstance(label_config, dict):
+            hold = next((label_config[key] for key in
+                         ("hold_minutes", "max_hold_minutes", "horizon_minutes")
+                         if key in label_config), None)
+        if (isinstance(hold, bool) or not isinstance(hold, (int, float)) or
+                not np.isfinite(hold) or int(hold) != hold or not 1 <= int(hold) <= MAX_HOLD_MINUTES):
+            return None
+        policy["hold_minutes"] = int(hold)
+        policy["grade"] = card["grade"]
+        policy["alert_eligible"] = card["grade"] == "✅"
         if (not np.isfinite([policy["cost_R"], policy["financing_R"]]).all() or
                 float(policy["cost_R"]) < 0 or float(policy["financing_R"]) < 0):
             return None
@@ -109,7 +123,11 @@ class ShadowLoop:
         self.connection = sqlite3.connect(state_path)
         self.connection.execute("CREATE TABLE IF NOT EXISTS candidates (symbol TEXT, method TEXT, ts TEXT, "
                                 "event_json TEXT NOT NULL, message TEXT NOT NULL, status TEXT NOT NULL, "
+                                "alert_eligible INTEGER NOT NULL DEFAULT 0, "
                                 "PRIMARY KEY(symbol, method, ts, event_json))")
+        candidate_columns = {row[1] for row in self.connection.execute("PRAGMA table_info(candidates)")}
+        if "alert_eligible" not in candidate_columns:
+            self.connection.execute("ALTER TABLE candidates ADD COLUMN alert_eligible INTEGER NOT NULL DEFAULT 0")
         self.connection.execute("CREATE TABLE IF NOT EXISTS checkpoints (symbol TEXT PRIMARY KEY, ts TEXT NOT NULL)")
         self.connection.execute("CREATE TABLE IF NOT EXISTS bar_audit (symbol TEXT, ts TEXT, reason TEXT NOT NULL, "
                                 "detail TEXT NOT NULL, signal TEXT, PRIMARY KEY(symbol, ts))")
@@ -236,6 +254,7 @@ class ShadowLoop:
         messages = []
         reasons = []
         emitted = None
+        emitted_alert_eligible = False
         for event in result.events:
             method = event["method"]
             event_known_at = pd.Timestamp(event["known_at"])
@@ -248,6 +267,7 @@ class ShadowLoop:
             message = (f"PRELIMINARY {self.symbol} | {side_text} candidate near {float(event['price']):.2f}"
                        f" | {method} | {pd.Timestamp(event['known_at']).isoformat()}")
             status = "PRELIMINARY"
+            alert_eligible = False
             if data_detail:
                 reasons.append("data")
             elif emitted is not None:
@@ -260,10 +280,11 @@ class ShadowLoop:
                     artifact, model_policy = model
                     decision = self._edge_order(artifact, model_policy, event,
                                                 result.features, result.levels)
+                    hold_minutes = int(model_policy["hold_minutes"])
                     if decision is None:
                         reasons.append("edge")
                     elif not self._position_allowed(event_known_at,
-                                                    stamp + pd.Timedelta(minutes=2 + self.policy.max_hold_minutes)):
+                                                    stamp + pd.Timedelta(minutes=2 + hold_minutes)):
                         reasons.append("position")
                     elif self.blackout(self.symbol, stamp):
                         reasons.append("blackout")
@@ -283,6 +304,8 @@ class ShadowLoop:
                                                 valid_until=valid_until, chase_band=band)
                         status = "EMITTED"
                         emitted = message
+                        alert_eligible = bool(model_policy["alert_eligible"])
+                        emitted_alert_eligible = alert_eligible
                         reasons.append("emitted")
                         self.connection.execute("INSERT OR REPLACE INTO positions VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
                                                 (self.symbol, "pending", int(order["side"]), order["entry_type"],
@@ -290,11 +313,14 @@ class ShadowLoop:
                                                  pd.Timestamp(order["expiry_ts"]).isoformat()
                                                  if order.get("expiry_ts") is not None else None,
                                                  float(order["stop"]), float(order["tp"]),
-                                                 (entry_ts + pd.Timedelta(minutes=self.policy.max_hold_minutes)).isoformat(),
+                                                 (entry_ts + pd.Timedelta(minutes=hold_minutes)).isoformat(),
                                                  None, None))
             serialized = json.dumps(event, default=_json_default, sort_keys=True)
-            cursor = self.connection.execute("INSERT OR IGNORE INTO candidates VALUES (?,?,?,?,?,?)",
-                                             (self.symbol, method, stamp.isoformat(), serialized, message, status))
+            cursor = self.connection.execute(
+                "INSERT OR IGNORE INTO candidates(symbol,method,ts,event_json,message,status,alert_eligible) "
+                "VALUES (?,?,?,?,?,?,?)",
+                (self.symbol, method, stamp.isoformat(), serialized, message, status,
+                 int(alert_eligible)))
             if cursor.rowcount and status == "EMITTED":
                 messages.append(message)
         reason = ("data" if data_detail else "edge" if not result.events else
@@ -305,6 +331,7 @@ class ShadowLoop:
                  "events": len(result.events)}
         if emitted is not None:
             audit["signal"] = emitted
+            audit["alert_eligible"] = emitted_alert_eligible
         new_audit = self.connection.execute("INSERT OR IGNORE INTO bar_audit VALUES (?,?,?,?,?)",
                                             (self.symbol, stamp.isoformat(), reason, audit["detail"], emitted)).rowcount
         self.connection.execute("INSERT INTO checkpoints VALUES (?,?) ON CONFLICT(symbol) DO UPDATE SET ts=excluded.ts",
@@ -374,14 +401,13 @@ def main():
     parser.add_argument("--symbols", nargs="+", choices=SYMBOLS, default=list(SYMBOLS))
     parser.add_argument("--state", type=Path, default=DEFAULT_STATE)
     parser.add_argument("--warmup-minutes", type=int, default=SignalPolicy.warmup_minutes)
-    parser.add_argument("--spread-low-percentile", type=float, default=SignalPolicy.spread_low_percentile)
-    parser.add_argument("--spread-high-percentile", type=float, default=SignalPolicy.spread_high_percentile)
+    parser.add_argument("--spread-median-multiple", type=float,
+                        default=SignalPolicy.spread_median_multiple)
     parser.add_argument("--valid-minutes", type=int, default=SignalPolicy.valid_minutes)
     parser.add_argument("--chase-atr", type=float, default=SignalPolicy.chase_atr)
     args = parser.parse_args()
     policy = SignalPolicy(warmup_minutes=args.warmup_minutes,
-                          spread_low_percentile=args.spread_low_percentile,
-                          spread_high_percentile=args.spread_high_percentile,
+                          spread_median_multiple=args.spread_median_multiple,
                           valid_minutes=args.valid_minutes, chase_atr=args.chase_atr)
     run(args.symbols, state_path=args.state, policy=policy)
 

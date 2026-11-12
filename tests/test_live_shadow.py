@@ -153,19 +153,45 @@ def test_only_matching_graded_card_with_net_return_calibration_can_qualify(tmp_p
                                                             'symbol': 'BTCUSDT', 'config_hash': config_hash}))
     (directory / 'manifest.json').write_text(json.dumps({'live_policy': {'side': 1,
                     'candidate_kind': 'natural', 'entry_type': 'market', 'cost_R': .02,
-                    'financing_R': 0.}}))
+                    'financing_R': 0., 'hold_minutes': 90}}))
     import msd.live.shadow as shadow
     artifact = SimpleNamespace(config_hash=config_hash,
                                calibration={'calibrated': [0., 1.], 'expected_net_R': [-1., 2.]})
     monkeypatch.setattr(shadow, 'load_artifact', lambda _: artifact)
     assert QualifiedModels(tmp_path).get('BTCUSDT', 'sr_touch') == (artifact, {'side': 1,
                     'candidate_kind': 'natural', 'entry_type': 'market', 'cost_R': .02,
-                    'financing_R': 0.})
+                    'financing_R': 0., 'hold_minutes': 90, 'grade': '✅',
+                    'alert_eligible': True})
     artifact.calibration.pop('expected_net_R')
     assert QualifiedModels(tmp_path).get('BTCUSDT', 'sr_touch') is None
 
 
-@pytest.mark.parametrize('reason', ['data', 'model', 'edge', 'position', 'blackout', 'emitted'])
+def test_model_hold_horizon_is_required_and_capped(tmp_path, monkeypatch):
+    directory = tmp_path / 'BTCUSDT' / 'sr_touch'
+    directory.mkdir(parents=True)
+    config_hash = 'b' * 64
+    (directory / 'report_card.json').write_text(json.dumps({'grade': '🧪', 'method': 'sr_touch',
+                                                            'symbol': 'BTCUSDT', 'config_hash': config_hash}))
+    base = {'side': 1, 'candidate_kind': 'natural', 'entry_type': 'market',
+            'cost_R': .02, 'financing_R': 0.}
+    artifact = SimpleNamespace(config_hash=config_hash,
+                               calibration={'calibrated': [0., 1.], 'expected_net_R': [-1., 2.]})
+    import msd.live.shadow as shadow
+    monkeypatch.setattr(shadow, 'load_artifact', lambda _: artifact)
+    (directory / 'manifest.json').write_text(json.dumps({'live_policy': base}))
+    assert QualifiedModels(tmp_path).get('BTCUSDT', 'sr_touch') is None
+    (directory / 'manifest.json').write_text(json.dumps({'live_policy': base,
+                                                          'label_config': {'horizon_minutes': 7201}}))
+    assert QualifiedModels(tmp_path).get('BTCUSDT', 'sr_touch') is None
+    (directory / 'manifest.json').write_text(json.dumps({'live_policy': base,
+                                                          'label_config': {'horizon_minutes': 240}}))
+    loaded = QualifiedModels(tmp_path).get('BTCUSDT', 'sr_touch')
+    assert loaded[1]['hold_minutes'] == 240
+    assert loaded[1]['grade'] == '🧪' and loaded[1]['alert_eligible'] is False
+
+
+@pytest.mark.parametrize('reason', ['data', 'model', 'edge', 'position', 'blackout',
+                                    'emitted', 'experimental'])
 def test_one_structured_audit_reason_per_bar(tmp_path, reason):
     stamp = pd.Timestamp('2025-01-01 00:03', tz='UTC')
     def bar(ts):
@@ -189,12 +215,14 @@ def test_one_structured_audit_reason_per_bar(tmp_path, reason):
         config_hash = 'a'*64
         def probability(self, _features): return .01 if reason == 'edge' else .95
     model_policy = {'side': 1, 'candidate_kind': 'atr:0.5:6', 'entry_type': 'market',
-                    'cost_R': .02, 'financing_R': 0.}
+                    'cost_R': .02, 'financing_R': 0., 'hold_minutes': 90,
+                    'grade': '🧪' if reason == 'experimental' else '✅',
+                    'alert_eligible': reason != 'experimental'}
     class Models:
         def get(self, *_): return None if reason == 'model' else (FakeArtifact(), model_policy)
     output = []
     policy = SignalPolicy(warmup_minutes=3, spread_min_samples=1,
-                          spread_low_percentile=0., spread_high_percentile=1.)
+                          spread_median_multiple=100.)
     loop = ShadowLoop('BTCUSDT', tmp_path/f'{reason}.sqlite3', models=Models(),
                       output=output.append, policy=policy, replay=True,
                       blackout=lambda *_: reason == 'blackout')
@@ -210,13 +238,19 @@ def test_one_structured_audit_reason_per_bar(tmp_path, reason):
     signals = loop.process(current)
     assert len(output) == 1
     record = json.loads(output[0])
-    assert record['reason'] == reason
-    assert loop.connection.execute('SELECT reason FROM bar_audit').fetchone()[0] == reason
-    if reason == 'emitted':
+    expected_reason = 'emitted' if reason == 'experimental' else reason
+    assert record['reason'] == expected_reason
+    assert loop.connection.execute('SELECT reason FROM bar_audit').fetchone()[0] == expected_reason
+    if reason in {'emitted', 'experimental'}:
         assert len(signals) == 1
         assert 'valid until 2025-01-01T00:09:00+00:00' in signals[0]
         assert "don't chase outside 99.50–100.50" in signals[0]
         assert json.loads(output[0])['signal'] == signals[0]
+        assert json.loads(output[0])['alert_eligible'] is (reason == 'emitted')
+        assert loop.connection.execute(
+            "SELECT alert_eligible FROM candidates WHERE status='EMITTED'").fetchone()[0] == int(reason == 'emitted')
+        assert pd.Timestamp(loop.connection.execute(
+            "SELECT planned_end_ts FROM positions").fetchone()[0]) == stamp + pd.Timedelta(minutes=92)
     else:
         assert signals == []
     loop.close()
@@ -230,6 +264,19 @@ def test_data_guard_stale_and_incomplete_history():
     assert policy.data_reason(frame, stamp+pd.Timedelta(minutes=1), replay=True) == 'warmup'
 
 
+def test_warmup_allows_one_percent_gaps_but_last_hour_must_be_contiguous():
+    end = pd.Timestamp('2025-01-01 01:59', tz='UTC')
+    stamps = pd.date_range(end-pd.Timedelta(minutes=99), end, freq='min')
+    def frame(drop):
+        kept = stamps.delete(drop)
+        return pd.DataFrame({'ts': kept, 'bid_c': 100., 'ask_c': 100.1})
+    policy = SignalPolicy(warmup_minutes=100, warmup_min_fraction=.99,
+                          contiguous_minutes=60, spread_min_samples=1)
+    assert policy.data_reason(frame([10]), end+pd.Timedelta(minutes=1), replay=True) is None
+    assert policy.data_reason(frame([10, 20]), end+pd.Timedelta(minutes=1), replay=True) == 'missing'
+    assert policy.data_reason(frame([70]), end+pd.Timedelta(minutes=1), replay=True) == 'missing'
+
+
 def test_data_guard_hourly_spread_outlier():
     stamp = pd.Timestamp('2025-01-01 00:03', tz='UTC')
     frame = pd.DataFrame({'ts': [stamp-pd.Timedelta(minutes=2),
@@ -237,6 +284,8 @@ def test_data_guard_hourly_spread_outlier():
                           'bid_c': [100., 100., 100.], 'ask_c': [100.1, 100.1, 100.5]})
     policy = SignalPolicy(warmup_minutes=3, spread_min_samples=1)
     assert policy.data_reason(frame, stamp+pd.Timedelta(minutes=1), replay=True) == 'spread_outlier'
+    frame.loc[2, 'ask_c'] = 100.01
+    assert policy.data_reason(frame, stamp+pd.Timedelta(minutes=1), replay=True) is None
 
 
 def test_position_reopens_one_minute_after_label_end(tmp_path):
@@ -271,7 +320,7 @@ def test_future_known_at_is_silent_and_audited_as_data(tmp_path):
     lines = []
     loop = ShadowLoop('BTCUSDT', tmp_path/'future.sqlite3', output=lines.append, replay=True,
                       policy=SignalPolicy(warmup_minutes=3, spread_min_samples=1,
-                                          spread_low_percentile=0., spread_high_percentile=1.))
+                                          spread_median_multiple=100.))
     loop.online = FakeOnline()
     assert loop.process(bar(stamp)) == []
     assert json.loads(lines[0])['reason'] == 'data'

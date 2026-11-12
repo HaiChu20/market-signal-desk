@@ -10,23 +10,23 @@ import pandas as pd
 @dataclass(frozen=True)
 class SignalPolicy:
     warmup_minutes: int = 10 * 24 * 60
+    warmup_min_fraction: float = 0.99
+    contiguous_minutes: int = 60
     max_bar_age_seconds: float = 90.0
-    spread_low_percentile: float = 0.05
-    spread_high_percentile: float = 0.95
+    spread_median_multiple: float = 3.0
     spread_history_days: int = 7
     spread_min_samples: int = 60
     edge_threshold: float = 0.05
     valid_minutes: int = 4
     chase_atr: float = 0.25
-    max_hold_minutes: int = 60
 
     def __post_init__(self):
-        if not (0 <= self.spread_low_percentile < self.spread_high_percentile <= 1):
-            raise ValueError("invalid spread percentile band")
-        if (self.warmup_minutes < 2 or self.spread_min_samples < 1 or
+        if (self.warmup_minutes < 2 or not 0 < self.warmup_min_fraction <= 1 or
+                self.contiguous_minutes < 2 or self.spread_min_samples < 1 or
                 self.max_bar_age_seconds <= 0 or self.spread_history_days < 1 or
+                self.spread_median_multiple <= 0 or
                 self.edge_threshold < 0.05 or self.valid_minutes < 1 or
-                self.chase_atr <= 0 or self.max_hold_minutes < 1):
+                self.chase_atr <= 0):
             raise ValueError("invalid live signal policy")
 
     def data_reason(self, bars: pd.DataFrame, now: pd.Timestamp, *, replay: bool = False) -> str | None:
@@ -41,10 +41,17 @@ class SignalPolicy:
             age = (now - (ts + pd.Timedelta(minutes=1))).total_seconds()
             if age < 0 or age > self.max_bar_age_seconds:
                 return "stale"
-        if len(bars) < self.warmup_minutes:
+        stamps = pd.Series(pd.to_datetime(bars.ts, utc=True)).drop_duplicates().sort_values()
+        warmup_start = ts - pd.Timedelta(minutes=self.warmup_minutes - 1)
+        if stamps.iloc[0] > warmup_start:
             return "warmup"
-        tail = pd.to_datetime(bars.ts.iloc[-self.warmup_minutes:], utc=True)
-        if not tail.diff().iloc[1:].eq(pd.Timedelta(minutes=1)).all():
+        present = int(stamps.ge(warmup_start).sum())
+        if present / self.warmup_minutes < self.warmup_min_fraction:
+            return "missing"
+        required_contiguous = min(self.contiguous_minutes, self.warmup_minutes)
+        recent = stamps[stamps >= ts - pd.Timedelta(minutes=required_contiguous - 1)]
+        if (len(recent) != required_contiguous or
+                not recent.diff().iloc[1:].eq(pd.Timedelta(minutes=1)).all()):
             return "missing"
         if not {"bid_c", "ask_c"}.issubset(bars):
             return "spread_missing"
@@ -58,7 +65,9 @@ class SignalPolicy:
         spread = spread[np.isfinite(spread) & (spread > 0)]
         if len(spread) < self.spread_min_samples:
             return "spread_history"
-        low, high = np.quantile(spread, [self.spread_low_percentile, self.spread_high_percentile])
-        if not low <= current <= high:
+        median = float(np.median(spread))
+        if not np.isfinite(median) or median <= 0:
+            return "spread_history"
+        if current > self.spread_median_multiple * median:
             return "spread_outlier"
         return None
