@@ -210,6 +210,12 @@ def train_walk_forward(data: SequenceData, output: Path, *, n_folds: int = 5,
             best_loss, best_state, stale = state["best_loss"], state["best_state"], state["stale"]
             first_epoch, first_batch, step = state["epoch"], state["batch"], state["step"]
         stop_batch = _take(data, early_idx, selected_device, dense_stats)
+        if best_state is None:
+            model.eval()
+            with torch.no_grad():
+                windows, dense, p0, target, mask = stop_batch
+                best_loss = float(barrier_loss(model(windows, dense, p0), target, mask))
+            best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
         def save_progress(next_epoch, next_batch):
             state = {"config_sha256": config_sha256, "seed": seed, "model": model.state_dict(),
                      "optimizer": optimizer.state_dict(), "best_loss": best_loss,
