@@ -50,6 +50,7 @@ def test_bundle_uses_versioned_venue_paths(tmp_path, monkeypatch):
     config.write_text(json.dumps({"period": "dev", "end_exclusive": "2021-02-01",
         "symbols": ["BTCUSDT"], "starts": {"BTCUSDT": "2021-01-01"},
         "venue_overrides": {"BTCUSDT": {"venue": "binance_perp",
+            "available_from": "2021-01-01",
             "bars_1m": "bars/binance_um/BTCUSDT",
             "labels": "venues/binance_perp/labels/BTCUSDT",
             "features_overlay": "venues/binance_perp/features/BTCUSDT"}}}))

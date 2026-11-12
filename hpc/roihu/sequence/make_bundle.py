@@ -56,6 +56,8 @@ def make_bundle(data_root: Path, config_path: Path, output: Path, symbols=None):
         warm = max(start - pd.Timedelta(days=12), pd.Timestamp("2008-01-01") if symbol == "XAUUSD" else
                    pd.Timestamp("2018-12-16") if symbol in {"USATECHIDXUSD", "USA500IDXUSD"} else
                    pd.Timestamp("2017-01-01"))
+        if override.get("available_from"):
+            warm = max(warm, pd.Timestamp(override["available_from"]))
         months = pd.period_range(warm.to_period("M"), (end - pd.Timedelta(nanoseconds=1)).to_period("M"), freq="M")
         label_months = set(pd.period_range(start.to_period("M"), (end - pd.Timedelta(nanoseconds=1)).to_period("M"), freq="M"))
         flow_columns = config.get("flow_features", {}).get(symbol, [])

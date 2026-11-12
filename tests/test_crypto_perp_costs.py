@@ -3,7 +3,8 @@ import pandas as pd
 import pytest
 
 from msd.processing.crypto_perp import (TAKER_FEE, apply_perp_costs,
-                                        executable_perp_bars)
+                                        executable_perp_bars, spread_in_atr)
+from msd.processing.labels import label_grid
 
 
 def test_perp_cost_has_one_spread_fees_and_signed_funding():
@@ -30,3 +31,18 @@ def test_perp_cost_has_one_spread_fees_and_signed_funding():
     assert result.funding_R.iloc[0] < 0  # short receives it
     assert np.allclose(result.net_R, result.gross_R-result.cost_R)
     assert bars.spread_modeled.all()
+
+
+def test_spread_atr_never_infinite_and_invalid_atr_is_unlabelable():
+    result = spread_in_atr([1., 1., 1., 1.], [2., 0., np.nan, -1.])
+    assert result[0] == pytest.approx(.5)
+    assert np.isnan(result[1:]).all()
+    assert not np.isinf(result).any()
+    ts = pd.date_range("2022-01-01", periods=10, freq="1min", tz="UTC")
+    raw = pd.DataFrame({"ts": ts})
+    for side in ("bid", "ask"):
+        for field in "ohlc":
+            raw[f"{side}_{field}"] = 100.
+    bars = executable_perp_bars(raw, "BTCUSDT")
+    assert label_grid(bars, pd.Series(np.zeros(len(bars))), every_minutes=1,
+                      financing_per_night=0.).empty

@@ -18,6 +18,14 @@ SLIPPAGE_PER_SIDE = 0.00005  # 0.5 bp of notional.
 DEV_END = pd.Timestamp("2023-01-01", tz="UTC")
 
 
+def spread_in_atr(spread, atr) -> np.ndarray:
+    """Divide only by a finite positive ATR; unavailable rows remain NaN."""
+    numerator = np.asarray(spread, dtype=float)
+    denominator = np.asarray(atr, dtype=float)
+    return np.divide(numerator, denominator, out=np.full_like(numerator, np.nan),
+                     where=np.isfinite(denominator) & (denominator > 0))
+
+
 def executable_perp_bars(frame: pd.DataFrame, symbol: str) -> pd.DataFrame:
     """Convert trade-price UM klines to conservative executable bid/ask bars.
 
@@ -134,8 +142,9 @@ def build_symbol(symbol: str, data_root: Path, output_root: Path,
         spread = 2*current.perp_half_spread.to_numpy(float)
         overlay = base_features[["ts", "known_at"]].copy()
         by_ts = pd.Series(spread, index=current.ts).groupby(level=0).last()
-        overlay["spread_atr"] = (pd.to_datetime(overlay.ts, utc=True).map(by_ts).to_numpy(float) /
-                                 base_features["1m_atr14"].to_numpy(float)).astype("float32")
+        overlay["spread_atr"] = spread_in_atr(
+            pd.to_datetime(overlay.ts, utc=True).map(by_ts).to_numpy(float),
+            base_features["1m_atr14"].to_numpy(float)).astype("float32")
         overlay["spread_modeled"] = True
         overlay["venue"] = "binance_usdt_perp"
         feature_path = feature_root/f"{month}.parquet"; overlay.to_parquet(feature_path, index=False, compression="zstd")
