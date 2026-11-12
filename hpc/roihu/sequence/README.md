@@ -73,36 +73,47 @@ paths; see [CSC object storage](https://docs.csc.fi/data/Allas/).
 
 ## Allas route
 
-This is the transfer flow used for the pilot. On the Mac, replace only the CSC
-project number, build the inventory, upload its exact data paths, and upload
-the code separately:
+This is the transfer flow used for the pilot. Data files keep their `data/`
+relative paths at the bucket root, the same layout as the full derived-data
+backup, so they are uploaded once. Code lives under `code/` and results under
+`results/`. On the Mac (use `uv sync --inexact`; a plain sync removes the
+locally built `msd-kernels`):
 
 ```bash
 export CSC_PROJECT=2021849
-uv sync
-uv run python hpc/roihu/sequence/make_bundle.py
-rclone copy data "s3allas:${CSC_PROJECT}-msd-derived/data" --files-from hpc/roihu/sequence/bundle/files.txt --progress
-rclone copy . "s3allas:${CSC_PROJECT}-msd-derived/code" --exclude '/.git/**' --exclude '/.venv/**' --exclude '/.cao/**' --exclude '/data/**' --exclude '/reports/**' --progress
+./.venv/bin/python hpc/roihu/sequence/make_bundle.py --data-root data \
+  --config hpc/roihu/sequence/configs/dev_v3.json \
+  --symbols BTCUSDT,USATECHIDXUSD,USA500IDXUSD,XAUUSD,ETHUSDT
+rclone copy data "s3allas:${CSC_PROJECT}-msd-derived" \
+  --files-from hpc/roihu/sequence/bundle/files.txt --transfers 8 --progress
+rclone copy . "s3allas:${CSC_PROJECT}-msd-derived/code" \
+  --exclude '/.git/**' --exclude '/.venv/**' --exclude '/.cao/**' --exclude '/data/**' \
+  --exclude '/reports/**' --exclude '/rust/**/target/**' --exclude '__pycache__/**' --progress
 ```
 
-On the Roihu GPU login node:
+On the Roihu GPU login node (`uname -m` must print `aarch64`):
 
 ```bash
 export CSC_PROJECT=2021849
+D=/scratch/project_${CSC_PROJECT}/${USER}/market-signal-desk
 module load allas
-allas-conf
-mkdir -p "/scratch/project_${CSC_PROJECT}/${USER}/market-signal-desk"
-cd "/scratch/project_${CSC_PROJECT}/${USER}/market-signal-desk"
-rclone copy "s3allas:${CSC_PROJECT}-msd-derived/code" . --progress
-rclone copy "s3allas:${CSC_PROJECT}-msd-derived/data" data --progress
-bash hpc/roihu/sequence/setup.sh
+allas-conf   # once; asks the CSC password
+mkdir -p "$D" && cd "$D"
+rclone copy "s3allas:${CSC_PROJECT}-msd-derived/code" . --transfers 16
+rclone copy "s3allas:${CSC_PROJECT}-msd-derived" data \
+  --files-from hpc/roihu/sequence/bundle/files.txt --transfers 16 --progress
+rclone check "s3allas:${CSC_PROJECT}-msd-derived" data \
+  --files-from hpc/roihu/sequence/bundle/files.txt --one-way
+bash hpc/roihu/sequence/setup.sh   # once; the editable install picks up later code updates
 CSC_PROJECT=${CSC_PROJECT} bash hpc/roihu/sequence/submit.sh
+squeue --me
 ```
 
-After the array completes, upload results from the project checkout:
+After the array completes, upload results on Roihu and fetch them on the Mac:
 
 ```bash
-rclone copy reports/sequence "s3allas:${CSC_PROJECT}-msd-derived/results/sequence" --progress
+rclone copy reports/sequence "s3allas:${CSC_PROJECT}-msd-derived/results/sequence" --transfers 16
+rclone copy "s3allas:${CSC_PROJECT}-msd-derived/results/sequence" reports/sequence   # on the Mac
 ```
 
 ## Roihu-GPU: direct-rsync setup and submit
@@ -123,7 +134,7 @@ variables before `submit.sh`; every seed must appear in the JSON config.
 ## Monitor, fetch, grade
 
 ```bash
-ssh roihu-gpu.csc.fi "squeue --me; sacct -u ${USER} --format=JobID,State,Elapsed,ExitCode | tail"
+ssh roihu-gpu.csc.fi "squeue --me; sacct --format=JobID,State,Elapsed,ExitCode | tail"
 bash hpc/roihu/sequence/fetch.sh
 uv run python -m msd.research.grade_sequence --input reports/sequence --data-root data
 ```
