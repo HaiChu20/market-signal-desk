@@ -1,0 +1,865 @@
+{
+  "method": "funding_extreme_fade",
+  "period": "dev",
+  "preliminary": true,
+  "protocol": "v2",
+  "grade_in_dev": "not applicable; protocol section 5 grades test only",
+  "pooled": {
+    "n": 0,
+    "signals_per_year": 0,
+    "hit_rate": null,
+    "net_avg_R": null,
+    "t_stat": null,
+    "profit_factor": null,
+    "daily_sharpe": null,
+    "max_drawdown": null,
+    "brier": 0.14487881976571754,
+    "brier_skill_vs_p0": 0.3097690537247926,
+    "positive_dev_year_share": null,
+    "deflated_sharpe_ratio": null,
+    "random_direction_percentile": null,
+    "pbo": null,
+    "grade": "ungraded: development",
+    "random_direction_matched_signals": 0,
+    "row_accounting": {
+      "events": 183,
+      "candidate_rows": 6763,
+      "assembled_rows": 6763,
+      "drops": {
+        "invalid_geometry": 0,
+        "missing_outcome": 0
+      },
+      "cpcv_test_groups": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          1,
+          4
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "cpcv_train_scores": [
+        null,
+        null,
+        0.2635062590099178,
+        -0.6335622689201125,
+        0.09129024866745919,
+        -0.13591073941410112,
+        -0.07244773772307884,
+        -0.30838923273914554,
+        -0.6463131837524073,
+        null
+      ],
+      "cpcv_test_scores": [
+        null,
+        null,
+        null,
+        -1.370834985102947,
+        null,
+        null,
+        -1.3668806372221631,
+        null,
+        -1.4962099182569566,
+        null
+      ],
+      "oof_predicted_rows": 6763,
+      "selected_signals": 0,
+      "no_oof_prediction": 0
+    },
+    "selection_comparison": {
+      "selected_n": 0,
+      "selected_avg_R": null,
+      "unselected_n": 6763,
+      "unselected_avg_R": -9.288288430489036,
+      "same_event_unselected_n": 0,
+      "same_event_unselected_avg_R": null
+    }
+  },
+  "per_instrument": {
+    "BTCUSDT": {
+      "n": 0,
+      "signals_per_year": 0,
+      "hit_rate": null,
+      "net_avg_R": null,
+      "t_stat": null,
+      "profit_factor": null,
+      "daily_sharpe": null,
+      "max_drawdown": null,
+      "brier": 0.14487881976571754,
+      "brier_skill_vs_p0": 0.3097690537247926,
+      "positive_dev_year_share": null,
+      "deflated_sharpe_ratio": null,
+      "random_direction_percentile": null,
+      "pbo": null,
+      "grade": "ungraded: development"
+    }
+  },
+  "input_manifest": [
+    {
+      "path": "data/events/BTCUSDT/2020-01.parquet",
+      "mtime_ns": 1794445841029988129,
+      "size": 1177941
+    },
+    {
+      "path": "data/events/BTCUSDT/2020-02.parquet",
+      "mtime_ns": 1794445841082195260,
+      "size": 1118888
+    },
+    {
+      "path": "data/events/BTCUSDT/2020-03.parquet",
+      "mtime_ns": 1794445841132040743,
+      "size": 1198680
+    },
+    {
+      "path": "data/events/BTCUSDT/2020-04.parquet",
+      "mtime_ns": 1794445841178956480,
+      "size": 1072930
+    },
+    {
+      "path": "data/events/BTCUSDT/2020-05.parquet",
+      "mtime_ns": 1794445841226725198,
+      "size": 1138620
+    },
+    {
+      "path": "data/events/BTCUSDT/2020-06.parquet",
+      "mtime_ns": 1794445841276594098,
+      "size": 1090527
+    },
+    {
+      "path": "data/events/BTCUSDT/2020-07.parquet",
+      "mtime_ns": 1794445841331136834,
+      "size": 1170362
+    },
+    {
+      "path": "data/events/BTCUSDT/2020-08.parquet",
+      "mtime_ns": 1794445841386225460,
+      "size": 1215833
+    },
+    {
+      "path": "data/events/BTCUSDT/2020-09.parquet",
+      "mtime_ns": 1794445841437939077,
+      "size": 1150467
+    },
+    {
+      "path": "data/events/BTCUSDT/2020-10.parquet",
+      "mtime_ns": 1794445841498907988,
+      "size": 1343732
+    },
+    {
+      "path": "data/events/BTCUSDT/2020-11.parquet",
+      "mtime_ns": 1794445841563024485,
+      "size": 1607411
+    },
+    {
+      "path": "data/events/BTCUSDT/2020-12.parquet",
+      "mtime_ns": 1794445841624584704,
+      "size": 1627490
+    },
+    {
+      "path": "data/events/BTCUSDT/2021-01.parquet",
+      "mtime_ns": 1794446276553642232,
+      "size": 2337021
+    },
+    {
+      "path": "data/events/BTCUSDT/2021-02.parquet",
+      "mtime_ns": 1794446276629526633,
+      "size": 2083004
+    },
+    {
+      "path": "data/events/BTCUSDT/2021-03.parquet",
+      "mtime_ns": 1794446276703798781,
+      "size": 2357779
+    },
+    {
+      "path": "data/events/BTCUSDT/2021-04.parquet",
+      "mtime_ns": 1794446276771601170,
+      "size": 2122044
+    },
+    {
+      "path": "data/events/BTCUSDT/2021-05.parquet",
+      "mtime_ns": 1794446276830751449,
+      "size": 2034787
+    },
+    {
+      "path": "data/events/BTCUSDT/2021-06.parquet",
+      "mtime_ns": 1794446276888067927,
+      "size": 1928207
+    },
+    {
+      "path": "data/events/BTCUSDT/2021-07.parquet",
+      "mtime_ns": 1794446276956938387,
+      "size": 1916279
+    },
+    {
+      "path": "data/events/BTCUSDT/2021-08.parquet",
+      "mtime_ns": 1794446277026046186,
+      "size": 2145523
+    },
+    {
+      "path": "data/events/BTCUSDT/2021-09.parquet",
+      "mtime_ns": 1794446277089014318,
+      "size": 1975609
+    },
+    {
+      "path": "data/events/BTCUSDT/2021-10.parquet",
+      "mtime_ns": 1794446277159858165,
+      "size": 2099916
+    },
+    {
+      "path": "data/events/BTCUSDT/2021-11.parquet",
+      "mtime_ns": 1794446277220980205,
+      "size": 1970270
+    },
+    {
+      "path": "data/events/BTCUSDT/2021-12.parquet",
+      "mtime_ns": 1794446277280647498,
+      "size": 1916638
+    },
+    {
+      "path": "data/events/BTCUSDT/2022-01.parquet",
+      "mtime_ns": 1794489234563405072,
+      "size": 1951891
+    },
+    {
+      "path": "data/events/BTCUSDT/2022-02.parquet",
+      "mtime_ns": 1794489234609270852,
+      "size": 1639827
+    },
+    {
+      "path": "data/events/BTCUSDT/2022-03.parquet",
+      "mtime_ns": 1794489234663055779,
+      "size": 1710890
+    },
+    {
+      "path": "data/events/BTCUSDT/2022-04.parquet",
+      "mtime_ns": 1794489234712217520,
+      "size": 1652664
+    },
+    {
+      "path": "data/events/BTCUSDT/2022-05.parquet",
+      "mtime_ns": 1794489234766387161,
+      "size": 1841528
+    },
+    {
+      "path": "data/events/BTCUSDT/2022-06.parquet",
+      "mtime_ns": 1794489234823226129,
+      "size": 1922021
+    },
+    {
+      "path": "data/events/BTCUSDT/2022-07.parquet",
+      "mtime_ns": 1794489234893211690,
+      "size": 1935338
+    },
+    {
+      "path": "data/events/BTCUSDT/2022-08.parquet",
+      "mtime_ns": 1794489234949112978,
+      "size": 1629387
+    },
+    {
+      "path": "data/events/BTCUSDT/2022-09.parquet",
+      "mtime_ns": 1794489235000582708,
+      "size": 1488226
+    },
+    {
+      "path": "data/events/BTCUSDT/2022-10.parquet",
+      "mtime_ns": 1794489235053367206,
+      "size": 1286166
+    },
+    {
+      "path": "data/events/BTCUSDT/2022-11.parquet",
+      "mtime_ns": 1794489235105667988,
+      "size": 1421870
+    },
+    {
+      "path": "data/events/BTCUSDT/2022-12.parquet",
+      "mtime_ns": 1794489235160746850,
+      "size": 1272004
+    },
+    {
+      "path": "data/features/BTCUSDT/2020-01.parquet",
+      "mtime_ns": 1794373599793892638,
+      "size": 24939549
+    },
+    {
+      "path": "data/features/BTCUSDT/2020-02.parquet",
+      "mtime_ns": 1794373600147936763,
+      "size": 23072438
+    },
+    {
+      "path": "data/features/BTCUSDT/2020-03.parquet",
+      "mtime_ns": 1794373600526537987,
+      "size": 24880672
+    },
+    {
+      "path": "data/features/BTCUSDT/2020-04.parquet",
+      "mtime_ns": 1794373600903852319,
+      "size": 24073170
+    },
+    {
+      "path": "data/features/BTCUSDT/2020-05.parquet",
+      "mtime_ns": 1794373601272333191,
+      "size": 24958717
+    },
+    {
+      "path": "data/features/BTCUSDT/2020-06.parquet",
+      "mtime_ns": 1794373601628190550,
+      "size": 24051671
+    },
+    {
+      "path": "data/features/BTCUSDT/2020-07.parquet",
+      "mtime_ns": 1794373601990654128,
+      "size": 24956190
+    },
+    {
+      "path": "data/features/BTCUSDT/2020-08.parquet",
+      "mtime_ns": 1794373602357935358,
+      "size": 24851655
+    },
+    {
+      "path": "data/features/BTCUSDT/2020-09.parquet",
+      "mtime_ns": 1794373602713029206,
+      "size": 24246278
+    },
+    {
+      "path": "data/features/BTCUSDT/2020-10.parquet",
+      "mtime_ns": 1794373603083082559,
+      "size": 24927928
+    },
+    {
+      "path": "data/features/BTCUSDT/2020-11.parquet",
+      "mtime_ns": 1794373603449675780,
+      "size": 23940906
+    },
+    {
+      "path": "data/features/BTCUSDT/2020-12.parquet",
+      "mtime_ns": 1794373603822314544,
+      "size": 24413611
+    },
+    {
+      "path": "data/features/BTCUSDT/2021-01.parquet",
+      "mtime_ns": 1794373604187157906,
+      "size": 24502805
+    },
+    {
+      "path": "data/features/BTCUSDT/2021-02.parquet",
+      "mtime_ns": 1794373604518821671,
+      "size": 22216330
+    },
+    {
+      "path": "data/features/BTCUSDT/2021-03.parquet",
+      "mtime_ns": 1794373604877618697,
+      "size": 24820224
+    },
+    {
+      "path": "data/features/BTCUSDT/2021-04.parquet",
+      "mtime_ns": 1794373605225939865,
+      "size": 23898373
+    },
+    {
+      "path": "data/features/BTCUSDT/2021-05.parquet",
+      "mtime_ns": 1794373605590154594,
+      "size": 25094996
+    },
+    {
+      "path": "data/features/BTCUSDT/2021-06.parquet",
+      "mtime_ns": 1794373605958857969,
+      "size": 24267127
+    },
+    {
+      "path": "data/features/BTCUSDT/2021-07.parquet",
+      "mtime_ns": 1794373606339692017,
+      "size": 25020085
+    },
+    {
+      "path": "data/features/BTCUSDT/2021-08.parquet",
+      "mtime_ns": 1794373606712154196,
+      "size": 24884204
+    },
+    {
+      "path": "data/features/BTCUSDT/2021-09.parquet",
+      "mtime_ns": 1794373607079350675,
+      "size": 24221042
+    },
+    {
+      "path": "data/features/BTCUSDT/2021-10.parquet",
+      "mtime_ns": 1794373607452147775,
+      "size": 25010778
+    },
+    {
+      "path": "data/features/BTCUSDT/2021-11.parquet",
+      "mtime_ns": 1794373607822210962,
+      "size": 24313984
+    },
+    {
+      "path": "data/features/BTCUSDT/2021-12.parquet",
+      "mtime_ns": 1794373608197779476,
+      "size": 25156429
+    },
+    {
+      "path": "data/features/BTCUSDT/2022-01.parquet",
+      "mtime_ns": 1794373608574372714,
+      "size": 25077401
+    },
+    {
+      "path": "data/features/BTCUSDT/2022-02.parquet",
+      "mtime_ns": 1794373608938478941,
+      "size": 22752471
+    },
+    {
+      "path": "data/features/BTCUSDT/2022-03.parquet",
+      "mtime_ns": 1794373609315815689,
+      "size": 25220344
+    },
+    {
+      "path": "data/features/BTCUSDT/2022-04.parquet",
+      "mtime_ns": 1794373609683332047,
+      "size": 24185098
+    },
+    {
+      "path": "data/features/BTCUSDT/2022-05.parquet",
+      "mtime_ns": 1794373610050431317,
+      "size": 25121483
+    },
+    {
+      "path": "data/features/BTCUSDT/2022-06.parquet",
+      "mtime_ns": 1794373610407414609,
+      "size": 24212366
+    },
+    {
+      "path": "data/features/BTCUSDT/2022-07.parquet",
+      "mtime_ns": 1794373610778919440,
+      "size": 24948629
+    },
+    {
+      "path": "data/features/BTCUSDT/2022-08.parquet",
+      "mtime_ns": 1794373611143237295,
+      "size": 25095661
+    },
+    {
+      "path": "data/features/BTCUSDT/2022-09.parquet",
+      "mtime_ns": 1794373611505902293,
+      "size": 24305456
+    },
+    {
+      "path": "data/features/BTCUSDT/2022-10.parquet",
+      "mtime_ns": 1794373611871952089,
+      "size": 25048864
+    },
+    {
+      "path": "data/features/BTCUSDT/2022-11.parquet",
+      "mtime_ns": 1794373612233592197,
+      "size": 24366789
+    },
+    {
+      "path": "data/features/BTCUSDT/2022-12.parquet",
+      "mtime_ns": 1794373612603439380,
+      "size": 24882739
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2020-01.parquet",
+      "mtime_ns": 1794426591737977724,
+      "size": 10539238
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2020-02.parquet",
+      "mtime_ns": 1794426591954195555,
+      "size": 9788789
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2020-03.parquet",
+      "mtime_ns": 1794426592208729732,
+      "size": 11564196
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2020-04.parquet",
+      "mtime_ns": 1794426592472202103,
+      "size": 14822967
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2020-05.parquet",
+      "mtime_ns": 1794426592750100319,
+      "size": 15144799
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2020-06.parquet",
+      "mtime_ns": 1794426593015068999,
+      "size": 15066592
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2020-07.parquet",
+      "mtime_ns": 1794426593289893802,
+      "size": 15634798
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2020-08.parquet",
+      "mtime_ns": 1794426593561976946,
+      "size": 15707587
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2020-09.parquet",
+      "mtime_ns": 1794426593837737635,
+      "size": 15110316
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2020-10.parquet",
+      "mtime_ns": 1794426594105482267,
+      "size": 15548083
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2020-11.parquet",
+      "mtime_ns": 1794426594368244754,
+      "size": 14470172
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2020-12.parquet",
+      "mtime_ns": 1794426594652143252,
+      "size": 15978435
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2021-01.parquet",
+      "mtime_ns": 1794426594919046706,
+      "size": 16349357
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2021-02.parquet",
+      "mtime_ns": 1794426595186541169,
+      "size": 14788010
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2021-03.parquet",
+      "mtime_ns": 1794426595472783404,
+      "size": 16370728
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2021-04.parquet",
+      "mtime_ns": 1794426595740513244,
+      "size": 15679187
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2021-05.parquet",
+      "mtime_ns": 1794426596011291621,
+      "size": 16477096
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2021-06.parquet",
+      "mtime_ns": 1794426596274744992,
+      "size": 16005898
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2021-07.parquet",
+      "mtime_ns": 1794426596540572101,
+      "size": 16448915
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2021-08.parquet",
+      "mtime_ns": 1794426596803566090,
+      "size": 16366961
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2021-09.parquet",
+      "mtime_ns": 1794426597072046898,
+      "size": 15837309
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2021-10.parquet",
+      "mtime_ns": 1794426597346995994,
+      "size": 16409216
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2021-11.parquet",
+      "mtime_ns": 1794426597626288976,
+      "size": 15881666
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2021-12.parquet",
+      "mtime_ns": 1794426597896989312,
+      "size": 16352112
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2022-01.parquet",
+      "mtime_ns": 1794426598174982403,
+      "size": 16369803
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2022-02.parquet",
+      "mtime_ns": 1794426598472040021,
+      "size": 14831656
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2022-03.parquet",
+      "mtime_ns": 1794426598738210592,
+      "size": 16418290
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2022-04.parquet",
+      "mtime_ns": 1794426599013181021,
+      "size": 15896128
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2022-05.parquet",
+      "mtime_ns": 1794426599288339911,
+      "size": 16428216
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2022-06.parquet",
+      "mtime_ns": 1794426599576674505,
+      "size": 15913162
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2022-07.parquet",
+      "mtime_ns": 1794426599856011488,
+      "size": 16461532
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2022-08.parquet",
+      "mtime_ns": 1794426600125676061,
+      "size": 16135194
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2022-09.parquet",
+      "mtime_ns": 1794426600382516558,
+      "size": 15715753
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2022-10.parquet",
+      "mtime_ns": 1794426600655941177,
+      "size": 16305173
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2022-11.parquet",
+      "mtime_ns": 1794426600932004495,
+      "size": 15634524
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2022-12.parquet",
+      "mtime_ns": 1794426601200223049,
+      "size": 16306148
+    }
+  ],
+  "limitations": [
+    "Stage 9 inputs may be rebuilt; inspect manifest before reuse.",
+    "PBO uses like-for-like CPCV train/test ranks across logged development configurations; null until at least two comparable configurations exist.",
+    "Random-direction benchmark uses the executable opposite-side label kernel on raw bars; coverage is reported.",
+    "For BTC, the raw mid-price bars use a monthly median of the modeled decision-time spread in the opposite-direction simulation.",
+    "DSR uses trial-ledger daily Sharpe dispersion; null if too few trials."
+  ],
+  "config_hash": "d6dd65d745ac5bd3b32b35609668fdbda66610569a63e0be4823f8c92cee7f9a",
+  "registry_id": 45,
+  "variant": null,
+  "dry_run": false,
+  "cpcv": {
+    "cpcv_test_groups": [
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        0,
+        3
+      ],
+      [
+        0,
+        4
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        3,
+        4
+      ]
+    ],
+    "cpcv_train_scores": [
+      null,
+      null,
+      0.2635062590099178,
+      -0.6335622689201125,
+      0.09129024866745919,
+      -0.13591073941410112,
+      -0.07244773772307884,
+      -0.30838923273914554,
+      -0.6463131837524073,
+      null
+    ],
+    "cpcv_test_scores": [
+      null,
+      null,
+      null,
+      -1.370834985102947,
+      null,
+      null,
+      -1.3668806372221631,
+      null,
+      -1.4962099182569566,
+      null
+    ]
+  },
+  "status": "silent: 0 selected signals",
+  "run_stats": {
+    "method": "funding_extreme_fade",
+    "candidates": 6763,
+    "signals": 0,
+    "runtime_s": 6.648923916975036,
+    "peak_rss_mib": 1058.859375,
+    "report": "reports/research/dev_v2/funding_extreme_fade_dev.json",
+    "status": "silent: 0 selected signals",
+    "pooled": {
+      "n": 0,
+      "signals_per_year": 0,
+      "hit_rate": null,
+      "net_avg_R": null,
+      "t_stat": null,
+      "profit_factor": null,
+      "daily_sharpe": null,
+      "max_drawdown": null,
+      "brier": 0.14487881976571754,
+      "brier_skill_vs_p0": 0.3097690537247926,
+      "positive_dev_year_share": null,
+      "deflated_sharpe_ratio": null,
+      "random_direction_percentile": null,
+      "pbo": null,
+      "grade": "ungraded: development",
+      "random_direction_matched_signals": 0,
+      "row_accounting": {
+        "events": 183,
+        "candidate_rows": 6763,
+        "assembled_rows": 6763,
+        "drops": {
+          "invalid_geometry": 0,
+          "missing_outcome": 0
+        },
+        "cpcv_test_groups": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            1,
+            4
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            2,
+            4
+          ],
+          [
+            3,
+            4
+          ]
+        ],
+        "cpcv_train_scores": [
+          null,
+          null,
+          0.2635062590099178,
+          -0.6335622689201125,
+          0.09129024866745919,
+          -0.13591073941410112,
+          -0.07244773772307884,
+          -0.30838923273914554,
+          -0.6463131837524073,
+          null
+        ],
+        "cpcv_test_scores": [
+          null,
+          null,
+          null,
+          -1.370834985102947,
+          null,
+          null,
+          -1.3668806372221631,
+          null,
+          -1.4962099182569566,
+          null
+        ],
+        "oof_predicted_rows": 6763,
+        "selected_signals": 0,
+        "no_oof_prediction": 0
+      },
+      "selection_comparison": {
+        "selected_n": 0,
+        "selected_avg_R": null,
+        "unselected_n": 6763,
+        "unselected_avg_R": -9.288288430489036,
+        "same_event_unselected_n": 0,
+        "same_event_unselected_avg_R": null
+      }
+    }
+  }
+}
