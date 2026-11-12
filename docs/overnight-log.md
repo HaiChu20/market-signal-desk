@@ -391,3 +391,4 @@ Append-only notes from the autonomous review loop while the user sleeps.
 - 2026-11-12 05:55 hourly: XAU ticks at 2016-09 (~15 months/h); 81 GiB free; 0 errors; 301 rows 1032 (+4, incl. XAU 2016-10 incomplete, re-fill later). Workers still paused until 07:53; resume cron 79dd462e at 07:57.
 - 2026-11-12 06:55 hourly: XAU ticks at 2015-06 (~15 months/h, ~6 h to 2008); 80 GiB free; 0 errors; 301 rows 1032 (no new). Workers paused until 07:53; resume cron 79dd462e at 07:57.
 - 2026-11-12 07:55 hourly: XAU ticks at 2014-02 (~4 h to 2008); 79 GiB free; 0 errors; 301 rows 1036 (+4). Workers still paused (reset 07:53); cron 79dd462e resumes them at 07:57.
+- 2026-11-12 07:57: usage reset; resumed 2dcf8f09 (item 1), 33128ce1 (item 6), fe242257 (Stage 9) on their current tasks only. d271bffd/66f270b0 idle. After these finish: max 2 busy.
