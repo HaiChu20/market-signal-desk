@@ -12,8 +12,8 @@ Quote windows and hourly costs are measured from the latest twelve complete loca
 | EURUSD | 2025-11–2026-10 | 17:00–17:00 America/New_York | Mon: none; Tue: none; Wed: none; Thu: none; Fri: 17:00–24:00 | 3e-05–0.00029 | 100,000 | fx / 0.00015 |
 | USDJPY | 2025-11–2026-10 | 17:00–17:00 America/New_York | Mon: none; Tue: none; Wed: none; Thu: none; Fri: 17:00–24:00 | 0.004–0.048 | 1,000 | fx / 0.00015 |
 | GBPUSD | 2025-11–2026-10 | 17:00–17:00 America/New_York | Mon: none; Tue: none; Wed: none; Thu: none; Fri: 17:00–24:00 | 6e-05–0.00062 | 100,000 | fx / 0.00015 |
-| LIGHTCMDUSD | 2025-11–2026-10 | 18:00–17:00 America/New_York | Mon: 17:00–18:00; Tue: 17:00–18:00; Wed: 17:00–18:00; Thu: 17:00–18:00; Fri: 17:00–24:00 | 0.05–0.086 | 1,000 | energy / 0.00015 |
-| BRENTCMDUSD | 2025-11–2026-10 | 00:00–22:00 Europe/London | Mon: 22:00–24:00; Tue: 22:00–24:00; Wed: 22:00–24:00; Thu: 22:00–24:00; Fri: 22:00–24:00 | 0.05–0.086 | 1,000 | energy / 0.00015 |
+| LIGHTCMDUSD | 2025-11–2026-10 | 18:00–17:00 America/New_York | Mon: 17:00–18:00; Tue: 17:00–18:00; Wed: 17:00–18:00; Thu: 17:00–18:00; Fri: 17:00–24:00 | 0.05–0.086 | 1,000 | energy / 0.00020 |
+| BRENTCMDUSD | 2025-11–2026-10 | 00:00–22:00 Europe/London | Mon: 22:00–24:00; Tue: 22:00–24:00; Wed: 22:00–24:00; Thu: 22:00–24:00; Fri: 22:00–24:00 | 0.05–0.086 | 1,000 | energy / 0.00020 |
 
 ## Gaps before production Stage 9
 
