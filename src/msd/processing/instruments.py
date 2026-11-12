@@ -8,6 +8,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+import numpy as np
+import pandas as pd
+
 
 @dataclass(frozen=True)
 class InstrumentSpec:
@@ -50,3 +53,44 @@ def label_parameters(symbol: str) -> tuple[str, float]:
     # for every non-crypto class.  The descriptive class remains available for
     # later class-specific financing without changing the Stage 9 config.
     return spec.label_class, spec.financing_per_night
+
+
+def active_session_mask(timestamps: pd.Series, symbol: str) -> np.ndarray:
+    """DST-aware measured quote-session mask, including weekday closure."""
+    spec = instrument_spec(symbol)
+    if not spec.session_ready:
+        raise ValueError(f"{symbol} session is pending measurement from a completed local month")
+    local = pd.to_datetime(timestamps, utc=True).dt.tz_convert(spec.timezone)
+    minute = local.dt.hour * 60 + local.dt.minute
+    opened, closed = int(spec.session_open_minute), int(spec.session_close_minute)
+    if opened == closed:
+        open_day = pd.to_datetime(local.dt.date) - pd.to_timedelta((minute < opened).astype(int), unit="D")
+    elif opened < closed:
+        active = (minute >= opened) & (minute < closed)
+        open_day = pd.to_datetime(local.dt.date)
+    else:
+        active = (minute >= opened) | (minute < closed)
+        open_day = pd.to_datetime(local.dt.date) - pd.to_timedelta((minute < closed).astype(int), unit="D")
+    duration = 1440 if opened == closed else (closed - opened) % 1440
+    trade_day = (open_day + pd.Timedelta(minutes=opened + duration)).dt.day_of_week
+    return (active & trade_day.lt(5)).to_numpy() if opened != closed else trade_day.lt(5).to_numpy()
+
+
+def session_trade_dates(timestamps: pd.Series, symbol: str) -> np.ndarray:
+    """Local trade date for event-volume accounting."""
+    spec = instrument_spec(symbol)
+    if not spec.session_ready:
+        raise ValueError(f"{symbol} session is pending measurement from a completed local month")
+    local = pd.to_datetime(timestamps, utc=True).dt.tz_convert(spec.timezone)
+    minute = local.dt.hour * 60 + local.dt.minute
+    opened, closed = int(spec.session_open_minute), int(spec.session_close_minute)
+    local_day = pd.to_datetime(local.dt.date)
+    if opened == closed:
+        open_day = local_day - pd.to_timedelta((minute < opened).astype(int), unit="D")
+        duration = 1440
+    elif opened < closed:
+        open_day, duration = local_day, closed - opened
+    else:
+        open_day = local_day - pd.to_timedelta((minute < closed).astype(int), unit="D")
+        duration = 1440 - opened + closed
+    return (open_day + pd.Timedelta(minutes=opened + duration)).to_numpy().astype("datetime64[D]")

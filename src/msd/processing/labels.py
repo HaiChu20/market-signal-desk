@@ -215,7 +215,8 @@ def first_hit(bars: pd.DataFrame, entry_index: int, side: int, entry_price: floa
 def label_grid(bars: pd.DataFrame, atr: pd.Series, every_minutes: int=15,
                max_bars: int|None=None, *, max_trading_days: int=5,
                instrument_class: str="crypto", seconds: pd.DataFrame | None=None,
-               signal_start=None, signal_end=None) -> pd.DataFrame:
+               signal_start=None, signal_end=None,
+               financing_per_night: float | None = None) -> pd.DataFrame:
     """Both-side ATR-grid labels; holding limit is a timestamp deadline."""
     try:
         from msd._msd_kernels import first_hit_batch
@@ -265,7 +266,8 @@ def label_grid(bars: pd.DataFrame, atr: pd.Series, every_minutes: int=15,
                     sl=mid-side*sl_mult*a
                     for tp_mult in tp_grid:
                         tp=mid+side*tp_mult*a
-                        finance=.0006 if instrument_class.lower() in {"crypto","24x7"} else .0002
+                        finance = (float(financing_per_night) if financing_per_night is not None
+                                   else .0006 if instrument_class.lower() in {"crypto", "24x7"} else .0002)
                         class_code=1 if instrument_class.lower() in {"crypto","24x7"} else 0
                         jobs.extend([global_i,side,mid,sl,tp,deadline_value//1_000_000_000,2,finance,np.nan,np.nan,class_code])
                         metadata.append((int(global_i),side,sl_mult,tp_mult,deadline_value))

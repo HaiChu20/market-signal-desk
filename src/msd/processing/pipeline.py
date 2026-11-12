@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from datetime import date, datetime, timedelta, timezone
 import inspect
 import os
@@ -12,12 +13,14 @@ import time
 
 import numpy as np
 import pandas as pd
+import pyarrow.parquet as pq
 
 from msd.data import load
 from .features import build_features, external_feature_frame, feature_qa_files, prepare_feature_cache
 from .labels import label_grid, rust_fallback
 from .levels import apply_level_invalidations, build_levels
 from .timeframes import INDEX_SYMBOLS, TIMEFRAMES, build_all_timeframes
+from .instruments import STAGE9_INSTRUMENTS, active_session_mask, label_parameters, session_trade_dates
 from msd.methods.common import assert_event_volume, exit_candidates, prepare_exit_levels
 from msd.methods import (
     bollinger, btc_order_flow, candlestick_at_level, chart_patterns,
@@ -33,6 +36,12 @@ from msd.methods import (
 )
 
 TIER1 = ("USATECHIDXUSD", "USA500IDXUSD", "XAUUSD", "BTCUSDT", "ETHUSDT")
+STAGE9 = ("USA30IDXUSD", "DEUIDXEUR", "XAGUSD", "EURUSD", "USDJPY", "GBPUSD",
+          "LIGHTCMDUSD", "BRENTCMDUSD")
+SUPPORTED_SYMBOLS = (*TIER1, *STAGE9)
+STAGE9_START = {"USA30IDXUSD": pd.Timestamp("2018-05-01", tz="UTC"),
+                "DEUIDXEUR": pd.Timestamp("2020-01-01", tz="UTC"),
+                "XAGUSD": pd.Timestamp("2020-01-01", tz="UTC")}
 # Keep the same 370-day overlap used by the validated chunk-equivalence path.
 # A shorter overlap changes long HTF rolling features even when levels/state
 # are persisted, so production chunks must retain this warm-up.
@@ -242,6 +251,43 @@ def _adjusted_price_view(frame: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
+def _month_signature(frame: pd.DataFrame) -> dict:
+    ts = pd.to_datetime(frame.ts, utc=True)
+    return {"rows": len(frame), "columns": list(frame.columns),
+            "ts_min": ts.min().isoformat(), "ts_max": ts.max().isoformat()}
+
+
+def _verified_month(target: Path, frame: pd.DataFrame) -> bool:
+    if not target.exists():
+        return False
+    sidecar = target.with_name(target.name + ".verified.json")
+    expected = _month_signature(frame)
+    try:
+        metadata = pq.read_metadata(target)
+        if metadata.num_rows != expected["rows"] or metadata.schema.names != expected["columns"]:
+            return False
+        if sidecar.exists():
+            recorded = json.loads(sidecar.read_text())
+            return recorded == {**expected, "bytes": target.stat().st_size}
+        stored = pd.read_parquet(target, columns=["ts"])
+        actual = _month_signature(pd.DataFrame({"ts": stored.ts}))
+        if actual["rows"] != expected["rows"] or actual["ts_min"] != expected["ts_min"] or actual["ts_max"] != expected["ts_max"]:
+            return False
+        _write_verification(sidecar, {**expected, "bytes": target.stat().st_size})
+        return True
+    except (OSError, ValueError, KeyError, json.JSONDecodeError):
+        return False
+
+
+def _write_verification(path: Path, record: dict) -> None:
+    with tempfile.NamedTemporaryFile(mode="w", dir=path.parent, suffix=".json.part", delete=False) as handle:
+        temp = Path(handle.name); json.dump(record, handle, sort_keys=True, separators=(",", ":"))
+    try:
+        os.replace(temp, path)
+    finally:
+        temp.unlink(missing_ok=True)
+
+
 def _write_monthly(frame: pd.DataFrame, directory: Path, symbol: str, compression: str = "zstd") -> int:
     if frame.empty:
         return 0
@@ -251,10 +297,20 @@ def _write_monthly(frame: pd.DataFrame, directory: Path, symbol: str, compressio
         _check_disk()
         target = directory / symbol / f"{month}.parquet"
         target.parent.mkdir(parents=True, exist_ok=True)
+        output = part.drop(columns="_month")
+        if _verified_month(target, output):
+            continue
         with tempfile.NamedTemporaryFile(dir=target.parent,suffix=".parquet",delete=False) as handle:
             temp=Path(handle.name)
-        part.drop(columns="_month").to_parquet(temp,index=False,compression=compression)
-        os.replace(temp,target)
+        try:
+            output.to_parquet(temp,index=False,compression=compression)
+            if pq.read_metadata(temp).num_rows != len(output):
+                raise RuntimeError(f"row-count verification failed for {target}")
+            os.replace(temp,target)
+            _write_verification(target.with_name(target.name + ".verified.json"),
+                                {**_month_signature(output), "bytes": target.stat().st_size})
+        finally:
+            temp.unlink(missing_ok=True)
     return len(work)
 
 
@@ -283,8 +339,11 @@ def _merge_levels_year(level_temp: Path, symbol: str, start_year: int, replace_e
     _check_disk()
     with tempfile.NamedTemporaryFile(dir=LEVEL_DIR,suffix=".parquet",delete=False) as handle:
         merged_temp=Path(handle.name)
-    current.to_parquet(merged_temp,index=False,compression="zstd")
-    os.replace(merged_temp,target)
+    try:
+        current.to_parquet(merged_temp,index=False,compression="zstd")
+        os.replace(merged_temp,target)
+    finally:
+        merged_temp.unlink(missing_ok=True)
 
 
 def _timeframes_with_history(symbol: str, current: dict[str,pd.DataFrame], year_start: pd.Timestamp) -> dict[str,pd.DataFrame]:
@@ -298,7 +357,7 @@ def _timeframes_with_history(symbol: str, current: dict[str,pd.DataFrame], year_
             if path.stem >= year_start.strftime("%Y-%m"):
                 continue
             old=pd.read_parquet(path)
-            if symbol in INDEX_SYMBOLS:
+            if symbol in {"USATECHIDXUSD", "USA500IDXUSD"}:
                 old=old[pd.to_datetime(old.ts,utc=True)>=CASH_ERA_START]
             if len(old): parts.append(old)
         if len(frame): parts.append(frame)
@@ -316,7 +375,7 @@ def _load_year_level_history(symbol: str, year_start: pd.Timestamp) -> pd.DataFr
     levels=pd.read_parquet(path)
     levels=levels.drop(columns=["touches_so_far"],errors="ignore")
     levels=levels[pd.to_datetime(levels.known_at,utc=True)<year_start]
-    if symbol in INDEX_SYMBOLS:
+    if symbol in {"USATECHIDXUSD", "USA500IDXUSD"}:
         levels=levels[pd.to_datetime(levels.known_at,utc=True)>=CASH_ERA_START]
     return levels.reset_index(drop=True)
 
@@ -328,7 +387,10 @@ def _save_event_state(symbol: str, year: int, state: dict, touch_rows: list[tupl
     target=root/f"{year}.json"
     with tempfile.NamedTemporaryFile(mode="w",dir=root,suffix=".json",delete=False) as handle:
         temp=Path(handle.name);json.dump(state,handle,separators=(",",":"))
-    os.replace(temp,target)
+    try:
+        os.replace(temp,target)
+    finally:
+        temp.unlink(missing_ok=True)
     if touch_rows:
         touch_root=Path("data/levels/touches")/symbol;touch_root.mkdir(parents=True,exist_ok=True)
         touch_path=touch_root/f"{year}.parquet"
@@ -336,7 +398,10 @@ def _save_event_state(symbol: str, year: int, state: dict, touch_rows: list[tupl
         frame=frame.drop_duplicates(["method","level_id","touch_ts","known_at"])
         with tempfile.NamedTemporaryFile(dir=touch_root,suffix=".parquet",delete=False) as handle:
             tmp=Path(handle.name)
-        frame.to_parquet(tmp,index=False,compression="zstd");os.replace(tmp,touch_path)
+        try:
+            frame.to_parquet(tmp,index=False,compression="zstd");os.replace(tmp,touch_path)
+        finally:
+            tmp.unlink(missing_ok=True)
 
 
 def _first_year(symbol: str) -> int:
@@ -346,15 +411,19 @@ def _first_year(symbol: str) -> int:
         "BTCUSDT": Path("data/bars/binance_spot/BTCUSDT"),
         "ETHUSDT": Path("data/bars/binance_spot/ETHUSDT"),
         "XAUUSD": Path("data/bars/dukascopy/XAUUSD"),
-    }[symbol]
+    }.get(symbol, Path("data/bars/dukascopy") / symbol)
+    if symbol in STAGE9_START:
+        return STAGE9_START[symbol].year
     files = sorted(root.glob("[0-9][0-9][0-9][0-9]-[0-9][0-9].parquet"))
     return int(files[0].stem[:4]) if files else datetime.now(timezone.utc).year
 
 
 def _history_start(symbol: str) -> pd.Timestamp:
     """Earliest permitted source timestamp used to seed cumulative state."""
-    if symbol in INDEX_SYMBOLS:
+    if symbol in {"USATECHIDXUSD", "USA500IDXUSD"}:
         return CASH_ERA_START
+    if symbol in STAGE9_START:
+        return STAGE9_START[symbol]
     if symbol == "XAUUSD":
         # Early gold quotes are sparse; the registered pipeline starts 2008+.
         return pd.Timestamp("2008-01-01",tz="UTC")
@@ -374,6 +443,8 @@ def _history_start(symbol: str) -> pd.Timestamp:
 
 
 def _active_mask(bars: pd.DataFrame, symbol: str) -> np.ndarray:
+    if symbol in STAGE9_INSTRUMENTS:
+        return active_session_mask(bars.ts, symbol)
     if symbol not in INDEX_SYMBOLS:
         return np.ones(len(bars),dtype=bool)
     local=bars.ts.dt.tz_convert("America/New_York")
@@ -534,7 +605,7 @@ def write_feature_dictionary(columns: list[str]) -> Path:
         "spread_": "Bid/ask spread divided by trailing ATR.",
     }
     path=Path("reports/data/feature_dictionary.md"); path.parent.mkdir(parents=True,exist_ok=True)
-    lock_path=Path("data/tmp/feature_dictionary.lock"); lock_path.parent.mkdir(parents=True,exist_ok=True)
+    lock_path=Path("data/tmp/fe242257/feature_dictionary.lock"); lock_path.parent.mkdir(parents=True,exist_ok=True)
     with lock_path.open("a+") as lock:
         fcntl.flock(lock.fileno(),fcntl.LOCK_EX)
         names=set(columns)-{"ts","known_at"}
@@ -569,8 +640,11 @@ def label_method_events(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.D
         rust_fallback(error)
         first_hit_batch = None
     methods=methods_for_symbol(symbol)
-    instrument_class="index" if symbol in INDEX_SYMBOLS else "crypto" if symbol in {"BTCUSDT","ETHUSDT"} else "index"
-    finance=.0002 if symbol in INDEX_SYMBOLS else .0006 if symbol in {"BTCUSDT","ETHUSDT"} else .00015
+    if symbol in STAGE9_INSTRUMENTS:
+        instrument_class, finance = label_parameters(symbol)
+    else:
+        instrument_class="index" if symbol in INDEX_SYMBOLS else "crypto" if symbol in {"BTCUSDT","ETHUSDT"} else "index"
+        finance=.0002 if symbol in INDEX_SYMBOLS else .0006 if symbol in {"BTCUSDT","ETHUSDT"} else .00015
     event_bars=bars.sort_values("ts").reset_index(drop=True)
     scan_bars=(detector_bars if detector_bars is not None else event_bars).sort_values("ts").reset_index(drop=True)
     scan_features=detector_features if detector_features is not None else features
@@ -604,7 +678,12 @@ def label_method_events(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.D
         if event_end is not None:
             events=[event for event in events if pd.Timestamp(event["ts"]) < pd.Timestamp(event_end)]
         detected_counts[method.NAME] = len(events)
-        if symbol in INDEX_SYMBOLS:
+        if symbol in STAGE9_INSTRUMENTS:
+            day_features=scan_features
+            if event_start is not None: day_features=day_features[day_features.ts>=pd.Timestamp(event_start)]
+            if event_end is not None: day_features=day_features[day_features.ts<pd.Timestamp(event_end)]
+            day_count=max(1,len(np.unique(session_trade_dates(day_features.ts,symbol))))
+        elif symbol in INDEX_SYMBOLS:
             day_features=scan_features
             if event_start is not None: day_features=day_features[day_features.ts>=pd.Timestamp(event_start)]
             if event_end is not None: day_features=day_features[day_features.ts<pd.Timestamp(event_end)]
@@ -750,11 +829,14 @@ def run_symbol(symbol: str, start_year: int | None = None, end_year: int | None 
                            (pd.to_datetime(levels.known_at,utc=True)<=year_end)]
         if len(year_levels):
             _check_disk();LEVEL_DIR.mkdir(parents=True,exist_ok=True)
-            Path("data/tmp").mkdir(parents=True,exist_ok=True)
-            level_temp=Path("data/tmp")/f"levels_year_{symbol}_{year}.parquet"
-            year_levels.to_parquet(level_temp,index=False,compression="zstd")
-            _merge_levels_year(level_temp,symbol,year,replace_existing=replace_levels_pending,
-                               state_levels=levels)
+            scoped_tmp=Path("data/tmp/fe242257");scoped_tmp.mkdir(parents=True,exist_ok=True)
+            level_temp=scoped_tmp/f"levels_year_{symbol}_{year}.parquet"
+            try:
+                year_levels.to_parquet(level_temp,index=False,compression="zstd")
+                _merge_levels_year(level_temp,symbol,year,replace_existing=replace_levels_pending,
+                                   state_levels=levels)
+            finally:
+                level_temp.unlink(missing_ok=True)
             replace_levels_pending=False
             level_rows+=len(year_levels)
         del year_levels
@@ -774,7 +856,7 @@ def run_symbol(symbol: str, start_year: int | None = None, end_year: int | None 
         feature_cache=prepare_feature_cache(bars,symbol,tfs)
         feature_names=None
         month_cursor=year_start
-        if symbol in INDEX_SYMBOLS: month_cursor=max(month_cursor,CASH_ERA_START.floor("D"))
+        month_cursor=max(month_cursor,_history_start(symbol).floor("D"))
         year_feature_rows=year_label_rows=0
         while month_cursor<year_end:
             month_end=min(year_end,month_cursor+pd.offsets.MonthBegin(1))
@@ -837,16 +919,20 @@ def run_symbol(symbol: str, start_year: int | None = None, end_year: int | None 
         else:
             per_minute = pd.Series(np.nan, index=bars.index)
         label_started=time.perf_counter()
-        instrument_class="index" if symbol in INDEX_SYMBOLS else "crypto" if symbol in {"BTCUSDT","ETHUSDT"} else "index"
+        if symbol in STAGE9_INSTRUMENTS:
+            instrument_class, grid_finance = label_parameters(symbol)
+        else:
+            instrument_class="index" if symbol in INDEX_SYMBOLS else "crypto" if symbol in {"BTCUSDT","ETHUSDT"} else "index"
+            grid_finance=None
         month_cursor=year_start
-        if symbol in INDEX_SYMBOLS: month_cursor=max(month_cursor,CASH_ERA_START.floor("D"))
+        month_cursor=max(month_cursor,_history_start(symbol).floor("D"))
         while month_cursor<year_end:
             month_end=min(year_end,month_cursor+pd.offsets.MonthBegin(1))
             label_mask=(bars.ts>=month_cursor)&(bars.ts<min(right,month_end+pd.Timedelta(days=8)))&_active_mask(bars,symbol)
             label_bars=bars.loc[label_mask].reset_index(drop=True)
             label_atr=per_minute.loc[label_mask].reset_index(drop=True)
             labels=label_grid(label_bars,label_atr,max_trading_days=MAX_HOLD_TRADING_DAYS,
-                              instrument_class=instrument_class)
+                              instrument_class=instrument_class, financing_per_night=grid_finance)
             if len(labels):
                 labels["ts"]=label_bars.ts.iloc[labels.signal_index.to_numpy()].to_numpy()
                 labels=labels[labels.ts<month_end]
@@ -929,7 +1015,7 @@ def write_pipeline_report(results: list[dict]) -> Path:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--symbol", choices=TIER1)
+    parser.add_argument("--symbol", choices=SUPPORTED_SYMBOLS)
     parser.add_argument("--start-year", type=int)
     parser.add_argument("--end-year", type=int)
     parser.add_argument("--augment-external", action="store_true", help="attach downloaded external sources to existing feature files only")

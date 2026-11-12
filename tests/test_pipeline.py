@@ -266,6 +266,31 @@ def test_label_grid_can_limit_signal_timestamps_without_changing_outcomes():
     pd.testing.assert_frame_equal(bounded,all_rows,check_dtype=False)
 
 
+def test_label_grid_accepts_preregistered_stage9_financing(monkeypatch):
+    from msd.processing.labels import label_grid
+    import msd._msd_kernels as kernels
+    ts=pd.date_range("2024-01-01",periods=20,freq="min",tz="UTC")
+    bars=_bars(ts);atr=pd.Series(np.ones(len(bars)))
+    captured=[]
+    def fake_batch(_bars,_times,jobs,size,*_args):
+        captured.extend(jobs)
+        return np.tile([0.,19.,100.,100.,0.,0.,0.,2.,1.],len(jobs)//size).tolist()
+    monkeypatch.setattr(kernels,"first_hit_batch",fake_batch)
+    label_grid(bars,atr,max_trading_days=1,instrument_class="fx",financing_per_night=.00015)
+    assert set(np.asarray(captured).reshape(-1,11)[:,7]) == {.00015}
+
+
+def test_verified_month_is_skipped_on_resume(monkeypatch, tmp_path):
+    from msd.processing import pipeline
+    frame=_bars(pd.date_range("2024-01-01",periods=5,freq="min",tz="UTC"))
+    monkeypatch.setattr(pipeline,"_check_disk",lambda:None)
+    assert pipeline._write_monthly(frame,tmp_path,"EURUSD")==5
+    target=tmp_path/"EURUSD/2024-01.parquet"
+    assert target.exists() and target.with_name(target.name+".verified.json").exists()
+    monkeypatch.setattr(pd.DataFrame,"to_parquet",lambda *_args,**_kwargs: pytest.fail("verified month rewritten"))
+    assert pipeline._write_monthly(frame,tmp_path,"EURUSD")==5
+
+
 def test_label_gap_sl_first_and_favorable_limit_fill_rules():
     from msd.processing.labels import first_hit, first_hit_reference
     ts=pd.date_range("2024-01-02",periods=3,freq="min",tz="UTC")
