@@ -1,7 +1,7 @@
 services:
   market-signal-desk:
     build: .
-    env_file: .env
+    command: ["python", "-m", "msd.live.shadow"]
     volumes:
       - ./data/live:/app/data/live
       - ./live.toml:/app/live.toml

@@ -7,7 +7,7 @@ A strategy-agnostic historical data, spread-aware backtest, and paper-forward si
 - `msd.data` loads UTC OHLC bars with bid/ask prices. Index CFD bars are downloaded from Dukascopy; BTCUSDT bars come from checksum-verified Binance archives with the modeled spread embedded into bid/ask.
 - `msd.backtest.simulate(bars, orders)` applies side-specific fills, intrabar stop/TP rules, and timestamp-keyed stop updates. An update at time `t` takes effect on the next bar.
 - `msd.strategy_check.assert_causal(module, bars)` checks random truncations and future-volume perturbations.
-- The live engine polls Capital.com and stores signals, exits, and processing checkpoints in SQLite. `live.toml` currently has **zero strategies enabled**. Paper mode is the default.
+- The public spot shadow loop uses Binance closed 1-minute candles for BTCUSDT and ETHUSDT. It backfills gaps through REST, computes causal offline features and supported method events, and records preliminary candidates in SQLite. The Capital.com index adapter awaits credentials and implementation.
 - Historical results and research remain in `reports/` and `docs/`. The prior strategy and ML implementations were removed; none is selected for live operation.
 
 ## Strategy contract
@@ -39,7 +39,11 @@ uv run python -m msd.data.dukascopy --symbol USATECHIDXUSD --start 2018-01-01
 uv run python -m msd.data.quality --symbol USATECHIDXUSD --hours cme_equity
 ```
 
-Configure Capital.com demo credentials and Telegram variables from `.env.example` into a local `.env` (never commit it), then run `docker compose up -d`. `uv run python -m msd.live.engine --check` validates the Capital connection. `--dry-run` and `--replay START END --symbol SYMBOL --strategy package.module` support local replay; `--verify-live package.module SYMBOL START END` compares replayed signals and exits against the backtest simulator. Tests use synthetic fixtures and do not make network calls.
+`docker compose up -d --build` runs the Binance shadow loop without credentials. It records one structured audit row per completed minute and symbol, with reason `data`, `model`, `edge`, `position`, `blackout`, or `emitted`; a bar without a setup is `edge` with detail `no_setup`. Preliminary candidates remain in SQLite and never reach Telegram. The feed backfills missing closed bars through REST; a stale bar, less than 99% coverage over the ten-day warmup, a gap in the latest hour, or a spread above the configurable multiple of its trailing same-hour median suppresses alerts. The spread multiplier, warmup, validity minutes, and ATR don't-chase band are CLI options on `uv run python -m msd.live.shadow --help`.
+
+The loop never sends Telegram messages. Qualified paper signals are stored in SQLite and included in the structured stdout audit line; connecting a real chat requires separate user approval. A model needs a matching artifact manifest, a candidate-aware probability model, an explicit live policy with costs, a calibrated `expected_net_R` curve, and a report card graded ✅ or 🧪. The shared `decision.choose` must pass the 0.05R edge threshold and its neighbouring-candidate check. All alerts are labelled PAPER. Current development report cards are ungraded. Binance REST gap bars contain trade prices and therefore fail the executable-spread gate; live bars combine the public trade and bookTicker streams into volume plus bid/ask OHLC. The five checkpointed rules `ma_cross`, `macd_signal`, `stochastic`, `bollinger`, and `donchian_atr_breakout` join the pilot detectors online; other frozen methods are marked unavailable until their input and state parity is verified.
+
+The older Capital.com path remains at `uv run python -m msd.live.engine --check` and supports `--dry-run`, `--replay START END --symbol SYMBOL --strategy package.module`, and `--verify-live package.module SYMBOL START END`.
 
 ## Strategy status
 

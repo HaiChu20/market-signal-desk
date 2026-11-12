@@ -1,8 +1,8 @@
 from pathlib import Path
 import pandas as pd
 import pytest
-from msd.research.any_minute import load_grid,paths_for,gate_open_signals
-from msd.research.tournament import summarize
+from msd.research.any_minute import load_grid,paths_for,_gate_open_signals_streaming
+from msd.research.event_summary import summarize
 
 def test_grid_cost_and_causal_asof(tmp_path):
     root=tmp_path;p=root/'labels'/'BTCUSDT'/'2022-01.parquet';p.parent.mkdir(parents=True)

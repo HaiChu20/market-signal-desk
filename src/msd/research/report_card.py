@@ -9,18 +9,30 @@ import pandas as pd
 from msd.stats import deflated_sharpe_ratio
 
 def trial_diagnostics(rows,method):
-    """DSR trial dispersion and CSCV PBO from logged yearly dev scores."""
+    """DSR dispersion and PBO from like-for-like logged CPCV folds."""
     trials=[]
     for row in rows:
         if row.get('method')!=method or row.get('period') not in {'development','dev'}:continue
         try:metric=json.loads(row['metrics'])
         except (ValueError,KeyError):continue
-        if isinstance(metric,dict) and metric.get('daily_sharpe') is not None:
-            trials.append(metric)
-    sharpes=[float(m['daily_sharpe'])/np.sqrt(252) for m in trials if np.isfinite(m['daily_sharpe'])]
-    yearly=[m.get('per_year',{}) for m in trials if isinstance(m.get('per_year'),dict)]
+        if isinstance(metric,dict):trials.append(metric)
+    sharpes=[float(m['daily_sharpe'])/np.sqrt(252) for m in trials
+             if m.get('daily_sharpe') is not None and np.isfinite(m['daily_sharpe'])]
     pbo=None
-    if len(yearly)>=2:
+    cpcv=[(m.get('cpcv_train_scores'),m.get('cpcv_test_scores')) for m in trials]
+    cpcv=[(a,b) for a,b in cpcv if isinstance(a,list) and isinstance(b,list) and len(a)==len(b)]
+    if len(cpcv)>=2 and len({len(a) for a,_ in cpcv})==1:
+        train=np.asarray([a for a,_ in cpcv],float);test=np.asarray([b for _,b in cpcv],float)
+        failures=[]
+        for fold in range(train.shape[1]):
+            valid=np.isfinite(train[:,fold])&np.isfinite(test[:,fold])
+            if valid.sum()<2:continue
+            tr=train[valid,fold];te=test[valid,fold]
+            winner=int(np.argmax(tr));failures.append(float(te[winner]<np.median(te)))
+        if failures:pbo=float(np.mean(failures))
+    # Backward-compatible fallback for the three preliminary pilot cards.
+    yearly=[m.get('per_year',{}) for m in trials if isinstance(m.get('per_year'),dict)]
+    if pbo is None and len(yearly)>=2:
         common=set.intersection(*(set(y) for y in yearly))
         years=sorted(common)
         if len(years)>=4:
@@ -58,7 +70,8 @@ def metrics(signals:pd.DataFrame,candidates:pd.DataFrame|None=None,trial_count=1
     period_time=pd.to_datetime(candidates.known_at,utc=True) if candidates is not None and len(candidates) else entry
     years=max((period_time.max()-period_time.min()).total_seconds()/86400/365.25,1/365.25)
     daily=signals.assign(day=exit_ts.dt.floor('D')).groupby('day').net_R.sum()*.005
-    days=pd.date_range(entry.min().floor('D'),exit_ts.max().floor('D'),freq='D' if signals.sym.eq('BTCUSDT').all() else 'B',tz='UTC')
+    crypto=signals.sym.isin(['BTCUSDT','ETHUSDT']).any()
+    days=pd.date_range(entry.min().floor('D'),exit_ts.max().floor('D'),freq='D' if crypto else 'B',tz='UTC')
     daily=daily.reindex(days,fill_value=0)
     equity=(1+daily).clip(lower=0).cumprod()
     peak=equity.cummax().clip(lower=1)
@@ -66,7 +79,7 @@ def metrics(signals:pd.DataFrame,candidates:pd.DataFrame|None=None,trial_count=1
     out={'n':n,'signals_per_year':_f(n/years),'hit_rate':_f((r>0).mean()),
          'net_avg_R':_f(np.mean(r)),'t_stat':_f(np.mean(r)/(sd/np.sqrt(n))) if sd>0 else None,
          'profit_factor':_f(wins/loss) if loss>0 else None,
-         'daily_sharpe':_f(np.sqrt(365 if signals.sym.eq('BTCUSDT').all() else 252)*daily.mean()/daily.std(ddof=1)) if daily.std(ddof=1)>0 else None,
+         'daily_sharpe':_f(np.sqrt(365 if crypto else 252)*daily.mean()/daily.std(ddof=1)) if daily.std(ddof=1)>0 else None,
          'max_drawdown':_f((equity/peak-1).min()),
          'positive_dev_year_share':_f((grouped>0).mean()),
          'per_year':{str(k):_f(v) for k,v in grouped.items()},
@@ -118,7 +131,7 @@ def report(method,period,signals,candidates,manifest,trial_count=1,trial_sharpes
           'grade_in_dev':'not applicable; protocol section 5 grades test only',
           'pooled':pooled,'per_instrument':per_instrument,'input_manifest':manifest,
           'limitations':['Stage 9 inputs may be rebuilt; inspect manifest before reuse.',
-                         'PBO uses CSCV over common development years of logged configurations; null here because fewer than four common years have comparable trial scores.',
+                         'PBO uses like-for-like CPCV train/test ranks across logged development configurations; null until at least two comparable configurations exist.',
                          'Random-direction benchmark uses the executable opposite-side label kernel on raw bars; coverage is reported.',
                          'For BTC, the raw mid-price bars use a monthly median of the modeled decision-time spread in the opposite-direction simulation.',
                          'DSR uses trial-ledger daily Sharpe dispersion; null if too few trials.']}
@@ -128,10 +141,15 @@ def report(method,period,signals,candidates,manifest,trial_count=1,trial_sharpes
     lines=[f'# {method} — development report card','',
            '**PRELIMINARY — stage 9 inputs may change. Development period only; no protocol grade.**','',
            f'Input files: {len(manifest)} (paths and mtimes in JSON).','',
-           '| Scope | n | Brier skill vs p0 | Net avg R | t | Grade |','|---|---:|---:|---:|---:|---|']
+           '| Scope | n | Signals/year | Hit | Net avg R | t | PF | Daily Sharpe | MDD | Brier skill | Positive DEV years | DSR | PBO | Random pct |',
+           '|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|']
     for scope,item in [('pooled',pooled),*per_instrument.items()]:
         fmt=lambda v:'NA' if v is None else f'{v:.4f}'
-        lines.append(f"| {scope} | {item['n']} | {fmt(item['brier_skill_vs_p0'])} | {fmt(item['net_avg_R'])} | {fmt(item['t_stat'])} | ungraded |")
+        lines.append(f"| {scope} | {item['n']} | {fmt(item['signals_per_year'])} | {fmt(item['hit_rate'])} | "
+            f"{fmt(item['net_avg_R'])} | {fmt(item['t_stat'])} | {fmt(item['profit_factor'])} | "
+            f"{fmt(item['daily_sharpe'])} | {fmt(item['max_drawdown'])} | {fmt(item['brier_skill_vs_p0'])} | "
+            f"{fmt(item['positive_dev_year_share'])} | {fmt(item['deflated_sharpe_ratio'])} | "
+            f"{fmt(item.get('pbo'))} | {fmt(item.get('random_direction_percentile'))} |")
     if audit is not None:
         lines+=['','## Row accounting','',
             f"Events: {audit['events']}; candidate rows: {audit['candidate_rows']}; assembled: {audit['assembled_rows']}; OOF predicted: {len(candidates)}; selected: {len(signals)}; signals/year: {fmt(pooled['signals_per_year'])}.",

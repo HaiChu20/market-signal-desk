@@ -18,9 +18,9 @@ def random_direction(signals:pd.DataFrame,data_root:Path,seeds=200):
     normal=[];opposite=[];manifest=[]
     work=signals.assign(month=pd.to_datetime(signals.ts,utc=True).dt.tz_localize(None).dt.to_period('M'))
     for (symbol,month),group in work.groupby(['sym','month']):
-        # ETH must use the pipeline's annual Dukascopy spread model. Raw
+        # Crypto must use the pipeline's annual Dukascopy spread model. Raw
         # Binance OHLC are mid prices and understate executable costs.
-        if symbol=='ETHUSDT' or (symbol in {'USATECHIDXUSD','USA500IDXUSD'} and data_root.name=='data'):
+        if symbol in CRYPTO or (symbol in {'USATECHIDXUSD','USA500IDXUSD'} and data_root.name=='data'):
             from msd.research.sequence_data import load_executable_1m
             bars=load_executable_1m(symbol,pd.Timestamp(month.start_time,tz='UTC'),
                                     pd.Timestamp((month+1).end_time,tz='UTC'),data_root)
@@ -41,15 +41,6 @@ def random_direction(signals:pd.DataFrame,data_root:Path,seeds=200):
             if not parts:continue
             bars=pd.concat(parts,ignore_index=True).sort_values('ts').drop_duplicates('ts').reset_index(drop=True)
         times=pd.to_datetime(bars.ts,utc=True)
-        if symbol=='BTCUSDT':
-            # Binance bars are mid-price bars. Use the decision-time modeled
-            # spread, held constant within this batch as in pipeline labelling.
-            spread=float(np.nanmedian(group.spread_R*group.planned_risk))
-            if np.isfinite(spread):
-                for field in 'ohlc':
-                    mid=(bars[f'bid_{field}']+bars[f'ask_{field}'])/2
-                    bars[f'bid_{field}']=mid-spread/2
-                    bars[f'ask_{field}']=mid+spread/2
         jobs=[];rows=[]
         for row in group.itertuples(index=False):
             ix=int(times.searchsorted(pd.Timestamp(row.ts)))

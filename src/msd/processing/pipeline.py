@@ -932,7 +932,7 @@ def _drop_labels_crossing_boundary(events: pd.DataFrame, boundary: pd.Timestamp)
 
 
 def replay_events_only(symbol: str, start_year: int, end_year: int,
-                       output_root: Path, source_root: Path = Path('/Users/bfhach/Projects/market-signal-desk/data')) -> list[dict]:
+                       output_root: Path, source_root: Path = Path('data')) -> list[dict]:
     """Rebuild method events/labels from persisted bars, features and levels.
 
     Source data is read-only. Detector state is carried in memory between years.
@@ -1078,7 +1078,7 @@ def write_pipeline_report(results: list[dict]) -> Path:
     lines += ["", "## Runtime and peak RSS per year", "", "| Symbol | Year | Input bars | Feature rows | Labels | Runtime (s) | Peak RSS (GiB) |", "|---|---:|---:|---:|---:|---:|---:|"]
     lines += [f"| {row['symbol']} | {row['year']} | {row['input_bars']:,} | {row['feature_rows']:,} | {row['label_rows']:,} | {row['elapsed_seconds']:.1f} | {row['peak_rss_gib']:.2f} |" for row in year_rows]
     if not year_rows: lines.append("| No completed years | — | 0 | 0 | 0 | 0 | 0 |")
-    lines += ["", "## Validation", "", "Rust label/reference agreement is tested on 10,000 seeded randomized cases. Build: PATH=/Users/bfhach/.cargo/bin:$PATH maturin develop --manifest-path rust/msd_kernels/Cargo.toml --offline. pytest summary is recorded at completion.", ""]
+    lines += ["", "## Validation", "", "Rust label/reference agreement is tested on 10,000 seeded randomized cases. Build: PATH=$HOME/.cargo/bin:$PATH maturin develop --manifest-path rust/msd_kernels/Cargo.toml --offline. pytest summary is recorded at completion.", ""]
     path=Path("reports/data/pipeline_report.md"); path.parent.mkdir(parents=True,exist_ok=True); path.write_text("\n".join(lines))
     return path
 
@@ -1091,7 +1091,7 @@ def main() -> None:
     parser.add_argument("--augment-external", action="store_true", help="attach downloaded external sources to existing feature files only")
     parser.add_argument('--events-only',action='store_true')
     parser.add_argument('--output-root',type=Path)
-    parser.add_argument('--source-root',type=Path,default=Path('/Users/bfhach/Projects/market-signal-desk/data'))
+    parser.add_argument('--source-root',type=Path,default=Path('data'))
     args = parser.parse_args()
     if args.events_only:
         if not (args.symbol and args.start_year and args.end_year and args.output_root):
