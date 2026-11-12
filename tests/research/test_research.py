@@ -37,6 +37,32 @@ def test_purge_and_forward():
     for train,test in walk_forward(frame,3):
         assert frame.known_at.iloc[train].max()<frame.known_at.iloc[test].min()
 
+
+def test_cpcv_embargo_is_one_weekday_and_purge_removes_overlap():
+    from msd.research.splits import _purge
+    t=pd.to_datetime(['2022-01-06 12:00','2022-01-07 12:00','2022-01-10 11:59',
+                      '2022-01-10 12:00','2022-01-11 12:00'],utc=True)
+    frame=pd.DataFrame({'known_at':t,'label_end_ts':t})
+    kept=_purge(frame,np.array([1]))
+    assert kept.tolist()==[0,4]  # Friday test embargoes through Monday 12:00 inclusive.
+
+    overlap=pd.DataFrame({'known_at':pd.to_datetime(['2022-01-01','2022-01-03'],utc=True),
+                          'label_end_ts':pd.to_datetime(['2022-01-04','2022-01-03'],utc=True)})
+    assert len(_purge(overlap,np.array([1])))==0
+
+
+def test_trial_ledger_is_append_only_and_capped(tmp_path):
+    from msd.research.ledger import append_trial,read_trials,FIELDS
+    path=tmp_path/'trials.csv'
+    def row(i):
+        return dict(zip(FIELDS,[f't{i}','2026-11-12',f'h{i}','method','{}','2019/2022',
+                                'dev','{}','dry']))
+    append_trial(path,row(0),max_configs=2);before=path.read_bytes()
+    append_trial(path,row(1),max_configs=2)
+    assert path.read_bytes().startswith(before) and len(read_trials(path))==2
+    with pytest.raises(ValueError,match='already present'):append_trial(path,row(1),max_configs=2)
+    with pytest.raises(ValueError,match='limit'):append_trial(path,row(2),max_configs=2)
+
 def synthetic(edge=False):
     rng=np.random.default_rng(7);n=3000
     x=rng.normal(size=n);p=1/(1+np.exp(-(1.4*x if edge else np.zeros(n))))
