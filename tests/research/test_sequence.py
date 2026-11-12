@@ -138,6 +138,9 @@ def test_purged_walk_forward_cpu(tmp_path):
     assert cards
     assert list(tmp_path.glob("fold_*/model.pt"))
     assert all(card["period"] == "dev" for card in cards)
+    metrics = [pd.read_json(path, typ="series") for path in tmp_path.glob("fold_*/metrics.json")]
+    assert all(row.early_loss_finite for row in metrics)
+    assert all(row.best_early_loss < 1.5 for row in metrics)
 
 
 def test_dev_guard_rejects_test_and_final():
@@ -185,27 +188,48 @@ def _small_training_data():
                                  "exit_ts": stamp + pd.Timedelta(hours=1),
                                  "entry_ts": stamp + pd.Timedelta(minutes=2),
                                  "net_R": 1. if k % 2 else -1.})
+    dense = np.column_stack((np.arange(n, dtype="float32") * 1e10,
+                             np.ones(n, dtype="float32") * 1.4e6))
     return SequenceData({tf: np.zeros((n, 8, 6), dtype="float32") for tf in WINDOWS},
-                        np.zeros((n, 1), dtype="float32"),
+                        dense,
                         np.random.default_rng(1).integers(0, 2, (n, 2, 5, 7)).astype("float32"),
-                        np.ones((n, 2, 5, 7), dtype=bool), baseline, anchors, ("x",),
+                        np.ones((n, 2, 5, 7), dtype=bool), baseline, anchors,
+                        ("huge", "constant"),
                         labels=pd.DataFrame(rows))
 
 
+def test_dense_scaling_uses_fit_only_and_clips_huge_columns():
+    from msd.research.sequence_train import _dense_stats, _scale_dense
+    dense = np.array([[1., 4.], [3., 4.], [1e12, -1e12]], dtype="float32")
+    expected = _dense_stats(dense, [0, 1])
+    changed = dense.copy()
+    changed[2] = [-1e20, 1e20]
+    actual = _dense_stats(changed, [0, 1])
+    np.testing.assert_array_equal(actual[0], expected[0])
+    np.testing.assert_array_equal(actual[1], expected[1])
+    assert expected[1][1] == 1.
+    assert np.abs(_scale_dense(changed, actual)).max() <= 10.
+
+
 def test_checkpoint_resume_matches_uninterrupted(tmp_path):
-    pytest.importorskip("torch")
+    torch = pytest.importorskip("torch")
     from msd.research.sequence_train import train_walk_forward
     data = _small_training_data()
     common = dict(n_folds=3, epochs=2, batch_size=2, width=8, checkpoint_every=1,
                   config_sha256="fixture", seed=7)
     train_walk_forward(data, tmp_path / "full", **common)
     assert train_walk_forward(data, tmp_path / "resumed", max_steps=1, **common) == []
+    resume_state = torch.load(tmp_path / "resumed/fold_00/resume.pt", weights_only=False)
+    assert "dense_mean" in resume_state and "dense_std" in resume_state
     train_walk_forward(data, tmp_path / "resumed", **common)
     full = sorted((tmp_path / "full").rglob("oof.parquet"))
     resumed = sorted((tmp_path / "resumed").rglob("oof.parquet"))
     assert len(full) == len(resumed) > 0
     for left, right in zip(full, resumed):
         pd.testing.assert_frame_equal(pd.read_parquet(left), pd.read_parquet(right), check_exact=True)
+    model_state = torch.load(tmp_path / "resumed/fold_00/model.pt", weights_only=False)
+    np.testing.assert_array_equal(model_state["dense_mean"], resume_state["dense_mean"])
+    np.testing.assert_array_equal(model_state["dense_std"], resume_state["dense_std"])
 
 
 def test_grade_sequence_cli_fixture(tmp_path):
