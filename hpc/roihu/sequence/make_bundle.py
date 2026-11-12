@@ -35,7 +35,8 @@ def _flow_coverage(paths: list[Path], columns: list[str]) -> dict[str, float]:
     return {column: (count / total if total else 0.) for column, count in present.items()}
 
 
-def make_bundle(data_root: Path, config_path: Path, output: Path, symbols=None):
+def make_bundle(data_root: Path, config_path: Path, output: Path, symbols=None,
+                base_files: Path | None = None):
     config = json.loads(config_path.read_text())
     if config["period"] != "dev" or pd.Timestamp(config["end_exclusive"]) > pd.Timestamp("2023-01-01"):
         raise ValueError("DEV-only bundle")
@@ -61,6 +62,9 @@ def make_bundle(data_root: Path, config_path: Path, output: Path, symbols=None):
         months = pd.period_range(warm.to_period("M"), (end - pd.Timedelta(nanoseconds=1)).to_period("M"), freq="M")
         label_months = set(pd.period_range(start.to_period("M"), (end - pd.Timedelta(nanoseconds=1)).to_period("M"), freq="M"))
         flow_columns = config.get("flow_features", {}).get(symbol, [])
+        labels_path = config.get("labels_path")
+        labels_folder = (Path(labels_path.format(symbol=symbol)) if labels_path else
+                         Path(override.get("labels", Path("labels") / symbol)))
         flow_paths = []
         for month in months:
             stem = f"{month}.parquet"
@@ -68,7 +72,8 @@ def make_bundle(data_root: Path, config_path: Path, output: Path, symbols=None):
                      *(Path("derived") / f"bars_{tf}" / symbol / stem for tf in ("15m", "1h", "4h")),
                      Path("features") / symbol / stem]
             if month in label_months:
-                paths.append(Path(override.get("labels", Path("labels") / symbol)) / stem)
+                label_relative = labels_folder / stem
+                paths.append(label_relative)
                 if override.get("features_overlay"):
                     paths.append(Path(override["features_overlay"]) / stem)
             if flow_columns:
@@ -81,7 +86,8 @@ def make_bundle(data_root: Path, config_path: Path, output: Path, symbols=None):
                         flow_paths.append(path)
                         if path.stat().st_mtime_ns < done.stat().st_mtime_ns:
                             stale.append(f"{relative}: predates production4 completion")
-                    if relative.parts[0] in {"derived", "features", "labels"} and month.year >= start.year:
+                    if (relative.parts[0] in {"derived", "features", "labels"} or
+                            relative == labels_folder / stem) and month.year >= start.year:
                         year_marker = data_root / "tmp" / f"stage9p4_{symbol}_{month.year}.json"
                         if not year_marker.exists():
                             stale.append(f"{relative}: missing year marker")
@@ -126,6 +132,16 @@ def make_bundle(data_root: Path, config_path: Path, output: Path, symbols=None):
     (output / "missing.txt").write_text("\n".join(sorted(set(missing))) + ("\n" if missing else ""))
     (output / "coverage.json").write_text(json.dumps(coverage, indent=2) + "\n")
     (output / "stale.txt").write_text("\n".join(stale) + ("\n" if stale else ""))
+    if base_files is not None:
+        existing = {line.strip() for line in Path(base_files).read_text().splitlines()
+                    if line.strip()}
+        delta = [(path, size) for path, size in entries if path not in existing]
+        (output / "delta_files.txt").write_text(
+            "\n".join(path for path, _ in delta) + ("\n" if delta else ""))
+        (output / "delta_manifest.tsv").write_text(
+            "path\tbytes\n" + "\n".join(f"{path}\t{size}" for path, size in delta) +
+            ("\n" if delta else ""))
+        print(f"delta: {len(delta)} files, {sum(size for _, size in delta)} bytes")
     total = sum(size for _, size in entries)
     print(f"{len(entries)} files, {total} bytes ({total / 1024**3:.2f} GiB); {len(missing)} missing")
     minimum_coverage = min((row["coverage"] for row in coverage), default=float("nan"))
@@ -142,9 +158,12 @@ def main():
     parser.add_argument("--config", type=Path, default=Path("hpc/roihu/sequence/configs/dev_v3.json"))
     parser.add_argument("--output", type=Path, default=Path("hpc/roihu/sequence/bundle"))
     parser.add_argument("--symbols", help="comma-separated subset; default is all five")
+    parser.add_argument("--base-files", type=Path,
+                        help="write delta lists excluding paths already uploaded")
     args = parser.parse_args()
     make_bundle(args.data_root, args.config, args.output,
-                args.symbols.split(",") if args.symbols else None)
+                args.symbols.split(",") if args.symbols else None,
+                base_files=args.base_files)
 
 
 if __name__ == "__main__":
