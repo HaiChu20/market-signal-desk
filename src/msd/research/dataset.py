@@ -127,6 +127,7 @@ def _read_layer(root: Path, events: pd.DataFrame, *, depth=False) -> tuple[pd.Da
     if not paths:return pd.DataFrame(columns=['known_at',*columns]),[]
     by_stem={path.stem:path for path in paths};parts=[];manifest=[]
     months=pd.to_datetime(events.known_at,utc=True).dt.strftime('%Y-%m').unique()
+    event_known=pd.to_datetime(events.known_at,utc=True)
     for month in sorted(months):
         path=by_stem.get(month)
         if path is None:continue
@@ -140,7 +141,19 @@ def _read_layer(root: Path, events: pd.DataFrame, *, depth=False) -> tuple[pd.Da
         if depth and 'coverage' in part:part=part.rename(columns={'coverage':'depth_coverage'})
         for column in columns:
             if column not in part:part[column]=np.nan
-        parts.append(part[['known_at',*columns]])
+        # Keep only rows that can win an as-of join for this method's event
+        # timestamps. Reading remains defensive, while concatenated memory is
+        # proportional to candidates rather than every minute in every month.
+        part=part[['known_at',*columns]].sort_values('known_at').reset_index(drop=True)
+        known=pd.to_datetime(part.known_at,utc=True).astype('datetime64[ns, UTC]').astype('int64').to_numpy()
+        wanted=(event_known[event_known.dt.strftime('%Y-%m').eq(month)]
+                .astype('datetime64[ns, UTC]').astype('int64').to_numpy())
+        positions=np.searchsorted(known,wanted,side='right')-1
+        positions=np.unique(positions[positions>=0])
+        part=part.iloc[positions].copy()
+        for column in columns:
+            if pd.api.types.is_float_dtype(part[column]):part[column]=part[column].astype('float32')
+        parts.append(part)
         manifest.append({'path':str(path),'mtime_ns':before.st_mtime_ns,'size':before.st_size})
     frame=pd.concat(parts,ignore_index=True) if parts else pd.DataFrame(columns=['known_at',*columns])
     return frame,manifest

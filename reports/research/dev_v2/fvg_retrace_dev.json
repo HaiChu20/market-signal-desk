@@ -1,0 +1,4036 @@
+{
+  "method": "fvg_retrace",
+  "period": "dev",
+  "preliminary": true,
+  "protocol": "v2",
+  "grade_in_dev": "not applicable; protocol section 5 grades test only",
+  "pooled": {
+    "n": 0,
+    "signals_per_year": 0,
+    "hit_rate": null,
+    "net_avg_R": null,
+    "t_stat": null,
+    "profit_factor": null,
+    "daily_sharpe": null,
+    "max_drawdown": null,
+    "brier": 0.10724351691232142,
+    "brier_skill_vs_p0": 0.48032483893088407,
+    "positive_dev_year_share": null,
+    "deflated_sharpe_ratio": null,
+    "random_direction_percentile": null,
+    "pbo": null,
+    "grade": "ungraded: development",
+    "random_direction_matched_signals": 0,
+    "row_accounting": {
+      "events": 35259,
+      "candidate_rows": 1303511,
+      "assembled_rows": 805451,
+      "drops": {
+        "invalid_geometry": 0,
+        "missing_outcome": 498060
+      },
+      "cpcv_test_groups": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          1,
+          4
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "cpcv_train_scores": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "cpcv_test_scores": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "oof_predicted_rows": 805451,
+      "selected_signals": 0,
+      "no_oof_prediction": 0
+    },
+    "selection_comparison": {
+      "selected_n": 0,
+      "selected_avg_R": null,
+      "unselected_n": 805451,
+      "unselected_avg_R": -2.038277697335139,
+      "same_event_unselected_n": 0,
+      "same_event_unselected_avg_R": null
+    }
+  },
+  "per_instrument": {
+    "XAUUSD": {
+      "n": 0,
+      "signals_per_year": 0,
+      "hit_rate": null,
+      "net_avg_R": null,
+      "t_stat": null,
+      "profit_factor": null,
+      "daily_sharpe": null,
+      "max_drawdown": null,
+      "brier": 0.1111177903416207,
+      "brier_skill_vs_p0": 0.45707570303364786,
+      "positive_dev_year_share": null,
+      "deflated_sharpe_ratio": null,
+      "random_direction_percentile": null,
+      "pbo": null,
+      "grade": "ungraded: development"
+    },
+    "BTCUSDT": {
+      "n": 0,
+      "signals_per_year": 0,
+      "hit_rate": null,
+      "net_avg_R": null,
+      "t_stat": null,
+      "profit_factor": null,
+      "daily_sharpe": null,
+      "max_drawdown": null,
+      "brier": 0.03965400092615923,
+      "brier_skill_vs_p0": 0.8207022840140815,
+      "positive_dev_year_share": null,
+      "deflated_sharpe_ratio": null,
+      "random_direction_percentile": null,
+      "pbo": null,
+      "grade": "ungraded: development"
+    },
+    "USA500IDXUSD": {
+      "n": 0,
+      "signals_per_year": 0,
+      "hit_rate": null,
+      "net_avg_R": null,
+      "t_stat": null,
+      "profit_factor": null,
+      "daily_sharpe": null,
+      "max_drawdown": null,
+      "brier": 0.13917652588896792,
+      "brier_skill_vs_p0": 0.30588780326410125,
+      "positive_dev_year_share": null,
+      "deflated_sharpe_ratio": null,
+      "random_direction_percentile": null,
+      "pbo": null,
+      "grade": "ungraded: development"
+    },
+    "USATECHIDXUSD": {
+      "n": 0,
+      "signals_per_year": 0,
+      "hit_rate": null,
+      "net_avg_R": null,
+      "t_stat": null,
+      "profit_factor": null,
+      "daily_sharpe": null,
+      "max_drawdown": null,
+      "brier": 0.13984523903435514,
+      "brier_skill_vs_p0": 0.3055162503671539,
+      "positive_dev_year_share": null,
+      "deflated_sharpe_ratio": null,
+      "random_direction_percentile": null,
+      "pbo": null,
+      "grade": "ungraded: development"
+    }
+  },
+  "input_manifest": [
+    {
+      "path": "data/events/USATECHIDXUSD/2019-01.parquet",
+      "mtime_ns": 1794463275984630127,
+      "size": 1536020
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2019-02.parquet",
+      "mtime_ns": 1794463276026600303,
+      "size": 1215666
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2019-03.parquet",
+      "mtime_ns": 1794463276074886789,
+      "size": 1352793
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2019-04.parquet",
+      "mtime_ns": 1794463276119326338,
+      "size": 1224145
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2019-05.parquet",
+      "mtime_ns": 1794463276177152312,
+      "size": 1784254
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2019-06.parquet",
+      "mtime_ns": 1794463276232559371,
+      "size": 1540711
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2019-07.parquet",
+      "mtime_ns": 1794463276288361311,
+      "size": 1601906
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2019-08.parquet",
+      "mtime_ns": 1794463276334265342,
+      "size": 1455342
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2019-09.parquet",
+      "mtime_ns": 1794463276384651654,
+      "size": 1461754
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2019-10.parquet",
+      "mtime_ns": 1794463276433659693,
+      "size": 1463312
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2019-11.parquet",
+      "mtime_ns": 1794463276479434181,
+      "size": 1312007
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2019-12.parquet",
+      "mtime_ns": 1794463276523907314,
+      "size": 1241084
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2020-01.parquet",
+      "mtime_ns": 1794463499740689532,
+      "size": 1403947
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2020-02.parquet",
+      "mtime_ns": 1794463499815242941,
+      "size": 1409458
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2020-03.parquet",
+      "mtime_ns": 1794463499877034561,
+      "size": 1398547
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2020-04.parquet",
+      "mtime_ns": 1794463499948488671,
+      "size": 1444350
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2020-05.parquet",
+      "mtime_ns": 1794463500033779420,
+      "size": 1621968
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2020-06.parquet",
+      "mtime_ns": 1794463500126281327,
+      "size": 1715250
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2020-07.parquet",
+      "mtime_ns": 1794463500220580346,
+      "size": 1695725
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2020-08.parquet",
+      "mtime_ns": 1794463500298823981,
+      "size": 1471820
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2020-09.parquet",
+      "mtime_ns": 1794463500389216271,
+      "size": 1743542
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2020-10.parquet",
+      "mtime_ns": 1794463500481982057,
+      "size": 1711188
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2020-11.parquet",
+      "mtime_ns": 1794463500567011302,
+      "size": 1613181
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2020-12.parquet",
+      "mtime_ns": 1794463500653734032,
+      "size": 1602522
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2021-01.parquet",
+      "mtime_ns": 1794463711798032550,
+      "size": 1512736
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2021-02.parquet",
+      "mtime_ns": 1794463711876303811,
+      "size": 1484275
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2021-03.parquet",
+      "mtime_ns": 1794463711953811060,
+      "size": 1654308
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2021-04.parquet",
+      "mtime_ns": 1794463712050433866,
+      "size": 1726035
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2021-05.parquet",
+      "mtime_ns": 1794463712128679919,
+      "size": 1513533
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2021-06.parquet",
+      "mtime_ns": 1794463712218035692,
+      "size": 1539170
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2021-07.parquet",
+      "mtime_ns": 1794463712306263862,
+      "size": 1605184
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2021-08.parquet",
+      "mtime_ns": 1794463712394085486,
+      "size": 1562260
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2021-09.parquet",
+      "mtime_ns": 1794463712474264944,
+      "size": 1554071
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2021-10.parquet",
+      "mtime_ns": 1794463712556904692,
+      "size": 1611147
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2021-11.parquet",
+      "mtime_ns": 1794463712637447781,
+      "size": 1542962
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2021-12.parquet",
+      "mtime_ns": 1794463712737643771,
+      "size": 1828951
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2022-01.parquet",
+      "mtime_ns": 1794490198525243934,
+      "size": 1639172
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2022-02.parquet",
+      "mtime_ns": 1794490198594351934,
+      "size": 1453938
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2022-03.parquet",
+      "mtime_ns": 1794490198662331917,
+      "size": 1637261
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2022-04.parquet",
+      "mtime_ns": 1794490198725063651,
+      "size": 1438392
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2022-05.parquet",
+      "mtime_ns": 1794490198789463202,
+      "size": 1575015
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2022-06.parquet",
+      "mtime_ns": 1794490198855455612,
+      "size": 1556335
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2022-07.parquet",
+      "mtime_ns": 1794490198921198309,
+      "size": 1529098
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2022-08.parquet",
+      "mtime_ns": 1794490198990977486,
+      "size": 1570350
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2022-09.parquet",
+      "mtime_ns": 1794490199053036042,
+      "size": 1520675
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2022-10.parquet",
+      "mtime_ns": 1794490199122343379,
+      "size": 1488481
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2022-11.parquet",
+      "mtime_ns": 1794490199190337320,
+      "size": 1549175
+    },
+    {
+      "path": "data/events/USATECHIDXUSD/2022-12.parquet",
+      "mtime_ns": 1794490199259299651,
+      "size": 1487091
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2019-01.parquet",
+      "mtime_ns": 1794365941211929767,
+      "size": 16301374
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2019-02.parquet",
+      "mtime_ns": 1794365941432901536,
+      "size": 14536793
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2019-03.parquet",
+      "mtime_ns": 1794365941669325333,
+      "size": 15468795
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2019-04.parquet",
+      "mtime_ns": 1794365941901435344,
+      "size": 15273193
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2019-05.parquet",
+      "mtime_ns": 1794365942148480124,
+      "size": 17118311
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2019-06.parquet",
+      "mtime_ns": 1794365942377945713,
+      "size": 15074433
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2019-07.parquet",
+      "mtime_ns": 1794365942633115598,
+      "size": 16823909
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2019-08.parquet",
+      "mtime_ns": 1794365942874088851,
+      "size": 16522336
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2019-09.parquet",
+      "mtime_ns": 1794365943106379991,
+      "size": 15725341
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2019-10.parquet",
+      "mtime_ns": 1794365943350550094,
+      "size": 17250030
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2019-11.parquet",
+      "mtime_ns": 1794365943576966712,
+      "size": 14976768
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2019-12.parquet",
+      "mtime_ns": 1794365943803941380,
+      "size": 15178869
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2020-01.parquet",
+      "mtime_ns": 1794365944045767566,
+      "size": 16066322
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2020-02.parquet",
+      "mtime_ns": 1794365944259901046,
+      "size": 14816068
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2020-03.parquet",
+      "mtime_ns": 1794365944475568886,
+      "size": 14991263
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2020-04.parquet",
+      "mtime_ns": 1794365944699401915,
+      "size": 15910705
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2020-05.parquet",
+      "mtime_ns": 1794365944921662665,
+      "size": 15728700
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2020-06.parquet",
+      "mtime_ns": 1794365945155263495,
+      "size": 16430940
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2020-07.parquet",
+      "mtime_ns": 1794365945393906874,
+      "size": 16936408
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2020-08.parquet",
+      "mtime_ns": 1794365945630134418,
+      "size": 15579912
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2020-09.parquet",
+      "mtime_ns": 1794365945859581047,
+      "size": 16455964
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2020-10.parquet",
+      "mtime_ns": 1794365946095866217,
+      "size": 16517790
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2020-11.parquet",
+      "mtime_ns": 1794365946321276858,
+      "size": 15788236
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2020-12.parquet",
+      "mtime_ns": 1794365946557416900,
+      "size": 16252003
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2021-01.parquet",
+      "mtime_ns": 1794365946775552451,
+      "size": 14928145
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2021-02.parquet",
+      "mtime_ns": 1794365946990105188,
+      "size": 14986614
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2021-03.parquet",
+      "mtime_ns": 1794365947235695567,
+      "size": 17560645
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2021-04.parquet",
+      "mtime_ns": 1794365947460759785,
+      "size": 16243467
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2021-05.parquet",
+      "mtime_ns": 1794365947689392025,
+      "size": 15965346
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2021-06.parquet",
+      "mtime_ns": 1794365947918368187,
+      "size": 16543636
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2021-07.parquet",
+      "mtime_ns": 1794365948167614299,
+      "size": 16236619
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2021-08.parquet",
+      "mtime_ns": 1794365948409810700,
+      "size": 16543125
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2021-09.parquet",
+      "mtime_ns": 1794365948644822556,
+      "size": 16483967
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2021-10.parquet",
+      "mtime_ns": 1794365948869375972,
+      "size": 15949827
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2021-11.parquet",
+      "mtime_ns": 1794365949095260746,
+      "size": 16205931
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2021-12.parquet",
+      "mtime_ns": 1794365949348415136,
+      "size": 16635041
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2022-01.parquet",
+      "mtime_ns": 1794365949584258298,
+      "size": 15946038
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2022-02.parquet",
+      "mtime_ns": 1794365949826272237,
+      "size": 15245748
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2022-03.parquet",
+      "mtime_ns": 1794365950071088977,
+      "size": 17638881
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2022-04.parquet",
+      "mtime_ns": 1794365950288785396,
+      "size": 15272363
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2022-05.parquet",
+      "mtime_ns": 1794365950522338517,
+      "size": 16794503
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2022-06.parquet",
+      "mtime_ns": 1794365950756324144,
+      "size": 16689859
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2022-07.parquet",
+      "mtime_ns": 1794365950977869007,
+      "size": 15923219
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2022-08.parquet",
+      "mtime_ns": 1794365951230826436,
+      "size": 17601137
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2022-09.parquet",
+      "mtime_ns": 1794365951463471332,
+      "size": 16621785
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2022-10.parquet",
+      "mtime_ns": 1794365951695846514,
+      "size": 16133476
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2022-11.parquet",
+      "mtime_ns": 1794365951943017504,
+      "size": 16588007
+    },
+    {
+      "path": "data/features/USATECHIDXUSD/2022-12.parquet",
+      "mtime_ns": 1794365952173128063,
+      "size": 16027462
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2019-01.parquet",
+      "mtime_ns": 1794464094251229699,
+      "size": 1472888
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2019-02.parquet",
+      "mtime_ns": 1794464094287529033,
+      "size": 967248
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2019-03.parquet",
+      "mtime_ns": 1794464094325170598,
+      "size": 1098162
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2019-04.parquet",
+      "mtime_ns": 1794464094353777934,
+      "size": 781073
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2019-05.parquet",
+      "mtime_ns": 1794464094403869783,
+      "size": 1570275
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2019-06.parquet",
+      "mtime_ns": 1794464094443104998,
+      "size": 1118659
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2019-07.parquet",
+      "mtime_ns": 1794464094476285574,
+      "size": 872303
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2019-08.parquet",
+      "mtime_ns": 1794464094528354497,
+      "size": 1628526
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2019-09.parquet",
+      "mtime_ns": 1794464094575767969,
+      "size": 1340956
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2019-10.parquet",
+      "mtime_ns": 1794464094624318709,
+      "size": 1424706
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2019-11.parquet",
+      "mtime_ns": 1794464094654630364,
+      "size": 819794
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2019-12.parquet",
+      "mtime_ns": 1794464094684598056,
+      "size": 818695
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2020-01.parquet",
+      "mtime_ns": 1794464309804115325,
+      "size": 1190468
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2020-02.parquet",
+      "mtime_ns": 1794464309888912348,
+      "size": 1448350
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2020-03.parquet",
+      "mtime_ns": 1794464309960784360,
+      "size": 1576595
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2020-04.parquet",
+      "mtime_ns": 1794464310026519744,
+      "size": 1429457
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2020-05.parquet",
+      "mtime_ns": 1794464310101530550,
+      "size": 1508354
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2020-06.parquet",
+      "mtime_ns": 1794464310188889825,
+      "size": 1725945
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2020-07.parquet",
+      "mtime_ns": 1794464310282636396,
+      "size": 1778032
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2020-08.parquet",
+      "mtime_ns": 1794464310361543664,
+      "size": 1534528
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2020-09.parquet",
+      "mtime_ns": 1794464310436187888,
+      "size": 1569537
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2020-10.parquet",
+      "mtime_ns": 1794464310519493576,
+      "size": 1719668
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2020-11.parquet",
+      "mtime_ns": 1794464310596052175,
+      "size": 1534678
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2020-12.parquet",
+      "mtime_ns": 1794464310679425947,
+      "size": 1573661
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2021-01.parquet",
+      "mtime_ns": 1794464510751039130,
+      "size": 1524151
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2021-02.parquet",
+      "mtime_ns": 1794464510832508151,
+      "size": 1429782
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2021-03.parquet",
+      "mtime_ns": 1794464510929708544,
+      "size": 1744376
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2021-04.parquet",
+      "mtime_ns": 1794464511008439363,
+      "size": 1347020
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2021-05.parquet",
+      "mtime_ns": 1794464511094707489,
+      "size": 1555089
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2021-06.parquet",
+      "mtime_ns": 1794464511180034143,
+      "size": 1545124
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2021-07.parquet",
+      "mtime_ns": 1794464511256881979,
+      "size": 1447064
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2021-08.parquet",
+      "mtime_ns": 1794464511329906890,
+      "size": 1342074
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2021-09.parquet",
+      "mtime_ns": 1794464511419995399,
+      "size": 1619553
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2021-10.parquet",
+      "mtime_ns": 1794464511504180455,
+      "size": 1614043
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2021-11.parquet",
+      "mtime_ns": 1794464511597247836,
+      "size": 1615246
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2021-12.parquet",
+      "mtime_ns": 1794464511692606122,
+      "size": 1736363
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2022-01.parquet",
+      "mtime_ns": 1794490412251226201,
+      "size": 1615147
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2022-02.parquet",
+      "mtime_ns": 1794490412310747134,
+      "size": 1380898
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2022-03.parquet",
+      "mtime_ns": 1794490412375615610,
+      "size": 1597380
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2022-04.parquet",
+      "mtime_ns": 1794490412433040343,
+      "size": 1361936
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2022-05.parquet",
+      "mtime_ns": 1794490412506088988,
+      "size": 1651998
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2022-06.parquet",
+      "mtime_ns": 1794490412573676090,
+      "size": 1571541
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2022-07.parquet",
+      "mtime_ns": 1794490412641651364,
+      "size": 1495094
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2022-08.parquet",
+      "mtime_ns": 1794490412714532006,
+      "size": 1635478
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2022-09.parquet",
+      "mtime_ns": 1794490412777791623,
+      "size": 1522116
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2022-10.parquet",
+      "mtime_ns": 1794490412841108116,
+      "size": 1516623
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2022-11.parquet",
+      "mtime_ns": 1794490412908612174,
+      "size": 1556256
+    },
+    {
+      "path": "data/events/USA500IDXUSD/2022-12.parquet",
+      "mtime_ns": 1794490412970382601,
+      "size": 1446787
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2019-01.parquet",
+      "mtime_ns": 1794374542248914437,
+      "size": 15038483
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2019-02.parquet",
+      "mtime_ns": 1794374542454599199,
+      "size": 12458556
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2019-03.parquet",
+      "mtime_ns": 1794374542664896777,
+      "size": 13050143
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2019-04.parquet",
+      "mtime_ns": 1794374542868997558,
+      "size": 11614030
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2019-05.parquet",
+      "mtime_ns": 1794374543098230406,
+      "size": 15131635
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2019-06.parquet",
+      "mtime_ns": 1794374543310626389,
+      "size": 12811946
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2019-07.parquet",
+      "mtime_ns": 1794374543531667412,
+      "size": 13066250
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2019-08.parquet",
+      "mtime_ns": 1794374543764497186,
+      "size": 15379647
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2019-09.parquet",
+      "mtime_ns": 1794374543982143368,
+      "size": 13434896
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2019-10.parquet",
+      "mtime_ns": 1794374544208733470,
+      "size": 14801721
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2019-11.parquet",
+      "mtime_ns": 1794374544412081449,
+      "size": 11982544
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2019-12.parquet",
+      "mtime_ns": 1794374544606137212,
+      "size": 11333823
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2020-01.parquet",
+      "mtime_ns": 1794374544833434532,
+      "size": 14683110
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2020-02.parquet",
+      "mtime_ns": 1794374545047234035,
+      "size": 14340569
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2020-03.parquet",
+      "mtime_ns": 1794374545271605313,
+      "size": 15078742
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2020-04.parquet",
+      "mtime_ns": 1794374545509242156,
+      "size": 15949593
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2020-05.parquet",
+      "mtime_ns": 1794374545741686257,
+      "size": 15775928
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2020-06.parquet",
+      "mtime_ns": 1794374545984443214,
+      "size": 16571385
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2020-07.parquet",
+      "mtime_ns": 1794374546233042004,
+      "size": 17027442
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2020-08.parquet",
+      "mtime_ns": 1794374546472061533,
+      "size": 15196264
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2020-09.parquet",
+      "mtime_ns": 1794374546712389747,
+      "size": 16398051
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2020-10.parquet",
+      "mtime_ns": 1794374546950617264,
+      "size": 16362144
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2020-11.parquet",
+      "mtime_ns": 1794374547186935588,
+      "size": 15592675
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2020-12.parquet",
+      "mtime_ns": 1794374547415465092,
+      "size": 15588548
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2021-01.parquet",
+      "mtime_ns": 1794374547636794327,
+      "size": 14738364
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2021-02.parquet",
+      "mtime_ns": 1794374547852469773,
+      "size": 14603210
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2021-03.parquet",
+      "mtime_ns": 1794374548094977602,
+      "size": 17271995
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2021-04.parquet",
+      "mtime_ns": 1794374548317475812,
+      "size": 14927497
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2021-05.parquet",
+      "mtime_ns": 1794374548540261110,
+      "size": 15367947
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2021-06.parquet",
+      "mtime_ns": 1794374548768192147,
+      "size": 15495946
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2021-07.parquet",
+      "mtime_ns": 1794374548998469301,
+      "size": 15456618
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2021-08.parquet",
+      "mtime_ns": 1794374549227576772,
+      "size": 15360182
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2021-09.parquet",
+      "mtime_ns": 1794374549459157611,
+      "size": 15838826
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2021-10.parquet",
+      "mtime_ns": 1794374549685556877,
+      "size": 15678631
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2021-11.parquet",
+      "mtime_ns": 1794374549922339915,
+      "size": 15623567
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2021-12.parquet",
+      "mtime_ns": 1794374550155730322,
+      "size": 16347499
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2022-01.parquet",
+      "mtime_ns": 1794374550384705791,
+      "size": 15871217
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2022-02.parquet",
+      "mtime_ns": 1794374550600320820,
+      "size": 15147927
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2022-03.parquet",
+      "mtime_ns": 1794374550844841052,
+      "size": 17510786
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2022-04.parquet",
+      "mtime_ns": 1794374551063206245,
+      "size": 15058977
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2022-05.parquet",
+      "mtime_ns": 1794374551302930325,
+      "size": 16723959
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2022-06.parquet",
+      "mtime_ns": 1794374551546136205,
+      "size": 16594444
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2022-07.parquet",
+      "mtime_ns": 1794374551775920394,
+      "size": 15835577
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2022-08.parquet",
+      "mtime_ns": 1794374552025689701,
+      "size": 17387546
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2022-09.parquet",
+      "mtime_ns": 1794374552264731313,
+      "size": 16511111
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2022-10.parquet",
+      "mtime_ns": 1794374552494937841,
+      "size": 16058528
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2022-11.parquet",
+      "mtime_ns": 1794374552726086174,
+      "size": 16443556
+    },
+    {
+      "path": "data/features/USA500IDXUSD/2022-12.parquet",
+      "mtime_ns": 1794374552957041505,
+      "size": 15880644
+    },
+    {
+      "path": "data/events/XAUUSD/2008-01.parquet",
+      "mtime_ns": 1794464921597224276,
+      "size": 1180969
+    },
+    {
+      "path": "data/events/XAUUSD/2008-02.parquet",
+      "mtime_ns": 1794464921640636384,
+      "size": 1335401
+    },
+    {
+      "path": "data/events/XAUUSD/2008-03.parquet",
+      "mtime_ns": 1794464921680260234,
+      "size": 1248632
+    },
+    {
+      "path": "data/events/XAUUSD/2008-04.parquet",
+      "mtime_ns": 1794464921729327541,
+      "size": 1507472
+    },
+    {
+      "path": "data/events/XAUUSD/2008-05.parquet",
+      "mtime_ns": 1794464921775515644,
+      "size": 1397240
+    },
+    {
+      "path": "data/events/XAUUSD/2008-06.parquet",
+      "mtime_ns": 1794464921819404216,
+      "size": 1322109
+    },
+    {
+      "path": "data/events/XAUUSD/2008-07.parquet",
+      "mtime_ns": 1794464921865172522,
+      "size": 1457355
+    },
+    {
+      "path": "data/events/XAUUSD/2008-08.parquet",
+      "mtime_ns": 1794464921902404007,
+      "size": 1165364
+    },
+    {
+      "path": "data/events/XAUUSD/2008-09.parquet",
+      "mtime_ns": 1794464921943628504,
+      "size": 1349677
+    },
+    {
+      "path": "data/events/XAUUSD/2008-10.parquet",
+      "mtime_ns": 1794464921985311589,
+      "size": 1459334
+    },
+    {
+      "path": "data/events/XAUUSD/2008-11.parquet",
+      "mtime_ns": 1794464922029974713,
+      "size": 1397669
+    },
+    {
+      "path": "data/events/XAUUSD/2008-12.parquet",
+      "mtime_ns": 1794464922074334584,
+      "size": 1474542
+    },
+    {
+      "path": "data/events/XAUUSD/2009-01.parquet",
+      "mtime_ns": 1794465127870400869,
+      "size": 1237594
+    },
+    {
+      "path": "data/events/XAUUSD/2009-02.parquet",
+      "mtime_ns": 1794465127907687522,
+      "size": 1202513
+    },
+    {
+      "path": "data/events/XAUUSD/2009-03.parquet",
+      "mtime_ns": 1794465127945442264,
+      "size": 1201842
+    },
+    {
+      "path": "data/events/XAUUSD/2009-04.parquet",
+      "mtime_ns": 1794465127977969689,
+      "size": 1110211
+    },
+    {
+      "path": "data/events/XAUUSD/2009-05.parquet",
+      "mtime_ns": 1794465128013956241,
+      "size": 1185274
+    },
+    {
+      "path": "data/events/XAUUSD/2009-06.parquet",
+      "mtime_ns": 1794465128049564164,
+      "size": 1180553
+    },
+    {
+      "path": "data/events/XAUUSD/2009-07.parquet",
+      "mtime_ns": 1794465128090064442,
+      "size": 1182199
+    },
+    {
+      "path": "data/events/XAUUSD/2009-08.parquet",
+      "mtime_ns": 1794465128124826771,
+      "size": 1120569
+    },
+    {
+      "path": "data/events/XAUUSD/2009-09.parquet",
+      "mtime_ns": 1794465128170415407,
+      "size": 1500259
+    },
+    {
+      "path": "data/events/XAUUSD/2009-10.parquet",
+      "mtime_ns": 1794465128214146270,
+      "size": 1457927
+    },
+    {
+      "path": "data/events/XAUUSD/2009-11.parquet",
+      "mtime_ns": 1794465128246388107,
+      "size": 1071680
+    },
+    {
+      "path": "data/events/XAUUSD/2009-12.parquet",
+      "mtime_ns": 1794465128291572821,
+      "size": 1527740
+    },
+    {
+      "path": "data/events/XAUUSD/2010-01.parquet",
+      "mtime_ns": 1794465325990320511,
+      "size": 1411304
+    },
+    {
+      "path": "data/events/XAUUSD/2010-02.parquet",
+      "mtime_ns": 1794465326032219058,
+      "size": 1252886
+    },
+    {
+      "path": "data/events/XAUUSD/2010-03.parquet",
+      "mtime_ns": 1794465326080480896,
+      "size": 1328663
+    },
+    {
+      "path": "data/events/XAUUSD/2010-04.parquet",
+      "mtime_ns": 1794465326125983240,
+      "size": 1371124
+    },
+    {
+      "path": "data/events/XAUUSD/2010-05.parquet",
+      "mtime_ns": 1794465326169300596,
+      "size": 1384419
+    },
+    {
+      "path": "data/events/XAUUSD/2010-06.parquet",
+      "mtime_ns": 1794465326213946054,
+      "size": 1408491
+    },
+    {
+      "path": "data/events/XAUUSD/2010-07.parquet",
+      "mtime_ns": 1794465326261811512,
+      "size": 1499097
+    },
+    {
+      "path": "data/events/XAUUSD/2010-08.parquet",
+      "mtime_ns": 1794465326307166937,
+      "size": 1382172
+    },
+    {
+      "path": "data/events/XAUUSD/2010-09.parquet",
+      "mtime_ns": 1794465326349768201,
+      "size": 1292355
+    },
+    {
+      "path": "data/events/XAUUSD/2010-10.parquet",
+      "mtime_ns": 1794465326388147451,
+      "size": 1173254
+    },
+    {
+      "path": "data/events/XAUUSD/2010-11.parquet",
+      "mtime_ns": 1794465326434256803,
+      "size": 1448805
+    },
+    {
+      "path": "data/events/XAUUSD/2010-12.parquet",
+      "mtime_ns": 1794465326486846406,
+      "size": 1545555
+    },
+    {
+      "path": "data/events/XAUUSD/2011-01.parquet",
+      "mtime_ns": 1794465556864842507,
+      "size": 1407191
+    },
+    {
+      "path": "data/events/XAUUSD/2011-02.parquet",
+      "mtime_ns": 1794465556910301726,
+      "size": 1264929
+    },
+    {
+      "path": "data/events/XAUUSD/2011-03.parquet",
+      "mtime_ns": 1794465556955027101,
+      "size": 1439316
+    },
+    {
+      "path": "data/events/XAUUSD/2011-04.parquet",
+      "mtime_ns": 1794465556993097514,
+      "size": 1180840
+    },
+    {
+      "path": "data/events/XAUUSD/2011-05.parquet",
+      "mtime_ns": 1794465557056242504,
+      "size": 1622350
+    },
+    {
+      "path": "data/events/XAUUSD/2011-06.parquet",
+      "mtime_ns": 1794465557105034849,
+      "size": 1523819
+    },
+    {
+      "path": "data/events/XAUUSD/2011-07.parquet",
+      "mtime_ns": 1794465557147712698,
+      "size": 1332960
+    },
+    {
+      "path": "data/events/XAUUSD/2011-08.parquet",
+      "mtime_ns": 1794465557189077737,
+      "size": 1385474
+    },
+    {
+      "path": "data/events/XAUUSD/2011-09.parquet",
+      "mtime_ns": 1794465557237110197,
+      "size": 1622644
+    },
+    {
+      "path": "data/events/XAUUSD/2011-10.parquet",
+      "mtime_ns": 1794465557281836239,
+      "size": 1509069
+    },
+    {
+      "path": "data/events/XAUUSD/2011-11.parquet",
+      "mtime_ns": 1794465557329625488,
+      "size": 1602813
+    },
+    {
+      "path": "data/events/XAUUSD/2011-12.parquet",
+      "mtime_ns": 1794465557373424267,
+      "size": 1476511
+    },
+    {
+      "path": "data/events/XAUUSD/2012-01.parquet",
+      "mtime_ns": 1794465819357431863,
+      "size": 1381305
+    },
+    {
+      "path": "data/events/XAUUSD/2012-02.parquet",
+      "mtime_ns": 1794465819407351723,
+      "size": 1422713
+    },
+    {
+      "path": "data/events/XAUUSD/2012-03.parquet",
+      "mtime_ns": 1794465819454118583,
+      "size": 1385798
+    },
+    {
+      "path": "data/events/XAUUSD/2012-04.parquet",
+      "mtime_ns": 1794465819495356037,
+      "size": 1255627
+    },
+    {
+      "path": "data/events/XAUUSD/2012-05.parquet",
+      "mtime_ns": 1794465819544129007,
+      "size": 1527907
+    },
+    {
+      "path": "data/events/XAUUSD/2012-06.parquet",
+      "mtime_ns": 1794465819590741907,
+      "size": 1311892
+    },
+    {
+      "path": "data/events/XAUUSD/2012-07.parquet",
+      "mtime_ns": 1794465819637401224,
+      "size": 1396408
+    },
+    {
+      "path": "data/events/XAUUSD/2012-08.parquet",
+      "mtime_ns": 1794465819683460325,
+      "size": 1370085
+    },
+    {
+      "path": "data/events/XAUUSD/2012-09.parquet",
+      "mtime_ns": 1794465819727606442,
+      "size": 1337723
+    },
+    {
+      "path": "data/events/XAUUSD/2012-10.parquet",
+      "mtime_ns": 1794465819774664639,
+      "size": 1429559
+    },
+    {
+      "path": "data/events/XAUUSD/2012-11.parquet",
+      "mtime_ns": 1794465819816367017,
+      "size": 1259562
+    },
+    {
+      "path": "data/events/XAUUSD/2012-12.parquet",
+      "mtime_ns": 1794465819853341249,
+      "size": 1158325
+    },
+    {
+      "path": "data/events/XAUUSD/2013-01.parquet",
+      "mtime_ns": 1794466111017733570,
+      "size": 1169057
+    },
+    {
+      "path": "data/events/XAUUSD/2013-02.parquet",
+      "mtime_ns": 1794466111056095279,
+      "size": 1097254
+    },
+    {
+      "path": "data/events/XAUUSD/2013-03.parquet",
+      "mtime_ns": 1794466111092005580,
+      "size": 1126663
+    },
+    {
+      "path": "data/events/XAUUSD/2013-04.parquet",
+      "mtime_ns": 1794466111130089452,
+      "size": 1274886
+    },
+    {
+      "path": "data/events/XAUUSD/2013-05.parquet",
+      "mtime_ns": 1794466111168888083,
+      "size": 1349243
+    },
+    {
+      "path": "data/events/XAUUSD/2013-06.parquet",
+      "mtime_ns": 1794466111202934903,
+      "size": 1173414
+    },
+    {
+      "path": "data/events/XAUUSD/2013-07.parquet",
+      "mtime_ns": 1794466111248955503,
+      "size": 1396586
+    },
+    {
+      "path": "data/events/XAUUSD/2013-08.parquet",
+      "mtime_ns": 1794466111288240057,
+      "size": 1229456
+    },
+    {
+      "path": "data/events/XAUUSD/2013-09.parquet",
+      "mtime_ns": 1794466111323412891,
+      "size": 1118186
+    },
+    {
+      "path": "data/events/XAUUSD/2013-10.parquet",
+      "mtime_ns": 1794466111363705333,
+      "size": 1352040
+    },
+    {
+      "path": "data/events/XAUUSD/2013-11.parquet",
+      "mtime_ns": 1794466111405808382,
+      "size": 1215104
+    },
+    {
+      "path": "data/events/XAUUSD/2013-12.parquet",
+      "mtime_ns": 1794466111443079327,
+      "size": 1184409
+    },
+    {
+      "path": "data/events/XAUUSD/2014-01.parquet",
+      "mtime_ns": 1794466428308742163,
+      "size": 1224586
+    },
+    {
+      "path": "data/events/XAUUSD/2014-02.parquet",
+      "mtime_ns": 1794466428345831189,
+      "size": 1065895
+    },
+    {
+      "path": "data/events/XAUUSD/2014-03.parquet",
+      "mtime_ns": 1794466428380906985,
+      "size": 1199819
+    },
+    {
+      "path": "data/events/XAUUSD/2014-04.parquet",
+      "mtime_ns": 1794466428416958625,
+      "size": 1190408
+    },
+    {
+      "path": "data/events/XAUUSD/2014-05.parquet",
+      "mtime_ns": 1794466428453664564,
+      "size": 1197826
+    },
+    {
+      "path": "data/events/XAUUSD/2014-06.parquet",
+      "mtime_ns": 1794466428490275418,
+      "size": 1197405
+    },
+    {
+      "path": "data/events/XAUUSD/2014-07.parquet",
+      "mtime_ns": 1794466428527573155,
+      "size": 1209426
+    },
+    {
+      "path": "data/events/XAUUSD/2014-08.parquet",
+      "mtime_ns": 1794466428563515960,
+      "size": 1124125
+    },
+    {
+      "path": "data/events/XAUUSD/2014-09.parquet",
+      "mtime_ns": 1794466428600622736,
+      "size": 1201017
+    },
+    {
+      "path": "data/events/XAUUSD/2014-10.parquet",
+      "mtime_ns": 1794466428636777919,
+      "size": 1189103
+    },
+    {
+      "path": "data/events/XAUUSD/2014-11.parquet",
+      "mtime_ns": 1794466428670610368,
+      "size": 1173841
+    },
+    {
+      "path": "data/events/XAUUSD/2014-12.parquet",
+      "mtime_ns": 1794466428703997188,
+      "size": 1182256
+    },
+    {
+      "path": "data/events/XAUUSD/2015-01.parquet",
+      "mtime_ns": 1794466765734971723,
+      "size": 1122206
+    },
+    {
+      "path": "data/events/XAUUSD/2015-02.parquet",
+      "mtime_ns": 1794466765769450554,
+      "size": 1025715
+    },
+    {
+      "path": "data/events/XAUUSD/2015-03.parquet",
+      "mtime_ns": 1794466765805753905,
+      "size": 1219039
+    },
+    {
+      "path": "data/events/XAUUSD/2015-04.parquet",
+      "mtime_ns": 1794466765838193089,
+      "size": 1082787
+    },
+    {
+      "path": "data/events/XAUUSD/2015-05.parquet",
+      "mtime_ns": 1794466765870702357,
+      "size": 1075655
+    },
+    {
+      "path": "data/events/XAUUSD/2015-06.parquet",
+      "mtime_ns": 1794466765907289711,
+      "size": 1206022
+    },
+    {
+      "path": "data/events/XAUUSD/2015-07.parquet",
+      "mtime_ns": 1794466765947556022,
+      "size": 1371439
+    },
+    {
+      "path": "data/events/XAUUSD/2015-08.parquet",
+      "mtime_ns": 1794466765982467650,
+      "size": 1184687
+    },
+    {
+      "path": "data/events/XAUUSD/2015-09.parquet",
+      "mtime_ns": 1794466766020878190,
+      "size": 1166376
+    },
+    {
+      "path": "data/events/XAUUSD/2015-10.parquet",
+      "mtime_ns": 1794466766055981903,
+      "size": 1197873
+    },
+    {
+      "path": "data/events/XAUUSD/2015-11.parquet",
+      "mtime_ns": 1794466766092815968,
+      "size": 1204758
+    },
+    {
+      "path": "data/events/XAUUSD/2015-12.parquet",
+      "mtime_ns": 1794466766135739099,
+      "size": 1411314
+    },
+    {
+      "path": "data/events/XAUUSD/2016-01.parquet",
+      "mtime_ns": 1794467171475345071,
+      "size": 1018188
+    },
+    {
+      "path": "data/events/XAUUSD/2016-02.parquet",
+      "mtime_ns": 1794467171505565856,
+      "size": 1087585
+    },
+    {
+      "path": "data/events/XAUUSD/2016-03.parquet",
+      "mtime_ns": 1794467171541419661,
+      "size": 1155115
+    },
+    {
+      "path": "data/events/XAUUSD/2016-04.parquet",
+      "mtime_ns": 1794467171574838647,
+      "size": 1081696
+    },
+    {
+      "path": "data/events/XAUUSD/2016-05.parquet",
+      "mtime_ns": 1794467171606588491,
+      "size": 1140341
+    },
+    {
+      "path": "data/events/XAUUSD/2016-06.parquet",
+      "mtime_ns": 1794467171638532628,
+      "size": 1140790
+    },
+    {
+      "path": "data/events/XAUUSD/2016-07.parquet",
+      "mtime_ns": 1794467171669704340,
+      "size": 1059253
+    },
+    {
+      "path": "data/events/XAUUSD/2016-08.parquet",
+      "mtime_ns": 1794467171704373548,
+      "size": 1200442
+    },
+    {
+      "path": "data/events/XAUUSD/2016-09.parquet",
+      "mtime_ns": 1794467171737047651,
+      "size": 1120528
+    },
+    {
+      "path": "data/events/XAUUSD/2016-10.parquet",
+      "mtime_ns": 1794467171768826453,
+      "size": 1104840
+    },
+    {
+      "path": "data/events/XAUUSD/2016-11.parquet",
+      "mtime_ns": 1794467171803832624,
+      "size": 1176254
+    },
+    {
+      "path": "data/events/XAUUSD/2016-12.parquet",
+      "mtime_ns": 1794467171843213050,
+      "size": 1082078
+    },
+    {
+      "path": "data/events/XAUUSD/2017-01.parquet",
+      "mtime_ns": 1794467602300302115,
+      "size": 1080140
+    },
+    {
+      "path": "data/events/XAUUSD/2017-02.parquet",
+      "mtime_ns": 1794467602338277359,
+      "size": 1036264
+    },
+    {
+      "path": "data/events/XAUUSD/2017-03.parquet",
+      "mtime_ns": 1794467602373077277,
+      "size": 1189909
+    },
+    {
+      "path": "data/events/XAUUSD/2017-04.parquet",
+      "mtime_ns": 1794467602404005194,
+      "size": 962559
+    },
+    {
+      "path": "data/events/XAUUSD/2017-05.parquet",
+      "mtime_ns": 1794467602439437535,
+      "size": 1146031
+    },
+    {
+      "path": "data/events/XAUUSD/2017-06.parquet",
+      "mtime_ns": 1794467602473948075,
+      "size": 1112995
+    },
+    {
+      "path": "data/events/XAUUSD/2017-07.parquet",
+      "mtime_ns": 1794467602506666137,
+      "size": 1030131
+    },
+    {
+      "path": "data/events/XAUUSD/2017-08.parquet",
+      "mtime_ns": 1794467602544110751,
+      "size": 1153415
+    },
+    {
+      "path": "data/events/XAUUSD/2017-09.parquet",
+      "mtime_ns": 1794467602577236317,
+      "size": 1067439
+    },
+    {
+      "path": "data/events/XAUUSD/2017-10.parquet",
+      "mtime_ns": 1794467602612999412,
+      "size": 1133724
+    },
+    {
+      "path": "data/events/XAUUSD/2017-11.parquet",
+      "mtime_ns": 1794467602648037166,
+      "size": 1068398
+    },
+    {
+      "path": "data/events/XAUUSD/2017-12.parquet",
+      "mtime_ns": 1794467602680977022,
+      "size": 1008601
+    },
+    {
+      "path": "data/events/XAUUSD/2018-01.parquet",
+      "mtime_ns": 1794468063282599670,
+      "size": 1109254
+    },
+    {
+      "path": "data/events/XAUUSD/2018-02.parquet",
+      "mtime_ns": 1794468063313990384,
+      "size": 1041628
+    },
+    {
+      "path": "data/events/XAUUSD/2018-03.parquet",
+      "mtime_ns": 1794468063345820437,
+      "size": 1039047
+    },
+    {
+      "path": "data/events/XAUUSD/2018-04.parquet",
+      "mtime_ns": 1794468063378566499,
+      "size": 1088415
+    },
+    {
+      "path": "data/events/XAUUSD/2018-05.parquet",
+      "mtime_ns": 1794468063414106966,
+      "size": 1143718
+    },
+    {
+      "path": "data/events/XAUUSD/2018-06.parquet",
+      "mtime_ns": 1794468063446778528,
+      "size": 1078967
+    },
+    {
+      "path": "data/events/XAUUSD/2018-07.parquet",
+      "mtime_ns": 1794468063478063991,
+      "size": 1122495
+    },
+    {
+      "path": "data/events/XAUUSD/2018-08.parquet",
+      "mtime_ns": 1794468063509724542,
+      "size": 1145000
+    },
+    {
+      "path": "data/events/XAUUSD/2018-09.parquet",
+      "mtime_ns": 1794468063539134443,
+      "size": 998397
+    },
+    {
+      "path": "data/events/XAUUSD/2018-10.parquet",
+      "mtime_ns": 1794468063572522054,
+      "size": 1191526
+    },
+    {
+      "path": "data/events/XAUUSD/2018-11.parquet",
+      "mtime_ns": 1794468063604723778,
+      "size": 1071064
+    },
+    {
+      "path": "data/events/XAUUSD/2018-12.parquet",
+      "mtime_ns": 1794468063635675154,
+      "size": 964865
+    },
+    {
+      "path": "data/events/XAUUSD/2019-01.parquet",
+      "mtime_ns": 1794468515023519400,
+      "size": 1042979
+    },
+    {
+      "path": "data/events/XAUUSD/2019-02.parquet",
+      "mtime_ns": 1794468515057730152,
+      "size": 930275
+    },
+    {
+      "path": "data/events/XAUUSD/2019-03.parquet",
+      "mtime_ns": 1794468515089548329,
+      "size": 983564
+    },
+    {
+      "path": "data/events/XAUUSD/2019-04.parquet",
+      "mtime_ns": 1794468515120069094,
+      "size": 1010979
+    },
+    {
+      "path": "data/events/XAUUSD/2019-05.parquet",
+      "mtime_ns": 1794468515155235634,
+      "size": 1114754
+    },
+    {
+      "path": "data/events/XAUUSD/2019-06.parquet",
+      "mtime_ns": 1794468515185444900,
+      "size": 1022361
+    },
+    {
+      "path": "data/events/XAUUSD/2019-07.parquet",
+      "mtime_ns": 1794468515221576228,
+      "size": 1209212
+    },
+    {
+      "path": "data/events/XAUUSD/2019-08.parquet",
+      "mtime_ns": 1794468515258787927,
+      "size": 1270200
+    },
+    {
+      "path": "data/events/XAUUSD/2019-09.parquet",
+      "mtime_ns": 1794468515294243466,
+      "size": 1223015
+    },
+    {
+      "path": "data/events/XAUUSD/2019-10.parquet",
+      "mtime_ns": 1794468515337982892,
+      "size": 1464018
+    },
+    {
+      "path": "data/events/XAUUSD/2019-11.parquet",
+      "mtime_ns": 1794468515383788018,
+      "size": 1401477
+    },
+    {
+      "path": "data/events/XAUUSD/2019-12.parquet",
+      "mtime_ns": 1794468515423813041,
+      "size": 1302692
+    },
+    {
+      "path": "data/events/XAUUSD/2020-01.parquet",
+      "mtime_ns": 1794468940982975543,
+      "size": 1211629
+    },
+    {
+      "path": "data/events/XAUUSD/2020-02.parquet",
+      "mtime_ns": 1794468941015793966,
+      "size": 1087331
+    },
+    {
+      "path": "data/events/XAUUSD/2020-03.parquet",
+      "mtime_ns": 1794468941048690597,
+      "size": 1143326
+    },
+    {
+      "path": "data/events/XAUUSD/2020-04.parquet",
+      "mtime_ns": 1794468941080651566,
+      "size": 1052052
+    },
+    {
+      "path": "data/events/XAUUSD/2020-05.parquet",
+      "mtime_ns": 1794468941113179740,
+      "size": 1096123
+    },
+    {
+      "path": "data/events/XAUUSD/2020-06.parquet",
+      "mtime_ns": 1794468941146546537,
+      "size": 1134332
+    },
+    {
+      "path": "data/events/XAUUSD/2020-07.parquet",
+      "mtime_ns": 1794468941192820703,
+      "size": 1534867
+    },
+    {
+      "path": "data/events/XAUUSD/2020-08.parquet",
+      "mtime_ns": 1794468941235605549,
+      "size": 1522059
+    },
+    {
+      "path": "data/events/XAUUSD/2020-09.parquet",
+      "mtime_ns": 1794468941281353342,
+      "size": 1589337
+    },
+    {
+      "path": "data/events/XAUUSD/2020-10.parquet",
+      "mtime_ns": 1794468941327188885,
+      "size": 1581015
+    },
+    {
+      "path": "data/events/XAUUSD/2020-11.parquet",
+      "mtime_ns": 1794468941370996394,
+      "size": 1365813
+    },
+    {
+      "path": "data/events/XAUUSD/2020-12.parquet",
+      "mtime_ns": 1794468941413141409,
+      "size": 1460003
+    },
+    {
+      "path": "data/events/XAUUSD/2021-01.parquet",
+      "mtime_ns": 1794469423567965760,
+      "size": 1209253
+    },
+    {
+      "path": "data/events/XAUUSD/2021-02.parquet",
+      "mtime_ns": 1794469423606777579,
+      "size": 1137042
+    },
+    {
+      "path": "data/events/XAUUSD/2021-03.parquet",
+      "mtime_ns": 1794469423646519352,
+      "size": 1223474
+    },
+    {
+      "path": "data/events/XAUUSD/2021-04.parquet",
+      "mtime_ns": 1794469423680066689,
+      "size": 1083252
+    },
+    {
+      "path": "data/events/XAUUSD/2021-05.parquet",
+      "mtime_ns": 1794469423717700387,
+      "size": 1188578
+    },
+    {
+      "path": "data/events/XAUUSD/2021-06.parquet",
+      "mtime_ns": 1794469423753553466,
+      "size": 1230906
+    },
+    {
+      "path": "data/events/XAUUSD/2021-07.parquet",
+      "mtime_ns": 1794469423789815544,
+      "size": 1204762
+    },
+    {
+      "path": "data/events/XAUUSD/2021-08.parquet",
+      "mtime_ns": 1794469423826013456,
+      "size": 1179271
+    },
+    {
+      "path": "data/events/XAUUSD/2021-09.parquet",
+      "mtime_ns": 1794469423861012580,
+      "size": 1174681
+    },
+    {
+      "path": "data/events/XAUUSD/2021-10.parquet",
+      "mtime_ns": 1794469423896133120,
+      "size": 1119832
+    },
+    {
+      "path": "data/events/XAUUSD/2021-11.parquet",
+      "mtime_ns": 1794469423930749328,
+      "size": 1213843
+    },
+    {
+      "path": "data/events/XAUUSD/2021-12.parquet",
+      "mtime_ns": 1794469423963990375,
+      "size": 1122085
+    },
+    {
+      "path": "data/events/XAUUSD/2022-01.parquet",
+      "mtime_ns": 1794490936870861757,
+      "size": 1095106
+    },
+    {
+      "path": "data/events/XAUUSD/2022-02.parquet",
+      "mtime_ns": 1794490936902216123,
+      "size": 1086040
+    },
+    {
+      "path": "data/events/XAUUSD/2022-03.parquet",
+      "mtime_ns": 1794490936938824530,
+      "size": 1390920
+    },
+    {
+      "path": "data/events/XAUUSD/2022-04.parquet",
+      "mtime_ns": 1794490936972216679,
+      "size": 1225723
+    },
+    {
+      "path": "data/events/XAUUSD/2022-05.parquet",
+      "mtime_ns": 1794490937002820409,
+      "size": 1183758
+    },
+    {
+      "path": "data/events/XAUUSD/2022-06.parquet",
+      "mtime_ns": 1794490937036345268,
+      "size": 1188573
+    },
+    {
+      "path": "data/events/XAUUSD/2022-07.parquet",
+      "mtime_ns": 1794490937065343098,
+      "size": 1134970
+    },
+    {
+      "path": "data/events/XAUUSD/2022-08.parquet",
+      "mtime_ns": 1794490937095740907,
+      "size": 1156737
+    },
+    {
+      "path": "data/events/XAUUSD/2022-09.parquet",
+      "mtime_ns": 1794490937127647949,
+      "size": 1146908
+    },
+    {
+      "path": "data/events/XAUUSD/2022-10.parquet",
+      "mtime_ns": 1794490937157164579,
+      "size": 1119319
+    },
+    {
+      "path": "data/events/XAUUSD/2022-11.parquet",
+      "mtime_ns": 1794490937188153940,
+      "size": 1146441
+    },
+    {
+      "path": "data/events/XAUUSD/2022-12.parquet",
+      "mtime_ns": 1794490937216822181,
+      "size": 1055893
+    },
+    {
+      "path": "data/features/XAUUSD/2008-01.parquet",
+      "mtime_ns": 1794375874975170636,
+      "size": 13440090
+    },
+    {
+      "path": "data/features/XAUUSD/2008-02.parquet",
+      "mtime_ns": 1794375875187169863,
+      "size": 12802190
+    },
+    {
+      "path": "data/features/XAUUSD/2008-03.parquet",
+      "mtime_ns": 1794375875394254562,
+      "size": 12612989
+    },
+    {
+      "path": "data/features/XAUUSD/2008-04.parquet",
+      "mtime_ns": 1794375875606744254,
+      "size": 13556032
+    },
+    {
+      "path": "data/features/XAUUSD/2008-05.parquet",
+      "mtime_ns": 1794375875822452118,
+      "size": 13373606
+    },
+    {
+      "path": "data/features/XAUUSD/2008-06.parquet",
+      "mtime_ns": 1794375876034291051,
+      "size": 12990710
+    },
+    {
+      "path": "data/features/XAUUSD/2008-07.parquet",
+      "mtime_ns": 1794375876257224517,
+      "size": 14140651
+    },
+    {
+      "path": "data/features/XAUUSD/2008-08.parquet",
+      "mtime_ns": 1794375876473569098,
+      "size": 12911942
+    },
+    {
+      "path": "data/features/XAUUSD/2008-09.parquet",
+      "mtime_ns": 1794375876688325406,
+      "size": 13687789
+    },
+    {
+      "path": "data/features/XAUUSD/2008-10.parquet",
+      "mtime_ns": 1794375876914521460,
+      "size": 14356430
+    },
+    {
+      "path": "data/features/XAUUSD/2008-11.parquet",
+      "mtime_ns": 1794375877124110361,
+      "size": 12442669
+    },
+    {
+      "path": "data/features/XAUUSD/2008-12.parquet",
+      "mtime_ns": 1794375877346788032,
+      "size": 13978530
+    },
+    {
+      "path": "data/features/XAUUSD/2009-01.parquet",
+      "mtime_ns": 1794375877561996180,
+      "size": 13397066
+    },
+    {
+      "path": "data/features/XAUUSD/2009-02.parquet",
+      "mtime_ns": 1794375877768228284,
+      "size": 12515965
+    },
+    {
+      "path": "data/features/XAUUSD/2009-03.parquet",
+      "mtime_ns": 1794375877988372544,
+      "size": 13914705
+    },
+    {
+      "path": "data/features/XAUUSD/2009-04.parquet",
+      "mtime_ns": 1794375878208845641,
+      "size": 13353075
+    },
+    {
+      "path": "data/features/XAUUSD/2009-05.parquet",
+      "mtime_ns": 1794375878418559294,
+      "size": 13000892
+    },
+    {
+      "path": "data/features/XAUUSD/2009-06.parquet",
+      "mtime_ns": 1794375878635441425,
+      "size": 13770913
+    },
+    {
+      "path": "data/features/XAUUSD/2009-07.parquet",
+      "mtime_ns": 1794375878858191096,
+      "size": 14158009
+    },
+    {
+      "path": "data/features/XAUUSD/2009-08.parquet",
+      "mtime_ns": 1794375879075972739,
+      "size": 13097749
+    },
+    {
+      "path": "data/features/XAUUSD/2009-09.parquet",
+      "mtime_ns": 1794375879303944610,
+      "size": 13634310
+    },
+    {
+      "path": "data/features/XAUUSD/2009-10.parquet",
+      "mtime_ns": 1794375879537079722,
+      "size": 13455403
+    },
+    {
+      "path": "data/features/XAUUSD/2009-11.parquet",
+      "mtime_ns": 1794375879749769334,
+      "size": 12669426
+    },
+    {
+      "path": "data/features/XAUUSD/2009-12.parquet",
+      "mtime_ns": 1794375879972345378,
+      "size": 13879014
+    },
+    {
+      "path": "data/features/XAUUSD/2010-01.parquet",
+      "mtime_ns": 1794375880183549136,
+      "size": 12737593
+    },
+    {
+      "path": "data/features/XAUUSD/2010-02.parquet",
+      "mtime_ns": 1794375880396774589,
+      "size": 13095172
+    },
+    {
+      "path": "data/features/XAUUSD/2010-03.parquet",
+      "mtime_ns": 1794375880631902396,
+      "size": 15340829
+    },
+    {
+      "path": "data/features/XAUUSD/2010-04.parquet",
+      "mtime_ns": 1794375880856008504,
+      "size": 14528827
+    },
+    {
+      "path": "data/features/XAUUSD/2010-05.parquet",
+      "mtime_ns": 1794375881078933678,
+      "size": 13885095
+    },
+    {
+      "path": "data/features/XAUUSD/2010-06.parquet",
+      "mtime_ns": 1794375881306182456,
+      "size": 14561381
+    },
+    {
+      "path": "data/features/XAUUSD/2010-07.parquet",
+      "mtime_ns": 1794375881530345356,
+      "size": 14514510
+    },
+    {
+      "path": "data/features/XAUUSD/2010-08.parquet",
+      "mtime_ns": 1794375881756267115,
+      "size": 14782866
+    },
+    {
+      "path": "data/features/XAUUSD/2010-09.parquet",
+      "mtime_ns": 1794375881979843965,
+      "size": 14504106
+    },
+    {
+      "path": "data/features/XAUUSD/2010-10.parquet",
+      "mtime_ns": 1794375882198637956,
+      "size": 13840015
+    },
+    {
+      "path": "data/features/XAUUSD/2010-11.parquet",
+      "mtime_ns": 1794375882431283394,
+      "size": 14629772
+    },
+    {
+      "path": "data/features/XAUUSD/2010-12.parquet",
+      "mtime_ns": 1794375882664014749,
+      "size": 15021621
+    },
+    {
+      "path": "data/features/XAUUSD/2011-01.parquet",
+      "mtime_ns": 1794375882882485985,
+      "size": 14095608
+    },
+    {
+      "path": "data/features/XAUUSD/2011-02.parquet",
+      "mtime_ns": 1794375883094050123,
+      "size": 13396755
+    },
+    {
+      "path": "data/features/XAUUSD/2011-03.parquet",
+      "mtime_ns": 1794375883334155501,
+      "size": 15428239
+    },
+    {
+      "path": "data/features/XAUUSD/2011-04.parquet",
+      "mtime_ns": 1794375883552550486,
+      "size": 13451336
+    },
+    {
+      "path": "data/features/XAUUSD/2011-05.parquet",
+      "mtime_ns": 1794375883779116837,
+      "size": 14815980
+    },
+    {
+      "path": "data/features/XAUUSD/2011-06.parquet",
+      "mtime_ns": 1794375884004884135,
+      "size": 14791884
+    },
+    {
+      "path": "data/features/XAUUSD/2011-07.parquet",
+      "mtime_ns": 1794375884223842462,
+      "size": 13908769
+    },
+    {
+      "path": "data/features/XAUUSD/2011-08.parquet",
+      "mtime_ns": 1794375884459361274,
+      "size": 15280982
+    },
+    {
+      "path": "data/features/XAUUSD/2011-09.parquet",
+      "mtime_ns": 1794375884683968555,
+      "size": 14733314
+    },
+    {
+      "path": "data/features/XAUUSD/2011-10.parquet",
+      "mtime_ns": 1794375884902148996,
+      "size": 14153166
+    },
+    {
+      "path": "data/features/XAUUSD/2011-11.parquet",
+      "mtime_ns": 1794375885126200811,
+      "size": 14630974
+    },
+    {
+      "path": "data/features/XAUUSD/2011-12.parquet",
+      "mtime_ns": 1794375885351256808,
+      "size": 14124902
+    },
+    {
+      "path": "data/features/XAUUSD/2012-01.parquet",
+      "mtime_ns": 1794375885577935202,
+      "size": 14002716
+    },
+    {
+      "path": "data/features/XAUUSD/2012-02.parquet",
+      "mtime_ns": 1794375885793086599,
+      "size": 14066281
+    },
+    {
+      "path": "data/features/XAUUSD/2012-03.parquet",
+      "mtime_ns": 1794375886017429752,
+      "size": 14865390
+    },
+    {
+      "path": "data/features/XAUUSD/2012-04.parquet",
+      "mtime_ns": 1794375886235688443,
+      "size": 13797501
+    },
+    {
+      "path": "data/features/XAUUSD/2012-05.parquet",
+      "mtime_ns": 1794375886469614066,
+      "size": 15530512
+    },
+    {
+      "path": "data/features/XAUUSD/2012-06.parquet",
+      "mtime_ns": 1794375886690466211,
+      "size": 14134201
+    },
+    {
+      "path": "data/features/XAUUSD/2012-07.parquet",
+      "mtime_ns": 1794375886919329429,
+      "size": 14957774
+    },
+    {
+      "path": "data/features/XAUUSD/2012-08.parquet",
+      "mtime_ns": 1794375887161112580,
+      "size": 15608535
+    },
+    {
+      "path": "data/features/XAUUSD/2012-09.parquet",
+      "mtime_ns": 1794375887380138532,
+      "size": 13559722
+    },
+    {
+      "path": "data/features/XAUUSD/2012-10.parquet",
+      "mtime_ns": 1794375887624775599,
+      "size": 15561657
+    },
+    {
+      "path": "data/features/XAUUSD/2012-11.parquet",
+      "mtime_ns": 1794375887855304048,
+      "size": 14554002
+    },
+    {
+      "path": "data/features/XAUUSD/2012-12.parquet",
+      "mtime_ns": 1794375888071103121,
+      "size": 13438546
+    },
+    {
+      "path": "data/features/XAUUSD/2013-01.parquet",
+      "mtime_ns": 1794375888308876716,
+      "size": 14521371
+    },
+    {
+      "path": "data/features/XAUUSD/2013-02.parquet",
+      "mtime_ns": 1794375888525795305,
+      "size": 13321009
+    },
+    {
+      "path": "data/features/XAUUSD/2013-03.parquet",
+      "mtime_ns": 1794375888735969089,
+      "size": 13369474
+    },
+    {
+      "path": "data/features/XAUUSD/2013-04.parquet",
+      "mtime_ns": 1794375888957504619,
+      "size": 14824410
+    },
+    {
+      "path": "data/features/XAUUSD/2013-05.parquet",
+      "mtime_ns": 1794375889190680439,
+      "size": 15271340
+    },
+    {
+      "path": "data/features/XAUUSD/2013-06.parquet",
+      "mtime_ns": 1794375889400711388,
+      "size": 13477503
+    },
+    {
+      "path": "data/features/XAUUSD/2013-07.parquet",
+      "mtime_ns": 1794375889628682718,
+      "size": 15136014
+    },
+    {
+      "path": "data/features/XAUUSD/2013-08.parquet",
+      "mtime_ns": 1794375889849831409,
+      "size": 14741083
+    },
+    {
+      "path": "data/features/XAUUSD/2013-09.parquet",
+      "mtime_ns": 1794375890063318532,
+      "size": 13973652
+    },
+    {
+      "path": "data/features/XAUUSD/2013-10.parquet",
+      "mtime_ns": 1794375890295039540,
+      "size": 15298493
+    },
+    {
+      "path": "data/features/XAUUSD/2013-11.parquet",
+      "mtime_ns": 1794375890507357772,
+      "size": 13740885
+    },
+    {
+      "path": "data/features/XAUUSD/2013-12.parquet",
+      "mtime_ns": 1794375890718746866,
+      "size": 13843116
+    },
+    {
+      "path": "data/features/XAUUSD/2014-01.parquet",
+      "mtime_ns": 1794375890941273118,
+      "size": 14558755
+    },
+    {
+      "path": "data/features/XAUUSD/2014-02.parquet",
+      "mtime_ns": 1794375891155766172,
+      "size": 13254764
+    },
+    {
+      "path": "data/features/XAUUSD/2014-03.parquet",
+      "mtime_ns": 1794375891378866266,
+      "size": 13748227
+    },
+    {
+      "path": "data/features/XAUUSD/2014-04.parquet",
+      "mtime_ns": 1794375891591046829,
+      "size": 13765833
+    },
+    {
+      "path": "data/features/XAUUSD/2014-05.parquet",
+      "mtime_ns": 1794375891814969809,
+      "size": 14546050
+    },
+    {
+      "path": "data/features/XAUUSD/2014-06.parquet",
+      "mtime_ns": 1794375892035010859,
+      "size": 14038129
+    },
+    {
+      "path": "data/features/XAUUSD/2014-07.parquet",
+      "mtime_ns": 1794375892264409584,
+      "size": 15245795
+    },
+    {
+      "path": "data/features/XAUUSD/2014-08.parquet",
+      "mtime_ns": 1794375892481704429,
+      "size": 13965585
+    },
+    {
+      "path": "data/features/XAUUSD/2014-09.parquet",
+      "mtime_ns": 1794375892704354599,
+      "size": 14684579
+    },
+    {
+      "path": "data/features/XAUUSD/2014-10.parquet",
+      "mtime_ns": 1794375892934020786,
+      "size": 15314513
+    },
+    {
+      "path": "data/features/XAUUSD/2014-11.parquet",
+      "mtime_ns": 1794375893143980651,
+      "size": 13260877
+    },
+    {
+      "path": "data/features/XAUUSD/2014-12.parquet",
+      "mtime_ns": 1794375893370394333,
+      "size": 14699722
+    },
+    {
+      "path": "data/features/XAUUSD/2015-01.parquet",
+      "mtime_ns": 1794375893591294687,
+      "size": 14059418
+    },
+    {
+      "path": "data/features/XAUUSD/2015-02.parquet",
+      "mtime_ns": 1794375893810734021,
+      "size": 13389152
+    },
+    {
+      "path": "data/features/XAUUSD/2015-03.parquet",
+      "mtime_ns": 1794375894053366476,
+      "size": 14777007
+    },
+    {
+      "path": "data/features/XAUUSD/2015-04.parquet",
+      "mtime_ns": 1794375894278416972,
+      "size": 14085464
+    },
+    {
+      "path": "data/features/XAUUSD/2015-05.parquet",
+      "mtime_ns": 1794375894498156893,
+      "size": 13911046
+    },
+    {
+      "path": "data/features/XAUUSD/2015-06.parquet",
+      "mtime_ns": 1794375894725071291,
+      "size": 14616334
+    },
+    {
+      "path": "data/features/XAUUSD/2015-07.parquet",
+      "mtime_ns": 1794375894957513892,
+      "size": 15184653
+    },
+    {
+      "path": "data/features/XAUUSD/2015-08.parquet",
+      "mtime_ns": 1794375895180236772,
+      "size": 14111958
+    },
+    {
+      "path": "data/features/XAUUSD/2015-09.parquet",
+      "mtime_ns": 1794375895408899612,
+      "size": 14523751
+    },
+    {
+      "path": "data/features/XAUUSD/2015-10.parquet",
+      "mtime_ns": 1794375895637522159,
+      "size": 14777924
+    },
+    {
+      "path": "data/features/XAUUSD/2015-11.parquet",
+      "mtime_ns": 1794375895855633307,
+      "size": 13968430
+    },
+    {
+      "path": "data/features/XAUUSD/2015-12.parquet",
+      "mtime_ns": 1794375896078224393,
+      "size": 14642694
+    },
+    {
+      "path": "data/features/XAUUSD/2016-01.parquet",
+      "mtime_ns": 1794375896291772934,
+      "size": 13456711
+    },
+    {
+      "path": "data/features/XAUUSD/2016-02.parquet",
+      "mtime_ns": 1794375896506841163,
+      "size": 14223164
+    },
+    {
+      "path": "data/features/XAUUSD/2016-03.parquet",
+      "mtime_ns": 1794375896732398000,
+      "size": 15022585
+    },
+    {
+      "path": "data/features/XAUUSD/2016-04.parquet",
+      "mtime_ns": 1794375896946680218,
+      "size": 14219762
+    },
+    {
+      "path": "data/features/XAUUSD/2016-05.parquet",
+      "mtime_ns": 1794375897184128308,
+      "size": 14918118
+    },
+    {
+      "path": "data/features/XAUUSD/2016-06.parquet",
+      "mtime_ns": 1794375897411194749,
+      "size": 14931942
+    },
+    {
+      "path": "data/features/XAUUSD/2016-07.parquet",
+      "mtime_ns": 1794375897630643291,
+      "size": 14191217
+    },
+    {
+      "path": "data/features/XAUUSD/2016-08.parquet",
+      "mtime_ns": 1794375897886069012,
+      "size": 15623305
+    },
+    {
+      "path": "data/features/XAUUSD/2016-09.parquet",
+      "mtime_ns": 1794375898107994380,
+      "size": 14673707
+    },
+    {
+      "path": "data/features/XAUUSD/2016-10.parquet",
+      "mtime_ns": 1794375898327661341,
+      "size": 14288757
+    },
+    {
+      "path": "data/features/XAUUSD/2016-11.parquet",
+      "mtime_ns": 1794375898553916022,
+      "size": 14789780
+    },
+    {
+      "path": "data/features/XAUUSD/2016-12.parquet",
+      "mtime_ns": 1794375898771118615,
+      "size": 14186999
+    },
+    {
+      "path": "data/features/XAUUSD/2017-01.parquet",
+      "mtime_ns": 1794375898989162970,
+      "size": 14141627
+    },
+    {
+      "path": "data/features/XAUUSD/2017-02.parquet",
+      "mtime_ns": 1794375899197925859,
+      "size": 13482989
+    },
+    {
+      "path": "data/features/XAUUSD/2017-03.parquet",
+      "mtime_ns": 1794375899433608632,
+      "size": 15461148
+    },
+    {
+      "path": "data/features/XAUUSD/2017-04.parquet",
+      "mtime_ns": 1794375899641638427,
+      "size": 12951094
+    },
+    {
+      "path": "data/features/XAUUSD/2017-05.parquet",
+      "mtime_ns": 1794375899879315395,
+      "size": 15525802
+    },
+    {
+      "path": "data/features/XAUUSD/2017-06.parquet",
+      "mtime_ns": 1794375900130142425,
+      "size": 14803467
+    },
+    {
+      "path": "data/features/XAUUSD/2017-07.parquet",
+      "mtime_ns": 1794375900350969445,
+      "size": 14130214
+    },
+    {
+      "path": "data/features/XAUUSD/2017-08.parquet",
+      "mtime_ns": 1794375900590482522,
+      "size": 15964922
+    },
+    {
+      "path": "data/features/XAUUSD/2017-09.parquet",
+      "mtime_ns": 1794375900809927897,
+      "size": 14785573
+    },
+    {
+      "path": "data/features/XAUUSD/2017-10.parquet",
+      "mtime_ns": 1794375901037191342,
+      "size": 15902824
+    },
+    {
+      "path": "data/features/XAUUSD/2017-11.parquet",
+      "mtime_ns": 1794375901263534523,
+      "size": 15634981
+    },
+    {
+      "path": "data/features/XAUUSD/2017-12.parquet",
+      "mtime_ns": 1794375901479281554,
+      "size": 14409240
+    },
+    {
+      "path": "data/features/XAUUSD/2018-01.parquet",
+      "mtime_ns": 1794375901709643959,
+      "size": 15865703
+    },
+    {
+      "path": "data/features/XAUUSD/2018-02.parquet",
+      "mtime_ns": 1794375901924518061,
+      "size": 14395763
+    },
+    {
+      "path": "data/features/XAUUSD/2018-03.parquet",
+      "mtime_ns": 1794375902144909616,
+      "size": 15186802
+    },
+    {
+      "path": "data/features/XAUUSD/2018-04.parquet",
+      "mtime_ns": 1794375902369966612,
+      "size": 15270743
+    },
+    {
+      "path": "data/features/XAUUSD/2018-05.parquet",
+      "mtime_ns": 1794375902609916988,
+      "size": 16552749
+    },
+    {
+      "path": "data/features/XAUUSD/2018-06.parquet",
+      "mtime_ns": 1794375902850926128,
+      "size": 15152333
+    },
+    {
+      "path": "data/features/XAUUSD/2018-07.parquet",
+      "mtime_ns": 1794375903079314255,
+      "size": 15984110
+    },
+    {
+      "path": "data/features/XAUUSD/2018-08.parquet",
+      "mtime_ns": 1794375903319695262,
+      "size": 16708698
+    },
+    {
+      "path": "data/features/XAUUSD/2018-09.parquet",
+      "mtime_ns": 1794375903539474849,
+      "size": 14478404
+    },
+    {
+      "path": "data/features/XAUUSD/2018-10.parquet",
+      "mtime_ns": 1794375903779739729,
+      "size": 16791971
+    },
+    {
+      "path": "data/features/XAUUSD/2018-11.parquet",
+      "mtime_ns": 1794375904008094189,
+      "size": 15496137
+    },
+    {
+      "path": "data/features/XAUUSD/2018-12.parquet",
+      "mtime_ns": 1794375904226449715,
+      "size": 14650590
+    },
+    {
+      "path": "data/features/XAUUSD/2019-01.parquet",
+      "mtime_ns": 1794375904461806650,
+      "size": 16660923
+    },
+    {
+      "path": "data/features/XAUUSD/2019-02.parquet",
+      "mtime_ns": 1794375904684808492,
+      "size": 15019098
+    },
+    {
+      "path": "data/features/XAUUSD/2019-03.parquet",
+      "mtime_ns": 1794375904915674780,
+      "size": 15918708
+    },
+    {
+      "path": "data/features/XAUUSD/2019-04.parquet",
+      "mtime_ns": 1794375905161864411,
+      "size": 15845543
+    },
+    {
+      "path": "data/features/XAUUSD/2019-05.parquet",
+      "mtime_ns": 1794375905409480062,
+      "size": 17277123
+    },
+    {
+      "path": "data/features/XAUUSD/2019-06.parquet",
+      "mtime_ns": 1794375905641266737,
+      "size": 15428557
+    },
+    {
+      "path": "data/features/XAUUSD/2019-07.parquet",
+      "mtime_ns": 1794375905887872499,
+      "size": 17441981
+    },
+    {
+      "path": "data/features/XAUUSD/2019-08.parquet",
+      "mtime_ns": 1794375906122965972,
+      "size": 16923713
+    },
+    {
+      "path": "data/features/XAUUSD/2019-09.parquet",
+      "mtime_ns": 1794375906353932719,
+      "size": 16038735
+    },
+    {
+      "path": "data/features/XAUUSD/2019-10.parquet",
+      "mtime_ns": 1794375906604964835,
+      "size": 17612477
+    },
+    {
+      "path": "data/features/XAUUSD/2019-11.parquet",
+      "mtime_ns": 1794375906830947803,
+      "size": 15647251
+    },
+    {
+      "path": "data/features/XAUUSD/2019-12.parquet",
+      "mtime_ns": 1794375907057869118,
+      "size": 15715055
+    },
+    {
+      "path": "data/features/XAUUSD/2020-01.parquet",
+      "mtime_ns": 1794375907296017051,
+      "size": 16800379
+    },
+    {
+      "path": "data/features/XAUUSD/2020-02.parquet",
+      "mtime_ns": 1794375907519275647,
+      "size": 15365959
+    },
+    {
+      "path": "data/features/XAUUSD/2020-03.parquet",
+      "mtime_ns": 1794375907760624125,
+      "size": 17112541
+    },
+    {
+      "path": "data/features/XAUUSD/2020-04.parquet",
+      "mtime_ns": 1794375907989553760,
+      "size": 16335206
+    },
+    {
+      "path": "data/features/XAUUSD/2020-05.parquet",
+      "mtime_ns": 1794375908217836511,
+      "size": 16191162
+    },
+    {
+      "path": "data/features/XAUUSD/2020-06.parquet",
+      "mtime_ns": 1794375908461642733,
+      "size": 17079495
+    },
+    {
+      "path": "data/features/XAUUSD/2020-07.parquet",
+      "mtime_ns": 1794375908706368134,
+      "size": 17481088
+    },
+    {
+      "path": "data/features/XAUUSD/2020-08.parquet",
+      "mtime_ns": 1794375908941774945,
+      "size": 16216541
+    },
+    {
+      "path": "data/features/XAUUSD/2020-09.parquet",
+      "mtime_ns": 1794375909177291132,
+      "size": 16908068
+    },
+    {
+      "path": "data/features/XAUUSD/2020-10.parquet",
+      "mtime_ns": 1794375909424250774,
+      "size": 16925618
+    },
+    {
+      "path": "data/features/XAUUSD/2020-11.parquet",
+      "mtime_ns": 1794375909661892033,
+      "size": 16113187
+    },
+    {
+      "path": "data/features/XAUUSD/2020-12.parquet",
+      "mtime_ns": 1794375909894680764,
+      "size": 16892362
+    },
+    {
+      "path": "data/features/XAUUSD/2021-01.parquet",
+      "mtime_ns": 1794375910111829690,
+      "size": 15470591
+    },
+    {
+      "path": "data/features/XAUUSD/2021-02.parquet",
+      "mtime_ns": 1794375910329846503,
+      "size": 15431791
+    },
+    {
+      "path": "data/features/XAUUSD/2021-03.parquet",
+      "mtime_ns": 1794375910575639836,
+      "size": 17979687
+    },
+    {
+      "path": "data/features/XAUUSD/2021-04.parquet",
+      "mtime_ns": 1794375910803911587,
+      "size": 16231317
+    },
+    {
+      "path": "data/features/XAUUSD/2021-05.parquet",
+      "mtime_ns": 1794375911032318839,
+      "size": 16254297
+    },
+    {
+      "path": "data/features/XAUUSD/2021-06.parquet",
+      "mtime_ns": 1794375911278879975,
+      "size": 17021606
+    },
+    {
+      "path": "data/features/XAUUSD/2021-07.parquet",
+      "mtime_ns": 1794375911517633042,
+      "size": 16709887
+    },
+    {
+      "path": "data/features/XAUUSD/2021-08.parquet",
+      "mtime_ns": 1794375911761711642,
+      "size": 17034881
+    },
+    {
+      "path": "data/features/XAUUSD/2021-09.parquet",
+      "mtime_ns": 1794375912000783005,
+      "size": 16944781
+    },
+    {
+      "path": "data/features/XAUUSD/2021-10.parquet",
+      "mtime_ns": 1794375912232420679,
+      "size": 16305871
+    },
+    {
+      "path": "data/features/XAUUSD/2021-11.parquet",
+      "mtime_ns": 1794375912470572570,
+      "size": 16814008
+    },
+    {
+      "path": "data/features/XAUUSD/2021-12.parquet",
+      "mtime_ns": 1794375912709213426,
+      "size": 17038434
+    },
+    {
+      "path": "data/features/XAUUSD/2022-01.parquet",
+      "mtime_ns": 1794375912938956906,
+      "size": 16174352
+    },
+    {
+      "path": "data/features/XAUUSD/2022-02.parquet",
+      "mtime_ns": 1794375913169624983,
+      "size": 15496261
+    },
+    {
+      "path": "data/features/XAUUSD/2022-03.parquet",
+      "mtime_ns": 1794375913424065648,
+      "size": 17914269
+    },
+    {
+      "path": "data/features/XAUUSD/2022-04.parquet",
+      "mtime_ns": 1794375913651427510,
+      "size": 15500596
+    },
+    {
+      "path": "data/features/XAUUSD/2022-05.parquet",
+      "mtime_ns": 1794375913893323372,
+      "size": 17161528
+    },
+    {
+      "path": "data/features/XAUUSD/2022-06.parquet",
+      "mtime_ns": 1794375914142062872,
+      "size": 17022884
+    },
+    {
+      "path": "data/features/XAUUSD/2022-07.parquet",
+      "mtime_ns": 1794375914373168663,
+      "size": 16295461
+    },
+    {
+      "path": "data/features/XAUUSD/2022-08.parquet",
+      "mtime_ns": 1794375914627939291,
+      "size": 17959427
+    },
+    {
+      "path": "data/features/XAUUSD/2022-09.parquet",
+      "mtime_ns": 1794375914868608635,
+      "size": 17012150
+    },
+    {
+      "path": "data/features/XAUUSD/2022-10.parquet",
+      "mtime_ns": 1794375915101046611,
+      "size": 16415403
+    },
+    {
+      "path": "data/features/XAUUSD/2022-11.parquet",
+      "mtime_ns": 1794375915336941346,
+      "size": 16862722
+    },
+    {
+      "path": "data/features/XAUUSD/2022-12.parquet",
+      "mtime_ns": 1794375915570273793,
+      "size": 16228643
+    },
+    {
+      "path": "data/events/BTCUSDT/2018-01.parquet",
+      "mtime_ns": 1794445051128924888,
+      "size": 1874861
+    },
+    {
+      "path": "data/events/BTCUSDT/2018-02.parquet",
+      "mtime_ns": 1794445051185315132,
+      "size": 1296242
+    },
+    {
+      "path": "data/events/BTCUSDT/2018-03.parquet",
+      "mtime_ns": 1794445051248390303,
+      "size": 1443172
+    },
+    {
+      "path": "data/events/BTCUSDT/2018-04.parquet",
+      "mtime_ns": 1794445051324288459,
+      "size": 1326434
+    },
+    {
+      "path": "data/events/BTCUSDT/2018-05.parquet",
+      "mtime_ns": 1794445051398660121,
+      "size": 1321737
+    },
+    {
+      "path": "data/events/BTCUSDT/2018-06.parquet",
+      "mtime_ns": 1794445051464814945,
+      "size": 1417660
+    },
+    {
+      "path": "data/events/BTCUSDT/2018-07.parquet",
+      "mtime_ns": 1794445051523171721,
+      "size": 1316870
+    },
+    {
+      "path": "data/events/BTCUSDT/2018-08.parquet",
+      "mtime_ns": 1794445051575014944,
+      "size": 1193836
+    },
+    {
+      "path": "data/events/BTCUSDT/2018-09.parquet",
+      "mtime_ns": 1794445051627093958,
+      "size": 1171763
+    },
+    {
+      "path": "data/events/BTCUSDT/2018-10.parquet",
+      "mtime_ns": 1794445051683033495,
+      "size": 1233714
+    },
+    {
+      "path": "data/events/BTCUSDT/2018-11.parquet",
+      "mtime_ns": 1794445051734619637,
+      "size": 1171850
+    },
+    {
+      "path": "data/events/BTCUSDT/2018-12.parquet",
+      "mtime_ns": 1794445051792035543,
+      "size": 1288635
+    },
+    {
+      "path": "data/events/BTCUSDT/2019-01.parquet",
+      "mtime_ns": 1794445415292255133,
+      "size": 1375065
+    },
+    {
+      "path": "data/events/BTCUSDT/2019-02.parquet",
+      "mtime_ns": 1794445415357139859,
+      "size": 1161204
+    },
+    {
+      "path": "data/events/BTCUSDT/2019-03.parquet",
+      "mtime_ns": 1794445415418503364,
+      "size": 1215393
+    },
+    {
+      "path": "data/events/BTCUSDT/2019-04.parquet",
+      "mtime_ns": 1794445415487946339,
+      "size": 1355264
+    },
+    {
+      "path": "data/events/BTCUSDT/2019-05.parquet",
+      "mtime_ns": 1794445415546761317,
+      "size": 1234244
+    },
+    {
+      "path": "data/events/BTCUSDT/2019-06.parquet",
+      "mtime_ns": 1794445415604430721,
+      "size": 1279276
+    },
+    {
+      "path": "data/events/BTCUSDT/2019-07.parquet",
+      "mtime_ns": 1794445415663470997,
+      "size": 1306202
+    },
+    {
+      "path": "data/events/BTCUSDT/2019-08.parquet",
+      "mtime_ns": 1794445415725931573,
+      "size": 1305383
+    },
+    {
+      "path": "data/events/BTCUSDT/2019-09.parquet",
+      "mtime_ns": 1794445415787029321,
+      "size": 1234512
+    },
+    {
+      "path": "data/events/BTCUSDT/2019-10.parquet",
+      "mtime_ns": 1794445415845062152,
+      "size": 1210387
+    },
+    {
+      "path": "data/events/BTCUSDT/2019-11.parquet",
+      "mtime_ns": 1794445415901295935,
+      "size": 1148050
+    },
+    {
+      "path": "data/events/BTCUSDT/2019-12.parquet",
+      "mtime_ns": 1794445415956014384,
+      "size": 1148383
+    },
+    {
+      "path": "data/events/BTCUSDT/2020-01.parquet",
+      "mtime_ns": 1794445841029988129,
+      "size": 1177941
+    },
+    {
+      "path": "data/events/BTCUSDT/2020-02.parquet",
+      "mtime_ns": 1794445841082195260,
+      "size": 1118888
+    },
+    {
+      "path": "data/events/BTCUSDT/2020-03.parquet",
+      "mtime_ns": 1794445841132040743,
+      "size": 1198680
+    },
+    {
+      "path": "data/events/BTCUSDT/2020-04.parquet",
+      "mtime_ns": 1794445841178956480,
+      "size": 1072930
+    },
+    {
+      "path": "data/events/BTCUSDT/2020-05.parquet",
+      "mtime_ns": 1794445841226725198,
+      "size": 1138620
+    },
+    {
+      "path": "data/events/BTCUSDT/2020-06.parquet",
+      "mtime_ns": 1794445841276594098,
+      "size": 1090527
+    },
+    {
+      "path": "data/events/BTCUSDT/2020-07.parquet",
+      "mtime_ns": 1794445841331136834,
+      "size": 1170362
+    },
+    {
+      "path": "data/events/BTCUSDT/2020-08.parquet",
+      "mtime_ns": 1794445841386225460,
+      "size": 1215833
+    },
+    {
+      "path": "data/events/BTCUSDT/2020-09.parquet",
+      "mtime_ns": 1794445841437939077,
+      "size": 1150467
+    },
+    {
+      "path": "data/events/BTCUSDT/2020-10.parquet",
+      "mtime_ns": 1794445841498907988,
+      "size": 1343732
+    },
+    {
+      "path": "data/events/BTCUSDT/2020-11.parquet",
+      "mtime_ns": 1794445841563024485,
+      "size": 1607411
+    },
+    {
+      "path": "data/events/BTCUSDT/2020-12.parquet",
+      "mtime_ns": 1794445841624584704,
+      "size": 1627490
+    },
+    {
+      "path": "data/events/BTCUSDT/2021-01.parquet",
+      "mtime_ns": 1794446276553642232,
+      "size": 2337021
+    },
+    {
+      "path": "data/events/BTCUSDT/2021-02.parquet",
+      "mtime_ns": 1794446276629526633,
+      "size": 2083004
+    },
+    {
+      "path": "data/events/BTCUSDT/2021-03.parquet",
+      "mtime_ns": 1794446276703798781,
+      "size": 2357779
+    },
+    {
+      "path": "data/events/BTCUSDT/2021-04.parquet",
+      "mtime_ns": 1794446276771601170,
+      "size": 2122044
+    },
+    {
+      "path": "data/events/BTCUSDT/2021-05.parquet",
+      "mtime_ns": 1794446276830751449,
+      "size": 2034787
+    },
+    {
+      "path": "data/events/BTCUSDT/2021-06.parquet",
+      "mtime_ns": 1794446276888067927,
+      "size": 1928207
+    },
+    {
+      "path": "data/events/BTCUSDT/2021-07.parquet",
+      "mtime_ns": 1794446276956938387,
+      "size": 1916279
+    },
+    {
+      "path": "data/events/BTCUSDT/2021-08.parquet",
+      "mtime_ns": 1794446277026046186,
+      "size": 2145523
+    },
+    {
+      "path": "data/events/BTCUSDT/2021-09.parquet",
+      "mtime_ns": 1794446277089014318,
+      "size": 1975609
+    },
+    {
+      "path": "data/events/BTCUSDT/2021-10.parquet",
+      "mtime_ns": 1794446277159858165,
+      "size": 2099916
+    },
+    {
+      "path": "data/events/BTCUSDT/2021-11.parquet",
+      "mtime_ns": 1794446277220980205,
+      "size": 1970270
+    },
+    {
+      "path": "data/events/BTCUSDT/2021-12.parquet",
+      "mtime_ns": 1794446277280647498,
+      "size": 1916638
+    },
+    {
+      "path": "data/events/BTCUSDT/2022-01.parquet",
+      "mtime_ns": 1794489234563405072,
+      "size": 1951891
+    },
+    {
+      "path": "data/events/BTCUSDT/2022-02.parquet",
+      "mtime_ns": 1794489234609270852,
+      "size": 1639827
+    },
+    {
+      "path": "data/events/BTCUSDT/2022-03.parquet",
+      "mtime_ns": 1794489234663055779,
+      "size": 1710890
+    },
+    {
+      "path": "data/events/BTCUSDT/2022-04.parquet",
+      "mtime_ns": 1794489234712217520,
+      "size": 1652664
+    },
+    {
+      "path": "data/events/BTCUSDT/2022-05.parquet",
+      "mtime_ns": 1794489234766387161,
+      "size": 1841528
+    },
+    {
+      "path": "data/events/BTCUSDT/2022-06.parquet",
+      "mtime_ns": 1794489234823226129,
+      "size": 1922021
+    },
+    {
+      "path": "data/events/BTCUSDT/2022-07.parquet",
+      "mtime_ns": 1794489234893211690,
+      "size": 1935338
+    },
+    {
+      "path": "data/events/BTCUSDT/2022-08.parquet",
+      "mtime_ns": 1794489234949112978,
+      "size": 1629387
+    },
+    {
+      "path": "data/events/BTCUSDT/2022-09.parquet",
+      "mtime_ns": 1794489235000582708,
+      "size": 1488226
+    },
+    {
+      "path": "data/events/BTCUSDT/2022-10.parquet",
+      "mtime_ns": 1794489235053367206,
+      "size": 1286166
+    },
+    {
+      "path": "data/events/BTCUSDT/2022-11.parquet",
+      "mtime_ns": 1794489235105667988,
+      "size": 1421870
+    },
+    {
+      "path": "data/events/BTCUSDT/2022-12.parquet",
+      "mtime_ns": 1794489235160746850,
+      "size": 1272004
+    },
+    {
+      "path": "data/features/BTCUSDT/2018-01.parquet",
+      "mtime_ns": 1794373591292374242,
+      "size": 23512316
+    },
+    {
+      "path": "data/features/BTCUSDT/2018-02.parquet",
+      "mtime_ns": 1794373591632110497,
+      "size": 20265423
+    },
+    {
+      "path": "data/features/BTCUSDT/2018-03.parquet",
+      "mtime_ns": 1794373591993085304,
+      "size": 23549403
+    },
+    {
+      "path": "data/features/BTCUSDT/2018-04.parquet",
+      "mtime_ns": 1794373592340048494,
+      "size": 22726750
+    },
+    {
+      "path": "data/features/BTCUSDT/2018-05.parquet",
+      "mtime_ns": 1794373592698710269,
+      "size": 23650694
+    },
+    {
+      "path": "data/features/BTCUSDT/2018-06.parquet",
+      "mtime_ns": 1794373593055122427,
+      "size": 22511315
+    },
+    {
+      "path": "data/features/BTCUSDT/2018-07.parquet",
+      "mtime_ns": 1794373593406502306,
+      "size": 23541200
+    },
+    {
+      "path": "data/features/BTCUSDT/2018-08.parquet",
+      "mtime_ns": 1794373593777627091,
+      "size": 23883307
+    },
+    {
+      "path": "data/features/BTCUSDT/2018-09.parquet",
+      "mtime_ns": 1794373594132022262,
+      "size": 22975742
+    },
+    {
+      "path": "data/features/BTCUSDT/2018-10.parquet",
+      "mtime_ns": 1794373594500381133,
+      "size": 23587523
+    },
+    {
+      "path": "data/features/BTCUSDT/2018-11.parquet",
+      "mtime_ns": 1794373594862493789,
+      "size": 22932617
+    },
+    {
+      "path": "data/features/BTCUSDT/2018-12.parquet",
+      "mtime_ns": 1794373595222917255,
+      "size": 24075912
+    },
+    {
+      "path": "data/features/BTCUSDT/2019-01.parquet",
+      "mtime_ns": 1794373595598099764,
+      "size": 24509120
+    },
+    {
+      "path": "data/features/BTCUSDT/2019-02.parquet",
+      "mtime_ns": 1794373595942542086,
+      "size": 22077702
+    },
+    {
+      "path": "data/features/BTCUSDT/2019-03.parquet",
+      "mtime_ns": 1794373596287298245,
+      "size": 24149343
+    },
+    {
+      "path": "data/features/BTCUSDT/2019-04.parquet",
+      "mtime_ns": 1794373596629117154,
+      "size": 23530636
+    },
+    {
+      "path": "data/features/BTCUSDT/2019-05.parquet",
+      "mtime_ns": 1794373596976058595,
+      "size": 24626922
+    },
+    {
+      "path": "data/features/BTCUSDT/2019-06.parquet",
+      "mtime_ns": 1794373597316789530,
+      "size": 23961451
+    },
+    {
+      "path": "data/features/BTCUSDT/2019-07.parquet",
+      "mtime_ns": 1794373597663986141,
+      "size": 24926247
+    },
+    {
+      "path": "data/features/BTCUSDT/2019-08.parquet",
+      "mtime_ns": 1794373598027284814,
+      "size": 24582735
+    },
+    {
+      "path": "data/features/BTCUSDT/2019-09.parquet",
+      "mtime_ns": 1794373598372132100,
+      "size": 23975213
+    },
+    {
+      "path": "data/features/BTCUSDT/2019-10.parquet",
+      "mtime_ns": 1794373598723786899,
+      "size": 24936646
+    },
+    {
+      "path": "data/features/BTCUSDT/2019-11.parquet",
+      "mtime_ns": 1794373599064132537,
+      "size": 23765962
+    },
+    {
+      "path": "data/features/BTCUSDT/2019-12.parquet",
+      "mtime_ns": 1794373599437745608,
+      "size": 24658516
+    },
+    {
+      "path": "data/features/BTCUSDT/2020-01.parquet",
+      "mtime_ns": 1794373599793892638,
+      "size": 24939549
+    },
+    {
+      "path": "data/features/BTCUSDT/2020-02.parquet",
+      "mtime_ns": 1794373600147936763,
+      "size": 23072438
+    },
+    {
+      "path": "data/features/BTCUSDT/2020-03.parquet",
+      "mtime_ns": 1794373600526537987,
+      "size": 24880672
+    },
+    {
+      "path": "data/features/BTCUSDT/2020-04.parquet",
+      "mtime_ns": 1794373600903852319,
+      "size": 24073170
+    },
+    {
+      "path": "data/features/BTCUSDT/2020-05.parquet",
+      "mtime_ns": 1794373601272333191,
+      "size": 24958717
+    },
+    {
+      "path": "data/features/BTCUSDT/2020-06.parquet",
+      "mtime_ns": 1794373601628190550,
+      "size": 24051671
+    },
+    {
+      "path": "data/features/BTCUSDT/2020-07.parquet",
+      "mtime_ns": 1794373601990654128,
+      "size": 24956190
+    },
+    {
+      "path": "data/features/BTCUSDT/2020-08.parquet",
+      "mtime_ns": 1794373602357935358,
+      "size": 24851655
+    },
+    {
+      "path": "data/features/BTCUSDT/2020-09.parquet",
+      "mtime_ns": 1794373602713029206,
+      "size": 24246278
+    },
+    {
+      "path": "data/features/BTCUSDT/2020-10.parquet",
+      "mtime_ns": 1794373603083082559,
+      "size": 24927928
+    },
+    {
+      "path": "data/features/BTCUSDT/2020-11.parquet",
+      "mtime_ns": 1794373603449675780,
+      "size": 23940906
+    },
+    {
+      "path": "data/features/BTCUSDT/2020-12.parquet",
+      "mtime_ns": 1794373603822314544,
+      "size": 24413611
+    },
+    {
+      "path": "data/features/BTCUSDT/2021-01.parquet",
+      "mtime_ns": 1794373604187157906,
+      "size": 24502805
+    },
+    {
+      "path": "data/features/BTCUSDT/2021-02.parquet",
+      "mtime_ns": 1794373604518821671,
+      "size": 22216330
+    },
+    {
+      "path": "data/features/BTCUSDT/2021-03.parquet",
+      "mtime_ns": 1794373604877618697,
+      "size": 24820224
+    },
+    {
+      "path": "data/features/BTCUSDT/2021-04.parquet",
+      "mtime_ns": 1794373605225939865,
+      "size": 23898373
+    },
+    {
+      "path": "data/features/BTCUSDT/2021-05.parquet",
+      "mtime_ns": 1794373605590154594,
+      "size": 25094996
+    },
+    {
+      "path": "data/features/BTCUSDT/2021-06.parquet",
+      "mtime_ns": 1794373605958857969,
+      "size": 24267127
+    },
+    {
+      "path": "data/features/BTCUSDT/2021-07.parquet",
+      "mtime_ns": 1794373606339692017,
+      "size": 25020085
+    },
+    {
+      "path": "data/features/BTCUSDT/2021-08.parquet",
+      "mtime_ns": 1794373606712154196,
+      "size": 24884204
+    },
+    {
+      "path": "data/features/BTCUSDT/2021-09.parquet",
+      "mtime_ns": 1794373607079350675,
+      "size": 24221042
+    },
+    {
+      "path": "data/features/BTCUSDT/2021-10.parquet",
+      "mtime_ns": 1794373607452147775,
+      "size": 25010778
+    },
+    {
+      "path": "data/features/BTCUSDT/2021-11.parquet",
+      "mtime_ns": 1794373607822210962,
+      "size": 24313984
+    },
+    {
+      "path": "data/features/BTCUSDT/2021-12.parquet",
+      "mtime_ns": 1794373608197779476,
+      "size": 25156429
+    },
+    {
+      "path": "data/features/BTCUSDT/2022-01.parquet",
+      "mtime_ns": 1794373608574372714,
+      "size": 25077401
+    },
+    {
+      "path": "data/features/BTCUSDT/2022-02.parquet",
+      "mtime_ns": 1794373608938478941,
+      "size": 22752471
+    },
+    {
+      "path": "data/features/BTCUSDT/2022-03.parquet",
+      "mtime_ns": 1794373609315815689,
+      "size": 25220344
+    },
+    {
+      "path": "data/features/BTCUSDT/2022-04.parquet",
+      "mtime_ns": 1794373609683332047,
+      "size": 24185098
+    },
+    {
+      "path": "data/features/BTCUSDT/2022-05.parquet",
+      "mtime_ns": 1794373610050431317,
+      "size": 25121483
+    },
+    {
+      "path": "data/features/BTCUSDT/2022-06.parquet",
+      "mtime_ns": 1794373610407414609,
+      "size": 24212366
+    },
+    {
+      "path": "data/features/BTCUSDT/2022-07.parquet",
+      "mtime_ns": 1794373610778919440,
+      "size": 24948629
+    },
+    {
+      "path": "data/features/BTCUSDT/2022-08.parquet",
+      "mtime_ns": 1794373611143237295,
+      "size": 25095661
+    },
+    {
+      "path": "data/features/BTCUSDT/2022-09.parquet",
+      "mtime_ns": 1794373611505902293,
+      "size": 24305456
+    },
+    {
+      "path": "data/features/BTCUSDT/2022-10.parquet",
+      "mtime_ns": 1794373611871952089,
+      "size": 25048864
+    },
+    {
+      "path": "data/features/BTCUSDT/2022-11.parquet",
+      "mtime_ns": 1794373612233592197,
+      "size": 24366789
+    },
+    {
+      "path": "data/features/BTCUSDT/2022-12.parquet",
+      "mtime_ns": 1794373612603439380,
+      "size": 24882739
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2018-01.parquet",
+      "mtime_ns": 1794426587500680229,
+      "size": 5029516
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2018-02.parquet",
+      "mtime_ns": 1794426587675889262,
+      "size": 4221687
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2018-03.parquet",
+      "mtime_ns": 1794426587835381061,
+      "size": 5036674
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2018-04.parquet",
+      "mtime_ns": 1794426588001371481,
+      "size": 4875188
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2018-05.parquet",
+      "mtime_ns": 1794426588173388642,
+      "size": 5034467
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2018-06.parquet",
+      "mtime_ns": 1794426588345122966,
+      "size": 4784659
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2018-07.parquet",
+      "mtime_ns": 1794426588510212666,
+      "size": 4978216
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2018-08.parquet",
+      "mtime_ns": 1794426588681932324,
+      "size": 5033116
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2018-09.parquet",
+      "mtime_ns": 1794426588848387416,
+      "size": 4868610
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2018-10.parquet",
+      "mtime_ns": 1794426589013446033,
+      "size": 5007350
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2018-11.parquet",
+      "mtime_ns": 1794426589178512983,
+      "size": 4828944
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2018-12.parquet",
+      "mtime_ns": 1794426589343050135,
+      "size": 5033698
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2019-01.parquet",
+      "mtime_ns": 1794426589510408864,
+      "size": 5029201
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2019-02.parquet",
+      "mtime_ns": 1794426589676994416,
+      "size": 4552126
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2019-03.parquet",
+      "mtime_ns": 1794426589840074800,
+      "size": 4985861
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2019-04.parquet",
+      "mtime_ns": 1794426590004095904,
+      "size": 4873287
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2019-05.parquet",
+      "mtime_ns": 1794426590169847697,
+      "size": 4968890
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2019-06.parquet",
+      "mtime_ns": 1794426590359078986,
+      "size": 4869271
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2019-07.parquet",
+      "mtime_ns": 1794426590580080376,
+      "size": 5041452
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2019-08.parquet",
+      "mtime_ns": 1794426590750922814,
+      "size": 4982181
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2019-09.parquet",
+      "mtime_ns": 1794426590938737127,
+      "size": 4875793
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2019-10.parquet",
+      "mtime_ns": 1794426591136922902,
+      "size": 5037136
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2019-11.parquet",
+      "mtime_ns": 1794426591323785080,
+      "size": 4843197
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2019-12.parquet",
+      "mtime_ns": 1794426591503430376,
+      "size": 5033054
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2020-01.parquet",
+      "mtime_ns": 1794426591737977724,
+      "size": 10539238
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2020-02.parquet",
+      "mtime_ns": 1794426591954195555,
+      "size": 9788789
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2020-03.parquet",
+      "mtime_ns": 1794426592208729732,
+      "size": 11564196
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2020-04.parquet",
+      "mtime_ns": 1794426592472202103,
+      "size": 14822967
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2020-05.parquet",
+      "mtime_ns": 1794426592750100319,
+      "size": 15144799
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2020-06.parquet",
+      "mtime_ns": 1794426593015068999,
+      "size": 15066592
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2020-07.parquet",
+      "mtime_ns": 1794426593289893802,
+      "size": 15634798
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2020-08.parquet",
+      "mtime_ns": 1794426593561976946,
+      "size": 15707587
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2020-09.parquet",
+      "mtime_ns": 1794426593837737635,
+      "size": 15110316
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2020-10.parquet",
+      "mtime_ns": 1794426594105482267,
+      "size": 15548083
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2020-11.parquet",
+      "mtime_ns": 1794426594368244754,
+      "size": 14470172
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2020-12.parquet",
+      "mtime_ns": 1794426594652143252,
+      "size": 15978435
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2021-01.parquet",
+      "mtime_ns": 1794426594919046706,
+      "size": 16349357
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2021-02.parquet",
+      "mtime_ns": 1794426595186541169,
+      "size": 14788010
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2021-03.parquet",
+      "mtime_ns": 1794426595472783404,
+      "size": 16370728
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2021-04.parquet",
+      "mtime_ns": 1794426595740513244,
+      "size": 15679187
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2021-05.parquet",
+      "mtime_ns": 1794426596011291621,
+      "size": 16477096
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2021-06.parquet",
+      "mtime_ns": 1794426596274744992,
+      "size": 16005898
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2021-07.parquet",
+      "mtime_ns": 1794426596540572101,
+      "size": 16448915
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2021-08.parquet",
+      "mtime_ns": 1794426596803566090,
+      "size": 16366961
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2021-09.parquet",
+      "mtime_ns": 1794426597072046898,
+      "size": 15837309
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2021-10.parquet",
+      "mtime_ns": 1794426597346995994,
+      "size": 16409216
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2021-11.parquet",
+      "mtime_ns": 1794426597626288976,
+      "size": 15881666
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2021-12.parquet",
+      "mtime_ns": 1794426597896989312,
+      "size": 16352112
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2022-01.parquet",
+      "mtime_ns": 1794426598174982403,
+      "size": 16369803
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2022-02.parquet",
+      "mtime_ns": 1794426598472040021,
+      "size": 14831656
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2022-03.parquet",
+      "mtime_ns": 1794426598738210592,
+      "size": 16418290
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2022-04.parquet",
+      "mtime_ns": 1794426599013181021,
+      "size": 15896128
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2022-05.parquet",
+      "mtime_ns": 1794426599288339911,
+      "size": 16428216
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2022-06.parquet",
+      "mtime_ns": 1794426599576674505,
+      "size": 15913162
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2022-07.parquet",
+      "mtime_ns": 1794426599856011488,
+      "size": 16461532
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2022-08.parquet",
+      "mtime_ns": 1794426600125676061,
+      "size": 16135194
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2022-09.parquet",
+      "mtime_ns": 1794426600382516558,
+      "size": 15715753
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2022-10.parquet",
+      "mtime_ns": 1794426600655941177,
+      "size": 16305173
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2022-11.parquet",
+      "mtime_ns": 1794426600932004495,
+      "size": 15634524
+    },
+    {
+      "path": "data/features_flow/BTCUSDT/2022-12.parquet",
+      "mtime_ns": 1794426601200223049,
+      "size": 16306148
+    }
+  ],
+  "limitations": [
+    "Stage 9 inputs may be rebuilt; inspect manifest before reuse.",
+    "PBO uses like-for-like CPCV train/test ranks across logged development configurations; null until at least two comparable configurations exist.",
+    "Random-direction benchmark uses the executable opposite-side label kernel on raw bars; coverage is reported.",
+    "For BTC, the raw mid-price bars use a monthly median of the modeled decision-time spread in the opposite-direction simulation.",
+    "DSR uses trial-ledger daily Sharpe dispersion; null if too few trials."
+  ],
+  "config_hash": "18da5059eacaba2203811fc744622b7b67fddddab31810b8f62866b28020bda5",
+  "registry_id": 13,
+  "variant": null,
+  "dry_run": false,
+  "cpcv": {
+    "cpcv_test_groups": [
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        0,
+        3
+      ],
+      [
+        0,
+        4
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        3,
+        4
+      ]
+    ],
+    "cpcv_train_scores": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "cpcv_test_scores": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "status": "silent: 0 selected signals",
+  "run_stats": {
+    "method": "fvg_retrace",
+    "candidates": 805451,
+    "signals": 0,
+    "runtime_s": 354.5193881250452,
+    "peak_rss_mib": 7106.765625,
+    "report": "reports/research/dev_v2/fvg_retrace_dev.json",
+    "status": "silent: 0 selected signals",
+    "pooled": {
+      "n": 0,
+      "signals_per_year": 0,
+      "hit_rate": null,
+      "net_avg_R": null,
+      "t_stat": null,
+      "profit_factor": null,
+      "daily_sharpe": null,
+      "max_drawdown": null,
+      "brier": 0.10724351691232142,
+      "brier_skill_vs_p0": 0.48032483893088407,
+      "positive_dev_year_share": null,
+      "deflated_sharpe_ratio": null,
+      "random_direction_percentile": null,
+      "pbo": null,
+      "grade": "ungraded: development",
+      "random_direction_matched_signals": 0,
+      "row_accounting": {
+        "events": 35259,
+        "candidate_rows": 1303511,
+        "assembled_rows": 805451,
+        "drops": {
+          "invalid_geometry": 0,
+          "missing_outcome": 498060
+        },
+        "cpcv_test_groups": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            1,
+            4
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            2,
+            4
+          ],
+          [
+            3,
+            4
+          ]
+        ],
+        "cpcv_train_scores": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "cpcv_test_scores": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "oof_predicted_rows": 805451,
+        "selected_signals": 0,
+        "no_oof_prediction": 0
+      },
+      "selection_comparison": {
+        "selected_n": 0,
+        "selected_avg_R": null,
+        "unselected_n": 805451,
+        "unselected_avg_R": -2.038277697335139,
+        "same_event_unselected_n": 0,
+        "same_event_unselected_avg_R": null
+      }
+    }
+  }
+}
