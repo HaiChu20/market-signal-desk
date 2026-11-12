@@ -216,14 +216,18 @@ def label_grid(bars: pd.DataFrame, atr: pd.Series, every_minutes: int=15,
                max_bars: int|None=None, *, max_trading_days: int=5,
                instrument_class: str="crypto", seconds: pd.DataFrame | None=None,
                signal_start=None, signal_end=None,
-               financing_per_night: float | None=None) -> pd.DataFrame:
+               financing_per_night: float | None=None,
+               sl_grid: tuple[float, ...] | None=None,
+               tp_grid: tuple[float, ...] | None=None,
+               tp_is_r_multiple: bool=False) -> pd.DataFrame:
     """Both-side ATR-grid labels; holding limit is a timestamp deadline."""
     try:
         from msd._msd_kernels import first_hit_batch
     except ImportError as error:
         rust_fallback(error)
         first_hit_batch=None
-    stop_grid,tp_grid=(.5,1,1.5,2,3),(.5,1,1.5,2,3,4,6)
+    stop_grid=(.5,1,1.5,2,3) if sl_grid is None else tuple(sl_grid)
+    target_grid=(.5,1,1.5,2,3,4,6) if tp_grid is None else tuple(tp_grid)
     stamps=pd.to_datetime(bars.ts,utc=True)
     stamp_ns=np.asarray(timestamp_ints(stamps,unit="ns"),dtype=np.int64)
     stamp_values=stamps.to_numpy()
@@ -264,29 +268,30 @@ def label_grid(bars: pd.DataFrame, atr: pd.Series, every_minutes: int=15,
             for side in (-1,1):
                 for sl_mult in stop_grid:
                     sl=mid-side*sl_mult*a
-                    for tp_mult in tp_grid:
+                    for target in target_grid:
+                        tp_mult=target*sl_mult if tp_is_r_multiple else target
                         tp=mid+side*tp_mult*a
                         finance=(financing_per_night if financing_per_night is not None else
                                  .0006 if instrument_class.lower() in {"crypto","24x7"} else .0002)
                         class_code=1 if instrument_class.lower() in {"crypto","24x7"} else 0
                         jobs.extend([global_i,side,mid,sl,tp,deadline_value//1_000_000_000,2,finance,np.nan,np.nan,class_code])
-                        metadata.append((int(global_i),side,sl_mult,tp_mult,deadline_value))
+                        metadata.append((int(global_i),side,sl_mult,tp_mult,target if tp_is_r_multiple else tp_mult,deadline_value))
         if not jobs:continue
         if first_hit_batch is not None:
             results=np.asarray(first_hit_batch(packed_bytes,time_bytes,jobs,11,second_bytes,
                                                second_time_bytes,seconds is not None),dtype=float).reshape(
                                                    -1,13 if seconds is not None else 9)
             for meta,res in zip(metadata,results):
-                signal_i,side,sl_mult,tp_mult,deadline_ns=meta
+                signal_i,side,sl_mult,tp_mult,tp_r,deadline_ns=meta
                 code,exit_i,fill,exit_price,net,gross,nights,entry_i,risk=res[:9]
                 exit_i=int(exit_i);entry_i=int(entry_i)
-                rows.append((signal_i,side,sl_mult,tp_mult,int(code),exit_i-signal_i if exit_i>=0 else -1,
+                rows.append((signal_i,side,sl_mult,tp_mult,tp_r,int(code),exit_i-signal_i if exit_i>=0 else -1,
                              net,gross,fill,exit_price,stamp_ns[exit_i] if exit_i>=0 else np.iinfo(np.int64).min,
                              nights,stamp_ns[entry_i] if entry_i>=0 else np.iinfo(np.int64).min,risk,deadline_ns,
                              {1:"tp",-1:"stop",0:"time",-2:"no_fill"}[int(code)],
                              *res[9:]))
         else:
-            for signal_i,side,sl_mult,tp_mult,deadline_ns in metadata:
+            for signal_i,side,sl_mult,tp_mult,tp_r,deadline_ns in metadata:
                 mid=(float(bid_c[signal_i])+float(ask_c[signal_i]))/2
                 a=float(atr_values[signal_i]);sl=mid-side*sl_mult*a;tp=mid+side*tp_mult*a
                 deadline=pd.Timestamp(deadline_ns,tz="UTC")
@@ -294,16 +299,16 @@ def label_grid(bars: pd.DataFrame, atr: pd.Series, every_minutes: int=15,
                     instrument_class=instrument_class,detailed=True,seconds=seconds,return_stats=seconds is not None)
                 reason,exit_i,exit_price,net,gross,fill,nights,entry_i,risk=res[:9]
                 extra=tuple(res[9].values()) if seconds is not None else ()
-                rows.append((signal_i,side,sl_mult,tp_mult,outcome_code[reason],exit_i-signal_i if exit_i>=0 else -1,
+                rows.append((signal_i,side,sl_mult,tp_mult,tp_r,outcome_code[reason],exit_i-signal_i if exit_i>=0 else -1,
                              net,gross,fill,exit_price,stamp_ns[exit_i] if exit_i>=0 else np.iinfo(np.int64).min,
                              nights,stamp_ns[entry_i] if entry_i>=0 else np.iinfo(np.int64).min,risk,deadline_ns,reason,*extra))
-    columns=["signal_index","side","sl_atr","tp_atr","outcome","exit_offset","net_R","gross_R",
+    columns=["signal_index","side","sl_atr","tp_atr","tp_r","outcome","exit_offset","net_R","gross_R",
              "fill_price","exit_price","exit_ts","financing_nights","entry_ts","planned_risk","deadline_ts","exit_reason"]
     if seconds is not None: columns += list(AMBIGUITY_KEYS)
     result=pd.DataFrame(rows,columns=columns)
     if result.empty:return result
     for column in ("exit_ts","entry_ts","deadline_ts"):
         result[column]=pd.to_datetime(result[column],unit="ns",utc=True,errors="coerce")
-    return result.astype({"signal_index":"int32","side":"int8","sl_atr":"float32","tp_atr":"float32",
+    return result.astype({"signal_index":"int32","side":"int8","sl_atr":"float32","tp_atr":"float32","tp_r":"float32",
                           "outcome":"int8","exit_offset":"int32","net_R":"float32","gross_R":"float32",
                           "fill_price":"float32","exit_price":"float32","financing_nights":"int8","planned_risk":"float32"})
