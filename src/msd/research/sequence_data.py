@@ -79,6 +79,7 @@ class SequenceData:
     sides: tuple[int, int] = (-1, 1)
     sl_grid: tuple[float, ...] = SL_GRID
     tp_grid: tuple[float, ...] = TP_GRID
+    tp_is_r_multiple: bool = False
     labels: pd.DataFrame | None = None
 
     def __len__(self) -> int:
@@ -123,9 +124,30 @@ def _encode(bars: pd.DataFrame, mid: float, atr: float) -> np.ndarray:
     return out
 
 
+def grid_from_config(config: dict) -> tuple[tuple[float, ...], tuple[float, ...], bool]:
+    """Return (SL-in-ATR, TP-axis, TP-is-R) with the legacy grid as default."""
+    grid = config.get("grid")
+    if grid is None:
+        return SL_GRID, TP_GRID, False
+    sl_grid = tuple(float(value) for value in grid.get("sl_atr", ()))
+    has_atr, has_r = "tp_atr" in grid, "tp_r" in grid
+    if has_atr == has_r:
+        raise ValueError("Grid requires exactly one of tp_atr or tp_r")
+    tp_grid = tuple(float(value) for value in grid["tp_r" if has_r else "tp_atr"])
+    if not sl_grid or not tp_grid or any(value <= 0 for value in (*sl_grid, *tp_grid)):
+        raise ValueError("Grid distances must be non-empty and positive")
+    if (any(left >= right for left, right in zip(sl_grid, sl_grid[1:])) or
+            any(left >= right for left, right in zip(tp_grid, tp_grid[1:]))):
+        raise ValueError("Grid distances must be strictly increasing")
+    return sl_grid, tp_grid, has_r
+
+
 def build_windows(bars: dict[str, pd.DataFrame], features: pd.DataFrame,
                   labels: pd.DataFrame, *, windows: dict[str, int] | None = None,
-                  feature_cols: list[str] | None = None) -> SequenceData:
+                  feature_cols: list[str] | None = None,
+                  sl_grid: tuple[float, ...] = SL_GRID,
+                  tp_grid: tuple[float, ...] = TP_GRID,
+                  tp_is_r_multiple: bool = False) -> SequenceData:
     """Build complete anchors with a full both-side SL/TP grid.
 
     Label ``ts`` is the open of the 1m signal bar; its close is its known_at.
@@ -160,7 +182,8 @@ def build_windows(bars: dict[str, pd.DataFrame], features: pd.DataFrame,
     for anchor, group in lab.groupby("known_at", sort=True):
         if group.ts.iloc[0].minute % 15:
             continue
-        if group[["side", "sl_atr", "tp_atr"]].duplicated().any():
+        tp_column = "tp_r" if tp_is_r_multiple and "tp_r" in group else "tp_atr"
+        if group[["side", "sl_atr", tp_column]].duplicated().any():
             raise ValueError("Duplicate grid cell")
         fi = f_times.searchsorted(anchor, side="right") - 1
         if fi < 0:
@@ -190,19 +213,31 @@ def build_windows(bars: dict[str, pd.DataFrame], features: pd.DataFrame,
         # The production dense table contains deliberately unavailable cross-market
         # fields. Zero imputation is fixed, causal, and independent of future folds.
         row = np.nan_to_num(row, nan=0., posinf=0., neginf=0.)
-        y = np.zeros((2, len(SL_GRID), len(TP_GRID)), dtype="float32")
+        y = np.zeros((2, len(sl_grid), len(tp_grid)), dtype="float32")
         mask = np.zeros_like(y, dtype=bool)
         p0 = np.empty_like(y)
         for si, side in enumerate((-1, 1)):
-            for i, sl in enumerate(SL_GRID):
-                for j, tp in enumerate(TP_GRID):
-                    p0[si, i, j] = sl / (sl + tp)
-        for _, item in group.iterrows():
+            for i, sl in enumerate(sl_grid):
+                for j, tp_value in enumerate(tp_grid):
+                    tp_atr = sl * tp_value if tp_is_r_multiple else tp_value
+                    p0[si, i, j] = sl / (sl + tp_atr)
+        canonical = group.copy()
+        if tp_is_r_multiple:
+            canonical["_tp_grid"] = (pd.to_numeric(canonical["tp_r"], errors="coerce")
+                                      if "tp_r" in canonical else
+                                      pd.to_numeric(canonical["tp_atr"], errors="coerce") /
+                                      pd.to_numeric(canonical["sl_atr"], errors="coerce"))
+        else:
+            canonical["_tp_grid"] = pd.to_numeric(canonical["tp_atr"], errors="coerce")
+        canonical["_tp_grid"] = canonical["_tp_grid"].round(12)
+        for _, item in canonical.iterrows():
             try:
                 si = (-1, 1).index(int(item.side))
-                i = SL_GRID.index(float(item.sl_atr))
-                j = TP_GRID.index(float(item.tp_atr))
-            except ValueError as error:
+                i = next(k for k, value in enumerate(sl_grid)
+                         if np.isclose(value, float(item.sl_atr)))
+                j = next(k for k, value in enumerate(tp_grid)
+                         if np.isclose(value, float(item._tp_grid)))
+            except (ValueError, StopIteration) as error:
                 raise ValueError("Label outside grid") from error
             if int(item.outcome) in (-1, 1):
                 y[si, i, j] = float(int(item.outcome) == 1)
@@ -218,9 +253,11 @@ def build_windows(bars: dict[str, pd.DataFrame], features: pd.DataFrame,
         anchor_rows.append({"known_at": anchor, "label_end_ts": group.exit_ts.max(),
                             "price": mid, "atr": atr,
                             "spread": float(close.ask_c) - float(close.bid_c)})
-        label_rows.append(group)
+        label_rows.append(canonical)
     if not dense:
         raise ValueError("No complete causal windows")
     return SequenceData({tf: np.stack(v) for tf, v in arrays.items()}, np.stack(dense),
                         np.stack(targets), np.stack(masks), np.stack(baselines),
-                        pd.DataFrame(anchor_rows), tuple(feature_cols), labels=pd.concat(label_rows, ignore_index=True))
+                        pd.DataFrame(anchor_rows), tuple(feature_cols), sl_grid=sl_grid,
+                        tp_grid=tp_grid, tp_is_r_multiple=tp_is_r_multiple,
+                        labels=pd.concat(label_rows, ignore_index=True))

@@ -9,14 +9,16 @@ from msd.research.sequence_data import WINDOWS
 
 
 class SequenceModel(nn.Module):
-    def __init__(self, dense_dim: int, channels: int = 6, width: int = 24):
+    def __init__(self, dense_dim: int, channels: int = 6, width: int = 24,
+                 sides: int = 2, sl_count: int = 5, tp_count: int = 7):
         super().__init__()
+        self.grid_shape = (sides, sl_count, tp_count)
         self.encoders = nn.ModuleDict({tf: nn.Sequential(
             nn.Conv1d(channels, width, 5, padding=2), nn.GELU(),
             nn.Conv1d(width, width, 5, padding=2), nn.GELU(),
             nn.AdaptiveAvgPool1d(1), nn.Flatten()) for tf in WINDOWS})
         self.head = nn.Sequential(nn.Linear(width * 4 + dense_dim, width * 4),
-                                  nn.GELU(), nn.Linear(width * 4, 2 * 5 * 7))
+                                  nn.GELU(), nn.Linear(width * 4, sides * sl_count * tp_count))
         # Start exactly at the geometric baseline, allowing the model to learn a residual.
         nn.init.zeros_(self.head[-1].weight)
         nn.init.zeros_(self.head[-1].bias)
@@ -24,7 +26,7 @@ class SequenceModel(nn.Module):
     def forward(self, windows: dict[str, torch.Tensor], dense: torch.Tensor,
                 p0: torch.Tensor) -> torch.Tensor:
         encoded = [self.encoders[tf](windows[tf].transpose(1, 2)) for tf in WINDOWS]
-        offset = self.head(torch.cat([*encoded, dense], dim=1)).reshape(-1, 2, 5, 7)
+        offset = self.head(torch.cat([*encoded, dense], dim=1)).reshape(-1, *self.grid_shape)
         return torch.logit(p0.clamp(1e-6, 1 - 1e-6)) + offset
 
 

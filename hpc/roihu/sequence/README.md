@@ -116,6 +116,45 @@ rclone copy reports/sequence "s3allas:${CSC_PROJECT}-msd-derived/results/sequenc
 rclone copy "s3allas:${CSC_PROJECT}-msd-derived/results/sequence" reports/sequence   # on the Mac
 ```
 
+### V5 wide-grid delta
+
+V5 uses the v4 Binance-perpetual crypto inputs with the wide 50-option grid
+(five ATR stops × five R-multiple targets × two sides). Its config SHA-256 is
+`8f2c610755b472a154f38e5d7adf88983ffe60c2f11902c7de1490d24847eca0`.
+The v3 bundle plus v4 delta are already in Allas, so upload only the generated
+348-file, 884,882,953-byte wide-label delta from the Mac:
+
+```bash
+export CSC_PROJECT=2021849
+rclone copy data "s3allas:${CSC_PROJECT}-msd-derived" \
+  --files-from hpc/roihu/sequence/bundle_dev_v5_wide/delta_files.txt \
+  --transfers 8 --progress
+rclone copy . "s3allas:${CSC_PROJECT}-msd-derived/code" \
+  --exclude '/.git/**' --exclude '/.venv/**' --exclude '/.cao/**' --exclude '/data/**' \
+  --exclude '/reports/**' --exclude '/rust/**/target/**' --exclude '__pycache__/**' --progress
+```
+
+On Roihu, pull code and the complete v5 inventory, then submit the 15 jobs:
+
+```bash
+export CSC_PROJECT=2021849
+D=/scratch/project_${CSC_PROJECT}/${USER}/market-signal-desk
+module load allas
+allas-conf
+mkdir -p "$D" && cd "$D"
+rclone copy "s3allas:${CSC_PROJECT}-msd-derived/code" . --transfers 16
+rclone copy "s3allas:${CSC_PROJECT}-msd-derived" data \
+  --files-from hpc/roihu/sequence/bundle_dev_v5_wide/files.txt --transfers 16 --progress
+rclone check "s3allas:${CSC_PROJECT}-msd-derived" data \
+  --files-from hpc/roihu/sequence/bundle_dev_v5_wide/files.txt --one-way
+bash hpc/roihu/sequence/setup.sh
+SYMBOLS=BTCUSDT,ETHUSDT,USATECHIDXUSD,USA500IDXUSD,XAUUSD \
+SEEDS=7,17,27 \
+CONFIG_PATH=hpc/roihu/sequence/configs/dev_v5_wide.json \
+CSC_PROJECT=${CSC_PROJECT} bash hpc/roihu/sequence/submit.sh
+squeue --me
+```
+
 ## Roihu-GPU: direct-rsync setup and submit
 
 ```bash
