@@ -20,7 +20,7 @@ seed_count=${#seeds[@]}
 index=${SLURM_ARRAY_TASK_ID}
 symbol=${symbols[$((index / seed_count))]}
 seed=${seeds[$((index % seed_count))]}
-config=${CONFIG_PATH:-hpc/roihu/sequence/configs/dev_v2.json}
+config=${CONFIG_PATH:-hpc/roihu/sequence/configs/dev_v3.json}
 config_sha=$(sha256sum "$config" | cut -d' ' -f1)
 output="reports/sequence/${config_sha}/${symbol}/seed_${seed}"
 mkdir -p "$output"
