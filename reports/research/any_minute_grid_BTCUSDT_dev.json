@@ -1,0 +1,1487 @@
+{
+  "method": "any_minute_grid",
+  "period": "dev",
+  "preliminary": true,
+  "symbol": "BTCUSDT",
+  "anchors": 174766,
+  "oof_candidate_rows": 9784985,
+  "signals": 0,
+  "brier": 0.1617643978655456,
+  "brier_p0": 0.195072313202463,
+  "brier_skill_vs_p0": 0.17074650313059814,
+  "net_avg_R": null,
+  "t_stat": null,
+  "random_direction_percentile": null,
+  "random_direction_matched": null,
+  "dsr": null,
+  "pbo": null,
+  "calibration_bins": [
+    [
+      2948004.0,
+      120613.93414309606,
+      193910.0
+    ],
+    [
+      2435196.0,
+      348223.26090358116,
+      481129.0
+    ],
+    [
+      1696227.0,
+      429976.08409311937,
+      536226.0
+    ],
+    [
+      939619.0,
+      331380.7167507427,
+      408246.0
+    ],
+    [
+      605353.0,
+      274602.1015095265,
+      297539.0
+    ],
+    [
+      493029.0,
+      270376.74416033487,
+      308045.0
+    ],
+    [
+      382450.0,
+      242594.15904590435,
+      249506.0
+    ],
+    [
+      157705.0,
+      116934.25204876279,
+      116853.0
+    ],
+    [
+      98194.0,
+      81883.60930564074,
+      80025.0
+    ],
+    [
+      29208.0,
+      27228.567666027146,
+      24710.0
+    ]
+  ],
+  "folds": [
+    {
+      "fold": 0,
+      "train_sample": 38413,
+      "train_eligible": 2438996
+    },
+    {
+      "fold": 1,
+      "train_sample": 76617,
+      "train_eligible": 4886047
+    },
+    {
+      "fold": 2,
+      "train_sample": 100000,
+      "train_eligible": 7329992
+    },
+    {
+      "fold": 3,
+      "train_sample": 100000,
+      "train_eligible": 9778968
+    }
+  ],
+  "manifest": [
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-01.parquet",
+      "mtime_ns": 1794350192501216694
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-01.parquet",
+      "mtime_ns": 1794355726429227693
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-02.parquet",
+      "mtime_ns": 1794350196122760498
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-02.parquet",
+      "mtime_ns": 1794355726752860974
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-03.parquet",
+      "mtime_ns": 1794350200382827318
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-03.parquet",
+      "mtime_ns": 1794355727119712998
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-04.parquet",
+      "mtime_ns": 1794350204320279750
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-04.parquet",
+      "mtime_ns": 1794355727468150146
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-05.parquet",
+      "mtime_ns": 1794350208421729847
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-05.parquet",
+      "mtime_ns": 1794355727834625332
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-06.parquet",
+      "mtime_ns": 1794350211796853460
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-06.parquet",
+      "mtime_ns": 1794355728182705934
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-07.parquet",
+      "mtime_ns": 1794350215143764530
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-07.parquet",
+      "mtime_ns": 1794355728532506139
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-08.parquet",
+      "mtime_ns": 1794350218841425723
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-08.parquet",
+      "mtime_ns": 1794355728870027870
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-09.parquet",
+      "mtime_ns": 1794350222194085793
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-09.parquet",
+      "mtime_ns": 1794355729198968669
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-10.parquet",
+      "mtime_ns": 1794350224534458184
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-10.parquet",
+      "mtime_ns": 1794355729542516594
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-11.parquet",
+      "mtime_ns": 1794350227653906966
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-11.parquet",
+      "mtime_ns": 1794355729883339987
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-12.parquet",
+      "mtime_ns": 1794350230649880927
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-12.parquet",
+      "mtime_ns": 1794355730214839983
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-01.parquet",
+      "mtime_ns": 1794350663979240811
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-01.parquet",
+      "mtime_ns": 1794355730555654793
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-01.parquet",
+      "mtime_ns": 1794350663979240811
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-01.parquet",
+      "mtime_ns": 1794355730555654793
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-02.parquet",
+      "mtime_ns": 1794350665710766691
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-02.parquet",
+      "mtime_ns": 1794355730861816958
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-03.parquet",
+      "mtime_ns": 1794350667669681912
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-03.parquet",
+      "mtime_ns": 1794355731202460974
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-04.parquet",
+      "mtime_ns": 1794350670679630940
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-04.parquet",
+      "mtime_ns": 1794355731539776120
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-05.parquet",
+      "mtime_ns": 1794350674430128217
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-05.parquet",
+      "mtime_ns": 1794355731882381659
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-06.parquet",
+      "mtime_ns": 1794350678539748130
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-06.parquet",
+      "mtime_ns": 1794355732220736190
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-07.parquet",
+      "mtime_ns": 1794350682803530239
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-07.parquet",
+      "mtime_ns": 1794355732570983608
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-08.parquet",
+      "mtime_ns": 1794350686749065085
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-08.parquet",
+      "mtime_ns": 1794355732918155200
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-09.parquet",
+      "mtime_ns": 1794350690686579843
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-09.parquet",
+      "mtime_ns": 1794355733260413234
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-10.parquet",
+      "mtime_ns": 1794350694821867626
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-10.parquet",
+      "mtime_ns": 1794355733625115234
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-11.parquet",
+      "mtime_ns": 1794350698805308833
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-11.parquet",
+      "mtime_ns": 1794355733987462665
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-12.parquet",
+      "mtime_ns": 1794350702484572376
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-12.parquet",
+      "mtime_ns": 1794355734344660579
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-01.parquet",
+      "mtime_ns": 1794351187941236940
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-01.parquet",
+      "mtime_ns": 1794355734692012964
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-01.parquet",
+      "mtime_ns": 1794350192501216694
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-01.parquet",
+      "mtime_ns": 1794355726429227693
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-02.parquet",
+      "mtime_ns": 1794350196122760498
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-02.parquet",
+      "mtime_ns": 1794355726752860974
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-03.parquet",
+      "mtime_ns": 1794350200382827318
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-03.parquet",
+      "mtime_ns": 1794355727119712998
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-04.parquet",
+      "mtime_ns": 1794350204320279750
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-04.parquet",
+      "mtime_ns": 1794355727468150146
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-05.parquet",
+      "mtime_ns": 1794350208421729847
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-05.parquet",
+      "mtime_ns": 1794355727834625332
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-06.parquet",
+      "mtime_ns": 1794350211796853460
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-06.parquet",
+      "mtime_ns": 1794355728182705934
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-07.parquet",
+      "mtime_ns": 1794350215143764530
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-07.parquet",
+      "mtime_ns": 1794355728532506139
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-08.parquet",
+      "mtime_ns": 1794350218841425723
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-08.parquet",
+      "mtime_ns": 1794355728870027870
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-09.parquet",
+      "mtime_ns": 1794350222194085793
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-09.parquet",
+      "mtime_ns": 1794355729198968669
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-10.parquet",
+      "mtime_ns": 1794350224534458184
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-10.parquet",
+      "mtime_ns": 1794355729542516594
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-11.parquet",
+      "mtime_ns": 1794350227653906966
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-11.parquet",
+      "mtime_ns": 1794355729883339987
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-12.parquet",
+      "mtime_ns": 1794350230649880927
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-12.parquet",
+      "mtime_ns": 1794355730214839983
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-01.parquet",
+      "mtime_ns": 1794350663979240811
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-01.parquet",
+      "mtime_ns": 1794355730555654793
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-02.parquet",
+      "mtime_ns": 1794350665710766691
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-02.parquet",
+      "mtime_ns": 1794355730861816958
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-03.parquet",
+      "mtime_ns": 1794350667669681912
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-03.parquet",
+      "mtime_ns": 1794355731202460974
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-04.parquet",
+      "mtime_ns": 1794350670679630940
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-04.parquet",
+      "mtime_ns": 1794355731539776120
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-05.parquet",
+      "mtime_ns": 1794350674430128217
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-05.parquet",
+      "mtime_ns": 1794355731882381659
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-06.parquet",
+      "mtime_ns": 1794350678539748130
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-06.parquet",
+      "mtime_ns": 1794355732220736190
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-07.parquet",
+      "mtime_ns": 1794350682803530239
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-07.parquet",
+      "mtime_ns": 1794355732570983608
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-08.parquet",
+      "mtime_ns": 1794350686749065085
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-08.parquet",
+      "mtime_ns": 1794355732918155200
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-09.parquet",
+      "mtime_ns": 1794350690686579843
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-09.parquet",
+      "mtime_ns": 1794355733260413234
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-10.parquet",
+      "mtime_ns": 1794350694821867626
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-10.parquet",
+      "mtime_ns": 1794355733625115234
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-11.parquet",
+      "mtime_ns": 1794350698805308833
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-11.parquet",
+      "mtime_ns": 1794355733987462665
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-12.parquet",
+      "mtime_ns": 1794350702484572376
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-12.parquet",
+      "mtime_ns": 1794355734344660579
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-01.parquet",
+      "mtime_ns": 1794351187941236940
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-01.parquet",
+      "mtime_ns": 1794355734692012964
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-01.parquet",
+      "mtime_ns": 1794351187941236940
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-01.parquet",
+      "mtime_ns": 1794355734692012964
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-02.parquet",
+      "mtime_ns": 1794351191484085698
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-02.parquet",
+      "mtime_ns": 1794355735016889384
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-03.parquet",
+      "mtime_ns": 1794351196156414362
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-03.parquet",
+      "mtime_ns": 1794355735357326857
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-04.parquet",
+      "mtime_ns": 1794351200150569033
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-04.parquet",
+      "mtime_ns": 1794355735702478883
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-05.parquet",
+      "mtime_ns": 1794351204405652335
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-05.parquet",
+      "mtime_ns": 1794355736051564830
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-06.parquet",
+      "mtime_ns": 1794351208122823574
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-06.parquet",
+      "mtime_ns": 1794355736391709174
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-07.parquet",
+      "mtime_ns": 1794351211889247566
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-07.parquet",
+      "mtime_ns": 1794355736742694767
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-08.parquet",
+      "mtime_ns": 1794351216596337960
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-08.parquet",
+      "mtime_ns": 1794355737082395898
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-09.parquet",
+      "mtime_ns": 1794351220495865311
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-09.parquet",
+      "mtime_ns": 1794355737413319595
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-10.parquet",
+      "mtime_ns": 1794351224931947284
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-10.parquet",
+      "mtime_ns": 1794355737756790269
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-11.parquet",
+      "mtime_ns": 1794351229659914681
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-11.parquet",
+      "mtime_ns": 1794355738133568698
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-12.parquet",
+      "mtime_ns": 1794351234297232280
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-12.parquet",
+      "mtime_ns": 1794355738485937974
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2021-01.parquet",
+      "mtime_ns": 1794351841974450647
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-01.parquet",
+      "mtime_ns": 1794355738839508680
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-01.parquet",
+      "mtime_ns": 1794350192501216694
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-01.parquet",
+      "mtime_ns": 1794355726429227693
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-02.parquet",
+      "mtime_ns": 1794350196122760498
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-02.parquet",
+      "mtime_ns": 1794355726752860974
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-03.parquet",
+      "mtime_ns": 1794350200382827318
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-03.parquet",
+      "mtime_ns": 1794355727119712998
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-04.parquet",
+      "mtime_ns": 1794350204320279750
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-04.parquet",
+      "mtime_ns": 1794355727468150146
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-05.parquet",
+      "mtime_ns": 1794350208421729847
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-05.parquet",
+      "mtime_ns": 1794355727834625332
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-06.parquet",
+      "mtime_ns": 1794350211796853460
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-06.parquet",
+      "mtime_ns": 1794355728182705934
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-07.parquet",
+      "mtime_ns": 1794350215143764530
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-07.parquet",
+      "mtime_ns": 1794355728532506139
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-08.parquet",
+      "mtime_ns": 1794350218841425723
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-08.parquet",
+      "mtime_ns": 1794355728870027870
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-09.parquet",
+      "mtime_ns": 1794350222194085793
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-09.parquet",
+      "mtime_ns": 1794355729198968669
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-10.parquet",
+      "mtime_ns": 1794350224534458184
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-10.parquet",
+      "mtime_ns": 1794355729542516594
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-11.parquet",
+      "mtime_ns": 1794350227653906966
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-11.parquet",
+      "mtime_ns": 1794355729883339987
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-12.parquet",
+      "mtime_ns": 1794350230649880927
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-12.parquet",
+      "mtime_ns": 1794355730214839983
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-01.parquet",
+      "mtime_ns": 1794350663979240811
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-01.parquet",
+      "mtime_ns": 1794355730555654793
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-02.parquet",
+      "mtime_ns": 1794350665710766691
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-02.parquet",
+      "mtime_ns": 1794355730861816958
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-03.parquet",
+      "mtime_ns": 1794350667669681912
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-03.parquet",
+      "mtime_ns": 1794355731202460974
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-04.parquet",
+      "mtime_ns": 1794350670679630940
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-04.parquet",
+      "mtime_ns": 1794355731539776120
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-05.parquet",
+      "mtime_ns": 1794350674430128217
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-05.parquet",
+      "mtime_ns": 1794355731882381659
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-06.parquet",
+      "mtime_ns": 1794350678539748130
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-06.parquet",
+      "mtime_ns": 1794355732220736190
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-07.parquet",
+      "mtime_ns": 1794350682803530239
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-07.parquet",
+      "mtime_ns": 1794355732570983608
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-08.parquet",
+      "mtime_ns": 1794350686749065085
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-08.parquet",
+      "mtime_ns": 1794355732918155200
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-09.parquet",
+      "mtime_ns": 1794350690686579843
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-09.parquet",
+      "mtime_ns": 1794355733260413234
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-10.parquet",
+      "mtime_ns": 1794350694821867626
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-10.parquet",
+      "mtime_ns": 1794355733625115234
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-11.parquet",
+      "mtime_ns": 1794350698805308833
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-11.parquet",
+      "mtime_ns": 1794355733987462665
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-12.parquet",
+      "mtime_ns": 1794350702484572376
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-12.parquet",
+      "mtime_ns": 1794355734344660579
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-01.parquet",
+      "mtime_ns": 1794351187941236940
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-01.parquet",
+      "mtime_ns": 1794355734692012964
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-02.parquet",
+      "mtime_ns": 1794351191484085698
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-02.parquet",
+      "mtime_ns": 1794355735016889384
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-03.parquet",
+      "mtime_ns": 1794351196156414362
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-03.parquet",
+      "mtime_ns": 1794355735357326857
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-04.parquet",
+      "mtime_ns": 1794351200150569033
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-04.parquet",
+      "mtime_ns": 1794355735702478883
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-05.parquet",
+      "mtime_ns": 1794351204405652335
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-05.parquet",
+      "mtime_ns": 1794355736051564830
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-06.parquet",
+      "mtime_ns": 1794351208122823574
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-06.parquet",
+      "mtime_ns": 1794355736391709174
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-07.parquet",
+      "mtime_ns": 1794351211889247566
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-07.parquet",
+      "mtime_ns": 1794355736742694767
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-08.parquet",
+      "mtime_ns": 1794351216596337960
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-08.parquet",
+      "mtime_ns": 1794355737082395898
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-09.parquet",
+      "mtime_ns": 1794351220495865311
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-09.parquet",
+      "mtime_ns": 1794355737413319595
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-10.parquet",
+      "mtime_ns": 1794351224931947284
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-10.parquet",
+      "mtime_ns": 1794355737756790269
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-11.parquet",
+      "mtime_ns": 1794351229659914681
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-11.parquet",
+      "mtime_ns": 1794355738133568698
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-12.parquet",
+      "mtime_ns": 1794351234297232280
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-12.parquet",
+      "mtime_ns": 1794355738485937974
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2021-01.parquet",
+      "mtime_ns": 1794351841974450647
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-01.parquet",
+      "mtime_ns": 1794355738839508680
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2021-01.parquet",
+      "mtime_ns": 1794351841974450647
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-01.parquet",
+      "mtime_ns": 1794355738839508680
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2021-02.parquet",
+      "mtime_ns": 1794351846947074045
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-02.parquet",
+      "mtime_ns": 1794355739156981182
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2021-03.parquet",
+      "mtime_ns": 1794351852450501837
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-03.parquet",
+      "mtime_ns": 1794355739504659321
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2021-04.parquet",
+      "mtime_ns": 1794351857456841287
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-04.parquet",
+      "mtime_ns": 1794355739845792010
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2021-05.parquet",
+      "mtime_ns": 1794351863284292176
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-05.parquet",
+      "mtime_ns": 1794355740219905741
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2021-06.parquet",
+      "mtime_ns": 1794351867907908877
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-06.parquet",
+      "mtime_ns": 1794355740555588660
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2021-07.parquet",
+      "mtime_ns": 1794351872669562320
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-07.parquet",
+      "mtime_ns": 1794355740917729839
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2021-08.parquet",
+      "mtime_ns": 1794351877227524827
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-08.parquet",
+      "mtime_ns": 1794355741266124861
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2021-09.parquet",
+      "mtime_ns": 1794351882218049501
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-09.parquet",
+      "mtime_ns": 1794355741621880008
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2021-10.parquet",
+      "mtime_ns": 1794351887544849845
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-10.parquet",
+      "mtime_ns": 1794355741976136222
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2021-11.parquet",
+      "mtime_ns": 1794351892375847607
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-11.parquet",
+      "mtime_ns": 1794355742332095455
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2021-12.parquet",
+      "mtime_ns": 1794351897635017074
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-12.parquet",
+      "mtime_ns": 1794355742703288570
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2022-01.parquet",
+      "mtime_ns": 1794352556283177479
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-01.parquet",
+      "mtime_ns": 1794355743063230058
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-01.parquet",
+      "mtime_ns": 1794350192501216694
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-01.parquet",
+      "mtime_ns": 1794355726429227693
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-02.parquet",
+      "mtime_ns": 1794350196122760498
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-02.parquet",
+      "mtime_ns": 1794355726752860974
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-03.parquet",
+      "mtime_ns": 1794350200382827318
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-03.parquet",
+      "mtime_ns": 1794355727119712998
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-04.parquet",
+      "mtime_ns": 1794350204320279750
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-04.parquet",
+      "mtime_ns": 1794355727468150146
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-05.parquet",
+      "mtime_ns": 1794350208421729847
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-05.parquet",
+      "mtime_ns": 1794355727834625332
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-06.parquet",
+      "mtime_ns": 1794350211796853460
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-06.parquet",
+      "mtime_ns": 1794355728182705934
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-07.parquet",
+      "mtime_ns": 1794350215143764530
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-07.parquet",
+      "mtime_ns": 1794355728532506139
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-08.parquet",
+      "mtime_ns": 1794350218841425723
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-08.parquet",
+      "mtime_ns": 1794355728870027870
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-09.parquet",
+      "mtime_ns": 1794350222194085793
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-09.parquet",
+      "mtime_ns": 1794355729198968669
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-10.parquet",
+      "mtime_ns": 1794350224534458184
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-10.parquet",
+      "mtime_ns": 1794355729542516594
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-11.parquet",
+      "mtime_ns": 1794350227653906966
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-11.parquet",
+      "mtime_ns": 1794355729883339987
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2018-12.parquet",
+      "mtime_ns": 1794350230649880927
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2018-12.parquet",
+      "mtime_ns": 1794355730214839983
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-01.parquet",
+      "mtime_ns": 1794350663979240811
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-01.parquet",
+      "mtime_ns": 1794355730555654793
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-02.parquet",
+      "mtime_ns": 1794350665710766691
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-02.parquet",
+      "mtime_ns": 1794355730861816958
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-03.parquet",
+      "mtime_ns": 1794350667669681912
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-03.parquet",
+      "mtime_ns": 1794355731202460974
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-04.parquet",
+      "mtime_ns": 1794350670679630940
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-04.parquet",
+      "mtime_ns": 1794355731539776120
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-05.parquet",
+      "mtime_ns": 1794350674430128217
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-05.parquet",
+      "mtime_ns": 1794355731882381659
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-06.parquet",
+      "mtime_ns": 1794350678539748130
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-06.parquet",
+      "mtime_ns": 1794355732220736190
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-07.parquet",
+      "mtime_ns": 1794350682803530239
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-07.parquet",
+      "mtime_ns": 1794355732570983608
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-08.parquet",
+      "mtime_ns": 1794350686749065085
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-08.parquet",
+      "mtime_ns": 1794355732918155200
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-09.parquet",
+      "mtime_ns": 1794350690686579843
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-09.parquet",
+      "mtime_ns": 1794355733260413234
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-10.parquet",
+      "mtime_ns": 1794350694821867626
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-10.parquet",
+      "mtime_ns": 1794355733625115234
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-11.parquet",
+      "mtime_ns": 1794350698805308833
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-11.parquet",
+      "mtime_ns": 1794355733987462665
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2019-12.parquet",
+      "mtime_ns": 1794350702484572376
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2019-12.parquet",
+      "mtime_ns": 1794355734344660579
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-01.parquet",
+      "mtime_ns": 1794351187941236940
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-01.parquet",
+      "mtime_ns": 1794355734692012964
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-02.parquet",
+      "mtime_ns": 1794351191484085698
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-02.parquet",
+      "mtime_ns": 1794355735016889384
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-03.parquet",
+      "mtime_ns": 1794351196156414362
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-03.parquet",
+      "mtime_ns": 1794355735357326857
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-04.parquet",
+      "mtime_ns": 1794351200150569033
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-04.parquet",
+      "mtime_ns": 1794355735702478883
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-05.parquet",
+      "mtime_ns": 1794351204405652335
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-05.parquet",
+      "mtime_ns": 1794355736051564830
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-06.parquet",
+      "mtime_ns": 1794351208122823574
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-06.parquet",
+      "mtime_ns": 1794355736391709174
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-07.parquet",
+      "mtime_ns": 1794351211889247566
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-07.parquet",
+      "mtime_ns": 1794355736742694767
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-08.parquet",
+      "mtime_ns": 1794351216596337960
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-08.parquet",
+      "mtime_ns": 1794355737082395898
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-09.parquet",
+      "mtime_ns": 1794351220495865311
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-09.parquet",
+      "mtime_ns": 1794355737413319595
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-10.parquet",
+      "mtime_ns": 1794351224931947284
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-10.parquet",
+      "mtime_ns": 1794355737756790269
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-11.parquet",
+      "mtime_ns": 1794351229659914681
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-11.parquet",
+      "mtime_ns": 1794355738133568698
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2020-12.parquet",
+      "mtime_ns": 1794351234297232280
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-12.parquet",
+      "mtime_ns": 1794355738485937974
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2021-01.parquet",
+      "mtime_ns": 1794351841974450647
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-01.parquet",
+      "mtime_ns": 1794355738839508680
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2021-02.parquet",
+      "mtime_ns": 1794351846947074045
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-02.parquet",
+      "mtime_ns": 1794355739156981182
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2021-03.parquet",
+      "mtime_ns": 1794351852450501837
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-03.parquet",
+      "mtime_ns": 1794355739504659321
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2021-04.parquet",
+      "mtime_ns": 1794351857456841287
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-04.parquet",
+      "mtime_ns": 1794355739845792010
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2021-05.parquet",
+      "mtime_ns": 1794351863284292176
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-05.parquet",
+      "mtime_ns": 1794355740219905741
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2021-06.parquet",
+      "mtime_ns": 1794351867907908877
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-06.parquet",
+      "mtime_ns": 1794355740555588660
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2021-07.parquet",
+      "mtime_ns": 1794351872669562320
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-07.parquet",
+      "mtime_ns": 1794355740917729839
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2021-08.parquet",
+      "mtime_ns": 1794351877227524827
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-08.parquet",
+      "mtime_ns": 1794355741266124861
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2021-09.parquet",
+      "mtime_ns": 1794351882218049501
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-09.parquet",
+      "mtime_ns": 1794355741621880008
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2021-10.parquet",
+      "mtime_ns": 1794351887544849845
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-10.parquet",
+      "mtime_ns": 1794355741976136222
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2021-11.parquet",
+      "mtime_ns": 1794351892375847607
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-11.parquet",
+      "mtime_ns": 1794355742332095455
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2021-12.parquet",
+      "mtime_ns": 1794351897635017074
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-12.parquet",
+      "mtime_ns": 1794355742703288570
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2022-01.parquet",
+      "mtime_ns": 1794352556283177479
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-01.parquet",
+      "mtime_ns": 1794355743063230058
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2022-02.parquet",
+      "mtime_ns": 1794352560168520067
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-02.parquet",
+      "mtime_ns": 1794355743395325227
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2022-03.parquet",
+      "mtime_ns": 1794352564385417070
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-03.parquet",
+      "mtime_ns": 1794355743755894805
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2022-04.parquet",
+      "mtime_ns": 1794352568581029279
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-04.parquet",
+      "mtime_ns": 1794355744109098132
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2022-05.parquet",
+      "mtime_ns": 1794352572893177727
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-05.parquet",
+      "mtime_ns": 1794355744463012757
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2022-06.parquet",
+      "mtime_ns": 1794352577081062776
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-06.parquet",
+      "mtime_ns": 1794355744811245819
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2022-07.parquet",
+      "mtime_ns": 1794352581412693376
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-07.parquet",
+      "mtime_ns": 1794355745158625704
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2022-08.parquet",
+      "mtime_ns": 1794352585860855465
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-08.parquet",
+      "mtime_ns": 1794355745502451298
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2022-09.parquet",
+      "mtime_ns": 1794352590118043326
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-09.parquet",
+      "mtime_ns": 1794355745861588068
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2022-10.parquet",
+      "mtime_ns": 1794352594513000221
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-10.parquet",
+      "mtime_ns": 1794355746220583044
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2022-11.parquet",
+      "mtime_ns": 1794352599050203485
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-11.parquet",
+      "mtime_ns": 1794355746572050018
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels/BTCUSDT/2022-12.parquet",
+      "mtime_ns": 1794352603352413918
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-12.parquet",
+      "mtime_ns": 1794355746948474985
+    }
+  ],
+  "runtime_s": 122.30896629102062
+}

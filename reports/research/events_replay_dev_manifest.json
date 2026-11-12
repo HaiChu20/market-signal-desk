@@ -1,0 +1,1689 @@
+{
+  "root": "data/events_replay_dev",
+  "files": [
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2018-01.parquet",
+      "size": 1874861,
+      "sha256": "58c50f88c89e4e5553d3e7f989e524e6f96775a7ce2ab1e9ba894569e5118c59"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2018-02.parquet",
+      "size": 1296242,
+      "sha256": "2ad775a972ad6f31090804ca0ae59e9acd709eadd79bf26c71ab7dd96c85dc2a"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2018-03.parquet",
+      "size": 1443172,
+      "sha256": "c86198ad22cd5df0baec5744ae9c2add465690afc6acf33b964fbc91ca10d951"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2018-04.parquet",
+      "size": 1326434,
+      "sha256": "18c25a87f40c35a56dbe9e0f393ef816baa2ad05c98d2dcf300e6c2f4f949191"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2018-05.parquet",
+      "size": 1321737,
+      "sha256": "3d550d2809478822823fe5bb8eea9af10c47787599186340d8b59c3ee19e35bf"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2018-06.parquet",
+      "size": 1417660,
+      "sha256": "a6f79ef1711e1b5372af2bbd03e00f0563837f13ed25be392186f14f43385ee6"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2018-07.parquet",
+      "size": 1316870,
+      "sha256": "2d69a6d6969ef781c6b296552437de11354427da577d2bf8fd3095023c84e563"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2018-08.parquet",
+      "size": 1193836,
+      "sha256": "b3ed05ffea6b0954615a83f8a31b118e70a84e032d8c89dfb6e6120406afba59"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2018-09.parquet",
+      "size": 1171763,
+      "sha256": "e81dfef77f5cbfe07f76a4bec6f243552603ca1eb2ec56d939350b9fb067853e"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2018-10.parquet",
+      "size": 1233714,
+      "sha256": "f8b7f601bcc9a01adb3c45c3ba060e4853554509321bf87df0b5db902564525c"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2018-11.parquet",
+      "size": 1171850,
+      "sha256": "37e499612d1818de8714210ff5fcbab2a211fed676e63a1e1049b014e2eac4c3"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2018-12.parquet",
+      "size": 1288635,
+      "sha256": "b91d3f596f99a1d015de9f00590ee9d812b970a3dba43ca429d255587c37edd4"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2019-01.parquet",
+      "size": 1375065,
+      "sha256": "6abbaf4e9ada09caa7e3b2e5315a30b56fd8ed164de958a79259f52a941b3cc0"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2019-02.parquet",
+      "size": 1161204,
+      "sha256": "7369b96972e6e0ab6474859676371bc7e4af9ce48fcec7c74a9dd577d37a9e3a"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2019-03.parquet",
+      "size": 1215393,
+      "sha256": "462cdef5384b942decee7e99d044f6a803304427d276a20ea7bfbe26511e92a1"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2019-04.parquet",
+      "size": 1355264,
+      "sha256": "ba27fdc04d8e6488d4f52faf18958d245c0dbcbc2c1b6cf293be620a4974b165"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2019-05.parquet",
+      "size": 1234244,
+      "sha256": "c915dbde58d421cf64bc2f6043df4b5526700f88d8fbbc6b581c80261520c03c"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2019-06.parquet",
+      "size": 1279276,
+      "sha256": "3de4bf6f27f1f82ff9024f5bd5b11365e042f60ad00ccb3fa924c944951be289"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2019-07.parquet",
+      "size": 1306202,
+      "sha256": "52c00cc9dde2ea7dfb6ab2f7e38e8c8f55f05a191bd2067b4bfcba4ad041f06f"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2019-08.parquet",
+      "size": 1305383,
+      "sha256": "e2723d66a1b08f03f24058a33e85b3937c2416ac3d42ac7150635d6908242cbd"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2019-09.parquet",
+      "size": 1234512,
+      "sha256": "3ddef957d50e7cf18873c7b054e769caee34eb4d4e77643873eeca286d72c868"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2019-10.parquet",
+      "size": 1210387,
+      "sha256": "55772d9a52d42f5d10b1b086671da05cffc62d90348d11c6d8c234e1f4ffb003"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2019-11.parquet",
+      "size": 1148050,
+      "sha256": "408a14653dce7254a24b3dbf3514dead50be01bebbcb121cd8cfbbeea4a38190"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2019-12.parquet",
+      "size": 1148383,
+      "sha256": "1d4cd464467b7d751a0e2bb7eb09456397859aa7fe8104ee8da5fbb442e61c86"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2020-01.parquet",
+      "size": 1177941,
+      "sha256": "7161ff4ba2fd7a8091bd0cc58f5a8ba81853ce58be674fdd11f534ac32389c2a"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2020-02.parquet",
+      "size": 1118888,
+      "sha256": "0393dfcd628c52a6a3f5901c08653b83cd520e5acc572dd7f9fb71ab94af923e"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2020-03.parquet",
+      "size": 1198680,
+      "sha256": "d8851107be5679648e31ac262703ee06270ae320908f7b137820de3a000ebd22"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2020-04.parquet",
+      "size": 1072930,
+      "sha256": "81baa5558f88c8748fc623b736a6bbee9e677c562dff3a6764affbb5ec925f5a"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2020-05.parquet",
+      "size": 1138620,
+      "sha256": "39b186dc6cd710b4e10b5542635118d7201a9644a711b93d76e4cef5749f4084"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2020-06.parquet",
+      "size": 1090527,
+      "sha256": "a7c8e3d4027448a27b1483879697dde3219b92880f4f82be8b99edfb64dfa43d"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2020-07.parquet",
+      "size": 1170362,
+      "sha256": "b5861edd218c56e9d29282984637ca1c891394643132691f45562ff297f1c982"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2020-08.parquet",
+      "size": 1215833,
+      "sha256": "2ee544c76ef9d301639c7e03a07a354436283a5c3d4a5b9b0ad4401ff864a260"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2020-09.parquet",
+      "size": 1150467,
+      "sha256": "5197c73a2e0f02131a6b3a3f0fdc142e18a9a96184937c2eeb837791d68abe6c"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2020-10.parquet",
+      "size": 1343732,
+      "sha256": "f937a9e25e7c1d2a3de6d9b383b6a52efee354e1c3a23257f23e494c63d29a17"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2020-11.parquet",
+      "size": 1607411,
+      "sha256": "96ea31e6d2b32f1ba62cad447ffbfa703f3d71c4b1d5b43c2fb8854be5359429"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2020-12.parquet",
+      "size": 1627490,
+      "sha256": "b254ad431b69b1ec13152d7411b6237409337925cd4c263549164947da4e3b0c"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2021-01.parquet",
+      "size": 2337021,
+      "sha256": "8fedf5d033e331bfb38cda2eff52bcdff36d9a216c95bde8ce20316b96afb269"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2021-02.parquet",
+      "size": 2083004,
+      "sha256": "72a4f99d43feb266355e1dfb17b7a4f59c9f0b43c944ef2a00788647d6d8426c"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2021-03.parquet",
+      "size": 2357779,
+      "sha256": "cc2dabb83246ce5df4ed9e71e15d6171d678685671281f3a94d01a2ba36881c5"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2021-04.parquet",
+      "size": 2122044,
+      "sha256": "477fec0ffd45bb7eeed2cedb6b63099414c8c5bff39d7d0008d8d73e41138272"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2021-05.parquet",
+      "size": 2034787,
+      "sha256": "8efed34465991daa12a90fe88fa3ff479e06a63fe84024c354ba574217577b05"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2021-06.parquet",
+      "size": 1928207,
+      "sha256": "1cb719b8824cc89c1b1423c1b7e6859880c95ec02ecf31667fa3ad1845259943"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2021-07.parquet",
+      "size": 1916279,
+      "sha256": "003168153feb8ea328024d246f82baf2a0eb340d9e69eaff044b2be112f3bf5e"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2021-08.parquet",
+      "size": 2145523,
+      "sha256": "5e45000bcb62e6edbd98d07e65b0e69f43e0d9a0196245c080a3c546a3d3aae4"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2021-09.parquet",
+      "size": 1975609,
+      "sha256": "ef3f647076cbf80a98a6563775785d69cadf9cdfe2e64911066524a9c9773fcd"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2021-10.parquet",
+      "size": 2099916,
+      "sha256": "8e9a927738e44b7af2fc10d45d49314baa2142bfca7889c0080f94ed21c2d074"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2021-11.parquet",
+      "size": 1970270,
+      "sha256": "f5a53091838908b47a9ee8f1468d45877e57d9dfa5a29ef0d458d754b5bd3557"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2021-12.parquet",
+      "size": 1916638,
+      "sha256": "518d6ca1822e980f0c73c4581318e5436701c263d993fbef2fe106504024620f"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2022-01.parquet",
+      "size": 1951891,
+      "sha256": "7bcc85bd3d5d2c628a3aa8ef67a2977415114421d55f9c273e68e00634d3dce2"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2022-02.parquet",
+      "size": 1639827,
+      "sha256": "3813602bd88d07f7995bf969186065ca66d1b6fe19255214ad013dee9bafc5ad"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2022-03.parquet",
+      "size": 1710890,
+      "sha256": "ddf177019be107d96459be4262506e62623f76af1c2edc7aa20aec98527bb9b4"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2022-04.parquet",
+      "size": 1652664,
+      "sha256": "e88a42e8430f61062a5761bf7f32f217a44b26b57ea27d349a41b3b5aac2d020"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2022-05.parquet",
+      "size": 1841528,
+      "sha256": "58039c4a2a75722571f39104c418f3b3c2903b48ab1a8b60ffb7d0f881c6a4c9"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2022-06.parquet",
+      "size": 1922021,
+      "sha256": "e695db3551ad187cfd1f9d335f3d1bc005fc06d542f4b6800a03d3d75aed7a37"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2022-07.parquet",
+      "size": 1935338,
+      "sha256": "a2d257c4dae9fb05014a1f264405607aeec4f183a7ffcd93c65531353112520c"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2022-08.parquet",
+      "size": 1629387,
+      "sha256": "f86399f21aee8dc0ab24485ad89a5b4a93733286b4bb47b8ff6e787dc60f3a03"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2022-09.parquet",
+      "size": 1488226,
+      "sha256": "f7b5eda1683241f0ddb5b087698f98019d9ba4aded1c5416cccc406c5a38e9b7"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2022-10.parquet",
+      "size": 1286166,
+      "sha256": "976b1c2911a05f1b1b8412cc75d4068d90fe8558982e74a1dd4c2f311ef3e424"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2022-11.parquet",
+      "size": 1421870,
+      "sha256": "22a1fec737b34798b2f9f55db7f899f24ce4c270b9b5d643b0747dc480aebda5"
+    },
+    {
+      "path": "data/events_replay_dev/BTCUSDT/2022-12.parquet",
+      "size": 1272004,
+      "sha256": "1af1fd528a44ee6bf1fb334202df6bfd8d53d5b2a49da9993265bd79e23daf5b"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2019-01.parquet",
+      "size": 1472888,
+      "sha256": "a99ac6778c9656edcf18451d9418e0125523375d45e9520e23fc4c452ea2638d"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2019-02.parquet",
+      "size": 967248,
+      "sha256": "4fbee730ff441aa680422cfdbe479a23049a8b765b34e283414108b1c828fca9"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2019-03.parquet",
+      "size": 1098162,
+      "sha256": "65f497273268e7ee8b51b4f823673b967378b5412b69a7a8d6d8b23f5ac265d0"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2019-04.parquet",
+      "size": 781073,
+      "sha256": "b0f4bbd36903a0c16ec7660609803d17f6c6164492dd3d9b13be914b193b5cf3"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2019-05.parquet",
+      "size": 1570275,
+      "sha256": "904e4da674066db658d0399f313ce68902759e447f6a8226b43e1c379e7bb259"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2019-06.parquet",
+      "size": 1118659,
+      "sha256": "65ed967dae01e5eda5c127e7cf567f3aecd2bc3cf8a4513be60b09a48280ad32"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2019-07.parquet",
+      "size": 872303,
+      "sha256": "5704ec289d248c80ff2b67c1dad8794740712fb66653114dfea600d8824b0fb8"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2019-08.parquet",
+      "size": 1628526,
+      "sha256": "14e3cd507f57b5f98d36588c632879f0d5e2923a6d887ae35d4194d178a13220"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2019-09.parquet",
+      "size": 1340956,
+      "sha256": "5752fdf909a4360d238fbda4c2cc917e2f0c215204e1a151358a1ff8393aab8c"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2019-10.parquet",
+      "size": 1424706,
+      "sha256": "8cae6e6f91a010afaf0c63dfcc591b93b1b15bf685fb458f88e04db81a176b9c"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2019-11.parquet",
+      "size": 819794,
+      "sha256": "ed270c7c1489d79821a3e0eb0cf7eb2db4ea04229658c45c52e607ae08118489"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2019-12.parquet",
+      "size": 818695,
+      "sha256": "875d1a90c3ba1282befc6a3f43238f3121c608d4fa2235955ba55f1de79072d4"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2020-01.parquet",
+      "size": 1190468,
+      "sha256": "45c90c7b6343a5ed7606202aa3203e3c4e045f99879b080d2f7974e44554cb5e"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2020-02.parquet",
+      "size": 1448350,
+      "sha256": "2035e6fe8c831ef8bcef32b5fafdb1f562dd1beaecccc30ad3480ab55aec4415"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2020-03.parquet",
+      "size": 1576595,
+      "sha256": "4a79ac7a9bc2edbe987f8a64502f6cdf8ccf2cfd8f21786e37f5fd97987eaca5"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2020-04.parquet",
+      "size": 1429457,
+      "sha256": "6a610f150628d4cd3d53b6d793356650c7785fd27f135eb361bff002079bb7ba"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2020-05.parquet",
+      "size": 1508354,
+      "sha256": "f6c55590c4825caf8af4189d093340c469d64b9956beebc9ece1fce88394601a"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2020-06.parquet",
+      "size": 1725945,
+      "sha256": "0e0ad53ccebc1c91b98069b6627e258805a2f3e0dc2cd9448fc7e1ae216001f4"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2020-07.parquet",
+      "size": 1778032,
+      "sha256": "ab49870bf4fe306f82215d4e2443f86911fcc0dd9d641208e57408055d034a9b"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2020-08.parquet",
+      "size": 1534528,
+      "sha256": "9ec97cfdf6d0470815b4a4e672e71a2a29a93dd2df7d9ea9351006dc7d0d21d3"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2020-09.parquet",
+      "size": 1569537,
+      "sha256": "264108c5ae1e2788b9858b439d4984f2ad8a28513dca2abcac65614f13698045"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2020-10.parquet",
+      "size": 1719668,
+      "sha256": "6d6e49b68f1460ef50b366c401587b8e880df2c69f06a30383e5218dbd69e394"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2020-11.parquet",
+      "size": 1534678,
+      "sha256": "c322b42eb90cd757dd954b1e02ce1b91cd14fdf32271b39bd9c4eb6670143f1f"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2020-12.parquet",
+      "size": 1573661,
+      "sha256": "e142c88de627348b26b6fa1659de1820c414001c320ee85465b35a25d97d06bc"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2021-01.parquet",
+      "size": 1524151,
+      "sha256": "e77e2ee67a6845688e1829ebfd1d55a4d03278b231c725d16ca3a650ab0b1be7"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2021-02.parquet",
+      "size": 1429782,
+      "sha256": "9eca6744918bab96ff1ce6c093922afd50d6f44bae2222f6077f28cec59cec4e"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2021-03.parquet",
+      "size": 1744376,
+      "sha256": "fff00e2edba287b16bc5bf29be7e256ae46a851a8f0accfe293c5e571672e4e1"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2021-04.parquet",
+      "size": 1347020,
+      "sha256": "6295382d1925d93d6eeeebac2f9f50103ebad7d5480a6814cb09690e4acd5265"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2021-05.parquet",
+      "size": 1555089,
+      "sha256": "c724cab6071d1957c5d80fcbf0ac799ea30989e6ac1cc8227797235d1c364ad4"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2021-06.parquet",
+      "size": 1545124,
+      "sha256": "2a8a785475975fb0394479cbbcd14089837016bb6321a8939d563117f0580622"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2021-07.parquet",
+      "size": 1447064,
+      "sha256": "cc184100852936044ae1a6cc1622078936cd0a44fbb7556237f2c0be91ed9f28"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2021-08.parquet",
+      "size": 1342074,
+      "sha256": "b4286896b81624ed64948cd12e65b22da06a9b1ef6a3641b902747a389f15c1f"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2021-09.parquet",
+      "size": 1619553,
+      "sha256": "c4c1db64339668691dcff77ec893fe432afcd6dc1c62c9cf4c761994804913ca"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2021-10.parquet",
+      "size": 1614043,
+      "sha256": "820e18e6cffaff961824656e414beafc10ebb8eae76da9b5bb8305423d0bae63"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2021-11.parquet",
+      "size": 1615246,
+      "sha256": "80007e8c09657efeb96e382e7cfad5f32c32ad4632032189f3d3ebd7a260ecfc"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2021-12.parquet",
+      "size": 1736363,
+      "sha256": "0a8b77061b1b04095e9a78fb0b23560f79a982c7fb53509bd738b49fbf619bf2"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2022-01.parquet",
+      "size": 1615147,
+      "sha256": "f12a88b295e0ea028c759d3991c4b37fbb803e1995a592f1c4eb076d1711b43c"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2022-02.parquet",
+      "size": 1380898,
+      "sha256": "e1ac4155f55368902c3837906606efa9e7f2c031db892420bf27ab13e967ef5b"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2022-03.parquet",
+      "size": 1597380,
+      "sha256": "1aa01c6710eb62445f60a16c92cf1eeb5182e68c286980cbe6f3b7476766f7bd"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2022-04.parquet",
+      "size": 1361936,
+      "sha256": "05501f5496b4b4245fbef257b8b8e46e72f14a5a6ea0f7008dd6aead51604bdd"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2022-05.parquet",
+      "size": 1651998,
+      "sha256": "062ba7a1894e794c2940df47f9a84fc293fb3205ba3eb1fcdcb7643892f08f0f"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2022-06.parquet",
+      "size": 1571541,
+      "sha256": "990f41f20ac3652d4b702f9153d71dae0f2186d366c17d7ac1c27eedb39ec45d"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2022-07.parquet",
+      "size": 1495094,
+      "sha256": "f5253a3ee7e3ac6334aa84e666ea8aa3964888ce4f4dc6783a03ed9a0dfd9689"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2022-08.parquet",
+      "size": 1635478,
+      "sha256": "af0cf39bb493e10d7e282a6e28f8332e11d32e78bd7d006bdb4bb0b35a97ebb8"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2022-09.parquet",
+      "size": 1522116,
+      "sha256": "4f7013a6d5366504015db2b8b4df8424e7967667bbcf4b53c1cdb4c505487191"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2022-10.parquet",
+      "size": 1516623,
+      "sha256": "d7770f0d44e547d621840be93e584af14d03dcba2b4e403e566627063c1179cc"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2022-11.parquet",
+      "size": 1556256,
+      "sha256": "ac308dc97dd337e5b1f310c9ff099be0120dba59efaf69caccf0050ccec53af3"
+    },
+    {
+      "path": "data/events_replay_dev/USA500IDXUSD/2022-12.parquet",
+      "size": 1446787,
+      "sha256": "619050f8a06cc63efddc0291feea5694b105a33979e0e873b08028f17615459a"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2019-01.parquet",
+      "size": 1536020,
+      "sha256": "1b65d072d77f2108cc167f7e5aa0b30e6cd725901436f0d943b01d4a223a4004"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2019-02.parquet",
+      "size": 1215666,
+      "sha256": "b16007f42f0cc572aa5f7a29aa8415d2d43b50505ddad2ad2ca2c0d8da640287"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2019-03.parquet",
+      "size": 1352793,
+      "sha256": "e13bdcd4fd23a18c2347d6cf9b907a4e7428d69ecf8ce31cf31fe88206619dc7"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2019-04.parquet",
+      "size": 1224145,
+      "sha256": "aafa7dcd92841d97a5530bb24e6f261613d8f5a51d88e38feed4973d2cd091c0"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2019-05.parquet",
+      "size": 1784254,
+      "sha256": "5bf6b6eedfdbc70aa9a9e3c87768d9671908eb46eb0cba7b446aee31684276b6"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2019-06.parquet",
+      "size": 1540711,
+      "sha256": "8657e0b32040fce32813d045f6a3789a3a4e4e6f679e52d49ff397e10704bf9e"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2019-07.parquet",
+      "size": 1601906,
+      "sha256": "e2b4e80cbf652ae9c0edb8daa65ddd8ae2f6697b9dae0fa87707b9c239441d0f"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2019-08.parquet",
+      "size": 1455342,
+      "sha256": "37dd515346e6e885c953a7a06b7cd3b9d875ee3953abd61536b07074e0ca210f"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2019-09.parquet",
+      "size": 1461754,
+      "sha256": "73e092a3affb9941ff6ba54ced9be06c4d80a99f29f0a63c4a909c92d29a6f9e"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2019-10.parquet",
+      "size": 1463312,
+      "sha256": "027608f939b16e1ab18f007487e730d509f96bec327ecfc711cb97e307c4f670"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2019-11.parquet",
+      "size": 1312007,
+      "sha256": "6bb101ba7e3ce7b23af461a395a0d6608d710d04f163667274ecb38cae89f4ef"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2019-12.parquet",
+      "size": 1241084,
+      "sha256": "a58d62f2b8432ddb14847a1d86395bc7c46f9800e30fd67f8803145b31720657"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2020-01.parquet",
+      "size": 1403947,
+      "sha256": "edcbab2564ad3665e50d5f179620e7f7f7f890eaf6fbf7045fe75376311a7fc3"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2020-02.parquet",
+      "size": 1409458,
+      "sha256": "517bb4d983c440ec96e157e48864a62a8de2e2564962e29a3e3ed237e34797ee"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2020-03.parquet",
+      "size": 1398547,
+      "sha256": "1e715230230e4e74d0ab8b029bdc8c2772949660015a3a8ff822b2f12a2bd35c"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2020-04.parquet",
+      "size": 1444350,
+      "sha256": "78aff07b0112c956f34c69598336cab4f29e2b72e06b087c95497f88cb72083a"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2020-05.parquet",
+      "size": 1621968,
+      "sha256": "be0374e1ab5e10caaaedb25fd7aca9c35d7541d6bb34d6a52e0855b907d9aca0"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2020-06.parquet",
+      "size": 1715250,
+      "sha256": "b5c520a7c172f0dfbd6b68b991189a5bbf4e4009cd04ca81963fef566962ffe0"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2020-07.parquet",
+      "size": 1695725,
+      "sha256": "bcaf0519f54b292e55b153102b1de62c65f0086237174b91ef56882afe8acb62"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2020-08.parquet",
+      "size": 1471820,
+      "sha256": "60b72f94818c67bd5df8346048ea4b8f1586e674eb2be122261c17039700f669"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2020-09.parquet",
+      "size": 1743542,
+      "sha256": "a468ea1f2c3c6f6b3a1f1756a7f2ccd1c8feaab6b548756960628191940cbd6b"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2020-10.parquet",
+      "size": 1711188,
+      "sha256": "ca1365379782f8f13d509615e8152b7da49bfda142d5ac3940c5646ba5ff9c5d"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2020-11.parquet",
+      "size": 1613181,
+      "sha256": "42218d6477c728e028197e6bbd54f757e90ec93464f43fc4fa2d6a91219902c3"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2020-12.parquet",
+      "size": 1602522,
+      "sha256": "7e87933f4747b80eba055cfb859a8aa445bd6a806604be249f03d04818f9a72d"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2021-01.parquet",
+      "size": 1512736,
+      "sha256": "469287a8dae008d920b097fed9004cefbeb46d007d934e273c2063d5d309587d"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2021-02.parquet",
+      "size": 1484275,
+      "sha256": "6ecf9bce20d3c000350d7ab915ce7be30823474ec1fb559e7cc986d2b2cce45d"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2021-03.parquet",
+      "size": 1654308,
+      "sha256": "37588a57e93aac834f0de1c2cdfcd72d89c3495c2ce2e5e188370d00b59e7f43"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2021-04.parquet",
+      "size": 1726035,
+      "sha256": "986f6b1da7019801f8bf7cd84f3020fa7f65a06b6e4d1b0d5bd1947bfdc6a44c"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2021-05.parquet",
+      "size": 1513533,
+      "sha256": "d64f56441de0469a36313f9024728357ae263ff25ce955247e628424cca8a8a5"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2021-06.parquet",
+      "size": 1539170,
+      "sha256": "227cc58ba04fa39eac4950e6a78c2daf364a9c16e8a97f056eeca1a60aacbe67"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2021-07.parquet",
+      "size": 1605184,
+      "sha256": "9a844d4cc7eee4692f440e104625aa2b5638010a710b9203ebc5ac0ad9355d5c"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2021-08.parquet",
+      "size": 1562260,
+      "sha256": "10931ee9108ff34ca8085a68246f1ca856a5f07674c3cf3f8a01cbd7134b8954"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2021-09.parquet",
+      "size": 1554071,
+      "sha256": "7d91b7df47c59bb9fc1b9b0f45747bb5f9e8ec33247aacd90b6c8ae401190cd3"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2021-10.parquet",
+      "size": 1611147,
+      "sha256": "905435769aca37770f64f8d9c6153fe0d5158e31a80fcfc21db53277df4e74b8"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2021-11.parquet",
+      "size": 1542962,
+      "sha256": "83395c1c6f35fee944c9622cbbadef295c64896e11ec35b0cee5a2fbb635cbcd"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2021-12.parquet",
+      "size": 1828951,
+      "sha256": "e805eae3ea21063e2088aa5b146eaf4b218d7eff2c5006d2ba99ef60caf92248"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2022-01.parquet",
+      "size": 1639172,
+      "sha256": "65c951d706c16a7caeba74a91c7c9604cc0f998661a531529a679cd03e859a37"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2022-02.parquet",
+      "size": 1453938,
+      "sha256": "d0027cd84d2a8082cac783c684d56feab01f52bd3d41a187ce7dd60af510d8c3"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2022-03.parquet",
+      "size": 1637261,
+      "sha256": "aaac72806f49ce7f389759b3f55bd55a257d7a32b8a2962671f20198928cda05"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2022-04.parquet",
+      "size": 1438392,
+      "sha256": "8f0e37ee32d0a9472bd57f1e5904d418e5ff4f89ffed42fff9fff22b2c3c2215"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2022-05.parquet",
+      "size": 1575015,
+      "sha256": "f31c17afea661c916cb72a2099f99c9a3c8c14b588550842205e54ac16c63fe3"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2022-06.parquet",
+      "size": 1556335,
+      "sha256": "b6ebfe217276185353e7038a410f39202a6e281c7f1bb65ebaa7c7f725c59da3"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2022-07.parquet",
+      "size": 1529098,
+      "sha256": "51793cad71df0e6e4e80d35b7778d46f6cc0e367237b8fded908f89316bbe46a"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2022-08.parquet",
+      "size": 1570350,
+      "sha256": "560b30bb070f2f9081f328942e434d73f79837e2aae5e9ae3ffe1032ea37ea4e"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2022-09.parquet",
+      "size": 1520675,
+      "sha256": "ea8590b168153dfec142e1a73e0b3ace9f6936a537e5a91b0184dd193a819381"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2022-10.parquet",
+      "size": 1488481,
+      "sha256": "0f6116f822e57ecca4dc1f38fb255ea4414a21af86155748c9dac31b1a93f7fe"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2022-11.parquet",
+      "size": 1549175,
+      "sha256": "2c8fd325d01fd01920232fb64c899ccd9c169d82f9e10c560a865ad58a5a6421"
+    },
+    {
+      "path": "data/events_replay_dev/USATECHIDXUSD/2022-12.parquet",
+      "size": 1487091,
+      "sha256": "dfea3ea2bb50d5d94371a2bd260b9d23624c7932b4b0ca5801eaa33e735283a6"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2008-01.parquet",
+      "size": 1180969,
+      "sha256": "33b37b9417ef7bebb361aa592178e1b8de6b1286b414f44abccddaff79ab1a71"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2008-02.parquet",
+      "size": 1335401,
+      "sha256": "933aefd206ba16a16ec5206e39adfbe6ee22e7aa50b1ffead584bf589fb5c674"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2008-03.parquet",
+      "size": 1248632,
+      "sha256": "42a706da25a27076026598e0c2c918f66510b8a9dd76eca5cccdf68d0e737b61"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2008-04.parquet",
+      "size": 1507472,
+      "sha256": "9c03fa7e2f630d282f336b446a4365f2784d3529c30d7653a335a446bc192923"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2008-05.parquet",
+      "size": 1397240,
+      "sha256": "c54690c3cad229df498ba7651420fe7051f0e2fd2583e22e06b13244e58fd4a3"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2008-06.parquet",
+      "size": 1322109,
+      "sha256": "52968948bbcb1ce02942a8175bee2c6452f629c923e9865a10712ae700577a5d"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2008-07.parquet",
+      "size": 1457355,
+      "sha256": "2ea02bc7043ffd85774357cd8779ac5815f43dfec7535c6e73bf6a3427384e2c"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2008-08.parquet",
+      "size": 1165364,
+      "sha256": "4658b31145050d1aeda73147e4b92c588389410dff95f0d9ceefb5b92d35f030"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2008-09.parquet",
+      "size": 1349677,
+      "sha256": "ed0e4164348e9e551237a0f359d62c5f2aa03d679f4b5284ccfd8b9d0d0a731a"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2008-10.parquet",
+      "size": 1459334,
+      "sha256": "7c21d30f45a06b5fb2fa0ab56bb276a6cbe1f7f2f5b48929cf3ed4bdf6cd0c99"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2008-11.parquet",
+      "size": 1397669,
+      "sha256": "b9e4c5c38156e7cec1fff4215c62d782adbcd9aa057ace80d67e029c28fada73"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2008-12.parquet",
+      "size": 1474542,
+      "sha256": "bc00fc4db6e6b5f97b3ad4980f10e4b11bcdd622858c5dcb5635c8e7b09e90c9"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2009-01.parquet",
+      "size": 1237594,
+      "sha256": "8abe054133ecf1231fa2c08e1003c9c1a1b1513b5b3307c6d07a18d5561a5dcb"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2009-02.parquet",
+      "size": 1202513,
+      "sha256": "8f1d48971523562f4927821852275a3460d208999fd3ae38bc523d0b247aef16"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2009-03.parquet",
+      "size": 1201842,
+      "sha256": "2215008a442fdcb0eab134805d2572b05740c5d367e41ec5fc96203335cbf4c0"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2009-04.parquet",
+      "size": 1110211,
+      "sha256": "893aea0b9a4b3332a3323ed42eb8bad747709d78318b2f48154a2aa6f19ec9c9"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2009-05.parquet",
+      "size": 1185274,
+      "sha256": "10325e22053811712741f18166d2d38ffbd757847be6d39392093c1d2d84e9db"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2009-06.parquet",
+      "size": 1180553,
+      "sha256": "8df20b67586dada581e9540830c3d3c7d3c928b21dfda4c8ed460e9226b85c74"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2009-07.parquet",
+      "size": 1182199,
+      "sha256": "a52682150a6066d2e6dcaf7ee365ade3ff3107eb8d7f237a42860468c0224a1e"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2009-08.parquet",
+      "size": 1120569,
+      "sha256": "07dca1aaa500127c4e57fda045b32a9fda57b24be1be00bf2ce07d5d64cc6c8e"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2009-09.parquet",
+      "size": 1500259,
+      "sha256": "304984823e00781b347f1406fe2ccefdbc6ad1da02904bfd768d950bb216d220"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2009-10.parquet",
+      "size": 1457927,
+      "sha256": "b0f86fb1ac381c6cb8b3e59180e55583d622cc81b20c54db185dfb2e9d17ce26"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2009-11.parquet",
+      "size": 1071680,
+      "sha256": "a9b1dfa4d0f2b87853123eafd1df4c838e6cd978f9e35b9cc69d0dc69164c874"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2009-12.parquet",
+      "size": 1527740,
+      "sha256": "b3eeffbee50a4cb645acd90f8144e90d60ebd7500a038cf6c2ef32caad415606"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2010-01.parquet",
+      "size": 1411304,
+      "sha256": "5fcbe7bf265cdb4f82596b52f14a0df2fdfacc17eb468c4bebac8ac577133b6b"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2010-02.parquet",
+      "size": 1252886,
+      "sha256": "ebe04d403747a8f6bc4ef33e3ab85f943969b6760223d08621d34215c630aeac"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2010-03.parquet",
+      "size": 1328663,
+      "sha256": "2f5f20e10525660d2f4c5af0d79b525fe15612b6deae5d685c60e1ba3473b0b4"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2010-04.parquet",
+      "size": 1371124,
+      "sha256": "bc08f46f301ab124cdd193457d76c6b5ca0f96a35a465576ebbf8eafe0d270af"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2010-05.parquet",
+      "size": 1384419,
+      "sha256": "300590d0252978de750137c8a65ad32e5913edcb788d8ddb11b9a222bd40f058"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2010-06.parquet",
+      "size": 1408491,
+      "sha256": "e64bfbb54f24ea99c538a95c181dfd995f5dfa0b58f1647de9729b540299055c"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2010-07.parquet",
+      "size": 1499097,
+      "sha256": "a5c2f8e1d384d325e67fde3614db63aa67a31625695d4b879bccebbbd1453746"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2010-08.parquet",
+      "size": 1382172,
+      "sha256": "ff2a70399deb8a5d0a85e49305c30e8b63f753c6233eac424bf0924e64fd78f0"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2010-09.parquet",
+      "size": 1292355,
+      "sha256": "eb3fbbe21a0da2348e20ff35cb4b18e110cf10e44040ac0f2080258d6526c2ec"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2010-10.parquet",
+      "size": 1173254,
+      "sha256": "5c5e09a1e260e7514863eb180e28095ea61e6ef37acd1332283526c3cf339557"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2010-11.parquet",
+      "size": 1448805,
+      "sha256": "da16bbd73fe8221bf1317b98be862f3a96f5e23a70ecd249fbd7390a63318dac"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2010-12.parquet",
+      "size": 1545555,
+      "sha256": "db48e2162dc50bf827f56cec516a6aaea39bd2ba45d9c491df18e772d76672e6"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2011-01.parquet",
+      "size": 1407191,
+      "sha256": "5dcffe69e1278ec0f39f7954e3e09685968f4d20d6d110d80e1dbb541740b751"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2011-02.parquet",
+      "size": 1264929,
+      "sha256": "8508e08f9cf18dc2208b0dbb396e24381cc9432592eacac0fa05ee22d32504e0"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2011-03.parquet",
+      "size": 1439316,
+      "sha256": "2fedccd9f89151a204f68b57a65aadac627aa6ad282d18e65ac1c57337da2268"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2011-04.parquet",
+      "size": 1180840,
+      "sha256": "941721303c51417c5ed174a23141d21e1a8324209249f4c816253da554f451c4"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2011-05.parquet",
+      "size": 1622350,
+      "sha256": "7c9cecbcff4e44aad5d362b1288c88565c0c059e09071bc8cbc17e89796d04a9"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2011-06.parquet",
+      "size": 1523819,
+      "sha256": "0775f32ac711304f8474a5e88c439fc84e6de2fa27642ca8eb966d683235071d"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2011-07.parquet",
+      "size": 1332960,
+      "sha256": "83df6ffbc358b11b90a156f584593343d994adc3629241bda3d8786f1ec8d282"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2011-08.parquet",
+      "size": 1385474,
+      "sha256": "3ec34983813fc947046bc3bd4a6fc7e37fb4ab52d7f3282861d44f810ff37e87"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2011-09.parquet",
+      "size": 1622644,
+      "sha256": "eff64560b9e357c08a50d5d8d9ee2bf32599c428bce710636d61d03ea0ce946b"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2011-10.parquet",
+      "size": 1509069,
+      "sha256": "8eaedeeb214f547f9693b40ddbf296c8c7f86f484d68dc42594aab2618a533c6"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2011-11.parquet",
+      "size": 1602813,
+      "sha256": "07d52827a23cf80fd1e9919ef313ac6ea7ea95e13dcba0b36d76319589831cde"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2011-12.parquet",
+      "size": 1476511,
+      "sha256": "4792e8a8f14811a918861db399c589df63f48114e1988277685a8839590d8160"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2012-01.parquet",
+      "size": 1381305,
+      "sha256": "44ebece50788fa9829749ffd874810d0ef76d07030dcb5d5d14b444b08509d39"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2012-02.parquet",
+      "size": 1422713,
+      "sha256": "4687023ed398116d12fcdf4d32e5fc7da17f56049b649828842e2b4238aa9889"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2012-03.parquet",
+      "size": 1385798,
+      "sha256": "4c9444828cc8ad25a94a9f0c9c1093e21c3f77667a213895669cf28078fd269c"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2012-04.parquet",
+      "size": 1255627,
+      "sha256": "4da357ba964ae413dd6462eaed94c24433ae18b0edc5b3a46e3174eee3ac75ba"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2012-05.parquet",
+      "size": 1527907,
+      "sha256": "a2c0bf57b9224a8880c8b1650b7c9a3b823a6857fdca6a2de1d44bd3fb3816ce"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2012-06.parquet",
+      "size": 1311892,
+      "sha256": "09dba05a3f73b4c4e8111230bbdc39c5f1421710e1c7d3cd4532ffe17ffa8c90"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2012-07.parquet",
+      "size": 1396408,
+      "sha256": "05e0aee47e5e49575c9024ed122c9ac741b069bf5e4670da4152e2e1f5b78faa"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2012-08.parquet",
+      "size": 1370085,
+      "sha256": "c09dd34f92f77b94c424e7d0e93f307cf05c55f5b704c2b41ae7676a7a7a5836"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2012-09.parquet",
+      "size": 1337723,
+      "sha256": "bc92dc42468077c4016f5341e3d44164a56d316b21588a1e1d60cf40614d58b3"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2012-10.parquet",
+      "size": 1429559,
+      "sha256": "3a069b46911f462c727ae3ad247e9063776e4a23da993c9c8c8572ad8c9cab9e"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2012-11.parquet",
+      "size": 1259562,
+      "sha256": "ea47e448fe8f1e204123c86244f2b8382f6a06ffd2857dfb241b29146808fb6b"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2012-12.parquet",
+      "size": 1158325,
+      "sha256": "a4080c3f9ee495db7d4047e7c0f0f91364394a444ec6e93d61fd66233ecbd10f"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2013-01.parquet",
+      "size": 1169057,
+      "sha256": "2430e8495dacf60619311180bd020a924dc22fad47089eca4cc00530f487e3ad"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2013-02.parquet",
+      "size": 1097254,
+      "sha256": "b53e9597958dd9890e567bc985baa52fda726dfeec96c190fffba9e97d36795a"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2013-03.parquet",
+      "size": 1126663,
+      "sha256": "0c4e3662c8c3fd4d5be2ef7f3c4e6f89c278be90153c221d136a5ae76bfcdb8d"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2013-04.parquet",
+      "size": 1274886,
+      "sha256": "014eff01b4e6fada01e3bb6a68ce5608140404af9a5649c1ede429eb8f8bf939"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2013-05.parquet",
+      "size": 1349243,
+      "sha256": "4a67af2ef4f718b05e1c5b9d9865da585d419ec7af649828c7d32d2b6632fd37"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2013-06.parquet",
+      "size": 1173414,
+      "sha256": "770e65fa56a43848ea69ed3e41f8cc672d2e96c4111f5c49acfbc66d92c557af"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2013-07.parquet",
+      "size": 1396586,
+      "sha256": "8adf30778923d8b47a54067bb46c03bece08469568079734d967be92ae110a1c"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2013-08.parquet",
+      "size": 1229456,
+      "sha256": "6a74a66cac2410c1d4b3348431f6079a0541b02874c691f546abb5e086770d32"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2013-09.parquet",
+      "size": 1118186,
+      "sha256": "9b820851afdd2b9282f7a4d4b92a34b0190ab0d9b19887c0775d902323e2a8a6"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2013-10.parquet",
+      "size": 1352040,
+      "sha256": "d9244d4285b0d84077fc36d2d81efbdf338a255398c784e5e144b1b9ca60e66b"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2013-11.parquet",
+      "size": 1215104,
+      "sha256": "29b016bc3c41acb825c9295198e6bfd8df561b618edd6eab2f9a790924841c62"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2013-12.parquet",
+      "size": 1184409,
+      "sha256": "5327d0dd734606607f959217c0ac96df3c7f4bec1aa6ceab612d6382848bcaf0"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2014-01.parquet",
+      "size": 1224586,
+      "sha256": "e8e2c003bcdf972778905a1726c83975b423426e67be5266275937e70487670d"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2014-02.parquet",
+      "size": 1065895,
+      "sha256": "ece7bbb44099e27b4d77872591bfcd28b3f8ff961b95d65ad0fbcf95ca1900c5"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2014-03.parquet",
+      "size": 1199819,
+      "sha256": "6c74863ab7eafd836043124a55b111e3848c9740c83182b34cf88662e16f683e"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2014-04.parquet",
+      "size": 1190408,
+      "sha256": "f5b95e98972e2966f5aa9be973df6b8854198d8fba68a38c5b51ffadfdfea87e"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2014-05.parquet",
+      "size": 1197826,
+      "sha256": "d3dcec19be2a5a42cf2fcde9092db1427f93d68c0f1da2e61cfa5ec562ae1793"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2014-06.parquet",
+      "size": 1197405,
+      "sha256": "8d2c55297acc033249b6fa121054e381b139d561ad09f670609c04707ff01bf5"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2014-07.parquet",
+      "size": 1209426,
+      "sha256": "cde3100394a39279ed76c0ca26f1607b1d6cc02016aa1dd33be73f98b00f01c2"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2014-08.parquet",
+      "size": 1124125,
+      "sha256": "57177a12d66681b5e4828afd5b7f42541d5d6c5c3339654fbfad992009595f1c"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2014-09.parquet",
+      "size": 1201017,
+      "sha256": "e26561e439c6ab534da6cafb5b56d07d3160a37869e4048b22fd0ed02da233f9"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2014-10.parquet",
+      "size": 1189103,
+      "sha256": "836b5c9e1d349d82217a8abd86248e4d59343be1a21d2c909485b1a025cd60fc"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2014-11.parquet",
+      "size": 1173841,
+      "sha256": "f4aea3d437b0118b1ce189c05186aae3412394947056b8ac7da9ff01f3cd3c83"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2014-12.parquet",
+      "size": 1182256,
+      "sha256": "cdd967fc34482bd6c76c0ea48cde46487b398d115123355c9ddebb0bbf3b7ad3"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2015-01.parquet",
+      "size": 1122206,
+      "sha256": "38ee6291b27634ccef893a38b6a67cbc556703a1fcc88aa7dba8c2733d4b606b"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2015-02.parquet",
+      "size": 1025715,
+      "sha256": "78b5a59299165f6bcfe63b012f0310fd32abbc26967fb54a51d1230871d41ebb"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2015-03.parquet",
+      "size": 1219039,
+      "sha256": "99b854cef927797633cf33fe9042e6c318806f00d4d9866d4a91741b7b038f74"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2015-04.parquet",
+      "size": 1082787,
+      "sha256": "246c68882dfa3e032431cf019ad731fe709d3a87236484aee745eb4a6b78d9d8"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2015-05.parquet",
+      "size": 1075655,
+      "sha256": "674f168b254f2aa420536f6099f3ecbaa0156a4fa679f3578e0cfb6232ae8196"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2015-06.parquet",
+      "size": 1206022,
+      "sha256": "592cb9c7a5da7c71524f0ebc35ce963f9ba9959fc071f18e136e373ca857720d"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2015-07.parquet",
+      "size": 1371439,
+      "sha256": "c63d975d51eb42ce7f84f12113d3559358751f67108acb0b647ff3282b4ac03e"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2015-08.parquet",
+      "size": 1184687,
+      "sha256": "218b06d5864496149ad40b962b670af36e5b5e4d78cea80387d4e79cc03a36c6"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2015-09.parquet",
+      "size": 1166376,
+      "sha256": "31989ebfd4aa51718b2bffda2ee21974c171cc09fa393002ad7f843b705ac4e7"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2015-10.parquet",
+      "size": 1197873,
+      "sha256": "495bf0cab85d80829c730d1c2cf4d61e6af571a48a800e78c590831128dcefe7"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2015-11.parquet",
+      "size": 1204758,
+      "sha256": "ac1f349fc42ba75f76527bb9ef72e3cd7012b9983f9e2190d164567dfae413f1"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2015-12.parquet",
+      "size": 1411314,
+      "sha256": "5006ac397cbf26d8f16771727e4a7ff01c9e0d1cd947c82a900238eb49660458"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2016-01.parquet",
+      "size": 1018188,
+      "sha256": "a258d2e80909eb92365856d072a2af1b32fdb49b49c51c5d2a800e36d8bf529e"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2016-02.parquet",
+      "size": 1087585,
+      "sha256": "445e63968d7db0ce923bdc16d6b00920e2d08b8d133ad56aeb6a8f79c265d845"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2016-03.parquet",
+      "size": 1155115,
+      "sha256": "bafec1fcac8766f3ebbeb268d25fc356e74e4e6fe4bb7924f4cde3f64456ebed"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2016-04.parquet",
+      "size": 1081696,
+      "sha256": "7f324631b52b12cb6b696a52053b726a21f2725bb7a1454d4ebb2191449b80cc"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2016-05.parquet",
+      "size": 1140341,
+      "sha256": "45912ef2345e85341b258665622669042009d7216ebc824ac8fdb09e8f459080"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2016-06.parquet",
+      "size": 1140790,
+      "sha256": "90364479fedea9c3a6b4a6370a04626b5709e116316e83415efe6ef5ab1597e3"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2016-07.parquet",
+      "size": 1059253,
+      "sha256": "a6bf959ce314e8d693904209ed0492f64ef8f36af337c36ce747c6bb452afc9c"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2016-08.parquet",
+      "size": 1200442,
+      "sha256": "c77872872fe0dcd99da409105a75e1cd98e96c586fed9992b0fd7118abf34a45"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2016-09.parquet",
+      "size": 1120528,
+      "sha256": "b33a9f99fdad71f06218faef182ddf2f0412fd547e8eb2d8dd72f7e8771a66ad"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2016-10.parquet",
+      "size": 1104840,
+      "sha256": "dcf30ac68831e3e8790476f47d5447a808f2e18fe28da9587fd7e23782bee969"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2016-11.parquet",
+      "size": 1176254,
+      "sha256": "a40b34ce30d930f661ea89946997741b0034efa6b0772721a7bc1f149566597d"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2016-12.parquet",
+      "size": 1082078,
+      "sha256": "48b5dfeea42df1b9561799f0662ac45f37792e59f0c88315d9d6354ce3e89da0"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2017-01.parquet",
+      "size": 1080140,
+      "sha256": "ed69691f0dcbbd5d2a0e0455fb08a456db6864e7892d8d51e58e06eccb835d62"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2017-02.parquet",
+      "size": 1036264,
+      "sha256": "bb4508cf8f64e5d0c4b8d49ffa596a9b4670d5dee654572ea8cbadfecc6f6bbf"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2017-03.parquet",
+      "size": 1189909,
+      "sha256": "090f7ff496ea84558cd38c429585ca42b7965394fb108a66dbe818c632321265"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2017-04.parquet",
+      "size": 962559,
+      "sha256": "091d3a2a027fa55b59113633a37d18e283e3c56c26e4c3f15cacf5a27b9be4e2"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2017-05.parquet",
+      "size": 1146031,
+      "sha256": "77e78cb7f3776d0e19673cecf53755035a346552653392653fee2d7965bf2262"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2017-06.parquet",
+      "size": 1112995,
+      "sha256": "a1fe8bc7a0e2eaf39fd19b2962e79b3639dd7d9311a8022e765bbb83e2a3cd9c"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2017-07.parquet",
+      "size": 1030131,
+      "sha256": "69a93d90ee55fd6704c6b10517cab1b13615f7beddabbd15f54947524c830e44"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2017-08.parquet",
+      "size": 1153415,
+      "sha256": "c931d86736e0a5e3f89fa6d517213c7489d113810881fdb9d4a9526930ee9e2d"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2017-09.parquet",
+      "size": 1067439,
+      "sha256": "95b5e7d045a6f3245c86425cb8738a0a9c54887c41b2e66a464617db81cccd51"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2017-10.parquet",
+      "size": 1133724,
+      "sha256": "796a64d51e607f552c8f147f3c13bbfca3d0a523d9079ddbf3550b1031ffc32d"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2017-11.parquet",
+      "size": 1068398,
+      "sha256": "ce8b2a2a7a82a3be85d29b8523c39ce06bdd550e6cb42d8d58ffef5c46e20179"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2017-12.parquet",
+      "size": 1008601,
+      "sha256": "2374025a2dee2359c1b563fe195bbc438b984cc884ee3700030cd5f4c4985a88"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2018-01.parquet",
+      "size": 1109254,
+      "sha256": "f71e158d403c21795363a20c4b65579467684a9a6e3920940c6aa3791ae86eba"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2018-02.parquet",
+      "size": 1041628,
+      "sha256": "de972494b0e04bc72e3d17b004ab03e0dcaffa462625664e689c7b39ac3d27af"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2018-03.parquet",
+      "size": 1039047,
+      "sha256": "06fb6b2980d8258c0315247b4cedd30b20096c60f16c6f9723b3aaec6c29435e"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2018-04.parquet",
+      "size": 1088415,
+      "sha256": "71a107a18341ab9e849a34ea73b54e4e504ec22a212721005cb20ddab9dfac24"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2018-05.parquet",
+      "size": 1143718,
+      "sha256": "dc47b72aab5ce6417d0b4f31ba6f75f5732038a4745fa60d58e9b0d3321a3821"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2018-06.parquet",
+      "size": 1078967,
+      "sha256": "01efcdaf0d47757e366594b6ddfd2828e83953be1b4ecd869dcdccdca7585824"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2018-07.parquet",
+      "size": 1122495,
+      "sha256": "f582caba3e480e110aa67cd9c31667e2c6704e3d38bf0614d1016d85afc1b06d"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2018-08.parquet",
+      "size": 1145000,
+      "sha256": "12e0cb925984681a8fd964a0d984f860b9cfc84338fd1791e88583abe281881e"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2018-09.parquet",
+      "size": 998397,
+      "sha256": "d48fb232918ac2991f1a5c34f79bb63d89b0eee28aa79d4d534959ed1c3fe84a"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2018-10.parquet",
+      "size": 1191526,
+      "sha256": "3c25d3f4f0f8a48e3fe7d5c0ac8ef034f037063dac854a67928425d4a758e073"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2018-11.parquet",
+      "size": 1071064,
+      "sha256": "5b2f1864969ee62aef8e4b695277c9ab6a6eee096ebb6c74d3503265795bba0c"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2018-12.parquet",
+      "size": 964865,
+      "sha256": "d2241ace483e2b3f20604922aff9d8125b153131100dd3c5681bdc20e77a6100"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2019-01.parquet",
+      "size": 1042979,
+      "sha256": "53e70a35efb88995fd8273fb65008ff290ad52b2039c34fe29da77ab67f7f190"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2019-02.parquet",
+      "size": 930275,
+      "sha256": "cab896d86b2a2592938cbca38ac17aedf34e8152b1bdab582566bd5d80e0a914"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2019-03.parquet",
+      "size": 983564,
+      "sha256": "6edea879f8979a9a9f1072b16d23f878d54a418907f2b44c59d0bf793e4b6681"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2019-04.parquet",
+      "size": 1010979,
+      "sha256": "51bf4f832cb6f5b90930a685c97bfc569275c1e0b55ccf76be1b07adc844e9f4"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2019-05.parquet",
+      "size": 1114754,
+      "sha256": "d23b9fc955674852d0bc3ec2962db6aa1d7177e6733cda2c3adfdb8474f6fe58"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2019-06.parquet",
+      "size": 1022361,
+      "sha256": "756518959230b4a86e42f035d51176dc431cfdd01cd59ece8d1ffe00e7dc627f"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2019-07.parquet",
+      "size": 1209212,
+      "sha256": "236b237e0dfa9a5214fad73ca4f35f2fa4d109d027ac2755936823c40bdb9baa"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2019-08.parquet",
+      "size": 1270200,
+      "sha256": "76e24a7d47021af51d61804fe15d584f1af87d6cb08f14ab20cbb8d96fb76145"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2019-09.parquet",
+      "size": 1223015,
+      "sha256": "418896be44254988c94b07ebc9adfea5a4fd81188f005264a2caac9aaaf63b36"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2019-10.parquet",
+      "size": 1464018,
+      "sha256": "4e969cdc914d6bb2223e9147b48f40c21a2d87c1dcf870a12828960feb6089ef"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2019-11.parquet",
+      "size": 1401477,
+      "sha256": "7ec6f975e7113d3bbf1ecceb8960bbeebf7b637ab4c71fe660a5e2323f197179"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2019-12.parquet",
+      "size": 1302692,
+      "sha256": "158e7792cc4de54bbf94c61a7e5ac0c764b11bd47b08a70d0d5ccfa0f1f41a2a"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2020-01.parquet",
+      "size": 1211629,
+      "sha256": "ed6b4a9f0e85a2a7549168bcfa3d93305aa01b63094a61ed14acc7d9a24fe1b3"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2020-02.parquet",
+      "size": 1087331,
+      "sha256": "02f8e2aa1a19430949e37a838be4225d2c38decfe845f1f7d3dc95e9f75a529b"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2020-03.parquet",
+      "size": 1143326,
+      "sha256": "e58ad423474587ab20e2b4cb9d9acbdb1e2f9483dc7e86f9f84f3d26818b9d97"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2020-04.parquet",
+      "size": 1052052,
+      "sha256": "567bda13adcecfe70e43e6e9c5cef43834bc1ac6d500a44a939c03c030f6332e"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2020-05.parquet",
+      "size": 1096123,
+      "sha256": "ac6b8a1711827fe6ae43825b44a7b4e48607701ea26d9cb7d941bf61694a3d1f"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2020-06.parquet",
+      "size": 1134332,
+      "sha256": "e2b068e29b5e0e941c42b36cf530a16f3c34df83407c84bd69f7f7bba95cda1b"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2020-07.parquet",
+      "size": 1534867,
+      "sha256": "2694b1ec83340ea35a125f24322a5eac7b550ad93b14f0af25be606f9ee3b7fc"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2020-08.parquet",
+      "size": 1522059,
+      "sha256": "0aa3e4b283890e3e963191910a346dd5eced7921050608ad1fb5730e9554c1cd"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2020-09.parquet",
+      "size": 1589337,
+      "sha256": "f4e2fbaaf7e287c0cd16f684c67ca10f3eb73788c7f955f1e55547e24c368834"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2020-10.parquet",
+      "size": 1581015,
+      "sha256": "5593aaef8b6b24329ff895a57340e96008f1c7413f8a77ac6c66f1fc42bf3ac5"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2020-11.parquet",
+      "size": 1365813,
+      "sha256": "fdc440532b1c277e7996d208edd37383fbabd4d76ae288de103174544bf45f8b"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2020-12.parquet",
+      "size": 1460003,
+      "sha256": "9ebb86bf18bd32828076adb1e39432a82b30adaab16349877f0a099a910f5536"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2021-01.parquet",
+      "size": 1209253,
+      "sha256": "b1fee5d830829d6c1cc07422f49f274e1da024706e1061fe20a4478881969c7b"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2021-02.parquet",
+      "size": 1137042,
+      "sha256": "ac3ac07dd0616fcb4b0910cbc5205309a6e59c845b15ea0c46d96fc06cd48f54"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2021-03.parquet",
+      "size": 1223474,
+      "sha256": "e27ee3562778e8a7cc1f41461f7febec3a6f546ef416f89c088db9c13c8539f7"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2021-04.parquet",
+      "size": 1083252,
+      "sha256": "4b08dec308d391a3df152aa6eefb14c2c6ea81f8c93bce7964e1ed2c7044c5ea"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2021-05.parquet",
+      "size": 1188578,
+      "sha256": "e129b02f9bedd12c26e257508952eb3aaba21d1ffc3794343e34c129c408805d"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2021-06.parquet",
+      "size": 1230906,
+      "sha256": "fd7f26bc024a29564993a654a0701f6d329644542ec681dc5a9e4ca5e0fe3c9e"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2021-07.parquet",
+      "size": 1204762,
+      "sha256": "fe8c576af71e182494c601c30700a9a329510b4d4b8533466fa64da805912708"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2021-08.parquet",
+      "size": 1179271,
+      "sha256": "a4f91131595e990452176f811be898a4634a3fa7eb070590d59cc5c08dd16ffb"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2021-09.parquet",
+      "size": 1174681,
+      "sha256": "f58d90a4685fbdfff1f5245d101bdf62029753676659c6013e0e802025e2086a"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2021-10.parquet",
+      "size": 1119832,
+      "sha256": "61990c080ba6b8dc39fb28fe71fcb0b89059f4fabc4f0a5aaa873c79300f0b48"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2021-11.parquet",
+      "size": 1213843,
+      "sha256": "5b98faadd055e9f539b3cffc949fccd069b84e272a5cb750883c2ccd4e218dea"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2021-12.parquet",
+      "size": 1122085,
+      "sha256": "ac4bfa6bbd1b7c6062f5e854b7e655418ba8f30f4cf9ff8c88174d530e71f067"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2022-01.parquet",
+      "size": 1095106,
+      "sha256": "de411d931cfc9a32026ccdd68d8592295ed0114537514242368457290914cb97"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2022-02.parquet",
+      "size": 1086040,
+      "sha256": "add90c7def82194be5a9b862d76ea0e94413d2fc1ab729718117c6079c92eda1"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2022-03.parquet",
+      "size": 1390920,
+      "sha256": "0309d86e347b1253107ae217671d9fb27283278c6e957dbb16ee82e82124681a"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2022-04.parquet",
+      "size": 1225723,
+      "sha256": "08cd9c99fe5ed9e027f4069659b242d759befa6a2cb22043999293a784476bb8"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2022-05.parquet",
+      "size": 1183758,
+      "sha256": "786b0408410d62b4371a5701f778e1c8a2c68a734d67bf5e44d539a41fc2ecc8"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2022-06.parquet",
+      "size": 1188573,
+      "sha256": "52e2312c84d70434a5f96c5e883e54e1e23bffbf63d112bc162a8dc404855ecf"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2022-07.parquet",
+      "size": 1134970,
+      "sha256": "d925150f2a05052d3a02e3de6de8c93fdc596ef6ef87a1820ff78503fc04ab81"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2022-08.parquet",
+      "size": 1156737,
+      "sha256": "117b8fda990b73e5e50093759cbfdc498f9c1c43969c235ece1ccb94143033dd"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2022-09.parquet",
+      "size": 1146908,
+      "sha256": "9d55ece53929e0b8fb9e46d824dcbeab179f068dc3f63fb1e56027d1992a42e3"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2022-10.parquet",
+      "size": 1119319,
+      "sha256": "88c1cd10afd4091b6403e23cda80454f30bb59541929033161ed26d8410e2a67"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2022-11.parquet",
+      "size": 1146441,
+      "sha256": "7d805000a825f9f33668c9a6fd3ef00e0822a509e6eb7b0876f21c4702fa733f"
+    },
+    {
+      "path": "data/events_replay_dev/XAUUSD/2022-12.parquet",
+      "size": 1055893,
+      "sha256": "c2c853765532677467cc24e7e2da939cb7e84e2712ccff8fb9317213e9a1ce9a"
+    }
+  ],
+  "file_count": 336,
+  "total_size": 455164529,
+  "combined_sha256": "e18389ba59e47ba85758462afae6444d33d91d8f4795561ff879023fa2b2bef2",
+  "combined_rule": "sha256 of sorted UTF-8 path + NUL + file sha256 + LF records"
+}

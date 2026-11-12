@@ -113,3 +113,7 @@ def detect(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.DataFrame, *, 
         "last_emit": {str(k): int(v) for k,v in last_emit.items()},
     }
     return events, state_out, touch_rows
+
+from .requirements import required_features, market_for
+REQUIRED_FEATURES = required_features(NAME)
+MARKETS = market_for(NAME)
