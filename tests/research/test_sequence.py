@@ -42,6 +42,9 @@ def test_causal_truncation_and_grid():
     original = build_windows(bars, features, labels, windows=lengths)
     assert len(original) == 1
     assert original.mask.sum() == 70
+    assert original.target.shape == (1, 2, 5, 7)
+    legacy_p0 = np.array([[sl / (sl + tp) for tp in TP_GRID] for sl in SL_GRID])
+    np.testing.assert_allclose(original.p0[0, 0], legacy_p0)
     assert original.p0[0, 0, 0, 0] == pytest.approx(.5)
     changed = {tf: frame.copy() for tf, frame in bars.items()}
     for frame in changed.values():
@@ -57,6 +60,31 @@ def test_causal_truncation_and_grid():
                                    "1h_atr14_price": [1e9], "x": [1e9]})
     third = build_windows(bars, pd.concat([features, future_feature]), labels, windows=lengths)
     np.testing.assert_array_equal(original.dense, third.dense)
+
+
+def test_wide_r_multiple_grid_and_model_shape():
+    torch = pytest.importorskip("torch")
+    from msd.research.sequence_model import SequenceModel
+    bars, features, old_labels = _fixture()
+    anchor = old_labels.ts.iloc[0] + pd.Timedelta(minutes=1)
+    sl_grid = (1., 1.5, 2., 3., 4.)
+    tp_r_grid = (.5, 1., 1.5, 2., 3.)
+    labels = pd.DataFrame([{
+        "ts": anchor - pd.Timedelta(minutes=1), "side": side, "sl_atr": sl,
+        "tp_r": tp_r, "tp_atr": sl * tp_r, "outcome": 1,
+        "exit_ts": anchor + pd.Timedelta(hours=1),
+        "entry_ts": anchor + pd.Timedelta(minutes=2), "net_R": .2}
+        for side in (-1, 1) for sl in sl_grid for tp_r in tp_r_grid])
+    data = build_windows(bars, features, labels, windows={tf: 4 for tf in bars},
+                         sl_grid=sl_grid, tp_grid=tp_r_grid,
+                         tp_is_r_multiple=True)
+    assert data.target.shape == (1, 2, 5, 5)
+    np.testing.assert_allclose(data.p0[0, 0, 0],
+                               [1 / (1 + tp_r) for tp_r in tp_r_grid])
+    model = SequenceModel(data.dense.shape[1], width=4, sl_count=5, tp_count=5)
+    windows = {tf: torch.as_tensor(value) for tf, value in data.windows.items()}
+    logits = model(windows, torch.as_tensor(data.dense), torch.as_tensor(data.p0))
+    assert logits.shape == (1, 2, 5, 5)
 
 
 @pytest.mark.slow
@@ -233,6 +261,8 @@ def test_checkpoint_resume_matches_uninterrupted(tmp_path):
 
 
 def test_grade_sequence_cli_fixture(tmp_path):
+    import hashlib
+    import json
     from msd.research.grade_sequence import grade
     folder = tmp_path / "oof" / "fold_00"
     folder.mkdir(parents=True)
@@ -240,6 +270,7 @@ def test_grade_sequence_cli_fixture(tmp_path):
     row = {"known_at": time, "label_end_ts": time + pd.Timedelta(hours=1),
            "entry_ts": time + pd.Timedelta(minutes=2), "ts": time - pd.Timedelta(minutes=1),
            "side": 1, "sl": 98., "tp": 104., "price": 100., "p": .8, "p0": 1 / 3,
+           "sl_atr": 1., "tp_atr": 2.,
            "tp_first": 1., "net_R": 1., "cost_R": .01, "financing_R": 0., "spread_R": .01,
            "TP_R": 2., "sym": "BTCUSDT", "event_key": "event", "candidate_id": "candidate",
            "config_sha256": "fixture", "fold": 0, "seed": 7}
@@ -247,6 +278,13 @@ def test_grade_sequence_cli_fixture(tmp_path):
     cards = grade(tmp_path / "oof", data_root=tmp_path / "absent")
     assert next(iter(cards.values()))["pooled"]["brier"] is not None
     assert (tmp_path / "oof" / "grade" / "summary.json").exists()
+    config = tmp_path / "wide.json"
+    raw_config = json.dumps({"grid": {"sl_atr": [1], "tp_r": [2]}}).encode()
+    config.write_bytes(raw_config)
+    row["config_sha256"] = hashlib.sha256(raw_config).hexdigest()
+    pd.DataFrame([row]).to_parquet(folder / "oof.parquet")
+    assert grade(tmp_path / "oof", data_root=tmp_path / "absent",
+                 output=tmp_path / "configured-grade", config_path=config)
     row["known_at"] = pd.Timestamp("2023-01-01", tz="UTC")
     pd.DataFrame([row]).to_parquet(folder / "oof.parquet")
     with pytest.raises(ValueError, match="TEST/FINAL"):

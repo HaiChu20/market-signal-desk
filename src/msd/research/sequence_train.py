@@ -16,7 +16,8 @@ from sklearn.isotonic import IsotonicRegression
 from msd.data.flow_features import join_by_known_at
 from msd.research import decision, report_card, splits
 from msd.research.dataset import DEV_END
-from msd.research.sequence_data import SequenceData, SYMBOL_START, build_windows, load_executable_1m
+from msd.research.sequence_data import (SequenceData, SYMBOL_START, build_windows,
+                                        grid_from_config, load_executable_1m)
 
 _STOP_REQUESTED = False
 
@@ -129,38 +130,45 @@ def _later_blocks(data: SequenceData, train_indices, embargo=splits.EMBARGO):
 
 def _candidates(data: SequenceData, indices, probabilities, symbol, config_sha256, fold, seed):
     rows = []
-    label_index = data.labels.set_index(["known_at", "side", "sl_atr", "tp_atr"])
+    labels = data.labels.copy()
+    if "_tp_grid" not in labels:
+        labels["_tp_grid"] = (labels.tp_atr / labels.sl_atr
+                              if data.tp_is_r_multiple else labels.tp_atr)
+    labels["_tp_grid"] = labels["_tp_grid"].round(12)
+    label_index = labels.set_index(["known_at", "side", "sl_atr", "_tp_grid"])
     for k, idx in enumerate(indices):
         anchor = data.anchors.iloc[int(idx)]
         for si, side in enumerate(data.sides):
             for i, sl in enumerate(data.sl_grid):
-                for j, tp in enumerate(data.tp_grid):
+                for j, tp_value in enumerate(data.tp_grid):
                     if not data.mask[idx, si, i, j]:
                         continue
-                    key = (anchor.known_at, side, sl, tp)
+                    key = (anchor.known_at, side, sl, round(tp_value, 12))
                     try:
                         label = label_index.loc[key]
                     except KeyError:
                         continue
                     price = float(anchor.price)
                     atr = float(anchor.atr)
+                    tp_atr = sl * tp_value if data.tp_is_r_multiple else tp_value
+                    tp_r = tp_atr / sl
                     rows.append({"known_at": anchor.known_at, "label_end_ts": label.exit_ts,
                                  "ts": anchor.known_at - pd.Timedelta(minutes=1),
                                  "entry_ts": label.entry_ts, "sym": symbol, "side": side,
                                  "price": price, "sl": price - side * sl * atr,
-                                 "tp": price + side * tp * atr,
+                                 "tp": price + side * tp_atr * atr,
                                  "p": float(probabilities[k, si, i, j]),
                                  "p0": float(data.p0[idx, si, i, j]),
                                  "tp_first": float(data.target[idx, si, i, j]),
-                                 "net_R": float(label.net_R), "TP_R": tp / sl,
+                                 "net_R": float(label.net_R), "TP_R": tp_r,
                                  "planned_risk": float(label.planned_risk) if "planned_risk" in label else sl * atr,
                                  "deadline_ts": label.deadline_ts if "deadline_ts" in label else label.exit_ts,
-                                 "sl_atr": sl, "tp_atr": tp,
+                                 "sl_atr": sl, "tp_atr": tp_atr,
                                  "config_sha256": config_sha256, "fold": fold, "seed": seed,
                                  "cost_R": float(anchor.spread / (float(label.planned_risk) if "planned_risk" in label else sl * atr)),
                                  "financing_R": 0., "spread_R": float(anchor.spread / (float(label.planned_risk) if "planned_risk" in label else sl * atr)),
                                  "event_key": f"{symbol}|{anchor.known_at}|{side}",
-                                 "candidate_id": f"{symbol}|{anchor.known_at}|{side}|{sl}|{tp}"})
+                                 "candidate_id": f"{symbol}|{anchor.known_at}|{side}|{sl}|{tp_value}"})
     return pd.DataFrame(rows)
 
 
@@ -191,7 +199,8 @@ def train_walk_forward(data: SequenceData, output: Path, *, n_folds: int = 5,
         if not len(cal_idx):
             continue
         torch.manual_seed(seed + fold)
-        model = SequenceModel(data.dense.shape[1], width=width).to(selected_device)
+        model = SequenceModel(data.dense.shape[1], width=width, sides=len(data.sides),
+                              sl_count=len(data.sl_grid), tp_count=len(data.tp_grid)).to(selected_device)
         optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3)
         dense_stats = _dense_stats(data.dense, fit_idx)
         best_loss, best_state, stale = float("inf"), None, 0
@@ -281,6 +290,8 @@ def train_walk_forward(data: SequenceData, output: Path, *, n_folds: int = 5,
         signals = decision.choose(candidates) if len(candidates) else candidates
         checkpoint = {"state_dict": best_state, "feature_names": data.feature_names,
                       "config_sha256": config_sha256,
+                      "sl_grid": data.sl_grid, "tp_grid": data.tp_grid,
+                      "tp_is_r_multiple": data.tp_is_r_multiple,
                       "dense_mean": dense_stats[0], "dense_std": dense_stats[1],
                       "calibration_x": calibrator.X_thresholds_.tolist(),
                       "calibration_y": calibrator.y_thresholds_.tolist(),
@@ -361,12 +372,18 @@ def main():
                     columns=["ts", "known_at", *flow_columns])
         features = add_flow_features(features, flow, flow_columns,
                                      float(config["flow_min_non_nan_coverage"]))
-    labels = load(root / venue_override.get("labels", f"labels/{args.symbol}"))
+    labels_path = config.get("labels_path")
+    labels_folder = (Path(labels_path.format(symbol=args.symbol)) if labels_path else
+                     Path(venue_override.get("labels", f"labels/{args.symbol}")))
+    labels = load(root / labels_folder)
     labels = labels[(pd.to_datetime(labels.ts, utc=True) >= start) & (pd.to_datetime(labels.ts, utc=True) < end)]
     if args.smoke:
         timestamps = pd.to_datetime(labels.ts, utc=True)
         labels = labels[timestamps.dt.minute.eq(0) & timestamps.dt.hour.isin((0, 12))]
-    data = build_windows(bars, features, labels)
+    sl_grid, tp_grid, tp_is_r = grid_from_config(config)
+    data = build_windows(bars, features, labels, windows=config.get("windows"),
+                         sl_grid=sl_grid, tp_grid=tp_grid,
+                         tp_is_r_multiple=tp_is_r)
     (args.output / "config_sha256.txt").parent.mkdir(parents=True, exist_ok=True)
     (args.output / "config_sha256.txt").write_text(config_sha256 + "\n")
     train_walk_forward(data, args.output, epochs=1 if args.smoke else config["epochs"],
