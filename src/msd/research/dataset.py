@@ -93,7 +93,12 @@ def assemble(events: pd.DataFrame, features: pd.DataFrame, feature_cols=None, *,
     out['SL_R']=1.0
     out['TP_R']=reward/risk
     out['p0']=risk/(risk+reward)
-    out['spread_R']=(pd.to_numeric(out.get('spread_atr',pd.Series(0,index=out.index)),errors='coerce')*pd.to_numeric(out.get('1m_atr14',pd.Series(0,index=out.index)),errors='coerce')/pd.to_numeric(out.planned_risk,errors='coerce')).clip(lower=0).fillna(0)
+    spread_atr=pd.to_numeric(out.get('spread_atr',pd.Series(np.nan,index=out.index)),errors='coerce')
+    out['spread_R']=(spread_atr*pd.to_numeric(out.get('1m_atr14',pd.Series(np.nan,index=out.index)),errors='coerce')/pd.to_numeric(out.planned_risk,errors='coerce')).clip(lower=0)
+    crypto=out.sym.isin(['BTCUSDT','ETHUSDT'])
+    if out.loc[crypto,'spread_R'].isna().any():
+        raise ValueError('Crypto candidate has no executable spread cost')
+    out['spread_R']=out.spread_R.fillna(0)
     out['cost_R']=out.spread_R
     rate=np.where(out.sym.isin(['BTCUSDT','ETHUSDT']),.0006,
                   np.where(out.sym.eq('XAUUSD'),.00015,.0002))
