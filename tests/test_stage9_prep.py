@@ -54,3 +54,5 @@ def test_stage9_label_specs_are_explicit():
                                           "LIGHTCMDUSD", "BRENTCMDUSD"}
     assert label_parameters("USA30IDXUSD") == ("index", .0002)
     assert label_parameters("EURUSD") == ("fx", .00015)
+    assert label_parameters("LIGHTCMDUSD") == ("energy", .0002)
+    assert label_parameters("BRENTCMDUSD") == ("energy", .0002)
