@@ -133,7 +133,7 @@ def make_bundle(data_root: Path, config_path: Path, output: Path, symbols=None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-root", type=Path, default=Path("data"))
-    parser.add_argument("--config", type=Path, default=Path("hpc/roihu/sequence/configs/dev_v2.json"))
+    parser.add_argument("--config", type=Path, default=Path("hpc/roihu/sequence/configs/dev_v3.json"))
     parser.add_argument("--output", type=Path, default=Path("hpc/roihu/sequence/bundle"))
     parser.add_argument("--symbols", help="comma-separated subset; default is all five")
     args = parser.parse_args()
