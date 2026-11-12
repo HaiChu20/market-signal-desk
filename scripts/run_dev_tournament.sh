@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -u
 
-cd "$(git rev-parse --show-toplevel)" || exit 1
+script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+cd "$script_dir/.." || exit 1
 
 logs="data/tournament_logs"
 output="reports/research/dev_v2"
