@@ -525,3 +525,9 @@ Append-only notes from the autonomous review loop while the user sleeps.
 - S1 Breakout 20: KEEP, 80 trades, +0.276R, t 1.47; NQ +0.04, gold +0.54, BTC +0.28; 2x cost +0.25; random 95% +0.47 (not beaten); evidence avg +0.10.
 - S2 Breakout 55: KEEP, 47 trades, +0.392R, t 1.57; NQ +0.08, gold +0.73, BTC +0.33; 2x cost +0.36; random 95% +0.38 (just beaten); evidence avg -0.03.
 - Both are mostly a 2025-26 gold/BTC trend story; t < 2, so still low confidence. Markdown table layout of the report is cosmetically interleaved; numbers are correct (JSON is canonical).
+
+## 2026-11-13: final check v2 Part B run once (intraday Donchian)
+- Worker 1afb2f6f proved exact DEV-2022 event parity vs the original replay_events_only path (features rebuilt into data/tmp_parity, 0 mismatches on all 4 symbols). Merged (ab9073e).
+- Ran --check-inputs, --generate-events (13 s), --run-final-once (2 s) once. Logs data/logs/final_v2_donchian*.log.
+- Verdict DROP: 608 trades, -0.067R, t -1.57, PF 0.86, random percentile 28.5. NQ -0.11, SPX -0.12, gold +0.17, BTC -0.16; 2025 -0.11, 2026 -0.02.
+- Intraday rule is not deployed; Capital.com feed and msd-intraday service not needed.

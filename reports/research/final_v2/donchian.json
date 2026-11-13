@@ -1,0 +1,179 @@
+{
+  "protocol": "docs/final_check_v2.md part B",
+  "score_start": "2025-01-01T00:00:00+00:00",
+  "frozen_code": "a196fdd982e10aa4f3d4dffc08e59382615ce53a",
+  "wide_config_sha256": "1cab0902ea0845a1ab74ff15333ea412a1f16bd6b3b71031afeb4a2da02681dd",
+  "settings": {
+    "symbols": [
+      "USATECHIDXUSD",
+      "USA500IDXUSD",
+      "XAUUSD",
+      "BTCUSDT"
+    ],
+    "sl_atr": 3.0,
+    "tp_r": 3.0
+  },
+  "input_end_exclusive": {
+    "USATECHIDXUSD": "2026-11-13T00:00:00+00:00",
+    "USA500IDXUSD": "2026-11-11T00:00:00+00:00",
+    "XAUUSD": "2026-11-13T00:00:00+00:00",
+    "BTCUSDT": "2026-11-01T00:00:00+00:00"
+  },
+  "result": {
+    "n": 608,
+    "signals_per_year": 327.4190932546996,
+    "hit_rate": 0.4407894736842105,
+    "net_avg_R": -0.06689817681306656,
+    "t_stat": -1.5693445399010766,
+    "profit_factor": 0.8580136807439348,
+    "daily_sharpe": -1.0371350131898571,
+    "max_drawdown": -0.2368526925706066,
+    "positive_dev_year_share": 0.0,
+    "per_year": {
+      "2025": {
+        "n": 333,
+        "signals_per_year": 339.5856212191717,
+        "hit_rate": 0.4114114114114114,
+        "net_avg_R": -0.1069572480495663,
+        "t_stat": -1.869810232228801,
+        "profit_factor": 0.7822264764313203,
+        "daily_sharpe": -1.8007925304324137,
+        "max_drawdown": -0.19270112408750828,
+        "positive_dev_year_share": 0.0,
+        "per_year": {
+          "2025": -0.1069572480495663
+        },
+        "spread_1_5x_net_avg_R": -0.11574234320465389,
+        "random_direction_percentile": null,
+        "pbo": null,
+        "grade": "ungraded: development",
+        "brier": null,
+        "brier_skill_vs_p0": null,
+        "deflated_sharpe_ratio": null
+      },
+      "2026": {
+        "n": 275,
+        "signals_per_year": 320.2670386608211,
+        "hit_rate": 0.4763636363636364,
+        "net_avg_R": -0.018390283279414128,
+        "t_stat": -0.28778321474979185,
+        "profit_factor": 0.9588551815106018,
+        "daily_sharpe": -0.2621558543797901,
+        "max_drawdown": -0.08958623881364924,
+        "positive_dev_year_share": 0.0,
+        "per_year": {
+          "2026": -0.018390283279414114
+        },
+        "spread_1_5x_net_avg_R": -0.029137483930857685,
+        "random_direction_percentile": null,
+        "pbo": null,
+        "grade": "ungraded: development",
+        "brier": null,
+        "brier_skill_vs_p0": null,
+        "deflated_sharpe_ratio": null
+      }
+    },
+    "spread_1_5x_net_avg_R": -0.07657073744759148,
+    "random_direction_percentile": 28.499999999999996,
+    "pbo": null,
+    "grade": "ungraded: development",
+    "brier": null,
+    "brier_skill_vs_p0": null,
+    "deflated_sharpe_ratio": null,
+    "random_direction_matched_signals": 608,
+    "random_direction_seeds": 200,
+    "events": 787,
+    "dropped_at_end": 1,
+    "verdict": "DROP",
+    "per_market": {
+      "USATECHIDXUSD": {
+        "n": 153,
+        "signals_per_year": 82.46421544515495,
+        "hit_rate": 0.39869281045751637,
+        "net_avg_R": -0.1106293030407525,
+        "t_stat": -1.3019126488033272,
+        "profit_factor": 0.7730313427091534,
+        "daily_sharpe": -0.9897248897283232,
+        "max_drawdown": -0.09528346674735333,
+        "positive_dev_year_share": 0.0,
+        "per_year": {
+          "2025": -0.07456898848366927,
+          "2026": -0.1453026824225633
+        },
+        "spread_1_5x_net_avg_R": -0.11988775162445503,
+        "random_direction_percentile": null,
+        "pbo": null,
+        "grade": "ungraded: development",
+        "brier": null,
+        "brier_skill_vs_p0": null,
+        "deflated_sharpe_ratio": null
+      },
+      "USA500IDXUSD": {
+        "n": 164,
+        "signals_per_year": 88.58910525018487,
+        "hit_rate": 0.43902439024390244,
+        "net_avg_R": -0.12133962600942122,
+        "t_stat": -1.5975701031952392,
+        "profit_factor": 0.7427312554391547,
+        "daily_sharpe": -1.1768061447766884,
+        "max_drawdown": -0.09966690698681269,
+        "positive_dev_year_share": 0.0,
+        "per_year": {
+          "2025": -0.1463711028117068,
+          "2026": -0.09691131732285337
+        },
+        "spread_1_5x_net_avg_R": -0.13803432919227673,
+        "random_direction_percentile": null,
+        "pbo": null,
+        "grade": "ungraded: development",
+        "brier": null,
+        "brier_skill_vs_p0": null,
+        "deflated_sharpe_ratio": null
+      },
+      "XAUUSD": {
+        "n": 130,
+        "signals_per_year": 70.14526652714514,
+        "hit_rate": 0.5615384615384615,
+        "net_avg_R": 0.16778621285764284,
+        "t_stat": 1.8736087076440626,
+        "profit_factor": 1.4939018877465873,
+        "daily_sharpe": 1.520052554171726,
+        "max_drawdown": -0.03459000137014845,
+        "positive_dev_year_share": 1.0,
+        "per_year": {
+          "2025": 0.014426127971910048,
+          "2026": 0.36419474262358126
+        },
+        "spread_1_5x_net_avg_R": 0.15887829612927762,
+        "random_direction_percentile": null,
+        "pbo": null,
+        "grade": "ungraded: development",
+        "brier": null,
+        "brier_skill_vs_p0": null,
+        "deflated_sharpe_ratio": null
+      },
+      "BTCUSDT": {
+        "n": 161,
+        "signals_per_year": 90.1805750798722,
+        "hit_rate": 0.38509316770186336,
+        "net_avg_R": -0.1593808518202349,
+        "t_stat": -1.7879643682795854,
+        "profit_factor": 0.7160732957013685,
+        "daily_sharpe": -1.3323100126989766,
+        "max_drawdown": -0.14612404134208423,
+        "positive_dev_year_share": 0.0,
+        "per_year": {
+          "2025": -0.18481862960030362,
+          "2026": -0.11296806429168864
+        },
+        "spread_1_5x_net_avg_R": -0.1629113719184266,
+        "random_direction_percentile": null,
+        "pbo": null,
+        "grade": "ungraded: development",
+        "brier": null,
+        "brier_skill_vs_p0": null,
+        "deflated_sharpe_ratio": null
+      }
+    }
+  }
+}
