@@ -23,3 +23,29 @@ DXY and Treasury yields are unavailable in v1 and are not included in F5.
 | f5_cross_market | USA500IDXUSD | NA | 0.0000 | NA | NA | NA | 0.1154 | -0.0057 | NA | no | 0.79 | 4.13 |
 | f5_cross_market | USATECHIDXUSD | -0.3650 | 2.2532 | 0.4444 | -1.4186 | 0.3530 | 0.0995 | -0.0028 | 0.5000 | no | 0.80 | 3.96 |
 | f5_cross_market | XAUUSD | NA | 0.0000 | NA | NA | NA | 0.1207 | -0.0040 | NA | no | 2.57 | 7.55 |
+
+## Random-direction percentile correction v2
+
+The original Family 3–5 random-direction percentiles used a broken microsecond timestamp conversion. The table below is the benchmark-only correction from the deterministically reproduced OOF signals stored under `reports/research/phase2_v1_rerun_signals/signals`. Frozen configs, model fits, thresholds, features, gates, selected-signal metrics and labels were unchanged. This diagnostic rerun appended **no trial-ledger rows** because it is not a new configuration.
+
+The original Family 3–5 summary displayed random percentile as a diagnostic but defined no random-percentile pass threshold; its pass flag was Brier skill versus the cell base rate > 0 and net R > 0. Accordingly the original-threshold verdict is N/A. The ≥95 column is a clearly labelled supplemental check, not a retroactive protocol criterion.
+
+| Family | Market | Signals | Original pct (invalid) | Corrected pct | Original-threshold verdict | Supplemental pct ≥95 |
+|---|---|---:|---:|---:|---|---|
+| f3_order_flow | USATECHIDXUSD | 0 | NA | NA | N/A | no |
+| f3_order_flow | USA500IDXUSD | 12 | 8.5000 | 8.5000 | N/A | no |
+| f3_order_flow | XAUUSD | 0 | NA | NA | N/A | no |
+| f3_order_flow | BTCUSDT | 7 | 50.0000 | 50.0000 | N/A | no |
+| f3_order_flow | ETHUSDT | 18 | 74.0000 | 74.0000 | N/A | no |
+| f4_regime | USATECHIDXUSD | 15 | 98.5000 | 98.5000 | N/A | yes |
+| f4_regime | USA500IDXUSD | 0 | NA | NA | N/A | no |
+| f4_regime | XAUUSD | 35 | 13.0000 | 13.0000 | N/A | no |
+| f4_regime | BTCUSDT | 2 | 47.5000 | 47.5000 | N/A | no |
+| f4_regime | ETHUSDT | 17 | 63.5000 | 63.5000 | N/A | no |
+| f5_cross_market | USATECHIDXUSD | 9 | 0.5000 | 0.5000 | N/A | no |
+| f5_cross_market | USA500IDXUSD | 0 | NA | NA | N/A | no |
+| f5_cross_market | XAUUSD | 0 | NA | NA | N/A | no |
+| f5_cross_market | BTCUSDT | 8 | 64.0000 | 64.0000 | N/A | no |
+| f5_cross_market | ETHUSDT | 19 | 70.5000 | 70.5000 | N/A | no |
+
+For F4/NQ specifically, an old-versus-fixed replay of the same 15 paired opposite-direction benchmark trades and the same 200 direction-swap seeds was bit-identical: 0/15 simulated trades exited after their declared deadline under either conversion, and mean random portfolio net R was −0.157673350849 under both (percentile 98.5 under both). Every simulated opposite trade resolved by SL or TP well before its approximately one-day deadline; moreover, this NQ executable-bar loading path supplied nanosecond timestamps, so the old and fixed stamp arrays were identical for these inputs. The corrected diagnostic is therefore genuinely unchanged, not evidence that a late time exit was overlooked.

@@ -1,0 +1,16 @@
+family,symbol,signals,original_random_pct,random_pct_v2,original_random_threshold,original_random_pass,random_pass_95
+f3_order_flow,USATECHIDXUSD,0,,,,,False
+f3_order_flow,USA500IDXUSD,12,8.5,8.5,,,False
+f3_order_flow,XAUUSD,0,,,,,False
+f3_order_flow,BTCUSDT,7,50.0,50.0,,,False
+f3_order_flow,ETHUSDT,18,74.0,74.0,,,False
+f4_regime,USATECHIDXUSD,15,98.5,98.5,,,True
+f4_regime,USA500IDXUSD,0,,,,,False
+f4_regime,XAUUSD,35,13.0,13.0,,,False
+f4_regime,BTCUSDT,2,47.5,47.5,,,False
+f4_regime,ETHUSDT,17,63.5,63.5,,,False
+f5_cross_market,USATECHIDXUSD,9,0.5,0.5,,,False
+f5_cross_market,USA500IDXUSD,0,,,,,False
+f5_cross_market,XAUUSD,0,,,,,False
+f5_cross_market,BTCUSDT,8,64.0,64.0,,,False
+f5_cross_market,ETHUSDT,19,70.5,70.5,,,False

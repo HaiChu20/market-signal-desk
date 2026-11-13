@@ -1,0 +1,16 @@
+{
+  "family": "f4_regime",
+  "symbol": "USATECHIDXUSD",
+  "signals": 15,
+  "seeds": 200,
+  "old_exit_after_deadline": 0,
+  "fixed_exit_after_deadline": 0,
+  "old_mean_random_net_R": -0.15767335084851125,
+  "fixed_mean_random_net_R": -0.15767335084851125,
+  "old_random_percentile": 98.5,
+  "fixed_random_percentile": 98.5,
+  "opposite_results_bit_identical": true,
+  "random_score_arrays_bit_identical": true,
+  "loaded_timestamp_dtype": "datetime64[ns, UTC]",
+  "note": "All paired opposite-direction trades resolved by SL or TP before the declared deadline; the NQ executable loader also supplied nanosecond timestamps, making old and fixed stamp arrays identical for these inputs."
+}

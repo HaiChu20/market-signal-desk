@@ -1,0 +1,2487 @@
+{
+  "family": "f4_regime",
+  "symbol": "XAUUSD",
+  "config_hash": "9439f1e2af0f6679e471bfb4b00b690e90126939d62dfeb47c02376df23fc7b1",
+  "features": [
+    "minutes_since_session_open",
+    "session_id",
+    "time_sin",
+    "time_cos",
+    "1m_adx14",
+    "1m_plus_di14",
+    "1m_minus_di14",
+    "1m_realized_vol14",
+    "1m_realized_vol30",
+    "1m_realized_vol50",
+    "1m_parkinson_vol14",
+    "1m_parkinson_vol50",
+    "1m_atr14",
+    "1m_atr50",
+    "1m_atr14_price",
+    "1m_atr50_price",
+    "1m_atr_ratio14_50",
+    "1m_vol_ratio14_50",
+    "1m_bollinger_width20",
+    "1m_donchian20_position",
+    "1m_donchian20_width_atr",
+    "1m_donchian55_position",
+    "1m_donchian55_width_atr",
+    "1m_range_position14",
+    "1m_range_position50",
+    "1m_ema20_slope",
+    "1m_ema50_slope",
+    "1m_ema200_slope",
+    "1m_ema20_distance_atr",
+    "1m_ema50_distance_atr",
+    "1m_ema200_distance_atr",
+    "1m_higher_high",
+    "1m_higher_low",
+    "1m_bos_up",
+    "1m_bos_down",
+    "1m_choch_up",
+    "1m_choch_down",
+    "5m_adx14",
+    "5m_plus_di14",
+    "5m_minus_di14",
+    "5m_realized_vol14",
+    "5m_realized_vol30",
+    "5m_realized_vol50",
+    "5m_parkinson_vol14",
+    "5m_parkinson_vol50",
+    "5m_atr14",
+    "5m_atr50",
+    "5m_atr14_price",
+    "5m_atr50_price",
+    "5m_atr_ratio14_50",
+    "5m_vol_ratio14_50",
+    "5m_bollinger_width20",
+    "5m_donchian20_position",
+    "5m_donchian20_width_atr",
+    "5m_donchian55_position",
+    "5m_donchian55_width_atr",
+    "5m_range_position14",
+    "5m_range_position50",
+    "5m_ema20_slope",
+    "5m_ema50_slope",
+    "5m_ema200_slope",
+    "5m_ema20_distance_atr",
+    "5m_ema50_distance_atr",
+    "5m_ema200_distance_atr",
+    "5m_higher_high",
+    "5m_higher_low",
+    "5m_bos_up",
+    "5m_bos_down",
+    "5m_choch_up",
+    "5m_choch_down",
+    "15m_adx14",
+    "15m_plus_di14",
+    "15m_minus_di14",
+    "15m_realized_vol14",
+    "15m_realized_vol30",
+    "15m_realized_vol50",
+    "15m_parkinson_vol14",
+    "15m_parkinson_vol50",
+    "15m_atr14",
+    "15m_atr50",
+    "15m_atr14_price",
+    "15m_atr50_price",
+    "15m_atr_ratio14_50",
+    "15m_vol_ratio14_50",
+    "15m_bollinger_width20",
+    "15m_donchian20_position",
+    "15m_donchian20_width_atr",
+    "15m_donchian55_position",
+    "15m_donchian55_width_atr",
+    "15m_range_position14",
+    "15m_range_position50",
+    "15m_ema20_slope",
+    "15m_ema50_slope",
+    "15m_ema200_slope",
+    "15m_ema20_distance_atr",
+    "15m_ema50_distance_atr",
+    "15m_ema200_distance_atr",
+    "15m_higher_high",
+    "15m_higher_low",
+    "15m_bos_up",
+    "15m_bos_down",
+    "15m_choch_up",
+    "15m_choch_down",
+    "1h_adx14",
+    "1h_plus_di14",
+    "1h_minus_di14",
+    "1h_realized_vol14",
+    "1h_realized_vol30",
+    "1h_realized_vol50",
+    "1h_parkinson_vol14",
+    "1h_parkinson_vol50",
+    "1h_atr14",
+    "1h_atr50",
+    "1h_atr14_price",
+    "1h_atr50_price",
+    "1h_atr_ratio14_50",
+    "1h_vol_ratio14_50",
+    "1h_bollinger_width20",
+    "1h_donchian20_position",
+    "1h_donchian20_width_atr",
+    "1h_donchian55_position",
+    "1h_donchian55_width_atr",
+    "1h_range_position14",
+    "1h_range_position50",
+    "1h_ema20_slope",
+    "1h_ema50_slope",
+    "1h_ema200_slope",
+    "1h_ema20_distance_atr",
+    "1h_ema50_distance_atr",
+    "1h_ema200_distance_atr",
+    "1h_higher_high",
+    "1h_higher_low",
+    "1h_bos_up",
+    "1h_bos_down",
+    "1h_choch_up",
+    "1h_choch_down",
+    "4h_adx14",
+    "4h_plus_di14",
+    "4h_minus_di14",
+    "4h_realized_vol14",
+    "4h_realized_vol30",
+    "4h_realized_vol50",
+    "4h_parkinson_vol14",
+    "4h_parkinson_vol50",
+    "4h_atr14",
+    "4h_atr50",
+    "4h_atr14_price",
+    "4h_atr50_price",
+    "4h_atr_ratio14_50",
+    "4h_vol_ratio14_50",
+    "4h_bollinger_width20",
+    "4h_donchian20_position",
+    "4h_donchian20_width_atr",
+    "4h_donchian55_position",
+    "4h_donchian55_width_atr",
+    "4h_range_position14",
+    "4h_range_position50",
+    "4h_ema20_slope",
+    "4h_ema50_slope",
+    "4h_ema200_slope",
+    "4h_ema20_distance_atr",
+    "4h_ema50_distance_atr",
+    "4h_ema200_distance_atr",
+    "4h_higher_high",
+    "4h_higher_low",
+    "4h_bos_up",
+    "4h_bos_down",
+    "4h_choch_up",
+    "4h_choch_down",
+    "1d_adx14",
+    "1d_plus_di14",
+    "1d_minus_di14",
+    "1d_realized_vol14",
+    "1d_realized_vol30",
+    "1d_realized_vol50",
+    "1d_parkinson_vol14",
+    "1d_parkinson_vol50",
+    "1d_atr14",
+    "1d_atr50",
+    "1d_atr14_price",
+    "1d_atr50_price",
+    "1d_atr_ratio14_50",
+    "1d_vol_ratio14_50",
+    "1d_bollinger_width20",
+    "1d_donchian20_position",
+    "1d_donchian20_width_atr",
+    "1d_donchian55_position",
+    "1d_donchian55_width_atr",
+    "1d_range_position14",
+    "1d_range_position50",
+    "1d_ema20_slope",
+    "1d_ema50_slope",
+    "1d_ema200_slope",
+    "1d_ema20_distance_atr",
+    "1d_ema50_distance_atr",
+    "1d_ema200_distance_atr",
+    "1d_higher_high",
+    "1d_higher_low",
+    "1d_bos_up",
+    "1d_bos_down",
+    "1d_choch_up",
+    "1d_choch_down",
+    "minutes_since_session_open__missing",
+    "session_id__missing",
+    "time_sin__missing",
+    "time_cos__missing",
+    "1m_adx14__missing",
+    "1m_plus_di14__missing",
+    "1m_minus_di14__missing",
+    "1m_realized_vol14__missing",
+    "1m_realized_vol30__missing",
+    "1m_realized_vol50__missing",
+    "1m_parkinson_vol14__missing",
+    "1m_parkinson_vol50__missing",
+    "1m_atr14__missing",
+    "1m_atr50__missing",
+    "1m_atr14_price__missing",
+    "1m_atr50_price__missing",
+    "1m_atr_ratio14_50__missing",
+    "1m_vol_ratio14_50__missing",
+    "1m_bollinger_width20__missing",
+    "1m_donchian20_position__missing",
+    "1m_donchian20_width_atr__missing",
+    "1m_donchian55_position__missing",
+    "1m_donchian55_width_atr__missing",
+    "1m_range_position14__missing",
+    "1m_range_position50__missing",
+    "1m_ema20_slope__missing",
+    "1m_ema50_slope__missing",
+    "1m_ema200_slope__missing",
+    "1m_ema20_distance_atr__missing",
+    "1m_ema50_distance_atr__missing",
+    "1m_ema200_distance_atr__missing",
+    "1m_higher_high__missing",
+    "1m_higher_low__missing",
+    "1m_bos_up__missing",
+    "1m_bos_down__missing",
+    "1m_choch_up__missing",
+    "1m_choch_down__missing",
+    "5m_adx14__missing",
+    "5m_plus_di14__missing",
+    "5m_minus_di14__missing",
+    "5m_realized_vol14__missing",
+    "5m_realized_vol30__missing",
+    "5m_realized_vol50__missing",
+    "5m_parkinson_vol14__missing",
+    "5m_parkinson_vol50__missing",
+    "5m_atr14__missing",
+    "5m_atr50__missing",
+    "5m_atr14_price__missing",
+    "5m_atr50_price__missing",
+    "5m_atr_ratio14_50__missing",
+    "5m_vol_ratio14_50__missing",
+    "5m_bollinger_width20__missing",
+    "5m_donchian20_position__missing",
+    "5m_donchian20_width_atr__missing",
+    "5m_donchian55_position__missing",
+    "5m_donchian55_width_atr__missing",
+    "5m_range_position14__missing",
+    "5m_range_position50__missing",
+    "5m_ema20_slope__missing",
+    "5m_ema50_slope__missing",
+    "5m_ema200_slope__missing",
+    "5m_ema20_distance_atr__missing",
+    "5m_ema50_distance_atr__missing",
+    "5m_ema200_distance_atr__missing",
+    "5m_higher_high__missing",
+    "5m_higher_low__missing",
+    "5m_bos_up__missing",
+    "5m_bos_down__missing",
+    "5m_choch_up__missing",
+    "5m_choch_down__missing",
+    "15m_adx14__missing",
+    "15m_plus_di14__missing",
+    "15m_minus_di14__missing",
+    "15m_realized_vol14__missing",
+    "15m_realized_vol30__missing",
+    "15m_realized_vol50__missing",
+    "15m_parkinson_vol14__missing",
+    "15m_parkinson_vol50__missing",
+    "15m_atr14__missing",
+    "15m_atr50__missing",
+    "15m_atr14_price__missing",
+    "15m_atr50_price__missing",
+    "15m_atr_ratio14_50__missing",
+    "15m_vol_ratio14_50__missing",
+    "15m_bollinger_width20__missing",
+    "15m_donchian20_position__missing",
+    "15m_donchian20_width_atr__missing",
+    "15m_donchian55_position__missing",
+    "15m_donchian55_width_atr__missing",
+    "15m_range_position14__missing",
+    "15m_range_position50__missing",
+    "15m_ema20_slope__missing",
+    "15m_ema50_slope__missing",
+    "15m_ema200_slope__missing",
+    "15m_ema20_distance_atr__missing",
+    "15m_ema50_distance_atr__missing",
+    "15m_ema200_distance_atr__missing",
+    "15m_higher_high__missing",
+    "15m_higher_low__missing",
+    "15m_bos_up__missing",
+    "15m_bos_down__missing",
+    "15m_choch_up__missing",
+    "15m_choch_down__missing",
+    "1h_adx14__missing",
+    "1h_plus_di14__missing",
+    "1h_minus_di14__missing",
+    "1h_realized_vol14__missing",
+    "1h_realized_vol30__missing",
+    "1h_realized_vol50__missing",
+    "1h_parkinson_vol14__missing",
+    "1h_parkinson_vol50__missing",
+    "1h_atr14__missing",
+    "1h_atr50__missing",
+    "1h_atr14_price__missing",
+    "1h_atr50_price__missing",
+    "1h_atr_ratio14_50__missing",
+    "1h_vol_ratio14_50__missing",
+    "1h_bollinger_width20__missing",
+    "1h_donchian20_position__missing",
+    "1h_donchian20_width_atr__missing",
+    "1h_donchian55_position__missing",
+    "1h_donchian55_width_atr__missing",
+    "1h_range_position14__missing",
+    "1h_range_position50__missing",
+    "1h_ema20_slope__missing",
+    "1h_ema50_slope__missing",
+    "1h_ema200_slope__missing",
+    "1h_ema20_distance_atr__missing",
+    "1h_ema50_distance_atr__missing",
+    "1h_ema200_distance_atr__missing",
+    "1h_higher_high__missing",
+    "1h_higher_low__missing",
+    "1h_bos_up__missing",
+    "1h_bos_down__missing",
+    "1h_choch_up__missing",
+    "1h_choch_down__missing",
+    "4h_adx14__missing",
+    "4h_plus_di14__missing",
+    "4h_minus_di14__missing",
+    "4h_realized_vol14__missing",
+    "4h_realized_vol30__missing",
+    "4h_realized_vol50__missing",
+    "4h_parkinson_vol14__missing",
+    "4h_parkinson_vol50__missing",
+    "4h_atr14__missing",
+    "4h_atr50__missing",
+    "4h_atr14_price__missing",
+    "4h_atr50_price__missing",
+    "4h_atr_ratio14_50__missing",
+    "4h_vol_ratio14_50__missing",
+    "4h_bollinger_width20__missing",
+    "4h_donchian20_position__missing",
+    "4h_donchian20_width_atr__missing",
+    "4h_donchian55_position__missing",
+    "4h_donchian55_width_atr__missing",
+    "4h_range_position14__missing",
+    "4h_range_position50__missing",
+    "4h_ema20_slope__missing",
+    "4h_ema50_slope__missing",
+    "4h_ema200_slope__missing",
+    "4h_ema20_distance_atr__missing",
+    "4h_ema50_distance_atr__missing",
+    "4h_ema200_distance_atr__missing",
+    "4h_higher_high__missing",
+    "4h_higher_low__missing",
+    "4h_bos_up__missing",
+    "4h_bos_down__missing",
+    "4h_choch_up__missing",
+    "4h_choch_down__missing",
+    "1d_adx14__missing",
+    "1d_plus_di14__missing",
+    "1d_minus_di14__missing",
+    "1d_realized_vol14__missing",
+    "1d_realized_vol30__missing",
+    "1d_realized_vol50__missing",
+    "1d_parkinson_vol14__missing",
+    "1d_parkinson_vol50__missing",
+    "1d_atr14__missing",
+    "1d_atr50__missing",
+    "1d_atr14_price__missing",
+    "1d_atr50_price__missing",
+    "1d_atr_ratio14_50__missing",
+    "1d_vol_ratio14_50__missing",
+    "1d_bollinger_width20__missing",
+    "1d_donchian20_position__missing",
+    "1d_donchian20_width_atr__missing",
+    "1d_donchian55_position__missing",
+    "1d_donchian55_width_atr__missing",
+    "1d_range_position14__missing",
+    "1d_range_position50__missing",
+    "1d_ema20_slope__missing",
+    "1d_ema50_slope__missing",
+    "1d_ema200_slope__missing",
+    "1d_ema20_distance_atr__missing",
+    "1d_ema50_distance_atr__missing",
+    "1d_ema200_distance_atr__missing",
+    "1d_higher_high__missing",
+    "1d_higher_low__missing",
+    "1d_bos_up__missing",
+    "1d_bos_down__missing",
+    "1d_choch_up__missing",
+    "1d_choch_down__missing",
+    "side",
+    "sl_atr"
+  ],
+  "feature_count": 406,
+  "pooled": {
+    "n": 35,
+    "signals_per_year": 2.3343674568740047,
+    "hit_rate": 0.6285714285714286,
+    "net_avg_R": -0.1557243538754327,
+    "t_stat": -1.3860581804800498,
+    "profit_factor": 0.5706407014863599,
+    "daily_sharpe": -14.470658064250072,
+    "max_drawdown": -0.027057528495788574,
+    "positive_dev_year_share": 0.0,
+    "per_year": {
+      "2018": -0.1557243538754327
+    },
+    "spread_1_5x_net_avg_R": -0.15572436153888702,
+    "random_direction_percentile": null,
+    "pbo": 0.0,
+    "grade": "ungraded: development",
+    "brier": 0.17284475094350815,
+    "brier_skill_vs_p0": 0.1259586791288927,
+    "reliability_by_year": {
+      "2008": {
+        "n": 1222300,
+        "predicted": 0.2862297804151314,
+        "observed": 0.307175816084431
+      },
+      "2009": {
+        "n": 1225550,
+        "predicted": 0.2919311312783208,
+        "observed": 0.29335890008567583
+      },
+      "2010": {
+        "n": 1229700,
+        "predicted": 0.29614906071116753,
+        "observed": 0.29011140928681795
+      },
+      "2011": {
+        "n": 1229000,
+        "predicted": 0.2957531161062184,
+        "observed": 0.3022327095199349
+      },
+      "2012": {
+        "n": 1218550,
+        "predicted": 0.30073038101755545,
+        "observed": 0.30312010176028886
+      },
+      "2013": {
+        "n": 1180200,
+        "predicted": 0.29748790579752854,
+        "observed": 0.3100821894594137
+      },
+      "2014": {
+        "n": 1179100,
+        "predicted": 0.3038854942748085,
+        "observed": 0.3020167924688322
+      },
+      "2015": {
+        "n": 1182100,
+        "predicted": 0.3025575387012532,
+        "observed": 0.30753320362067504
+      },
+      "2016": {
+        "n": 1180500,
+        "predicted": 0.302365501491275,
+        "observed": 0.29818975010588733
+      },
+      "2017": {
+        "n": 1176400,
+        "predicted": 0.31519966281561174,
+        "observed": 0.3051708602516151
+      },
+      "2018": {
+        "n": 1179400,
+        "predicted": 0.31744999056960427,
+        "observed": 0.3005858911310836
+      },
+      "2019": {
+        "n": 1176250,
+        "predicted": 0.31351970455986616,
+        "observed": 0.30221976620616364
+      },
+      "2020": {
+        "n": 1182750,
+        "predicted": 0.2914458406347222,
+        "observed": 0.29461678292115834
+      },
+      "2021": {
+        "n": 1180300,
+        "predicted": 0.29352995643302077,
+        "observed": 0.3029170549860205
+      },
+      "2022": {
+        "n": 1181150,
+        "predicted": 0.2917016830487451,
+        "observed": 0.30654362274054947
+      }
+    },
+    "reliability_by_vol_tercile": {
+      "unknown": {
+        "n": 17923250,
+        "predicted": 0.299913836549437,
+        "observed": 0.3016879193226675
+      }
+    },
+    "deflated_sharpe_ratio": 0.0050329467375964665,
+    "random_direction_matched_signals": 0,
+    "row_accounting": {
+      "events": 716930,
+      "candidate_rows": 17923250,
+      "assembled_rows": 17923250,
+      "drops": {},
+      "cpcv_test_groups": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          1,
+          4
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "cpcv_train_scores": [
+        -0.1727277316720139,
+        -0.17279021620168328,
+        -0.1731145966276193,
+        -0.17384314026768893,
+        -0.17154171723742823,
+        -0.17189407516990296,
+        -0.17251008699736223,
+        -0.17210091583075998,
+        -0.1725053628438353,
+        -0.17279819800703272
+      ],
+      "cpcv_test_scores": [
+        -0.17276230592505995,
+        -0.1725006276021346,
+        -0.1721331434736165,
+        -0.17168948522133637,
+        -0.1743387790348741,
+        -0.1736525231908478,
+        -0.17359325715260207,
+        -0.17346601565331524,
+        -0.17315289280406265,
+        -0.1723989310365302
+      ],
+      "pbo": 0.0,
+      "training_anchor_cadence": "hourly (:00) within each purged fold",
+      "maximum_training_anchors_per_fold": 25000,
+      "evaluation_anchor_cadence": "every 15 minutes",
+      "oof_predicted_rows": 17923250,
+      "selected_signals": 35,
+      "no_oof_prediction": 0
+    },
+    "selection_comparison": {
+      "selected_n": 35,
+      "selected_avg_R": -0.15572436153888702,
+      "unselected_n": 17923215,
+      "unselected_avg_R": -0.07928194850683212,
+      "same_event_unselected_n": 840,
+      "same_event_unselected_avg_R": -0.2735680043697357
+    },
+    "brier_skill_vs_cell_base_rate": 0.002053330629405492,
+    "beats_cell_base_and_positive_net": false
+  },
+  "cpcv": {
+    "cpcv_test_groups": [
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        0,
+        3
+      ],
+      [
+        0,
+        4
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        3,
+        4
+      ]
+    ],
+    "cpcv_train_scores": [
+      -0.1727277316720139,
+      -0.17279021620168328,
+      -0.1731145966276193,
+      -0.17384314026768893,
+      -0.17154171723742823,
+      -0.17189407516990296,
+      -0.17251008699736223,
+      -0.17210091583075998,
+      -0.1725053628438353,
+      -0.17279819800703272
+    ],
+    "cpcv_test_scores": [
+      -0.17276230592505995,
+      -0.1725006276021346,
+      -0.1721331434736165,
+      -0.17168948522133637,
+      -0.1743387790348741,
+      -0.1736525231908478,
+      -0.17359325715260207,
+      -0.17346601565331524,
+      -0.17315289280406265,
+      -0.1723989310365302
+    ],
+    "pbo": 0.0,
+    "training_anchor_cadence": "hourly (:00) within each purged fold",
+    "maximum_training_anchors_per_fold": 25000,
+    "evaluation_anchor_cadence": "every 15 minutes"
+  },
+  "runtime_s": 314.68708945799153,
+  "peak_rss_gib": 9.033065795898438,
+  "candidates": 17923250,
+  "signals": 35,
+  "input_manifest": [
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2008-01.parquet",
+      "size": 1713513,
+      "mtime_ns": 1794527098880400697
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2008-02.parquet",
+      "size": 1660515,
+      "mtime_ns": 1794527100376676707
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2008-03.parquet",
+      "size": 1655678,
+      "mtime_ns": 1794527101817449433
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2008-04.parquet",
+      "size": 1753078,
+      "mtime_ns": 1794527103362065486
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2008-05.parquet",
+      "size": 1724390,
+      "mtime_ns": 1794527104873139024
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2008-06.parquet",
+      "size": 1681912,
+      "mtime_ns": 1794527106336186981
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2008-07.parquet",
+      "size": 1808909,
+      "mtime_ns": 1794527107941727416
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2008-08.parquet",
+      "size": 1661619,
+      "mtime_ns": 1794527109451049644
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2008-09.parquet",
+      "size": 1760324,
+      "mtime_ns": 1794527110977497301
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2008-10.parquet",
+      "size": 1825127,
+      "mtime_ns": 1794527112640345495
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2008-11.parquet",
+      "size": 1550853,
+      "mtime_ns": 1794527114165758682
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2008-12.parquet",
+      "size": 1752794,
+      "mtime_ns": 1794527115833391302
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2009-01.parquet",
+      "size": 1716449,
+      "mtime_ns": 1794527117408783965
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2009-02.parquet",
+      "size": 1579424,
+      "mtime_ns": 1794527118875598920
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2009-03.parquet",
+      "size": 1741821,
+      "mtime_ns": 1794527120489684859
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2009-04.parquet",
+      "size": 1678902,
+      "mtime_ns": 1794527122091368003
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2009-05.parquet",
+      "size": 1642049,
+      "mtime_ns": 1794527123603332717
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2009-06.parquet",
+      "size": 1745777,
+      "mtime_ns": 1794527125236332103
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2009-07.parquet",
+      "size": 1770924,
+      "mtime_ns": 1794527126931010086
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2009-08.parquet",
+      "size": 1617423,
+      "mtime_ns": 1794527128513786784
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2009-09.parquet",
+      "size": 1712893,
+      "mtime_ns": 1794527130174802919
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2009-10.parquet",
+      "size": 1734169,
+      "mtime_ns": 1794527131822024993
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2009-11.parquet",
+      "size": 1694607,
+      "mtime_ns": 1794527133331902102
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2009-12.parquet",
+      "size": 1802580,
+      "mtime_ns": 1794527134940273316
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2010-01.parquet",
+      "size": 1622620,
+      "mtime_ns": 1794527136476666450
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2010-02.parquet",
+      "size": 1589363,
+      "mtime_ns": 1794527137915341696
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2010-03.parquet",
+      "size": 1822268,
+      "mtime_ns": 1794527139638144596
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2010-04.parquet",
+      "size": 1703608,
+      "mtime_ns": 1794527141286449973
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2010-05.parquet",
+      "size": 1669264,
+      "mtime_ns": 1794527142838084057
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2010-06.parquet",
+      "size": 1724280,
+      "mtime_ns": 1794527144486199807
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2010-07.parquet",
+      "size": 1705199,
+      "mtime_ns": 1794527146062328437
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2010-08.parquet",
+      "size": 1670216,
+      "mtime_ns": 1794527147770161973
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2010-09.parquet",
+      "size": 1645873,
+      "mtime_ns": 1794527149495802360
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2010-10.parquet",
+      "size": 1669016,
+      "mtime_ns": 1794527150995368821
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2010-11.parquet",
+      "size": 1706653,
+      "mtime_ns": 1794527152589809224
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2010-12.parquet",
+      "size": 1788120,
+      "mtime_ns": 1794527154224557628
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2011-01.parquet",
+      "size": 1657243,
+      "mtime_ns": 1794527155752406423
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2011-02.parquet",
+      "size": 1559485,
+      "mtime_ns": 1794527157234193366
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2011-03.parquet",
+      "size": 1835645,
+      "mtime_ns": 1794527158912722057
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2011-04.parquet",
+      "size": 1629911,
+      "mtime_ns": 1794527160447092836
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2011-05.parquet",
+      "size": 1743834,
+      "mtime_ns": 1794527162175070165
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2011-06.parquet",
+      "size": 1703364,
+      "mtime_ns": 1794527163804551556
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2011-07.parquet",
+      "size": 1669408,
+      "mtime_ns": 1794527165301943743
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2011-08.parquet",
+      "size": 1870324,
+      "mtime_ns": 1794527166946938587
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2011-09.parquet",
+      "size": 1761272,
+      "mtime_ns": 1794527168511543596
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2011-10.parquet",
+      "size": 1692863,
+      "mtime_ns": 1794527170080995949
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2011-11.parquet",
+      "size": 1720010,
+      "mtime_ns": 1794527171653036482
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2011-12.parquet",
+      "size": 1632356,
+      "mtime_ns": 1794527173098403967
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2012-01.parquet",
+      "size": 1648098,
+      "mtime_ns": 1794527174597545869
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2012-02.parquet",
+      "size": 1618442,
+      "mtime_ns": 1794527176093572746
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2012-03.parquet",
+      "size": 1712609,
+      "mtime_ns": 1794527177674439111
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2012-04.parquet",
+      "size": 1559987,
+      "mtime_ns": 1794527179172262676
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2012-05.parquet",
+      "size": 1800420,
+      "mtime_ns": 1794527180784470300
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2012-06.parquet",
+      "size": 1612160,
+      "mtime_ns": 1794527182296462491
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2012-07.parquet",
+      "size": 1708228,
+      "mtime_ns": 1794527183879730412
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2012-08.parquet",
+      "size": 1775033,
+      "mtime_ns": 1794527185556684733
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2012-09.parquet",
+      "size": 1536326,
+      "mtime_ns": 1794527187051255287
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2012-10.parquet",
+      "size": 1799555,
+      "mtime_ns": 1794527188799433684
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2012-11.parquet",
+      "size": 1643783,
+      "mtime_ns": 1794527190423021370
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2012-12.parquet",
+      "size": 1535169,
+      "mtime_ns": 1794527191843676301
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2013-01.parquet",
+      "size": 1644990,
+      "mtime_ns": 1794527193377472984
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2013-02.parquet",
+      "size": 1503078,
+      "mtime_ns": 1794527194718166924
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2013-03.parquet",
+      "size": 1483825,
+      "mtime_ns": 1794527196136516639
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2013-04.parquet",
+      "size": 1685555,
+      "mtime_ns": 1794527197631781483
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2013-05.parquet",
+      "size": 1725424,
+      "mtime_ns": 1794527199132978162
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2013-06.parquet",
+      "size": 1514340,
+      "mtime_ns": 1794527200523632267
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2013-07.parquet",
+      "size": 1701468,
+      "mtime_ns": 1794527202054588541
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2013-08.parquet",
+      "size": 1674067,
+      "mtime_ns": 1794527203568089651
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2013-09.parquet",
+      "size": 1564885,
+      "mtime_ns": 1794527204984620228
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2013-10.parquet",
+      "size": 1699726,
+      "mtime_ns": 1794527206560259794
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2013-11.parquet",
+      "size": 1556338,
+      "mtime_ns": 1794527208018504260
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2013-12.parquet",
+      "size": 1534415,
+      "mtime_ns": 1794527209396600966
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2014-01.parquet",
+      "size": 1650518,
+      "mtime_ns": 1794527210921995188
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2014-02.parquet",
+      "size": 1532183,
+      "mtime_ns": 1794527212262216306
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2014-03.parquet",
+      "size": 1562387,
+      "mtime_ns": 1794527213652072729
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2014-04.parquet",
+      "size": 1534129,
+      "mtime_ns": 1794527215083438235
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2014-05.parquet",
+      "size": 1625938,
+      "mtime_ns": 1794527216595149324
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2014-06.parquet",
+      "size": 1564823,
+      "mtime_ns": 1794527218075389790
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2014-07.parquet",
+      "size": 1702224,
+      "mtime_ns": 1794527219685046888
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2014-08.parquet",
+      "size": 1552181,
+      "mtime_ns": 1794527221147120936
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2014-09.parquet",
+      "size": 1652459,
+      "mtime_ns": 1794527222628578047
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2014-10.parquet",
+      "size": 1712839,
+      "mtime_ns": 1794527224211715184
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2014-11.parquet",
+      "size": 1466832,
+      "mtime_ns": 1794527225609388208
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2014-12.parquet",
+      "size": 1593778,
+      "mtime_ns": 1794527227128010370
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2015-01.parquet",
+      "size": 1587308,
+      "mtime_ns": 1794527228545973310
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2015-02.parquet",
+      "size": 1512098,
+      "mtime_ns": 1794527229886816906
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2015-03.parquet",
+      "size": 1675978,
+      "mtime_ns": 1794527231409298266
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2015-04.parquet",
+      "size": 1595350,
+      "mtime_ns": 1794527232812339983
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2015-05.parquet",
+      "size": 1553209,
+      "mtime_ns": 1794527234236817662
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2015-06.parquet",
+      "size": 1633668,
+      "mtime_ns": 1794527235735102781
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2015-07.parquet",
+      "size": 1674448,
+      "mtime_ns": 1794527237320900259
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2015-08.parquet",
+      "size": 1613477,
+      "mtime_ns": 1794527238747768441
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2015-09.parquet",
+      "size": 1640526,
+      "mtime_ns": 1794527240254577559
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2015-10.parquet",
+      "size": 1633208,
+      "mtime_ns": 1794527241735349243
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2015-11.parquet",
+      "size": 1572073,
+      "mtime_ns": 1794527243146120409
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2015-12.parquet",
+      "size": 1603348,
+      "mtime_ns": 1794527244624207373
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2016-01.parquet",
+      "size": 1513958,
+      "mtime_ns": 1794527245983610672
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2016-02.parquet",
+      "size": 1631526,
+      "mtime_ns": 1794527247365078119
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2016-03.parquet",
+      "size": 1644938,
+      "mtime_ns": 1794527248869745466
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2016-04.parquet",
+      "size": 1581631,
+      "mtime_ns": 1794527250285190558
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2016-05.parquet",
+      "size": 1676302,
+      "mtime_ns": 1794527251787647012
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2016-06.parquet",
+      "size": 1649235,
+      "mtime_ns": 1794527253340849366
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2016-07.parquet",
+      "size": 1551141,
+      "mtime_ns": 1794527254838853865
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2016-08.parquet",
+      "size": 1719322,
+      "mtime_ns": 1794527256445501216
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2016-09.parquet",
+      "size": 1612783,
+      "mtime_ns": 1794527257979772954
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2016-10.parquet",
+      "size": 1563647,
+      "mtime_ns": 1794527259488968954
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2016-11.parquet",
+      "size": 1658820,
+      "mtime_ns": 1794527260992567833
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2016-12.parquet",
+      "size": 1550428,
+      "mtime_ns": 1794527262444737555
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2017-01.parquet",
+      "size": 1615409,
+      "mtime_ns": 1794527263875811487
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2017-02.parquet",
+      "size": 1509016,
+      "mtime_ns": 1794527265230836022
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2017-03.parquet",
+      "size": 1738819,
+      "mtime_ns": 1794527266817368353
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2017-04.parquet",
+      "size": 1415423,
+      "mtime_ns": 1794527268138592633
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2017-05.parquet",
+      "size": 1710488,
+      "mtime_ns": 1794527269729092563
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2017-06.parquet",
+      "size": 1653084,
+      "mtime_ns": 1794527271242701140
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2017-07.parquet",
+      "size": 1573141,
+      "mtime_ns": 1794527272688384166
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2017-08.parquet",
+      "size": 1707325,
+      "mtime_ns": 1794527274234760729
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2017-09.parquet",
+      "size": 1569296,
+      "mtime_ns": 1794527275625297276
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2017-10.parquet",
+      "size": 1651490,
+      "mtime_ns": 1794527277155940561
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2017-11.parquet",
+      "size": 1624008,
+      "mtime_ns": 1794527278615430182
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2017-12.parquet",
+      "size": 1496282,
+      "mtime_ns": 1794527279942591279
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2018-01.parquet",
+      "size": 1661452,
+      "mtime_ns": 1794527281442095085
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2018-02.parquet",
+      "size": 1507187,
+      "mtime_ns": 1794527282811942254
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2018-03.parquet",
+      "size": 1595555,
+      "mtime_ns": 1794527284180133441
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2018-04.parquet",
+      "size": 1611103,
+      "mtime_ns": 1794527285588940927
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2018-05.parquet",
+      "size": 1695644,
+      "mtime_ns": 1794527287174237629
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2018-06.parquet",
+      "size": 1563795,
+      "mtime_ns": 1794527288658954208
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2018-07.parquet",
+      "size": 1686237,
+      "mtime_ns": 1794527290111358454
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2018-08.parquet",
+      "size": 1761843,
+      "mtime_ns": 1794527291671568239
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2018-09.parquet",
+      "size": 1506246,
+      "mtime_ns": 1794527293056793910
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2018-10.parquet",
+      "size": 1779770,
+      "mtime_ns": 1794527294637035125
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2018-11.parquet",
+      "size": 1630489,
+      "mtime_ns": 1794527296146564832
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2018-12.parquet",
+      "size": 1481148,
+      "mtime_ns": 1794527297478538385
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2019-01.parquet",
+      "size": 1670134,
+      "mtime_ns": 1794527298951175553
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2019-02.parquet",
+      "size": 1501812,
+      "mtime_ns": 1794527300263295042
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2019-03.parquet",
+      "size": 1634330,
+      "mtime_ns": 1794527301672776934
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2019-04.parquet",
+      "size": 1583836,
+      "mtime_ns": 1794527303086589833
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2019-05.parquet",
+      "size": 1740475,
+      "mtime_ns": 1794527304629704208
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2019-06.parquet",
+      "size": 1547738,
+      "mtime_ns": 1794527305930900058
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2019-07.parquet",
+      "size": 1684346,
+      "mtime_ns": 1794527307502169574
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2019-08.parquet",
+      "size": 1630044,
+      "mtime_ns": 1794527309027403238
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2019-09.parquet",
+      "size": 1576078,
+      "mtime_ns": 1794527310456790277
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2019-10.parquet",
+      "size": 1736124,
+      "mtime_ns": 1794527312049591632
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2019-11.parquet",
+      "size": 1552253,
+      "mtime_ns": 1794527313468554759
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2019-12.parquet",
+      "size": 1537764,
+      "mtime_ns": 1794527314871943005
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2020-01.parquet",
+      "size": 1687343,
+      "mtime_ns": 1794527316353022230
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2020-02.parquet",
+      "size": 1512977,
+      "mtime_ns": 1794527317701083915
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2020-03.parquet",
+      "size": 1609074,
+      "mtime_ns": 1794527319285546015
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2020-04.parquet",
+      "size": 1564507,
+      "mtime_ns": 1794527320810546764
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2020-05.parquet",
+      "size": 1563494,
+      "mtime_ns": 1794527322306832307
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2020-06.parquet",
+      "size": 1660328,
+      "mtime_ns": 1794527323896149129
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2020-07.parquet",
+      "size": 1761961,
+      "mtime_ns": 1794527325432742699
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2020-08.parquet",
+      "size": 1598478,
+      "mtime_ns": 1794527326895018035
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2020-09.parquet",
+      "size": 1656360,
+      "mtime_ns": 1794527328449313975
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2020-10.parquet",
+      "size": 1696162,
+      "mtime_ns": 1794527329985700926
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2020-11.parquet",
+      "size": 1579300,
+      "mtime_ns": 1794527331447839184
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2020-12.parquet",
+      "size": 1629474,
+      "mtime_ns": 1794527332936954806
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2021-01.parquet",
+      "size": 1497272,
+      "mtime_ns": 1794527334323727153
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2021-02.parquet",
+      "size": 1533972,
+      "mtime_ns": 1794527335700295119
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2021-03.parquet",
+      "size": 1778417,
+      "mtime_ns": 1794527337307409410
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2021-04.parquet",
+      "size": 1627983,
+      "mtime_ns": 1794527338730156994
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2021-05.parquet",
+      "size": 1592449,
+      "mtime_ns": 1794527340168932554
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2021-06.parquet",
+      "size": 1689851,
+      "mtime_ns": 1794527341645719201
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2021-07.parquet",
+      "size": 1658920,
+      "mtime_ns": 1794527343138696365
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2021-08.parquet",
+      "size": 1682375,
+      "mtime_ns": 1794527344667494595
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2021-09.parquet",
+      "size": 1682074,
+      "mtime_ns": 1794527346118395349
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2021-10.parquet",
+      "size": 1626146,
+      "mtime_ns": 1794527347586864925
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2021-11.parquet",
+      "size": 1659090,
+      "mtime_ns": 1794527349070123258
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2021-12.parquet",
+      "size": 1690859,
+      "mtime_ns": 1794527350578271267
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2022-01.parquet",
+      "size": 1603950,
+      "mtime_ns": 1794527352017910383
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2022-02.parquet",
+      "size": 1526691,
+      "mtime_ns": 1794527353324053987
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2022-03.parquet",
+      "size": 1793983,
+      "mtime_ns": 1794527354886010182
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2022-04.parquet",
+      "size": 1532363,
+      "mtime_ns": 1794527356271091358
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2022-05.parquet",
+      "size": 1705678,
+      "mtime_ns": 1794527357774627329
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2022-06.parquet",
+      "size": 1677561,
+      "mtime_ns": 1794527359290056656
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2022-07.parquet",
+      "size": 1582526,
+      "mtime_ns": 1794527360766895477
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2022-08.parquet",
+      "size": 1808009,
+      "mtime_ns": 1794527362328275252
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2022-09.parquet",
+      "size": 1699046,
+      "mtime_ns": 1794527363779369054
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2022-10.parquet",
+      "size": 1643960,
+      "mtime_ns": 1794527365255587494
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2022-11.parquet",
+      "size": 1671427,
+      "mtime_ns": 1794527366732413815
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/XAUUSD/2022-12.parquet",
+      "size": 1577010,
+      "mtime_ns": 1794527368133979389
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2008-01.parquet",
+      "size": 13440090,
+      "mtime_ns": 1794375874975170636
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2008-02.parquet",
+      "size": 12802190,
+      "mtime_ns": 1794375875187169863
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2008-03.parquet",
+      "size": 12612989,
+      "mtime_ns": 1794375875394254562
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2008-04.parquet",
+      "size": 13556032,
+      "mtime_ns": 1794375875606744254
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2008-05.parquet",
+      "size": 13373606,
+      "mtime_ns": 1794375875822452118
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2008-06.parquet",
+      "size": 12990710,
+      "mtime_ns": 1794375876034291051
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2008-07.parquet",
+      "size": 14140651,
+      "mtime_ns": 1794375876257224517
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2008-08.parquet",
+      "size": 12911942,
+      "mtime_ns": 1794375876473569098
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2008-09.parquet",
+      "size": 13687789,
+      "mtime_ns": 1794375876688325406
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2008-10.parquet",
+      "size": 14356430,
+      "mtime_ns": 1794375876914521460
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2008-11.parquet",
+      "size": 12442669,
+      "mtime_ns": 1794375877124110361
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2008-12.parquet",
+      "size": 13978530,
+      "mtime_ns": 1794375877346788032
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2009-01.parquet",
+      "size": 13397066,
+      "mtime_ns": 1794375877561996180
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2009-02.parquet",
+      "size": 12515965,
+      "mtime_ns": 1794375877768228284
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2009-03.parquet",
+      "size": 13914705,
+      "mtime_ns": 1794375877988372544
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2009-04.parquet",
+      "size": 13353075,
+      "mtime_ns": 1794375878208845641
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2009-05.parquet",
+      "size": 13000892,
+      "mtime_ns": 1794375878418559294
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2009-06.parquet",
+      "size": 13770913,
+      "mtime_ns": 1794375878635441425
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2009-07.parquet",
+      "size": 14158009,
+      "mtime_ns": 1794375878858191096
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2009-08.parquet",
+      "size": 13097749,
+      "mtime_ns": 1794375879075972739
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2009-09.parquet",
+      "size": 13634310,
+      "mtime_ns": 1794375879303944610
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2009-10.parquet",
+      "size": 13455403,
+      "mtime_ns": 1794375879537079722
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2009-11.parquet",
+      "size": 12669426,
+      "mtime_ns": 1794375879749769334
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2009-12.parquet",
+      "size": 13879014,
+      "mtime_ns": 1794375879972345378
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2010-01.parquet",
+      "size": 12737593,
+      "mtime_ns": 1794375880183549136
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2010-02.parquet",
+      "size": 13095172,
+      "mtime_ns": 1794375880396774589
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2010-03.parquet",
+      "size": 15340829,
+      "mtime_ns": 1794375880631902396
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2010-04.parquet",
+      "size": 14528827,
+      "mtime_ns": 1794375880856008504
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2010-05.parquet",
+      "size": 13885095,
+      "mtime_ns": 1794375881078933678
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2010-06.parquet",
+      "size": 14561381,
+      "mtime_ns": 1794375881306182456
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2010-07.parquet",
+      "size": 14514510,
+      "mtime_ns": 1794375881530345356
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2010-08.parquet",
+      "size": 14782866,
+      "mtime_ns": 1794375881756267115
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2010-09.parquet",
+      "size": 14504106,
+      "mtime_ns": 1794375881979843965
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2010-10.parquet",
+      "size": 13840015,
+      "mtime_ns": 1794375882198637956
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2010-11.parquet",
+      "size": 14629772,
+      "mtime_ns": 1794375882431283394
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2010-12.parquet",
+      "size": 15021621,
+      "mtime_ns": 1794375882664014749
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2011-01.parquet",
+      "size": 14095608,
+      "mtime_ns": 1794375882882485985
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2011-02.parquet",
+      "size": 13396755,
+      "mtime_ns": 1794375883094050123
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2011-03.parquet",
+      "size": 15428239,
+      "mtime_ns": 1794375883334155501
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2011-04.parquet",
+      "size": 13451336,
+      "mtime_ns": 1794375883552550486
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2011-05.parquet",
+      "size": 14815980,
+      "mtime_ns": 1794375883779116837
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2011-06.parquet",
+      "size": 14791884,
+      "mtime_ns": 1794375884004884135
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2011-07.parquet",
+      "size": 13908769,
+      "mtime_ns": 1794375884223842462
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2011-08.parquet",
+      "size": 15280982,
+      "mtime_ns": 1794375884459361274
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2011-09.parquet",
+      "size": 14733314,
+      "mtime_ns": 1794375884683968555
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2011-10.parquet",
+      "size": 14153166,
+      "mtime_ns": 1794375884902148996
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2011-11.parquet",
+      "size": 14630974,
+      "mtime_ns": 1794375885126200811
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2011-12.parquet",
+      "size": 14124902,
+      "mtime_ns": 1794375885351256808
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2012-01.parquet",
+      "size": 14002716,
+      "mtime_ns": 1794375885577935202
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2012-02.parquet",
+      "size": 14066281,
+      "mtime_ns": 1794375885793086599
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2012-03.parquet",
+      "size": 14865390,
+      "mtime_ns": 1794375886017429752
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2012-04.parquet",
+      "size": 13797501,
+      "mtime_ns": 1794375886235688443
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2012-05.parquet",
+      "size": 15530512,
+      "mtime_ns": 1794375886469614066
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2012-06.parquet",
+      "size": 14134201,
+      "mtime_ns": 1794375886690466211
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2012-07.parquet",
+      "size": 14957774,
+      "mtime_ns": 1794375886919329429
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2012-08.parquet",
+      "size": 15608535,
+      "mtime_ns": 1794375887161112580
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2012-09.parquet",
+      "size": 13559722,
+      "mtime_ns": 1794375887380138532
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2012-10.parquet",
+      "size": 15561657,
+      "mtime_ns": 1794375887624775599
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2012-11.parquet",
+      "size": 14554002,
+      "mtime_ns": 1794375887855304048
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2012-12.parquet",
+      "size": 13438546,
+      "mtime_ns": 1794375888071103121
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2013-01.parquet",
+      "size": 14521371,
+      "mtime_ns": 1794375888308876716
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2013-02.parquet",
+      "size": 13321009,
+      "mtime_ns": 1794375888525795305
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2013-03.parquet",
+      "size": 13369474,
+      "mtime_ns": 1794375888735969089
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2013-04.parquet",
+      "size": 14824410,
+      "mtime_ns": 1794375888957504619
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2013-05.parquet",
+      "size": 15271340,
+      "mtime_ns": 1794375889190680439
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2013-06.parquet",
+      "size": 13477503,
+      "mtime_ns": 1794375889400711388
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2013-07.parquet",
+      "size": 15136014,
+      "mtime_ns": 1794375889628682718
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2013-08.parquet",
+      "size": 14741083,
+      "mtime_ns": 1794375889849831409
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2013-09.parquet",
+      "size": 13973652,
+      "mtime_ns": 1794375890063318532
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2013-10.parquet",
+      "size": 15298493,
+      "mtime_ns": 1794375890295039540
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2013-11.parquet",
+      "size": 13740885,
+      "mtime_ns": 1794375890507357772
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2013-12.parquet",
+      "size": 13843116,
+      "mtime_ns": 1794375890718746866
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2014-01.parquet",
+      "size": 14558755,
+      "mtime_ns": 1794375890941273118
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2014-02.parquet",
+      "size": 13254764,
+      "mtime_ns": 1794375891155766172
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2014-03.parquet",
+      "size": 13748227,
+      "mtime_ns": 1794375891378866266
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2014-04.parquet",
+      "size": 13765833,
+      "mtime_ns": 1794375891591046829
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2014-05.parquet",
+      "size": 14546050,
+      "mtime_ns": 1794375891814969809
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2014-06.parquet",
+      "size": 14038129,
+      "mtime_ns": 1794375892035010859
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2014-07.parquet",
+      "size": 15245795,
+      "mtime_ns": 1794375892264409584
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2014-08.parquet",
+      "size": 13965585,
+      "mtime_ns": 1794375892481704429
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2014-09.parquet",
+      "size": 14684579,
+      "mtime_ns": 1794375892704354599
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2014-10.parquet",
+      "size": 15314513,
+      "mtime_ns": 1794375892934020786
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2014-11.parquet",
+      "size": 13260877,
+      "mtime_ns": 1794375893143980651
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2014-12.parquet",
+      "size": 14699722,
+      "mtime_ns": 1794375893370394333
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2015-01.parquet",
+      "size": 14059418,
+      "mtime_ns": 1794375893591294687
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2015-02.parquet",
+      "size": 13389152,
+      "mtime_ns": 1794375893810734021
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2015-03.parquet",
+      "size": 14777007,
+      "mtime_ns": 1794375894053366476
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2015-04.parquet",
+      "size": 14085464,
+      "mtime_ns": 1794375894278416972
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2015-05.parquet",
+      "size": 13911046,
+      "mtime_ns": 1794375894498156893
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2015-06.parquet",
+      "size": 14616334,
+      "mtime_ns": 1794375894725071291
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2015-07.parquet",
+      "size": 15184653,
+      "mtime_ns": 1794375894957513892
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2015-08.parquet",
+      "size": 14111958,
+      "mtime_ns": 1794375895180236772
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2015-09.parquet",
+      "size": 14523751,
+      "mtime_ns": 1794375895408899612
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2015-10.parquet",
+      "size": 14777924,
+      "mtime_ns": 1794375895637522159
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2015-11.parquet",
+      "size": 13968430,
+      "mtime_ns": 1794375895855633307
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2015-12.parquet",
+      "size": 14642694,
+      "mtime_ns": 1794375896078224393
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2016-01.parquet",
+      "size": 13456711,
+      "mtime_ns": 1794375896291772934
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2016-02.parquet",
+      "size": 14223164,
+      "mtime_ns": 1794375896506841163
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2016-03.parquet",
+      "size": 15022585,
+      "mtime_ns": 1794375896732398000
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2016-04.parquet",
+      "size": 14219762,
+      "mtime_ns": 1794375896946680218
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2016-05.parquet",
+      "size": 14918118,
+      "mtime_ns": 1794375897184128308
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2016-06.parquet",
+      "size": 14931942,
+      "mtime_ns": 1794375897411194749
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2016-07.parquet",
+      "size": 14191217,
+      "mtime_ns": 1794375897630643291
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2016-08.parquet",
+      "size": 15623305,
+      "mtime_ns": 1794375897886069012
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2016-09.parquet",
+      "size": 14673707,
+      "mtime_ns": 1794375898107994380
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2016-10.parquet",
+      "size": 14288757,
+      "mtime_ns": 1794375898327661341
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2016-11.parquet",
+      "size": 14789780,
+      "mtime_ns": 1794375898553916022
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2016-12.parquet",
+      "size": 14186999,
+      "mtime_ns": 1794375898771118615
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2017-01.parquet",
+      "size": 14141627,
+      "mtime_ns": 1794375898989162970
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2017-02.parquet",
+      "size": 13482989,
+      "mtime_ns": 1794375899197925859
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2017-03.parquet",
+      "size": 15461148,
+      "mtime_ns": 1794375899433608632
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2017-04.parquet",
+      "size": 12951094,
+      "mtime_ns": 1794375899641638427
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2017-05.parquet",
+      "size": 15525802,
+      "mtime_ns": 1794375899879315395
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2017-06.parquet",
+      "size": 14803467,
+      "mtime_ns": 1794375900130142425
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2017-07.parquet",
+      "size": 14130214,
+      "mtime_ns": 1794375900350969445
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2017-08.parquet",
+      "size": 15964922,
+      "mtime_ns": 1794375900590482522
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2017-09.parquet",
+      "size": 14785573,
+      "mtime_ns": 1794375900809927897
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2017-10.parquet",
+      "size": 15902824,
+      "mtime_ns": 1794375901037191342
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2017-11.parquet",
+      "size": 15634981,
+      "mtime_ns": 1794375901263534523
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2017-12.parquet",
+      "size": 14409240,
+      "mtime_ns": 1794375901479281554
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2018-01.parquet",
+      "size": 15865703,
+      "mtime_ns": 1794375901709643959
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2018-02.parquet",
+      "size": 14395763,
+      "mtime_ns": 1794375901924518061
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2018-03.parquet",
+      "size": 15186802,
+      "mtime_ns": 1794375902144909616
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2018-04.parquet",
+      "size": 15270743,
+      "mtime_ns": 1794375902369966612
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2018-05.parquet",
+      "size": 16552749,
+      "mtime_ns": 1794375902609916988
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2018-06.parquet",
+      "size": 15152333,
+      "mtime_ns": 1794375902850926128
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2018-07.parquet",
+      "size": 15984110,
+      "mtime_ns": 1794375903079314255
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2018-08.parquet",
+      "size": 16708698,
+      "mtime_ns": 1794375903319695262
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2018-09.parquet",
+      "size": 14478404,
+      "mtime_ns": 1794375903539474849
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2018-10.parquet",
+      "size": 16791971,
+      "mtime_ns": 1794375903779739729
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2018-11.parquet",
+      "size": 15496137,
+      "mtime_ns": 1794375904008094189
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2018-12.parquet",
+      "size": 14650590,
+      "mtime_ns": 1794375904226449715
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2019-01.parquet",
+      "size": 16660923,
+      "mtime_ns": 1794375904461806650
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2019-02.parquet",
+      "size": 15019098,
+      "mtime_ns": 1794375904684808492
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2019-03.parquet",
+      "size": 15918708,
+      "mtime_ns": 1794375904915674780
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2019-04.parquet",
+      "size": 15845543,
+      "mtime_ns": 1794375905161864411
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2019-05.parquet",
+      "size": 17277123,
+      "mtime_ns": 1794375905409480062
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2019-06.parquet",
+      "size": 15428557,
+      "mtime_ns": 1794375905641266737
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2019-07.parquet",
+      "size": 17441981,
+      "mtime_ns": 1794375905887872499
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2019-08.parquet",
+      "size": 16923713,
+      "mtime_ns": 1794375906122965972
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2019-09.parquet",
+      "size": 16038735,
+      "mtime_ns": 1794375906353932719
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2019-10.parquet",
+      "size": 17612477,
+      "mtime_ns": 1794375906604964835
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2019-11.parquet",
+      "size": 15647251,
+      "mtime_ns": 1794375906830947803
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2019-12.parquet",
+      "size": 15715055,
+      "mtime_ns": 1794375907057869118
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2020-01.parquet",
+      "size": 16800379,
+      "mtime_ns": 1794375907296017051
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2020-02.parquet",
+      "size": 15365959,
+      "mtime_ns": 1794375907519275647
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2020-03.parquet",
+      "size": 17112541,
+      "mtime_ns": 1794375907760624125
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2020-04.parquet",
+      "size": 16335206,
+      "mtime_ns": 1794375907989553760
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2020-05.parquet",
+      "size": 16191162,
+      "mtime_ns": 1794375908217836511
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2020-06.parquet",
+      "size": 17079495,
+      "mtime_ns": 1794375908461642733
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2020-07.parquet",
+      "size": 17481088,
+      "mtime_ns": 1794375908706368134
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2020-08.parquet",
+      "size": 16216541,
+      "mtime_ns": 1794375908941774945
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2020-09.parquet",
+      "size": 16908068,
+      "mtime_ns": 1794375909177291132
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2020-10.parquet",
+      "size": 16925618,
+      "mtime_ns": 1794375909424250774
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2020-11.parquet",
+      "size": 16113187,
+      "mtime_ns": 1794375909661892033
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2020-12.parquet",
+      "size": 16892362,
+      "mtime_ns": 1794375909894680764
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2021-01.parquet",
+      "size": 15470591,
+      "mtime_ns": 1794375910111829690
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2021-02.parquet",
+      "size": 15431791,
+      "mtime_ns": 1794375910329846503
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2021-03.parquet",
+      "size": 17979687,
+      "mtime_ns": 1794375910575639836
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2021-04.parquet",
+      "size": 16231317,
+      "mtime_ns": 1794375910803911587
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2021-05.parquet",
+      "size": 16254297,
+      "mtime_ns": 1794375911032318839
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2021-06.parquet",
+      "size": 17021606,
+      "mtime_ns": 1794375911278879975
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2021-07.parquet",
+      "size": 16709887,
+      "mtime_ns": 1794375911517633042
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2021-08.parquet",
+      "size": 17034881,
+      "mtime_ns": 1794375911761711642
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2021-09.parquet",
+      "size": 16944781,
+      "mtime_ns": 1794375912000783005
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2021-10.parquet",
+      "size": 16305871,
+      "mtime_ns": 1794375912232420679
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2021-11.parquet",
+      "size": 16814008,
+      "mtime_ns": 1794375912470572570
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2021-12.parquet",
+      "size": 17038434,
+      "mtime_ns": 1794375912709213426
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2022-01.parquet",
+      "size": 16174352,
+      "mtime_ns": 1794375912938956906
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2022-02.parquet",
+      "size": 15496261,
+      "mtime_ns": 1794375913169624983
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2022-03.parquet",
+      "size": 17914269,
+      "mtime_ns": 1794375913424065648
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2022-04.parquet",
+      "size": 15500596,
+      "mtime_ns": 1794375913651427510
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2022-05.parquet",
+      "size": 17161528,
+      "mtime_ns": 1794375913893323372
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2022-06.parquet",
+      "size": 17022884,
+      "mtime_ns": 1794375914142062872
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2022-07.parquet",
+      "size": 16295461,
+      "mtime_ns": 1794375914373168663
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2022-08.parquet",
+      "size": 17959427,
+      "mtime_ns": 1794375914627939291
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2022-09.parquet",
+      "size": 17012150,
+      "mtime_ns": 1794375914868608635
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2022-10.parquet",
+      "size": 16415403,
+      "mtime_ns": 1794375915101046611
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2022-11.parquet",
+      "size": 16862722,
+      "mtime_ns": 1794375915336941346
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/XAUUSD/2022-12.parquet",
+      "size": 16228643,
+      "mtime_ns": 1794375915570273793
+    }
+  ]
+}

@@ -1,0 +1,686 @@
+{
+  "method": "phase2_f3_order_flow_USA500IDXUSD",
+  "period": "dev",
+  "preliminary": true,
+  "protocol": "v2",
+  "grade_in_dev": "not applicable; protocol section 5 grades test only",
+  "pooled": {
+    "n": 12,
+    "signals_per_year": 3.0042840006854403,
+    "hit_rate": 0.5,
+    "net_avg_R": -0.3029463266332944,
+    "t_stat": -1.3876213711322687,
+    "profit_factor": 0.40960037776343966,
+    "daily_sharpe": -1.281507792281272,
+    "max_drawdown": -0.024195551872253418,
+    "positive_dev_year_share": 0.0,
+    "per_year": {
+      "2020": -0.3029463266332944
+    },
+    "spread_1_5x_net_avg_R": -0.3029463291168213,
+    "random_direction_percentile": null,
+    "pbo": 0.0,
+    "grade": "ungraded: development",
+    "brier": 0.17513350224426746,
+    "brier_skill_vs_p0": 0.11380636910339981,
+    "reliability_by_year": {
+      "2019": {
+        "n": 1067300,
+        "predicted": 0.31961386143967924,
+        "observed": 0.29324463599737655
+      },
+      "2020": {
+        "n": 1121900,
+        "predicted": 0.32048657434918965,
+        "observed": 0.31065870398431233
+      },
+      "2021": {
+        "n": 1125750,
+        "predicted": 0.3186100742245354,
+        "observed": 0.3127230735065512
+      },
+      "2022": {
+        "n": 1138700,
+        "predicted": 0.3160989628269484,
+        "observed": 0.32248529024325984
+      }
+    },
+    "reliability_by_vol_tercile": {
+      "unknown": {
+        "n": 4453650,
+        "predicted": 0.3186812933450636,
+        "observed": 0.31003109808808504
+      }
+    },
+    "deflated_sharpe_ratio": 0.045378354106257346,
+    "random_direction_matched_signals": 0,
+    "row_accounting": {
+      "events": 178146,
+      "candidate_rows": 4453650,
+      "assembled_rows": 4453650,
+      "drops": {},
+      "cpcv_test_groups": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          1,
+          4
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "cpcv_train_scores": [
+        -0.17643149272035852,
+        -0.17532425192024875,
+        -0.17484028365761387,
+        -0.17317244806207335,
+        -0.1752726275617848,
+        -0.17475204054241966,
+        -0.17337534874822316,
+        -0.17339130681791357,
+        -0.17183609264996802,
+        -0.1714460229145014
+      ],
+      "cpcv_test_scores": [
+        -0.1714317908628151,
+        -0.17324990933861725,
+        -0.173682694503889,
+        -0.17570790071051037,
+        -0.17386350674098444,
+        -0.17441176186611523,
+        -0.17658250117586216,
+        -0.17621366137486974,
+        -0.1785661892935883,
+        -0.17929666534031746
+      ],
+      "pbo": 0.0,
+      "training_anchor_cadence": "hourly (:00) within each purged fold",
+      "maximum_training_anchors_per_fold": 25000,
+      "evaluation_anchor_cadence": "every 15 minutes",
+      "oof_predicted_rows": 4453650,
+      "selected_signals": 12,
+      "no_oof_prediction": 0
+    },
+    "selection_comparison": {
+      "selected_n": 12,
+      "selected_avg_R": -0.3029463291168213,
+      "unselected_n": 4453638,
+      "unselected_avg_R": -0.04986164718866348,
+      "same_event_unselected_n": 288,
+      "same_event_unselected_avg_R": -0.4291301965713501
+    }
+  },
+  "per_instrument": {
+    "USA500IDXUSD": {
+      "n": 12,
+      "signals_per_year": 3.0042840006854403,
+      "hit_rate": 0.5,
+      "net_avg_R": -0.3029463266332944,
+      "t_stat": -1.3876213711322687,
+      "profit_factor": 0.40960037776343966,
+      "daily_sharpe": -1.281507792281272,
+      "max_drawdown": -0.024195551872253418,
+      "positive_dev_year_share": 0.0,
+      "per_year": {
+        "2020": -0.3029463266332944
+      },
+      "spread_1_5x_net_avg_R": -0.3029463291168213,
+      "random_direction_percentile": null,
+      "pbo": null,
+      "grade": "ungraded: development",
+      "brier": 0.17513350224426746,
+      "brier_skill_vs_p0": 0.11380636910339981,
+      "reliability_by_year": {
+        "2019": {
+          "n": 1067300,
+          "predicted": 0.31961386143967924,
+          "observed": 0.29324463599737655
+        },
+        "2020": {
+          "n": 1121900,
+          "predicted": 0.32048657434918965,
+          "observed": 0.31065870398431233
+        },
+        "2021": {
+          "n": 1125750,
+          "predicted": 0.3186100742245354,
+          "observed": 0.3127230735065512
+        },
+        "2022": {
+          "n": 1138700,
+          "predicted": 0.3160989628269484,
+          "observed": 0.32248529024325984
+        }
+      },
+      "reliability_by_vol_tercile": {
+        "unknown": {
+          "n": 4453650,
+          "predicted": 0.3186812933450636,
+          "observed": 0.31003109808808504
+        }
+      },
+      "deflated_sharpe_ratio": 0.045378354106257346
+    }
+  },
+  "input_manifest": [
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2019-01.parquet",
+      "size": 1584473,
+      "mtime_ns": 1794527035008546872
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2019-02.parquet",
+      "size": 1346226,
+      "mtime_ns": 1794527036200456644
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2019-03.parquet",
+      "size": 1418083,
+      "mtime_ns": 1794527037420783209
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2019-04.parquet",
+      "size": 1294770,
+      "mtime_ns": 1794527038603573762
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2019-05.parquet",
+      "size": 1620864,
+      "mtime_ns": 1794527039961177543
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2019-06.parquet",
+      "size": 1348578,
+      "mtime_ns": 1794527041190554286
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2019-07.parquet",
+      "size": 1421988,
+      "mtime_ns": 1794527042457615711
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2019-08.parquet",
+      "size": 1588832,
+      "mtime_ns": 1794527043769677062
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2019-09.parquet",
+      "size": 1415451,
+      "mtime_ns": 1794527045083803434
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2019-10.parquet",
+      "size": 1558969,
+      "mtime_ns": 1794527046428704583
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2019-11.parquet",
+      "size": 1328085,
+      "mtime_ns": 1794527047619576844
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2019-12.parquet",
+      "size": 1215216,
+      "mtime_ns": 1794527048691774874
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2020-01.parquet",
+      "size": 1537102,
+      "mtime_ns": 1794527049952075439
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2020-02.parquet",
+      "size": 1480939,
+      "mtime_ns": 1794527051170288358
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2020-03.parquet",
+      "size": 1483281,
+      "mtime_ns": 1794527052422008041
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2020-04.parquet",
+      "size": 1582820,
+      "mtime_ns": 1794527053797648717
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2020-05.parquet",
+      "size": 1603454,
+      "mtime_ns": 1794527055109415148
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2020-06.parquet",
+      "size": 1648535,
+      "mtime_ns": 1794527056525599786
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2020-07.parquet",
+      "size": 1687146,
+      "mtime_ns": 1794527057976712786
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2020-08.parquet",
+      "size": 1544485,
+      "mtime_ns": 1794527059333993438
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2020-09.parquet",
+      "size": 1643435,
+      "mtime_ns": 1794527060674248414
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2020-10.parquet",
+      "size": 1640668,
+      "mtime_ns": 1794527062048807996
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2020-11.parquet",
+      "size": 1526387,
+      "mtime_ns": 1794527063396960220
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2020-12.parquet",
+      "size": 1545610,
+      "mtime_ns": 1794527064743760264
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2021-01.parquet",
+      "size": 1479566,
+      "mtime_ns": 1794527065999419572
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2021-02.parquet",
+      "size": 1465106,
+      "mtime_ns": 1794527067250220037
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2021-03.parquet",
+      "size": 1723256,
+      "mtime_ns": 1794527068732322817
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2021-04.parquet",
+      "size": 1530978,
+      "mtime_ns": 1794527070054177186
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2021-05.parquet",
+      "size": 1553946,
+      "mtime_ns": 1794527071387402797
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2021-06.parquet",
+      "size": 1567524,
+      "mtime_ns": 1794527072759868815
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2021-07.parquet",
+      "size": 1599689,
+      "mtime_ns": 1794527074069299847
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2021-08.parquet",
+      "size": 1560787,
+      "mtime_ns": 1794527075429492987
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2021-09.parquet",
+      "size": 1625200,
+      "mtime_ns": 1794527076709725133
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2021-10.parquet",
+      "size": 1595038,
+      "mtime_ns": 1794527078047993589
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2021-11.parquet",
+      "size": 1578759,
+      "mtime_ns": 1794527079404588192
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2021-12.parquet",
+      "size": 1639933,
+      "mtime_ns": 1794527080754259807
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2022-01.parquet",
+      "size": 1572712,
+      "mtime_ns": 1794527082069390357
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2022-02.parquet",
+      "size": 1483145,
+      "mtime_ns": 1794527083325511876
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2022-03.parquet",
+      "size": 1739254,
+      "mtime_ns": 1794527084765976058
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2022-04.parquet",
+      "size": 1504968,
+      "mtime_ns": 1794527085970878965
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2022-05.parquet",
+      "size": 1646368,
+      "mtime_ns": 1794527087384484492
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2022-06.parquet",
+      "size": 1645197,
+      "mtime_ns": 1794527088734108941
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2022-07.parquet",
+      "size": 1564143,
+      "mtime_ns": 1794527090056430356
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2022-08.parquet",
+      "size": 1725797,
+      "mtime_ns": 1794527091478695598
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2022-09.parquet",
+      "size": 1631155,
+      "mtime_ns": 1794527092855886124
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2022-10.parquet",
+      "size": 1572681,
+      "mtime_ns": 1794527094208455436
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2022-11.parquet",
+      "size": 1594236,
+      "mtime_ns": 1794527095570715265
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USA500IDXUSD/2022-12.parquet",
+      "size": 1537506,
+      "mtime_ns": 1794527096806926288
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2019-01.parquet",
+      "size": 15038483,
+      "mtime_ns": 1794374542248914437
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2019-02.parquet",
+      "size": 12458556,
+      "mtime_ns": 1794374542454599199
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2019-03.parquet",
+      "size": 13050143,
+      "mtime_ns": 1794374542664896777
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2019-04.parquet",
+      "size": 11614030,
+      "mtime_ns": 1794374542868997558
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2019-05.parquet",
+      "size": 15131635,
+      "mtime_ns": 1794374543098230406
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2019-06.parquet",
+      "size": 12811946,
+      "mtime_ns": 1794374543310626389
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2019-07.parquet",
+      "size": 13066250,
+      "mtime_ns": 1794374543531667412
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2019-08.parquet",
+      "size": 15379647,
+      "mtime_ns": 1794374543764497186
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2019-09.parquet",
+      "size": 13434896,
+      "mtime_ns": 1794374543982143368
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2019-10.parquet",
+      "size": 14801721,
+      "mtime_ns": 1794374544208733470
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2019-11.parquet",
+      "size": 11982544,
+      "mtime_ns": 1794374544412081449
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2019-12.parquet",
+      "size": 11333823,
+      "mtime_ns": 1794374544606137212
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2020-01.parquet",
+      "size": 14683110,
+      "mtime_ns": 1794374544833434532
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2020-02.parquet",
+      "size": 14340569,
+      "mtime_ns": 1794374545047234035
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2020-03.parquet",
+      "size": 15078742,
+      "mtime_ns": 1794374545271605313
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2020-04.parquet",
+      "size": 15949593,
+      "mtime_ns": 1794374545509242156
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2020-05.parquet",
+      "size": 15775928,
+      "mtime_ns": 1794374545741686257
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2020-06.parquet",
+      "size": 16571385,
+      "mtime_ns": 1794374545984443214
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2020-07.parquet",
+      "size": 17027442,
+      "mtime_ns": 1794374546233042004
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2020-08.parquet",
+      "size": 15196264,
+      "mtime_ns": 1794374546472061533
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2020-09.parquet",
+      "size": 16398051,
+      "mtime_ns": 1794374546712389747
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2020-10.parquet",
+      "size": 16362144,
+      "mtime_ns": 1794374546950617264
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2020-11.parquet",
+      "size": 15592675,
+      "mtime_ns": 1794374547186935588
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2020-12.parquet",
+      "size": 15588548,
+      "mtime_ns": 1794374547415465092
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2021-01.parquet",
+      "size": 14738364,
+      "mtime_ns": 1794374547636794327
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2021-02.parquet",
+      "size": 14603210,
+      "mtime_ns": 1794374547852469773
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2021-03.parquet",
+      "size": 17271995,
+      "mtime_ns": 1794374548094977602
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2021-04.parquet",
+      "size": 14927497,
+      "mtime_ns": 1794374548317475812
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2021-05.parquet",
+      "size": 15367947,
+      "mtime_ns": 1794374548540261110
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2021-06.parquet",
+      "size": 15495946,
+      "mtime_ns": 1794374548768192147
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2021-07.parquet",
+      "size": 15456618,
+      "mtime_ns": 1794374548998469301
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2021-08.parquet",
+      "size": 15360182,
+      "mtime_ns": 1794374549227576772
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2021-09.parquet",
+      "size": 15838826,
+      "mtime_ns": 1794374549459157611
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2021-10.parquet",
+      "size": 15678631,
+      "mtime_ns": 1794374549685556877
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2021-11.parquet",
+      "size": 15623567,
+      "mtime_ns": 1794374549922339915
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2021-12.parquet",
+      "size": 16347499,
+      "mtime_ns": 1794374550155730322
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2022-01.parquet",
+      "size": 15871217,
+      "mtime_ns": 1794374550384705791
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2022-02.parquet",
+      "size": 15147927,
+      "mtime_ns": 1794374550600320820
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2022-03.parquet",
+      "size": 17510786,
+      "mtime_ns": 1794374550844841052
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2022-04.parquet",
+      "size": 15058977,
+      "mtime_ns": 1794374551063206245
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2022-05.parquet",
+      "size": 16723959,
+      "mtime_ns": 1794374551302930325
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2022-06.parquet",
+      "size": 16594444,
+      "mtime_ns": 1794374551546136205
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2022-07.parquet",
+      "size": 15835577,
+      "mtime_ns": 1794374551775920394
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2022-08.parquet",
+      "size": 17387546,
+      "mtime_ns": 1794374552025689701
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2022-09.parquet",
+      "size": 16511111,
+      "mtime_ns": 1794374552264731313
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2022-10.parquet",
+      "size": 16058528,
+      "mtime_ns": 1794374552494937841
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2022-11.parquet",
+      "size": 16443556,
+      "mtime_ns": 1794374552726086174
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USA500IDXUSD/2022-12.parquet",
+      "size": 15880644,
+      "mtime_ns": 1794374552957041505
+    }
+  ],
+  "limitations": [
+    "Stage 9 inputs may be rebuilt; inspect manifest before reuse.",
+    "PBO uses like-for-like CPCV train/test ranks across logged development configurations; null until at least two comparable configurations exist.",
+    "Random-direction benchmark uses the executable opposite-side label kernel on raw bars; coverage is reported.",
+    "For BTC, the raw mid-price bars use a monthly median of the modeled decision-time spread in the opposite-direction simulation.",
+    "DSR uses trial-ledger daily Sharpe dispersion; null if too few trials."
+  ]
+}
