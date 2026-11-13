@@ -598,14 +598,17 @@ def _attach_market_auxiliary(bars: pd.DataFrame, symbol: str) -> pd.DataFrame:
 
 
 def _event_feature_frame(bars: pd.DataFrame, timeframes: dict[str,pd.DataFrame],
-                         symbol: str | None = None, feature_root: Path = FEATURE_DIR) -> pd.DataFrame:
+                         symbol: str | None = None, feature_root: Path = FEATURE_DIR,
+                         method_names: set[str] | None = None) -> pd.DataFrame:
     """Read the persisted causal feature rows used by production detectors."""
     if symbol is not None:
         import pyarrow.parquet as pq
         history=bars.sort_values('ts').reset_index(drop=True)
         start=pd.to_datetime(history.ts.min(),utc=True);end=pd.to_datetime(history.ts.max(),utc=True)
-        wanted={'ts','known_at','1d_bar_known_at','1d_rsi2','1d_ema200_distance_atr','gex_level'}
-        for method in methods_for_symbol(symbol):wanted.update(method.REQUIRED_FEATURES)
+        wanted={'ts','known_at','1m_atr14','1d_bar_known_at','1d_rsi2','1d_ema200_distance_atr','gex_level'}
+        selected=(method for method in methods_for_symbol(symbol)
+                  if method_names is None or method.NAME in method_names)
+        for method in selected:wanted.update(method.REQUIRED_FEATURES)
         chunks=[]
         for path in sorted((feature_root/symbol).glob('*.parquet')):
             try:month=pd.Timestamp(path.stem+'-01',tz='UTC')
@@ -699,13 +702,15 @@ def label_method_events(features: pd.DataFrame, levels: pd.DataFrame, bars: pd.D
                         method_states: dict | None = None, return_states: bool = False,
                         detector_features: pd.DataFrame | None = None,
                         detector_bars: pd.DataFrame | None = None,
-                        unavailable: list[dict] | None = None):
+                        unavailable: list[dict] | None = None,
+                        method_names: set[str] | None = None):
     try:
         from msd._msd_kernels import first_hit_batch
     except ImportError as error:
         rust_fallback(error)
         first_hit_batch = None
-    methods=methods_for_symbol(symbol)
+    methods=tuple(method for method in methods_for_symbol(symbol)
+                  if method_names is None or method.NAME in method_names)
     if symbol in STAGE9_INSTRUMENTS:
         instrument_class, finance = label_parameters(symbol)
     else:
@@ -1059,7 +1064,9 @@ def _drop_labels_crossing_boundary(events: pd.DataFrame, boundary: pd.Timestamp)
 
 
 def replay_events_only(symbol: str, start_year: int, end_year: int,
-                       output_root: Path, source_root: Path = Path('data')) -> list[dict]:
+                       output_root: Path, source_root: Path = Path('data'),
+                       method_names: set[str] | None = None,
+                       hard_end_exclusive: pd.Timestamp | None = None) -> list[dict]:
     """Rebuild method events/labels from persisted bars, features and levels.
 
     Source data is read-only. Detector state is carried in memory between years.
@@ -1075,11 +1082,14 @@ def replay_events_only(symbol: str, start_year: int, end_year: int,
         year_start=pd.Timestamp(year,1,1,tz='UTC');year_end=pd.Timestamp(year+1,1,1,tz='UTC')
         left=year_start-pd.Timedelta(days=MAX_LOOKBACK_DAYS) if year>start_year else year_start-pd.Timedelta(days=MAX_LOOKBACK_DAYS)
         right=year_end+pd.Timedelta(days=8)
+        if hard_end_exclusive is not None:
+            hard_end_exclusive=pd.Timestamp(hard_end_exclusive)
+            right=min(right,hard_end_exclusive)
         parts=[]
         for path in sorted((source_root/'bars'/source/symbol).glob('*.parquet')):
             try:month=pd.Timestamp(path.stem+'-01',tz='UTC')
             except ValueError:continue
-            if month>right or month+pd.offsets.MonthBegin(1)<=left:continue
+            if month>=right or month+pd.offsets.MonthBegin(1)<=left:continue
             before=path.stat();part=pd.read_parquet(path)
             if path.stat().st_mtime_ns!=before.st_mtime_ns:raise RuntimeError(f'Bar source changed: {path}')
             parts.append(part)
@@ -1123,14 +1133,19 @@ def replay_events_only(symbol: str, start_year: int, end_year: int,
             repair['invalidated_at']=pd.NaT
             repair=apply_level_invalidations(active,repair)
             levels.loc[repair.index,'invalidated_at']=repair.invalidated_at
-        features=_event_feature_frame(active,{},symbol=symbol,feature_root=source_root/'features')
+        if hard_end_exclusive is not None and pd.to_datetime(active.ts,utc=True).ge(hard_end_exclusive).any():
+            raise AssertionError('Replay read a bar at or after the hard boundary')
+        features=_event_feature_frame(active,{},symbol=symbol,feature_root=source_root/'features',
+                                      method_names=method_names)
+        if hard_end_exclusive is not None and pd.to_datetime(features.ts,utc=True).ge(hard_end_exclusive).any():
+            raise AssertionError('Replay read a feature at or after the hard boundary')
         scan_start=year_start if year>start_year or has_prior_state else left
         scan=features[(features.ts>=scan_start)&(features.ts<year_end)]
         scan_bars=active[(active.ts>=scan_start)&(active.ts<year_end)]
         events,counts,state,touches=label_method_events(features,levels,active,symbol,
             return_states=True,event_start=year_start,event_end=year_end,
             detector_features=scan,detector_bars=scan_bars,method_states=state,
-            unavailable=unavailable)
+            unavailable=unavailable,method_names=method_names)
         boundary_dropped=pd.Series(dtype='int64')
         if year==end_year:
             # A DEV label is usable only when its outcome is known inside DEV.
@@ -1150,7 +1165,8 @@ def replay_events_only(symbol: str, start_year: int, end_year: int,
                                          and item['year']==year),
                                         'rule emitted no events with available inputs' if
                                         counts.get(method.NAME,0)==0 else None)}
-                         for method in methods_for_symbol(symbol))
+                         for method in methods_for_symbol(symbol)
+                         if method_names is None or method.NAME in method_names)
     if unavailable:
         report=output_root/'unavailable'/f'{symbol}.json';report.parent.mkdir(parents=True,exist_ok=True)
         report.write_text(json.dumps({'rows':summaries,'unavailable':unavailable},indent=2))
