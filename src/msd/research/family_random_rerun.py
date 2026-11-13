@@ -107,7 +107,8 @@ def main() -> None:
     result=run(args.data_root,labels,args.original_output,args.rerun_root,args.ledger,args.seeds)
     nq=result[(result.family=="f4_regime")&(result.symbol=="USATECHIDXUSD")].iloc[0]
     print(json.dumps({"units":len(result),"f4_nq_random_pct_v2":nq.random_pct_v2,
-                      "f4_nq_random_pass_v2":bool(nq.random_pass_v2)}),flush=True)
+                      "f4_nq_original_threshold_pass":None,
+                      "f4_nq_supplemental_pass_95":bool(nq.random_pass_95)}),flush=True)
 
 
 if __name__=="__main__":main()

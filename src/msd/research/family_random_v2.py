@@ -21,6 +21,7 @@ DEV_END = pd.Timestamp("2023-01-01", tz="UTC")
 FAMILIES = ("f3_order_flow", "f4_regime", "f5_cross_market")
 REQUIRED = ("sym", "ts", "side", "price", "sl", "tp", "deadline_ts", "net_R")
 SECTION = "## Random-direction percentile correction v2"
+SUPPLEMENTAL_THRESHOLD = 95.0
 
 
 def _signals(path: Path, family: str, symbol: str) -> pd.DataFrame:
@@ -52,12 +53,13 @@ def write_correction(summary: Path, rows: list[dict], signals_root: Path) -> Non
         original = original.split(SECTION, 1)[0].rstrip() + "\n"
     lines = ["", SECTION, "",
         f"The original Family 3–5 random-direction percentiles used a broken microsecond timestamp conversion. The table below is the benchmark-only correction from the deterministically reproduced OOF signals stored under `{signals_root}`. Frozen configs, model fits, thresholds, features, gates, selected-signal metrics and labels were unchanged. This diagnostic rerun appended **no trial-ledger rows** because it is not a new configuration.", "",
-        "| Family | Market | Signals | Original pct (invalid) | Corrected pct | Random check ≥95 |", 
-        "|---|---|---:|---:|---:|---|"]
+        "The original Family 3–5 summary displayed random percentile as a diagnostic but defined no random-percentile pass threshold; its pass flag was Brier skill versus the cell base rate > 0 and net R > 0. Accordingly the original-threshold verdict is N/A. The ≥95 column is a clearly labelled supplemental check, not a retroactive protocol criterion.","",
+        "| Family | Market | Signals | Original pct (invalid) | Corrected pct | Original-threshold verdict | Supplemental pct ≥95 |",
+        "|---|---|---:|---:|---:|---|---|"]
     for row in rows:
         lines.append(f"| {row['family']} | {row['symbol']} | {row['signals']} | "
-                     f"{_fmt(row['original_random_pct'])} | {_fmt(row['random_pct_v2'])} | "
-                     f"{'yes' if row['random_pass_v2'] else 'no'} |")
+                     f"{_fmt(row['original_random_pct'])} | {_fmt(row['random_pct_v2'])} | N/A | "
+                     f"{'yes' if row['random_pass_95'] else 'no'} |")
     summary.write_text(original + "\n".join(lines) + "\n")
 
 
@@ -76,7 +78,8 @@ def run(data_root: Path, signals_root: Path, output: Path, seeds: int = 200) -> 
             old=job["pooled"].get("random_direction_percentile")
             rows.append({"family":family,"symbol":symbol,"signals":len(signals),
                 "original_random_pct":old,"random_pct_v2":percentile,
-                "random_pass_v2":bool(percentile is not None and percentile>=95.0)})
+                "original_random_threshold":None,"original_random_pass":None,
+                "random_pass_95":bool(percentile is not None and percentile>=SUPPLEMENTAL_THRESHOLD)})
     result=pd.DataFrame(rows)
     output.mkdir(parents=True,exist_ok=True)
     result.to_csv(output/"families_random_pct_v2.csv",index=False)
@@ -94,7 +97,8 @@ def main() -> None:
     result=run(args.data_root,args.signals_root,args.output,args.seeds)
     nq=result[(result.family=="f4_regime")&(result.symbol=="USATECHIDXUSD")].iloc[0]
     print(json.dumps({"rows":len(result),"f4_nq_random_pct_v2":nq.random_pct_v2,
-                      "f4_nq_random_pass_v2":bool(nq.random_pass_v2)}),flush=True)
+                      "f4_nq_original_threshold_pass":None,
+                      "f4_nq_supplemental_pass_95":bool(nq.random_pass_95)}),flush=True)
 
 
 if __name__=="__main__":main()

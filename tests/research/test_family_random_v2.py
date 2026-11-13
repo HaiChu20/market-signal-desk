@@ -27,11 +27,14 @@ def test_correction_reuses_saved_signals_and_is_idempotent(tmp_path,monkeypatch)
     monkeypatch.setattr(correction,"random_direction",lambda frame,*args,**kwargs:(96.,len(frame),[]))
     result=correction.run(tmp_path,signals,output,seeds=2)
     assert len(result)==15
-    assert result.random_pass_v2.all()
+    assert result.random_pass_95.all()
+    assert result.original_random_pass.isna().all()
     first=(output/"families_summary.md").read_text()
     correction.run(tmp_path,signals,output,seeds=2)
     assert (output/"families_summary.md").read_text()==first
     assert (output/"families_random_pct_v2.csv").exists()
+    assert "original-threshold verdict is N/A" in first
+    assert "Supplemental pct ≥95" in first
 
 
 def test_missing_saved_signals_fails_instead_of_refitting(tmp_path):
