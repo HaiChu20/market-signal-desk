@@ -137,3 +137,27 @@ Stage 1 passed for **S3 only**, so stage 2 uses S3 entries only. These points we
   - a positive average over the evidence markets (yearly models trained on the 3 traded markets only);
   - **and** total R and net R per trade above the stage 1 S3 primary option over the same years.
 - One configuration, appended to reports/trials.csv.
+
+## 11. Final test (approved by the user 2026-11-13; frozen before any 2025+ data is examined)
+
+Run **once**. No rerun, no regrade, no change to any rule after seeing it.
+
+- **Final period:** trades entered from 2025-01-01 00:00 UTC to the end of the local data (Dukascopy to
+  2026-11, Binance spot BTCUSDT to 2026-10). Trades still open at the end are dropped and counted.
+- **Warm-up:** indicators (ATR, 126-day return, 20/55-day extremes) and the one-trade-per-market state
+  may use bars from 2023-01-01 onward; trades entered before 2025 are never scored. 2023–24 stays
+  spent: it is not evaluated.
+- **Main version (decides): plain S3, SL 2 ATR, TP 3R**, exactly as in stage 1 (07:00 UTC entry,
+  Globex hours, gap fills, 30-session cap, section 6 costs with carry).
+- **Second version (reported only): the stage 2 model.** Yearly walk-forward as in section 10: the
+  2025 model trains on traded-3 rows with exits before 2025-01-01, the 2026 model on exits before
+  2026-01-01, with the same features, settings and 0.05R threshold.
+- **Verdict on the main version, pooled over MNQ/MGC/MBT:**
+  - **NOT BROKEN** if net R per trade > 0. Then build the daily signal bot in shadow mode (no
+    Telegram sends without user approval).
+  - **BROKEN** if net R per trade ≤ 0. Then swing v1 stops; no bot.
+  - With ~90 expected trades this can only catch a clear failure; it cannot prove the edge.
+- **Also reported, without changing the verdict:** t-stat, per-market and per-year results, the random-
+  direction 95th percentile (200 seeds), no-carry and 2× cost rows, the evidence markets, and the
+  second version with the same metrics.
+- One row per version is appended to reports/trials.csv.
