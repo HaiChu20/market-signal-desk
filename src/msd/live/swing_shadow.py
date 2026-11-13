@@ -284,7 +284,7 @@ def _finland_time(value: str | pd.Timestamp) -> str:
     stamp = pd.Timestamp(value)
     stamp = stamp.tz_localize("UTC") if stamp.tzinfo is None else stamp.tz_convert("UTC")
     local = stamp.tz_convert("Europe/Helsinki").strftime("%a %-d %b, %H:%M")
-    return f"{local} (Europe/Helsinki)"
+    return f"{local} Finland"
 
 
 def _price(contract: str, value: float) -> str:
@@ -333,7 +333,8 @@ def _new_text(record: dict, *, include_header: bool = True) -> str:
         f"Price now: {_price(str(record['contract']), float(record['reference_price']))}",
         _distance_line("Stop", record, float(record["sl_distance"]), from_fill=True),
         _distance_line("Target", record, float(record["tp_distance"]), from_fill=True),
-        f"Example from price: stop {_price(str(record['contract']), float(record['plan_sl']))} "
+        f"Example from {_price(str(record['contract']), float(record['reference_price']))}: "
+        f"stop {_price(str(record['contract']), float(record['plan_sl']))} "
         f"· target {_price(str(record['contract']), float(record['plan_tp']))}",
         "Confidence: low.",
     ]

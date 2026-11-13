@@ -424,8 +424,7 @@ def test_cap_warning_is_sent_once_before_next_run(tmp_path: Path):
     statuses = shadow.deliver_telegram([record], tmp_path, now, client)
     assert statuses == ["Telegram: CAP_WARNING accepted for XAUUSD."]
     assert len(client.messages) == 1
-    assert client.messages[0] == ("⏰ ACTION: close MGC 🟢 LONG by Wed 18 Nov, 00:00 "
-                                  "(Europe/Helsinki)\n"
+    assert client.messages[0] == ("⏰ ACTION: close MGC 🟢 LONG by Wed 18 Nov, 00:00 Finland\n"
                                   "6-week limit")
     assert shadow.deliver_telegram([record], tmp_path, now, client) == []
 
