@@ -1,8 +1,9 @@
-"""Daily shadow message and append-only audit log for the frozen swing v1 rule."""
+"""Frozen swing v1 shadow job, intended daily at about 05:00 UTC before the 07:00 entry."""
 from __future__ import annotations
 
 import argparse
 import csv
+import multiprocessing
 import os
 from pathlib import Path
 import tempfile
@@ -17,6 +18,7 @@ from msd.research import swing_stage1 as s1
 MARKETS = tuple(s1.TRADED)
 LOOKBACK_DAYS = 400
 REFRESH_DAYS = 21
+REFRESH_TIMEOUT_SECONDS = 10 * 60
 LOG_COLUMNS = (
     "run_ts", "market", "contract", "signal_close", "data_last_ts", "stale",
     "state", "side", "entry_ts", "entry_price", "sl", "tp", "cap_session_end",
@@ -87,7 +89,8 @@ def refresh_market(data_root: Path, market: str, now: pd.Timestamp) -> None:
     stamp = pd.Timestamp(now)
     stamp = stamp.tz_localize("UTC") if stamp.tzinfo is None else stamp.tz_convert("UTC")
     start = (stamp - pd.Timedelta(days=REFRESH_DAYS)).date()
-    end = stamp.date()
+    # A Dukascopy UTC-day candle file is only available after that UTC day ends.
+    end = (stamp - pd.Timedelta(days=1)).date()
     if market == "BTCUSDT":
         directory = data_root / "bars/binance_spot/BTCUSDT"
         latest = _latest_local_bar(directory)
@@ -99,6 +102,45 @@ def refresh_market(data_root: Path, market: str, now: pd.Timestamp) -> None:
         dukascopy.download(
             market, start, end, root=data_root / "bars/dukascopy", workers=2
         )
+
+
+def _refresh_worker(data_root: Path, market: str, now: pd.Timestamp, connection) -> None:
+    try:
+        refresh_market(data_root, market, now)
+        connection.send("")
+    except Exception as exc:
+        connection.send(f"{type(exc).__name__}: {exc}")
+    finally:
+        connection.close()
+
+
+def refresh_with_timeout(data_root: Path, market: str, now: pd.Timestamp,
+                         timeout_seconds: float = REFRESH_TIMEOUT_SECONDS,
+                         _worker=_refresh_worker) -> None:
+    """Run one refresh in an isolated process with a hard wall-clock limit."""
+    context = multiprocessing.get_context("spawn")
+    receive, send = context.Pipe(duplex=False)
+    process = context.Process(target=_worker, args=(data_root, market, now, send))
+    process.start()
+    send.close()
+    process.join(timeout_seconds)
+    if process.is_alive():
+        process.terminate()
+        process.join(5)
+        if process.is_alive():
+            process.kill()
+            process.join()
+        receive.close()
+        raise TimeoutError(f"{market} refresh exceeded {timeout_seconds:g} seconds")
+    try:
+        error = receive.recv() if receive.poll() else ""
+    except EOFError:
+        error = ""
+    receive.close()
+    if error:
+        raise RuntimeError(error)
+    if process.exitcode != 0:
+        raise RuntimeError(f"{market} refresh process exited {process.exitcode}")
 
 
 def _side_text(side: int | str | None) -> str:
@@ -116,7 +158,7 @@ def analyze_market(bars: pd.DataFrame, market: str, now: pd.Timestamp,
     now = now.tz_localize("UTC") if now.tzinfo is None else now.tz_convert("UTC")
     ts = pd.DatetimeIndex(pd.to_datetime(bars.ts, utc=True))
     expected_close = latest_ny_close(now)
-    stale = is_stale(ts[-1], now)
+    stale = is_stale(ts[-1], now) or bool(refresh_error)
     period = s1.Period(data_start=ts[0], end=now.floor("min") + pd.Timedelta(minutes=1))
     first_year = int(ts[0].tz_convert(s1.NY).year) - 1
     daily = s1.daily_bars(bars, period=period)
@@ -200,12 +242,22 @@ def analyze_market(bars: pd.DataFrame, market: str, now: pd.Timestamp,
 
 
 def append_records(path: Path, records: list[dict]) -> int:
-    """Append unseen market/signal-close snapshots without rewriting history."""
-    seen = set()
+    """Allow a fresh row to supersede stale audit history, never the reverse."""
+    existing: dict[tuple[str, str], set[bool]] = {}
     if path.exists():
         with path.open(newline="") as handle:
-            seen = {(row["market"], row["signal_close"]) for row in csv.DictReader(handle)}
-    fresh = [row for row in records if (row["market"], row["signal_close"]) not in seen]
+            for row in csv.DictReader(handle):
+                key = (row["market"], row["signal_close"])
+                existing.setdefault(key, set()).add(row.get("stale", "").lower() == "true")
+    fresh = []
+    for row in records:
+        key = (row["market"], row["signal_close"])
+        stale = str(row.get("stale", "")).lower() == "true"
+        prior = existing.get(key, set())
+        if False in prior or (stale and True in prior):
+            continue
+        fresh.append(row)
+        existing.setdefault(key, set()).add(stale)
     if not fresh:
         return 0
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -228,7 +280,7 @@ def run(data_root: Path = Path("data"), shadow_root: Path = Path("data/shadow"),
         error = ""
         if refresh:
             try:
-                refresh_market(data_root, market, now)
+                refresh_with_timeout(data_root, market, now)
             except Exception as exc:  # stale guard below fails closed after transport errors
                 error = f"{type(exc).__name__}: {exc}"
         try:
@@ -250,7 +302,11 @@ def run(data_root: Path = Path("data"), shadow_root: Path = Path("data/shadow"),
         records.append(record)
         blocks.append(block)
     appended = append_records(shadow_root / "swing_v1.csv", records)
-    message = ("Swing v1 SHADOW — no orders sent\n" + BACKTEST_LINE + "\n\n" +
+    planned_entry = s1.entry_time(latest_ny_close(now))
+    message = (f"Swing v1 SHADOW — no orders sent | run {now.isoformat()} | "
+               f"planned entry {planned_entry.isoformat()} (07:00 UTC)\n" +
+               "Intended daily run time: about 05:00 UTC, after Dukascopy publishes the prior UTC day.\n" +
+               BACKTEST_LINE + "\n\n" +
                "\n\n".join(blocks) + f"\n\nAudit rows appended: {appended}.")
     shadow_root.mkdir(parents=True, exist_ok=True)
     (shadow_root / "swing_v1_latest.txt").write_text(message + "\n")

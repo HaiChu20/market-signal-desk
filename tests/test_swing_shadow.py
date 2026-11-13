@@ -1,4 +1,5 @@
 from pathlib import Path
+import time
 
 import pandas as pd
 
@@ -12,6 +13,10 @@ def _bars(times):
         for field in "ohlc":
             frame[f"{side}_{field}"] = 100.0
     return frame
+
+
+def _slow_refresh_worker(data_root, market, now, connection):
+    time.sleep(1)
 
 
 def test_state_replay_completed_rows_equal_evaluate_market(monkeypatch):
@@ -35,6 +40,33 @@ def test_state_replay_completed_rows_equal_evaluate_market(monkeypatch):
     assert replay_drops == evaluate_drops
 
 
+def test_live_period_loads_partial_end_month_but_dev_does_not(monkeypatch, tmp_path: Path):
+    directory = tmp_path / "bars/dukascopy/USATECHIDXUSD"
+    directory.mkdir(parents=True)
+    for month in ("2022-12", "2023-01", "2026-10", "2026-11"):
+        (directory / f"{month}.parquet").touch()
+    opened = []
+
+    def fake_load(symbol, start, end, root):
+        opened.append(start.strftime("%Y-%m"))
+        stamp = pd.Timestamp(start)
+        frame = _bars([stamp])
+        return frame
+
+    monkeypatch.setattr(stage1, "load_dukascopy", fake_load)
+    stage1.load_minutes(tmp_path, "USATECHIDXUSD")
+    assert opened == ["2022-12"]
+    opened.clear()
+    stage1.load_minutes(
+        tmp_path, "USATECHIDXUSD",
+        period=stage1.Period(
+            data_start=pd.Timestamp("2026-10-01", tz="UTC"),
+            end=pd.Timestamp("2026-11-13 05:01", tz="UTC"),
+        ),
+    )
+    assert opened == ["2026-10", "2026-11"]
+
+
 def test_stale_data_guard_uses_latest_new_york_close():
     now = pd.Timestamp("2026-11-13 22:05Z")
     assert shadow.latest_ny_close(now) == pd.Timestamp("2026-11-13 22:00Z")
@@ -44,6 +76,15 @@ def test_stale_data_guard_uses_latest_new_york_close():
     assert shadow.latest_ny_close(pd.Timestamp("2026-11-16 12:00Z")) == pd.Timestamp(
         "2026-11-13 22:00Z"
     )
+    # Intended 05:00 UTC run: prior day's 17:00 New York close, in both DST regimes.
+    assert shadow.latest_ny_close(pd.Timestamp("2026-11-13 05:00Z")) == pd.Timestamp(
+        "2026-11-12 22:00Z"
+    )
+    assert shadow.latest_ny_close(pd.Timestamp("2026-07-14 05:00Z")) == pd.Timestamp(
+        "2026-07-13 21:00Z"
+    )
+    assert not shadow.is_stale(pd.Timestamp("2026-11-12 21:59Z"),
+                               pd.Timestamp("2026-11-13 05:00Z"))
 
 
 def test_append_log_deduplicates_market_and_signal_close(tmp_path: Path):
@@ -54,6 +95,57 @@ def test_append_log_deduplicates_market_and_signal_close(tmp_path: Path):
     assert shadow.append_records(path, [record]) == 0
     rows = pd.read_csv(path)
     assert len(rows) == 1
+
+
+def test_non_stale_row_may_follow_stale_but_never_reverse(tmp_path: Path):
+    path = tmp_path / "swing_v1.csv"
+    base = {column: "" for column in shadow.LOG_COLUMNS}
+    base.update({"market": "XAUUSD", "signal_close": "2026-11-12T22:00:00+00:00"})
+    stale = {**base, "stale": "true", "state": "STALE"}
+    fresh = {**base, "stale": "false", "state": "FLAT"}
+    assert shadow.append_records(path, [stale]) == 1
+    assert shadow.append_records(path, [stale]) == 0
+    assert shadow.append_records(path, [fresh]) == 1
+    assert shadow.append_records(path, [stale]) == 0
+    assert shadow.append_records(path, [fresh]) == 0
+    assert pd.read_csv(path).state.tolist() == ["STALE", "FLAT"]
+
+
+def test_dukascopy_refresh_stops_at_last_complete_utc_day(monkeypatch, tmp_path: Path):
+    captured = {}
+
+    def fake_download(symbol, start, end, root, workers):
+        captured.update(symbol=symbol, start=start, end=end, root=root, workers=workers)
+
+    monkeypatch.setattr(shadow.dukascopy, "download", fake_download)
+    shadow.refresh_market(tmp_path, "XAUUSD", pd.Timestamp("2026-11-13 05:00Z"))
+    assert captured["end"].isoformat() == "2026-11-12"
+    assert captured["root"] == tmp_path / "bars/dukascopy"
+
+
+def test_market_refresh_has_hard_timeout(tmp_path: Path):
+    started = time.monotonic()
+    try:
+        shadow.refresh_with_timeout(
+            tmp_path, "BTCUSDT", pd.Timestamp("2026-11-13 05:00Z"),
+            timeout_seconds=.05, _worker=_slow_refresh_worker,
+        )
+    except TimeoutError as exc:
+        assert "BTCUSDT refresh exceeded" in str(exc)
+    else:
+        raise AssertionError("refresh did not time out")
+    assert time.monotonic() - started < .8
+
+
+def test_message_header_names_run_and_planned_entry_times(monkeypatch, tmp_path: Path):
+    monkeypatch.setattr(shadow, "MARKETS", ())
+    message = shadow.run(
+        tmp_path / "data", tmp_path / "shadow",
+        now=pd.Timestamp("2026-11-13 05:00Z"), refresh=False,
+    )
+    assert "run 2026-11-13T05:00:00+00:00" in message
+    assert "planned entry 2026-11-13T07:00:00+00:00" in message
+    assert "Intended daily run time: about 05:00 UTC" in message
 
 
 def test_no_plan_while_trade_is_open(monkeypatch):
@@ -83,3 +175,23 @@ def test_no_plan_while_trade_is_open(monkeypatch):
     assert record["plan_entry_ts"] == ""
     assert "No new plan while the trade is open." in message
     assert "NEW " not in message
+
+
+def test_refresh_error_fails_closed_even_when_local_bars_are_fresh(monkeypatch):
+    now = pd.Timestamp("2026-11-13 05:00Z")
+    bars = _bars(["2026-11-11 21:59Z", "2026-11-12 21:59Z"])
+    daily = pd.DataFrame({
+        "end": pd.to_datetime(["2026-11-11 22:00Z", "2026-11-12 22:00Z"], utc=True),
+        "c": [99.0, 100.0], "atr": [2.0, 2.0],
+    })
+    monkeypatch.setattr(stage1, "daily_bars", lambda bars, period: daily)
+    monkeypatch.setattr(stage1, "signals",
+                        lambda frame, first_year: frame.assign(S1=0, S2=0, S3=1))
+    monkeypatch.setattr(stage1, "replay_market", lambda *args, **kwargs: ([], {}, {}))
+    record, message = shadow.analyze_market(
+        bars, "BTCUSDT", now, "TimeoutError: BTCUSDT refresh exceeded 600 seconds"
+    )
+    assert record["stale"] == "true"
+    assert record["plan_entry_ts"] == ""
+    assert "no new trade plan issued" in message
+    assert "TimeoutError" in message

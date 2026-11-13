@@ -65,7 +65,8 @@ def load_minutes(root: Path, symbol: str, *, period: Period = DEV_PERIOD) -> pd.
     if period.data_start is not None:
         paths = [p for p in paths if p.stem >= period.data_start.strftime("%Y-%m")]
     if period.end is not None:
-        paths = [p for p in paths if p.stem < period.end.strftime("%Y-%m")]
+        paths = [p for p in paths
+                 if pd.Timestamp(p.stem + "-01", tz="UTC") < period.end]
     if not paths:
         raise FileNotFoundError(directory)
     parts = []
