@@ -279,6 +279,8 @@ def test_later_events_are_sent_exactly_once(tmp_path: Path):
     statuses = shadow.deliver_telegram(records, tmp_path, now, client)
     assert len(statuses) == len(client.messages) == 3
     assert "NEW MGC LONG" in client.messages[0]
+    assert shadow.CONFIDENCE_LINE in client.messages[0]
+    assert "UTC /" in client.messages[0] and "Helsinki" in client.messages[0]
     assert "INFO: MBT EXIT TP" in client.messages[1]
     assert "STALE MNQ" in client.messages[2]
     assert shadow.deliver_telegram(records, tmp_path, now, client) == []
@@ -336,6 +338,62 @@ def test_weekly_heartbeat_only_on_monday(tmp_path: Path):
     tuesday = pd.Timestamp("2026-11-17 05:00Z")
     assert shadow.deliver_telegram([record], tmp_path, tuesday, client) == []
     assert len(client.messages) == 1
+
+
+def test_missed_run_sends_closed_exit_and_late_open_entry(tmp_path: Path):
+    connected = pd.Timestamp("2026-11-13 05:00Z")
+    now = pd.Timestamp("2026-11-17 05:00Z")
+    _seed_telegram_history(tmp_path, connected)
+    old_trade = {
+        "entry_ts": "2026-10-01T07:00:00+00:00",
+        "exit_ts": "2026-11-14T12:00:00+00:00",
+        "exit": "sl", "net_R": -1.03,
+    }
+    record = _telegram_record(
+        "USATECHIDXUSD", "MNQ", state="OPEN", side=-1,
+        entry_ts="2026-11-16T07:00:00+00:00", entry_price=25000., sl=25500.,
+        tp=23500., unrealised_R=.2, cap_session_end="2026-12-28T22:00:00+00:00",
+        _current_price=24900., _open_trade={"entry_ts": "2026-11-16T07:00:00+00:00"},
+        _replay_rows=[old_trade],
+    )
+    client = FakeTelegram()
+    statuses = shadow.deliver_telegram([record], tmp_path, now, client)
+    assert statuses == [
+        "Telegram: EXIT_SL accepted for USATECHIDXUSD.",
+        "Telegram: LATE_ENTRY accepted for USATECHIDXUSD.",
+    ]
+    assert "INFO: MNQ EXIT SL" in client.messages[0]
+    assert "LATE ENTRY MNQ SHORT" in client.messages[1]
+    assert "you may enter late or skip it" in client.messages[1]
+    assert "Current spot: 24900.00" in client.messages[1]
+    assert shadow.CONFIDENCE_LINE in client.messages[1]
+    assert "UTC /" in client.messages[1] and "Helsinki" in client.messages[1]
+    assert shadow.deliver_telegram([record], tmp_path, now, client) == []
+
+
+def test_cap_warning_is_sent_once_before_next_run(tmp_path: Path):
+    connected = pd.Timestamp("2026-11-16 05:00Z")
+    now = pd.Timestamp("2026-11-17 05:00Z")
+    _seed_telegram_history(tmp_path, connected)
+    entry = "2026-10-01T07:00:00+00:00"
+    marker = {"event_id": shadow._event_id("XAUUSD", "ENTRY", entry),
+              "market": "XAUUSD", "event_type": "ENTRY_CONNECTED", "reference": entry}
+    shadow._append_sent(tmp_path / "telegram_sent.csv", [marker], connected)
+    record = _telegram_record(
+        "XAUUSD", "MGC", state="OPEN", side=1, entry_ts=entry,
+        entry_price=4100., sl=4000., tp=4400., unrealised_R=.3,
+        cap_session_end="2026-11-17T22:00:00+00:00",
+        _current_price=4130., _open_trade={"entry_ts": entry}, _replay_rows=[],
+    )
+    client = FakeTelegram()
+    statuses = shadow.deliver_telegram([record], tmp_path, now, client)
+    assert statuses == ["Telegram: CAP_WARNING accepted for XAUUSD."]
+    assert len(client.messages) == 1
+    assert client.messages[0] == (
+        "ACTION: MGC reaches its 30-session cap before the next run. Close the position at "
+        "2026-11-17T22:00:00+00:00 UTC / 2026-11-18T00:00:00+02:00 Helsinki."
+    )
+    assert shadow.deliver_telegram([record], tmp_path, now, client) == []
 
 
 def test_connection_test_uses_client_without_exposing_credentials():

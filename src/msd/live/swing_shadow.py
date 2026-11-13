@@ -28,6 +28,8 @@ LOG_COLUMNS = (
     "plan_sl", "plan_tp", "refresh_error",
 )
 BACKTEST_LINE = "Backtest: DEV +0.16R per trade; final +0.04R on 88 trades."
+CONFIDENCE_LINE = ("Confidence: low (rule-based; DEV +0.16R per trade, "
+                   "final +0.04R on 88 trades).")
 TELEGRAM_COLUMNS = ("sent_at", "event_id", "market", "event_type", "reference")
 
 
@@ -181,6 +183,9 @@ def analyze_market(bars: pd.DataFrame, market: str, now: pd.Timestamp,
         "signal_close": expected_close.isoformat(), "data_last_ts": ts[-1].isoformat(),
         "stale": str(stale).lower(), "refresh_error": refresh_error,
     })
+    record["_replay_rows"] = rows
+    record["_open_trade"] = open_trade
+    record["_current_price"] = mid_close
     detail = ""
     flat = open_trade is None
     if open_trade is not None:
@@ -265,7 +270,8 @@ def append_records(path: Path, records: list[dict]) -> int:
     path.parent.mkdir(parents=True, exist_ok=True)
     write_header = not path.exists() or path.stat().st_size == 0
     with path.open("a", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=LOG_COLUMNS, lineterminator="\n")
+        writer = csv.DictWriter(handle, fieldnames=LOG_COLUMNS, lineterminator="\n",
+                                extrasaction="ignore")
         if write_header:
             writer.writeheader()
         writer.writerows(fresh)
@@ -274,6 +280,12 @@ def append_records(path: Path, records: list[dict]) -> int:
 
 def _event_id(market: str, event_type: str, reference: str) -> str:
     return f"{market}|{event_type}|{reference}"
+
+
+def _dual_time(value: str | pd.Timestamp) -> str:
+    stamp = pd.Timestamp(value)
+    stamp = stamp.tz_localize("UTC") if stamp.tzinfo is None else stamp.tz_convert("UTC")
+    return f"{stamp.isoformat()} UTC / {stamp.tz_convert('Europe/Helsinki').isoformat()} Helsinki"
 
 
 def _open_text(record: dict) -> str:
@@ -289,14 +301,30 @@ def _open_text(record: dict) -> str:
 
 def _new_text(record: dict) -> str:
     return (f"NEW {record['contract']} {_side_text(record['side'])}\n"
-            f"Entry: {record['plan_entry_ts']} at the 07:00 UTC bar\n"
+            f"Entry: {_dual_time(record['plan_entry_ts'])} at the 07:00 UTC bar\n"
             f"Spot reference: {float(record['reference_price']):.2f}\n"
             f"SL: {float(record['sl_distance']):.2f} points; spot-equivalent "
             f"{float(record['plan_sl']):.2f}\n"
             f"TP: {float(record['tp_distance']):.2f} points; spot-equivalent "
             f"{float(record['plan_tp']):.2f}\n"
             "On futures, set SL and TP from the actual fill price using those distances.\n"
+            f"{CONFIDENCE_LINE}\n"
             f"{BACKTEST_LINE}")
+
+
+def _late_entry_text(record: dict) -> str:
+    entry = float(record["entry_price"])
+    stop = float(record["sl"])
+    target = float(record["tp"])
+    return (f"LATE ENTRY {record['contract']} {_side_text(record['side'])}\n"
+            f"Original entry: {_dual_time(record['entry_ts'])} at spot {entry:.2f}\n"
+            f"Current spot: {float(record['_current_price']):.2f}; "
+            f"unrealised {float(record['unrealised_R']):+.2f}R\n"
+            f"SL: {abs(entry-stop):.2f} points; spot level {stop:.2f}\n"
+            f"TP: {abs(target-entry):.2f} points; spot level {target:.2f}\n"
+            "This trade is already open in the rule replay; you may enter late or skip it. "
+            "If entering, set SL and TP from the actual futures fill using the distances.\n"
+            f"{CONFIDENCE_LINE}\n{BACKTEST_LINE}")
 
 
 def _exit_text(record: dict) -> str:
@@ -316,22 +344,76 @@ def _stale_text(record: dict) -> str:
             f"{record['signal_close']}; no new plan issued.{detail}")
 
 
-def telegram_events(records: list[dict], now: pd.Timestamp) -> list[dict]:
+def next_scheduled_run(now: pd.Timestamp) -> pd.Timestamp:
+    stamp = pd.Timestamp(now)
+    stamp = stamp.tz_localize("UTC") if stamp.tzinfo is None else stamp.tz_convert("UTC")
+    local = stamp.tz_convert("Europe/Helsinki")
+    candidate = local.normalize() + pd.Timedelta(hours=7)
+    if candidate <= local:
+        candidate = local.normalize() + pd.DateOffset(days=1) + pd.Timedelta(hours=7)
+    return candidate.tz_convert("UTC")
+
+
+def _cap_warning_due(record: dict, now: pd.Timestamp) -> bool:
+    return (record.get("state") == "OPEN" and bool(record.get("cap_session_end")) and
+            pd.Timestamp(record["cap_session_end"]) <= next_scheduled_run(now))
+
+
+def _cap_warning_text(record: dict) -> str:
+    return (f"ACTION: {record['contract']} reaches its 30-session cap before the next run. "
+            f"Close the position at {_dual_time(record['cap_session_end'])}.")
+
+
+def _entry_was_announced(sent_ids: set[str], market: str, entry: str) -> bool:
+    return (_event_id(market, "ENTRY", entry) in sent_ids or
+            _event_id(market, "NEW", entry) in sent_ids)
+
+
+def telegram_events(records: list[dict], now: pd.Timestamp, *,
+                    sent_ids: set[str] | None = None,
+                    connected_at: pd.Timestamp | None = None,
+                    include_late: bool = True) -> list[dict]:
+    sent_ids = sent_ids or set()
     events = []
     for record in records:
         market = str(record["market"])
         if record.get("plan_entry_ts") and str(record.get("stale", "")).lower() != "true":
             reference = str(record["plan_entry_ts"])
-            events.append({"event_id": _event_id(market, "NEW", reference),
+            events.append({"event_id": _event_id(market, "ENTRY", reference),
                            "market": market, "event_type": "NEW", "reference": reference,
                            "text": _new_text(record)})
-        if record.get("state") == "EXITED":
+        replay_rows = record.get("_replay_rows")
+        if replay_rows is not None:
+            for trade in replay_rows:
+                if connected_at is not None and pd.Timestamp(trade["exit_ts"]) <= connected_at:
+                    continue
+                reason = str(trade["exit"]).upper()
+                event_type = f"EXIT_{reason}"
+                reference = str(trade["entry_ts"])
+                exit_record = {"contract": record["contract"], "entry_ts": trade["entry_ts"],
+                               "exit_ts": trade["exit_ts"], "exit_reason": trade["exit"],
+                               "net_R": trade["net_R"]}
+                events.append({"event_id": _event_id(market, event_type, reference),
+                               "market": market, "event_type": event_type, "reference": reference,
+                               "text": _exit_text(exit_record)})
+        elif record.get("state") == "EXITED":
             reason = str(record.get("exit_reason", "")).upper()
             event_type = f"EXIT_{reason}"
             reference = str(record["entry_ts"])
             events.append({"event_id": _event_id(market, event_type, reference),
                            "market": market, "event_type": event_type, "reference": reference,
                            "text": _exit_text(record)})
+        if (include_late and record.get("state") == "OPEN" and record.get("_open_trade") and
+                not _entry_was_announced(sent_ids, market, str(record["entry_ts"]))):
+            reference = str(record["entry_ts"])
+            events.append({"event_id": _event_id(market, "ENTRY", reference),
+                           "market": market, "event_type": "LATE_ENTRY", "reference": reference,
+                           "text": _late_entry_text(record)})
+        if _cap_warning_due(record, now):
+            reference = str(record["entry_ts"])
+            events.append({"event_id": _event_id(market, "CAP_WARNING", reference),
+                           "market": market, "event_type": "CAP_WARNING", "reference": reference,
+                           "text": _cap_warning_text(record)})
         if str(record.get("stale", "")).lower() == "true":
             reference = str(record["signal_close"])
             events.append({"event_id": _event_id(market, "STALE", reference),
@@ -349,7 +431,7 @@ def telegram_events(records: list[dict], now: pd.Timestamp) -> list[dict]:
     return events
 
 
-def connected_message(records: list[dict]) -> str:
+def connected_message(records: list[dict], now: pd.Timestamp | None = None) -> str:
     lines = ["Swing v1 CONNECTED", BACKTEST_LINE]
     for record in records:
         state = str(record.get("state", "UNKNOWN"))
@@ -363,14 +445,38 @@ def connected_message(records: list[dict]) -> str:
             lines.append(_new_text(record))
         if str(record.get("stale", "")).lower() == "true":
             lines.append(_stale_text(record))
+        if now is not None and _cap_warning_due(record, now):
+            lines.append(_cap_warning_text(record))
     return "\n".join(lines)
 
 
-def _sent_ids(path: Path) -> set[str]:
+def _sent_rows(path: Path) -> list[dict]:
     if not path.exists():
-        return set()
+        return []
     with path.open(newline="") as handle:
-        return {row["event_id"] for row in csv.DictReader(handle)}
+        return list(csv.DictReader(handle))
+
+
+def _sent_ids(path: Path) -> set[str]:
+    return {row["event_id"] for row in _sent_rows(path)}
+
+
+def _connected_at(path: Path) -> pd.Timestamp | None:
+    rows = [row for row in _sent_rows(path) if row["event_type"] == "CONNECTED"]
+    return pd.Timestamp(rows[0]["sent_at"]) if rows else None
+
+
+def _connected_entry_markers(records: list[dict]) -> list[dict]:
+    markers = []
+    for record in records:
+        reference = (record.get("entry_ts") if record.get("state") == "OPEN"
+                     else record.get("plan_entry_ts"))
+        if not reference:
+            continue
+        markers.append({"event_id": _event_id(str(record["market"]), "ENTRY", str(reference)),
+                        "market": str(record["market"]), "event_type": "ENTRY_CONNECTED",
+                        "reference": str(reference)})
+    return markers
 
 
 def _append_sent(path: Path, events: list[dict], now: pd.Timestamp) -> None:
@@ -401,19 +507,24 @@ def deliver_telegram(records: list[dict], shadow_root: Path, now: pd.Timestamp,
     client = client or TelegramClient()
     history = shadow_root / "telegram_sent.csv"
     sent = _sent_ids(history)
-    events = telegram_events(records, now)
     statuses = []
     if not sent:
         connected = {"event_id": _event_id("ALL", "CONNECTED", "initial"),
                      "market": "ALL", "event_type": "CONNECTED", "reference": "initial",
-                     "text": connected_message(records)}
+                     "text": connected_message(records, now)}
+        events = telegram_events(records, now, sent_ids=set(), connected_at=now,
+                                 include_late=False)
         try:
             client.send_message(connected["text"])
-            _append_sent(history, [connected, *events], now)
+            accepted = [connected, *events, *_connected_entry_markers(records)]
+            unique = {event["event_id"]: event for event in accepted}
+            _append_sent(history, list(unique.values()), now)
             statuses.append("Telegram: CONNECTED accepted.")
         except Exception as exc:
             statuses.append(f"Telegram send failed; will retry: {_redacted_error(exc, client)}")
         return statuses
+    events = telegram_events(records, now, sent_ids=sent,
+                             connected_at=_connected_at(history))
     for event in events:
         if event["event_id"] in sent:
             continue
