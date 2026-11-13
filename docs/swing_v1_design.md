@@ -111,3 +111,29 @@ configurations.
 - At most 3 open trades, so at most 3% total risk.
 - The report shows, for given account sizes, what share of trades is too large to take with even one
   micro contract.
+
+## 10. Stage 2 clarifications (frozen 2026-11-13, after stage 1, before any stage 2 result)
+
+Stage 1 passed for **S3 only**, so stage 2 uses S3 entries only. These points were left open above:
+- **Target, not P(TP):** about a third of stage 1 trades end at the 30-day cap with a partial R, so the
+  binary "TP before SL" label and `decision.expected_r` (which assumes +TP_R or −1) would misprice
+  options. The model is one LightGBM **regressor of net R after costs** per (entry, option). The decision:
+  take the option with the highest predicted R if it is ≥ 0.05R, else skip. No other change.
+- **Inputs are market-agnostic** (everything is scaled by ATR or price), so the same model can be scored
+  on the evidence markets: 20/60/126-day return ÷ ATR, ATR ÷ price and its 1-year percentile, distance
+  to the 20- and 55-day closing high/low in ATR, side, day of week, sl_atr, tp_R. No market identifier.
+- **Training rows:** every S3 entry opportunity (each signal day with a valid entry minute) × 12 options,
+  labelled independently of whether a trade was open. **Trading** is sequential: one open trade per
+  market; the chosen option's exit frees the market.
+- **Walk-forward:** pooled over the 3 traded markets; to predict year Y, train on rows whose exit is
+  before 1 January Y. Predicted years are 2010–2022. LightGBM settings are fixed, with no tuning:
+  300 trees, learning rate 0.03, 15 leaves, min_data_in_leaf 100, feature_fraction 0.8, seed 7.
+- **Pass (S3 stage 2), in the predicted years:**
+  - net R > 0 with t ≥ 2;
+  - positive in ≥ 2 of 3 markets;
+  - positive in ≥ 60% of years;
+  - above the 95th percentile of random direction with the model's chosen options and timing
+    (200 seeds);
+  - a positive average over the evidence markets (yearly models trained on the 3 traded markets only);
+  - **and** total R and net R per trade above the stage 1 S3 primary option over the same years.
+- One configuration, appended to reports/trials.csv.
