@@ -11,6 +11,7 @@ import pandas as pd
 
 from .crypto_perp import apply_perp_costs, executable_perp_bars
 from .labels import deadline_after_trading_days, label_grid
+from .timeutil import epoch_seconds
 
 DEV_END = pd.Timestamp("2023-01-01", tz="UTC")
 CRYPTO = {"BTCUSDT", "ETHUSDT"}
@@ -97,8 +98,7 @@ def _event_jobs(events: pd.DataFrame, bars: pd.DataFrame, atr_map: pd.Series, co
     matrix=bars[["bid_o","bid_h","bid_l","bid_c","ask_o","ask_h","ask_l","ask_c"]].to_numpy(dtype="<f8")
     # Pandas may preserve microsecond resolution. Force nanoseconds before
     # converting to epoch seconds so the Rust deadline comparison is sound.
-    stamp=(pd.to_datetime(bars.ts,utc=True).to_numpy(dtype="datetime64[ns]").astype(np.int64)
-           //1_000_000_000).astype("<i8")
+    stamp=np.asarray(epoch_seconds(bars.ts),dtype="<i8")
     jobs=[];meta=[]
     for row in events.itertuples(index=False):
         i=positions.get(row.ts);side=int(row.side)

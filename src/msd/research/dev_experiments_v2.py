@@ -59,11 +59,13 @@ def _evaluate(frame: pd.DataFrame) -> tuple[pd.DataFrame,dict,list[dict]]:
     return signals,item,folds
 
 
-def e1_results(v1_root: Path,e1_root: Path) -> tuple[list[dict],dict[str,pd.DataFrame]]:
-    rows=[];signals={}
+def e1_results(v1_root: Path,e1_root: Path) -> tuple[list[dict],list[dict],dict[str,pd.DataFrame]]:
+    baseline=[];rows=[];signals={}
     for spec in [s for s in load_registry() if s.status=="in_scope"]:
         old=_load_unit(v1_root,spec);new=_load_unit(e1_root,spec)
-        old_signals,old_item,_=_evaluate(old);new_signals,item,folds=_evaluate(new)
+        old_signals,old_item,old_folds=_evaluate(old);new_signals,item,folds=_evaluate(new)
+        old_item.update({"unit":spec.key,"folds":old_folds})
+        baseline.append(_finite(old_item))
         item.update({"unit":spec.key,"folds":folds,"old":{
             "net_avg_R":metrics(old_signals,None).get("net_avg_R"),
             "t_stat":metrics(old_signals,None).get("t_stat"),
@@ -73,7 +75,8 @@ def e1_results(v1_root: Path,e1_root: Path) -> tuple[list[dict],dict[str,pd.Data
             a=item.get(key);b=item["old"].get(key);item[f"delta_{key}"]=a-b if a is not None and b is not None else None
         rows.append(_finite(item));signals[spec.key]=new_signals
     rows.sort(key=lambda row:row.get("net_avg_R") if row.get("net_avg_R") is not None else -np.inf,reverse=True)
-    return rows,signals
+    baseline.sort(key=lambda row:row.get("net_avg_R") if row.get("net_avg_R") is not None else -np.inf,reverse=True)
+    return baseline,rows,signals
 
 
 def _vol_for_rows(frame: pd.DataFrame,volumes: dict[str,pd.Series]) -> np.ndarray:
@@ -246,11 +249,12 @@ def e3_results(data_root: Path) -> tuple[dict,list[dict]]:
     return result,_finite(checks[columns].to_dict("records"))
 
 
-def _ledger_rows(e1: list[dict],e2: dict,e3: dict,config_sha: str) -> list[dict]:
+def _ledger_rows(baseline: list[dict],e1: list[dict],e2: dict,e3: dict,config_sha: str) -> list[dict]:
     day=str(pd.Timestamp.now(tz="UTC").date());rows=[]
-    payloads=[*(('E1',x['unit'],x) for x in e1),*(('E2',k,v) for k,v in e2.items()),*(('E3',k,v) for k,v in e3.items())]
+    payloads=[*(('E0',x['unit'],x) for x in baseline),*(('E1',x['unit'],x) for x in e1),
+              *(('E2',k,v) for k,v in e2.items()),*(('E3',k,v) for k,v in e3.items())]
     for experiment,name,value in payloads:
-        method=name if experiment=='E1' else 'rule_portfolio' if experiment=='E2' else 'intraday_momentum_jfe'
+        method=name if experiment in {'E0','E1'} else 'rule_portfolio' if experiment=='E2' else 'intraday_momentum_jfe'
         digest=hashlib.sha256(f"{PROTOCOL}|{experiment}|{name}|{config_sha}".encode()).hexdigest()
         params=json.dumps({"protocol":PROTOCOL,"experiment":experiment,"config":name,"config_sha":config_sha},sort_keys=True)
         rows.append(dict(zip(FIELDS,[f"dev-v2-{experiment.lower()}-{name}",day,digest,method,params,
@@ -267,25 +271,41 @@ def _preflight(ledger: Path,rows: list[dict]) -> None:
         shadow.append(row)
 
 
-def run(data_root: Path=Path("data"),e1_root: Path=Path("data/events_wide_hold3_deadline_v2"),
-        v1_root: Path=Path("data/events_wide_hold1_deadline_v2"),
+def run(data_root: Path=Path("data"),e1_root: Path=Path("data/events_wide_hold3_v2"),
+        v1_root: Path=Path("data/events_wide_v2"),
         output: Path=Path("reports/research/dev_v2_experiments"),ledger: Path=Path("reports/trials.csv"),
         build: bool=True) -> Path:
-    config_path=Path("hpc/roihu/sequence/configs/wide_hold3_v1.json")
-    config_sha=hashlib.sha256(config_path.read_bytes()).hexdigest()
+    config_path=Path("hpc/roihu/sequence/configs/wide_hold3_v2.json")
+    baseline_config=Path("hpc/roihu/sequence/configs/wide_v2.json")
+    config_sha=hashlib.sha256(baseline_config.read_bytes()+b"\0"+config_path.read_bytes()).hexdigest()
     if build:build_e1(data_root,e1_root,config_path)
-    e1,_=e1_results(v1_root,e1_root)
+    baseline,e1,_=e1_results(v1_root,e1_root)
     e2,_=e2_results(data_root,v1_root,e1_root)
     e3,e3_checks=e3_results(data_root)
-    rows=_ledger_rows(e1,e2,e3,config_sha);_preflight(ledger,rows)
-    payload=_finite({"protocol":PROTOCOL,"dev_only":True,"e1":e1,"e2":e2,"e3":e3,"e3_hand_checks":e3_checks})
+    rows=_ledger_rows(baseline,e1,e2,e3,config_sha);_preflight(ledger,rows)
+    payload=_finite({"protocol":PROTOCOL,"dev_only":True,"wide_v2_baseline":baseline,
+                     "e1":e1,"e2":e2,"e3":e3,"e3_hand_checks":e3_checks})
     output.mkdir(parents=True,exist_ok=True);(output/"summary.json").write_text(json.dumps(payload,indent=2,allow_nan=False)+"\n")
+    (output/"wide_v2_pure_rules_summary.json").write_text(json.dumps({"protocol":PROTOCOL,"units":baseline},indent=2,allow_nan=False)+"\n")
     def f(v):return "NA" if v is None else f"{v:.4f}"
     positive=sum(1 for x in e1 if (x.get('net_avg_R') or 0)>0);best=e1[0]
+    by_unit={x['unit']:x for x in e1}
+    leaders=[]
+    for unit in ('donchian_atr_breakout','funding_extreme_fade'):
+        item=by_unit.get(unit,{})
+        delta=item.get('delta_net_avg_R')
+        leaders.append(f"{unit} {'improved' if delta is not None and delta>0 else 'weakened'} by {f(delta)}R")
+    equal=e2.get('equal_risk',{});inverse=e2.get('inverse_volatility',{})
+    all_signal=e3.get('all_nonzero',{});filtered=e3.get('above_train_median',{})
     lines=["# DEV v2 experiments","","**DEV only; Test and Final were not loaded.**","","## Conclusions","",
-        f"E1 did not rescue the two original trend-rule leaders: donchian and funding fade weakened under the three-day hold. {positive} of 34 units had positive OOF average R; the best was {best['unit']} at {f(best.get('net_avg_R'))}R.",
-        "E2 was economically unusable at simultaneous 0.5% risk units: the reported MDD is a fraction of account equity (for example, -0.93 means a 93% drawdown), not an R-unit drawdown. ETH contributes exactly zero because the frozen wide-v1 replay contains no ETH event parquet, not because rows were lost during portfolio loading.",
-        "E3 was negative before and after spread costs. The train-median filter did not rescue it; the direction and New York session timestamps were hand-checked across the March and November DST transitions.","",
+        f"E1: {'; '.join(leaders)}. {positive} of 34 units had positive OOF average R; the best was {best['unit']} at {f(best.get('net_avg_R'))}R.",
+        f"E2 equal-risk Sharpe was {f(equal.get('daily_sharpe'))} with account MDD {f(equal.get('max_drawdown'))}; inverse-volatility Sharpe was {f(inverse.get('daily_sharpe'))} with account MDD {f(inverse.get('max_drawdown'))}. MDD is a fraction of account equity, not an R-unit drawdown. ETH contributes exactly zero because the frozen replay contains no ETH event parquet, not because rows were lost during portfolio loading.",
+        f"E3 net average R was {f(all_signal.get('net_avg_R'))} for all signals and {f(filtered.get('net_avg_R'))} above the train-fold median. The direction and New York session timestamps were hand-checked across the March and November DST transitions. E3 does not use wide event labels and was unaffected by the deadline-unit bug.","",
+        "## Wide-v2 corrected one-day baseline","","| Rule | OOF n | Net R | t | PF | Time exit |",
+        "|---|---:|---:|---:|---:|---:|"]
+    for x in baseline:lines.append(f"| {x['unit']} | {x.get('n',0)} | {f(x.get('net_avg_R'))} | {f(x.get('t_stat'))} | {f(x.get('profit_factor'))} | {f(x.get('time_exit_share'))} |")
+    (output/"wide_v2_pure_rules_summary.md").write_text("\n".join(lines[lines.index("## Wide-v2 corrected one-day baseline"):])+"\n")
+    lines += ["",
         "## E1 — three-day hold","","| Rule | OOF n | Net R | Δ Net R | t | Δ t | PF | Δ PF | Time exit | Δ Time exit |",
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|"]
     for x in e1:lines.append(f"| {x['unit']} | {x.get('n',0)} | {f(x.get('net_avg_R'))} | {f(x.get('delta_net_avg_R'))} | {f(x.get('t_stat'))} | {f(x.get('delta_t_stat'))} | {f(x.get('profit_factor'))} | {f(x.get('delta_profit_factor'))} | {f(x.get('time_exit_share'))} | {f(x.get('delta_time_exit_share'))} |")
@@ -306,8 +326,8 @@ def run(data_root: Path=Path("data"),e1_root: Path=Path("data/events_wide_hold3_
 
 def main() -> None:
     parser=argparse.ArgumentParser();parser.add_argument("--skip-build",action="store_true")
-    parser.add_argument("--data-root",type=Path,default=Path("data"));parser.add_argument("--e1-root",type=Path,default=Path("data/events_wide_hold3_deadline_v2"))
-    parser.add_argument("--v1-root",type=Path,default=Path("data/events_wide_hold1_deadline_v2"))
+    parser.add_argument("--data-root",type=Path,default=Path("data"));parser.add_argument("--e1-root",type=Path,default=Path("data/events_wide_hold3_v2"))
+    parser.add_argument("--v1-root",type=Path,default=Path("data/events_wide_v2"))
     args=parser.parse_args();print(run(args.data_root,args.e1_root,args.v1_root,build=not args.skip_build))
 
 

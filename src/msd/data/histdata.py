@@ -20,6 +20,7 @@ import zipfile
 
 import numpy as np
 import pandas as pd
+from msd.processing.timeutil import epoch_ns
 import pyarrow as pa
 import pyarrow.parquet as pq
 
@@ -493,7 +494,8 @@ def detect_roll_records(symbol: str, hist: pd.DataFrame, duka: pd.DataFrame | No
                     "stale_start":pd.NaT,"stale_end":pd.NaT,"stale_method":"n/a",
                     "stale_evidence_ts":pd.NaT})
                 continue
-            pos=int(np.searchsorted(work.ts.astype("int64").to_numpy(),int(record["switch_ts"].value)))
+            work_ns=np.asarray(epoch_ns(work.ts),dtype=np.int64)
+            pos=int(np.searchsorted(work_ns,int(record["switch_ts"].value)))
             if 0<pos<len(work):
                 changes=np.abs(work.bid_c.astype(float).diff().to_numpy())
                 raw_jump=float(work.bid_c.iloc[pos]-work.bid_c.iloc[pos-1])
@@ -504,7 +506,7 @@ def detect_roll_records(symbol: str, hist: pd.DataFrame, duka: pd.DataFrame | No
                 normal=normal[np.isfinite(normal)&(normal>0)]
                 record["normal_median_move"]=float(np.median(normal)) if len(normal) else float("nan")
                 duration=max(1,int(round(float(record["gap_minutes"]))))
-                time_ns=work.ts.astype("int64").to_numpy()
+                time_ns=work_ns
                 closes=work.bid_c.to_numpy(float)
                 window_left=int(np.searchsorted(time_ns,int(record["switch_ts"].value)-2*86400*1_000_000_000))
                 window_right=int(np.searchsorted(time_ns,int(record["switch_ts"].value)+2*86400*1_000_000_000))

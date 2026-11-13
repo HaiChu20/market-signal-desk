@@ -83,7 +83,7 @@ def test_wide_event_deadline_uses_epoch_seconds():
     from msd.processing.wide_v1 import _event_jobs
     times=pd.DatetimeIndex([pd.Timestamp("2021-01-04 00:00",tz="UTC")+pd.Timedelta(minutes=i) for i in range(3)]+[
         pd.Timestamp("2021-01-05 00:02",tz="UTC"),pd.Timestamp("2021-01-06 00:02",tz="UTC")])
-    bars=pd.DataFrame({"ts":times})
+    bars=pd.DataFrame({"ts":pd.Series(times).astype("datetime64[us, UTC]")})
     for side in ("bid","ask"):
         for field in "ohlc":bars[f"{side}_{field}"]=100.
     event=pd.DataFrame([{"ts":times[0],"known_at":times[0]+pd.Timedelta(minutes=1),"sym":"BTCUSDT",
@@ -92,3 +92,13 @@ def test_wide_event_deadline_uses_epoch_seconds():
                        {"sl_atr":[100.],"tp_r":[100.],"max_hold_trading_days":1},"BTCUSDT")
     assert result.outcome.tolist()==["time"]
     assert pd.Timestamp(result.exit_ts.iloc[0])==times[3]
+
+
+def test_epoch_seconds_matches_for_microsecond_and_nanosecond_inputs():
+    from msd.processing.timeutil import epoch_ns,epoch_seconds
+    values=["2021-01-01T00:00:00.123456Z","2021-01-01T00:00:01.654321Z"]
+    us=pd.Series(pd.to_datetime(values,utc=True)).astype("datetime64[us, UTC]")
+    ns=pd.Series(pd.to_datetime(values,utc=True)).astype("datetime64[ns, UTC]")
+    np.testing.assert_array_equal(np.asarray(epoch_seconds(us)),np.asarray(epoch_seconds(ns)))
+    np.testing.assert_array_equal(np.asarray(epoch_ns(us)),np.asarray(epoch_ns(ns)))
+    assert np.asarray(epoch_ns(us))[1]-np.asarray(epoch_ns(us))[0]==1_530_865_000
