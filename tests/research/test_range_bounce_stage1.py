@@ -41,3 +41,19 @@ def test_time_exit_never_exceeds_effective_deadline():
     assert (pd.to_datetime(labels.exit_ts, utc=True) <= pd.to_datetime(labels.deadline_ts, utc=True)).all()
     assert labels.exit_ts.eq(labels.deadline_ts).all()
     assert pd.to_datetime(labels.exit_ts, utc=True).max() < DEV_END
+    assert (labels.planned_risk >= .1*labels.atr).all()
+
+
+def test_setup_below_point_one_atr_risk_is_dropped_whole():
+    ts=pd.date_range("2021-01-01",periods=8*24*60,freq="1min",tz="UTC")
+    bars=pd.DataFrame({"ts":ts})
+    for field in "ohlc":
+        bars[f"bid_{field}"]=94.54
+        bars[f"ask_{field}"]=94.56
+    candidate=pd.DataFrame([{"symbol":"BTCUSDT","timeframe":"15m","range_id":"r","edge":"bottom",
+        "side":1,"ts":ts[0],"known_at":ts[1],"entry_index":1,"entry_ts":ts[1],"entry_price":94.56,
+        "top":105.,"bottom":95.,"atr":2.,"height_atr":5.,"age_candles":12,
+        "top_touches":2,"bottom_touches":2}])
+    labels=label_setups(candidate,bars,"BTCUSDT")
+    assert labels.empty
+    assert labels.attrs["dropped_risk_setups"]==1

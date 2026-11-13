@@ -1,26 +1,31 @@
 {
-  "setups": 36698,
-  "labels": 550470,
+  "setups": 33898,
+  "labels": 508470,
   "symbols": {
     "XAUUSD": {
-      "setups": 17015,
-      "labels": 255225
+      "setups": 16044,
+      "labels": 240660,
+      "dropped_risk_setups": 971
     },
     "USATECHIDXUSD": {
-      "setups": 3830,
-      "labels": 57450
+      "setups": 3605,
+      "labels": 54075,
+      "dropped_risk_setups": 225
     },
     "USA500IDXUSD": {
-      "setups": 4187,
-      "labels": 62805
+      "setups": 3968,
+      "labels": 59520,
+      "dropped_risk_setups": 219
     },
     "BTCUSDT": {
-      "setups": 5861,
-      "labels": 87915
+      "setups": 5092,
+      "labels": 76380,
+      "dropped_risk_setups": 769
     },
     "ETHUSDT": {
-      "setups": 5805,
-      "labels": 87075
+      "setups": 5189,
+      "labels": 77835,
+      "dropped_risk_setups": 616
     }
   }
 }
