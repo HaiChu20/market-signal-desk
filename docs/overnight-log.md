@@ -469,3 +469,4 @@ Append-only notes from the autonomous review loop while the user sleeps.
 - 07:12 check-in: corrected E1-E3 run braxz6gvx in progress (building BTC hold3 v2). 33128ce1 received the rerun approval and is adding the persist-signals flag (code only).
 - 07:20 33128ce1 rerun ready (944121a, 75cfa2b, 7d1ce5d): F3-F5 pass criterion was Brier skill>0 AND net R>0; random pct was diagnostic only, so the corrected percentile is reported as a diagnostic (95 supplemental). Queued after braxz6gvx.
 - 07:45 corrected run done (braxz6gvx exit 0; ledger 119 to 191, prefix OK). Corrected 1-day Donchian +0.027R t0.87 (v1 +0.136R was bug-inflated); funding fade +0.243R unchanged; E1 3-day Donchian +0.065R t1.59; E2 negative (Sharpe -0.24 equal, -0.08 inv-vol); E3 gross -0.034R, net -0.073R. ETH never had Family 1 events. F3-F5 deterministic rerun started (b1fshqokf).
+- 07:46 hourly: waiting for the 2dcf8f09 results commit; F3-F5 rerun running; disk 199 GiB.
