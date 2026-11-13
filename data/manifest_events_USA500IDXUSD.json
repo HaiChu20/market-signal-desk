@@ -1,0 +1,284 @@
+{
+  "version": "wide_v1",
+  "kind": "events",
+  "symbol": "USA500IDXUSD",
+  "config": {
+    "name": "wide_geometry_v1",
+    "period": "dev",
+    "end_exclusive": "2023-01-01",
+    "sl_atr": [
+      1.0,
+      1.5,
+      2.0,
+      3.0,
+      4.0
+    ],
+    "tp_r": [
+      0.5,
+      1.0,
+      1.5,
+      2.0,
+      3.0
+    ],
+    "max_hold_trading_days": 1,
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "USATECHIDXUSD",
+      "USA500IDXUSD",
+      "XAUUSD"
+    ],
+    "starts": {
+      "BTCUSDT": "2020-01-01",
+      "ETHUSDT": "2020-01-01",
+      "USATECHIDXUSD": "2019-01-01",
+      "USA500IDXUSD": "2019-01-01",
+      "XAUUSD": "2008-01-01"
+    },
+    "crypto_venue": "binance_usdt_perp",
+    "crypto_taker_fee_per_side": 0.0005,
+    "crypto_slippage_per_side": 5e-05
+  },
+  "files": [
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2019-01.parquet",
+      "size": 1658374,
+      "sha256": "6a9ce7f4f9f82095809e1bc9f912e5c3fd2824d3c2905d5e628bc698595470ab"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2019-02.parquet",
+      "size": 1145088,
+      "sha256": "785da6edb39ea1ff462b834881d063adc96bdf44169f0d2e6b8e11114ed2953a"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2019-03.parquet",
+      "size": 1273097,
+      "sha256": "284369b67aef0d75922c1e52b80ea051f79e2025a089eb767686d7de1b29ecce"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2019-04.parquet",
+      "size": 959534,
+      "sha256": "ca229bd1fe41cfdaba8fa93bfe37c37315fe8332bf2358ad96f76edbf832feb5"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2019-05.parquet",
+      "size": 1735548,
+      "sha256": "3976f6349fb451660fa8fe4a7853e1a86b48a95fc7b9af96dd44ba2eecedc006"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2019-06.parquet",
+      "size": 1293768,
+      "sha256": "0ceffb44927dc172bcd5a6b42fa329e3518c9bae0308deb1a5419c94b20d17e6"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2019-07.parquet",
+      "size": 1057765,
+      "sha256": "011097619e5e465bea5d9af309a0d00e47ea85ff2bb6647bd52ab05c786a7a54"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2019-08.parquet",
+      "size": 1770350,
+      "sha256": "324c282d73b96ba7eb8169f79a896a15b2517d2fa4a136addb78c66b32b7c979"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2019-09.parquet",
+      "size": 1464885,
+      "sha256": "7a4eaa18d391545ab8e8045232df2921c8d7c83aac553fa8a4101bf90e4c99b5"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2019-10.parquet",
+      "size": 1571038,
+      "sha256": "f553cb6a80a48c41e4c57f061f994687ae0b8071cd6c1fff3f58cf9b100f74bf"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2019-11.parquet",
+      "size": 990115,
+      "sha256": "efabb62398bac35b2e839096380a4486136cdbacc842379dd04ce6f4afe32ce1"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2019-12.parquet",
+      "size": 995386,
+      "sha256": "0f0b6f796818559e6199730092daf7c2e5366905f95cb4f09aeb6faf3d3d3b33"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2020-01.parquet",
+      "size": 1417317,
+      "sha256": "d4fe9ea6b177857a8fec33f0f70c843f27a4c9873bf2fd243392d823a6d311d0"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2020-02.parquet",
+      "size": 1642719,
+      "sha256": "59294eb70bb90b68ec8a130a025e9cd79e293f2d9fd420646e0f7ab08b02b0f6"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2020-03.parquet",
+      "size": 1664989,
+      "sha256": "1778a33c305ee455a4fb39fccd17778a1938830435cb857e5aef44322ad94a4f"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2020-04.parquet",
+      "size": 1554737,
+      "sha256": "4e0ec3203230faaf8748a2b67fd09b56d9a8a7761003ae8187346b2b65a903a3"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2020-05.parquet",
+      "size": 1634973,
+      "sha256": "7dc2da7d3f5f8cc202583093b2d8a555638b58822c54dd34ddd5e18bf6a9d435"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2020-06.parquet",
+      "size": 1900264,
+      "sha256": "ec6a89f78194952f059a2e6e1972b1a5c309f0d64ac857b3d649017fe93f5310"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2020-07.parquet",
+      "size": 2024180,
+      "sha256": "01e060293b0de38ee08ffffda26989305887bcbafddb9a5a51664d60b6e24a17"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2020-08.parquet",
+      "size": 1778654,
+      "sha256": "586a4ac2b35e1f0bfbe463328a5b636b03b8f359760b53d71fdab39e857feb1b"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2020-09.parquet",
+      "size": 1712427,
+      "sha256": "5e099070e85b6198e7a549f533b33fb9e7eb663b267b720a182c36b08567ce68"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2020-10.parquet",
+      "size": 1921744,
+      "sha256": "89c55f4f4ae7f31c2c46981ee7f8d7d72f52dc9b3d8e4c1d0ff26de7bbfdc08f"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2020-11.parquet",
+      "size": 1697148,
+      "sha256": "deb1854496cb870f5fe128e44bc29452b2e6b8524f16772c320c1ce2d0ada53e"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2020-12.parquet",
+      "size": 1775804,
+      "sha256": "521b7e6e3b9e257f9dc46bf2ecdaca8b9456f4646525826d4e587db754a39949"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2021-01.parquet",
+      "size": 1690186,
+      "sha256": "9b27e8f9142f79d3037d5ca8d01f683084469ee6ca595ea7dd80c99f26b62e7c"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2021-02.parquet",
+      "size": 1612995,
+      "sha256": "345cbd78b995a7a529f4eb698a13a8b1600abcd36d444841d1a8d90f26503ff2"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2021-03.parquet",
+      "size": 1978995,
+      "sha256": "8f110983bf0bb227341611c156b96dfeef3d69caf689abbfdd9652adfadffe1c"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2021-04.parquet",
+      "size": 1566179,
+      "sha256": "ac2a0ea367851b910527dc29191a9fbd3d2dfbac8045f976cb6f99a73b0560bb"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2021-05.parquet",
+      "size": 1767723,
+      "sha256": "ce3de1850c32f4dc67fb63d201b183c229e842918376e48413a981bcf677dc09"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2021-06.parquet",
+      "size": 1797032,
+      "sha256": "1ae3464f568e1f30267bc6df329338a9a39653b705994bd4abfcf14abc078309"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2021-07.parquet",
+      "size": 1629045,
+      "sha256": "112f6d77c0fa1cbba087b8fb8771162444746d23214b43cd75727b611548bd88"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2021-08.parquet",
+      "size": 1569687,
+      "sha256": "2a8db2cfda823020684b4d982477fa408d001af0f6812953d8a3dea01ad6159d"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2021-09.parquet",
+      "size": 1856070,
+      "sha256": "c17bd1b3a9d949550bfd884e9ed8cd5b3957b33a7ff65febe68dbc1a452dd6b4"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2021-10.parquet",
+      "size": 1815931,
+      "sha256": "65ff1811195ec48cf6a2b5cc8a295cb3c553d217c232a800bdfa03d08ddc5270"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2021-11.parquet",
+      "size": 1856345,
+      "sha256": "bdab8d7a7b59eb9b1a9e6cb7506e912ebc8ae26be15e55d73d92820aa59e916f"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2021-12.parquet",
+      "size": 1937129,
+      "sha256": "47828162cb4b5a307ffcac0f6cedb453d7e6a1662c0c7c266cc44d3333675789"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2022-01.parquet",
+      "size": 1758397,
+      "sha256": "6ee20546d6c0eafa7d6b871f5c21a053d662db6b5406caed64204a9d499a7ba5"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2022-02.parquet",
+      "size": 1492864,
+      "sha256": "089f393710330d1a4602f280a8dbc886f8b09c588c492749924bb4e5c8995909"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2022-03.parquet",
+      "size": 1725383,
+      "sha256": "a1a9ab0fa0e32317613066cfc3a33902c43c7a0e34fe65cc7d674e55fd93c824"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2022-04.parquet",
+      "size": 1480879,
+      "sha256": "7d232bcbd1d6ed9238326fbf81881f305d2f8471f4431b2ad1b29b62b924280e"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2022-05.parquet",
+      "size": 1782337,
+      "sha256": "fa5b6fea7751f936bf9f4fdb8bd4c6cf11147f49e37d0b54e48f193d2b83810b"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2022-06.parquet",
+      "size": 1679636,
+      "sha256": "71f09173979f0347cf0c0c5bb771b8f8078d9fbf72ae6570f46074402d86e66b"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2022-07.parquet",
+      "size": 1615490,
+      "sha256": "5917b4f93cd25d618592d2ba9c66a933a7166189234897d3f8e95bbbe913a00d"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2022-08.parquet",
+      "size": 1799075,
+      "sha256": "5355c28d01f24cb8863868e353945bbf9c76230f2be4f7e8507d96993fc7078e"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2022-09.parquet",
+      "size": 1657030,
+      "sha256": "81232975f06437390345bfe61415946d4a9315acefb4d2e88ece093f3d1517ed"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2022-10.parquet",
+      "size": 1615616,
+      "sha256": "7c51e8a6b5bd2532622d613cf3cbccbe40fac3e1d1250b6972d5cf286fed677e"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2022-11.parquet",
+      "size": 1670748,
+      "sha256": "e3feedc1acf3f38f2e953956543e216c012e59ae824fc1bdcc6393484db1e50a"
+    },
+    {
+      "path": "events_wide_v1/USA500IDXUSD/2022-12.parquet",
+      "size": 1551559,
+      "sha256": "71a647390be61da757b420e62623c899a977aa8d1864f8d444095978aaf5ca9e"
+    }
+  ]
+}

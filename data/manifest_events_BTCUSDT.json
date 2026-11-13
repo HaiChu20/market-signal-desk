@@ -1,0 +1,224 @@
+{
+  "version": "wide_v1",
+  "kind": "events",
+  "symbol": "BTCUSDT",
+  "config": {
+    "name": "wide_geometry_v1",
+    "period": "dev",
+    "end_exclusive": "2023-01-01",
+    "sl_atr": [
+      1.0,
+      1.5,
+      2.0,
+      3.0,
+      4.0
+    ],
+    "tp_r": [
+      0.5,
+      1.0,
+      1.5,
+      2.0,
+      3.0
+    ],
+    "max_hold_trading_days": 1,
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "USATECHIDXUSD",
+      "USA500IDXUSD",
+      "XAUUSD"
+    ],
+    "starts": {
+      "BTCUSDT": "2020-01-01",
+      "ETHUSDT": "2020-01-01",
+      "USATECHIDXUSD": "2019-01-01",
+      "USA500IDXUSD": "2019-01-01",
+      "XAUUSD": "2008-01-01"
+    },
+    "crypto_venue": "binance_usdt_perp",
+    "crypto_taker_fee_per_side": 0.0005,
+    "crypto_slippage_per_side": 5e-05
+  },
+  "files": [
+    {
+      "path": "events_wide_v1/BTCUSDT/2020-01.parquet",
+      "size": 3306346,
+      "sha256": "4543529a32f3f5c0d7e33fa585dee8fdcc7ed33fd7d2c51023d5b008ee0b7a27"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2020-02.parquet",
+      "size": 3136481,
+      "sha256": "314c874ea810f04b6d35c0a8418345ea6b4ef15c53638e89d69c7cddf1f06210"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2020-03.parquet",
+      "size": 3116498,
+      "sha256": "b7608399f54c3dcd3594b8f1c6f3fd95cfd8514bf41b40c132cf23302d53f8f6"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2020-04.parquet",
+      "size": 2939256,
+      "sha256": "f27f494d4970fc389a29bd11585ce0c068a3eb79962bf9fcb623e409149530ec"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2020-05.parquet",
+      "size": 3060120,
+      "sha256": "b1089dde430124a4c793958693f1dda0515f7df5c06c98d734a3a5d664be10eb"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2020-06.parquet",
+      "size": 3002590,
+      "sha256": "d07010036ecf5ec090bcd9898a0e1c732280b12fb63ffd33785f50cfeb9f0f69"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2020-07.parquet",
+      "size": 3354446,
+      "sha256": "b53d24cb673a2635d0881da02a99af4f26b2d514821d7be41d19c763fe1627b7"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2020-08.parquet",
+      "size": 3395652,
+      "sha256": "1fcfbae9d23aa200119968c0ba7a32953452c78fe8480de1557b20f785738a55"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2020-09.parquet",
+      "size": 3192202,
+      "sha256": "2cdb64c78dfb2b082cc59c44b7a979140a5e3be8ea27c8909ef5b23ebf5c7251"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2020-10.parquet",
+      "size": 3740887,
+      "sha256": "62bf9509e7d68da579ad20b5033764de05a5a2dc1c0e5e72a213e319a16bf6a7"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2020-11.parquet",
+      "size": 4085889,
+      "sha256": "99c8b9f8ae9c6d700426e438a2c8a42a7e568a30793e074fd1fcf67d580f8344"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2020-12.parquet",
+      "size": 3766609,
+      "sha256": "1210efeffcd4e3071c8b1c24420b271171390ead65b0e26fa961959d2085c7b5"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2021-01.parquet",
+      "size": 4343589,
+      "sha256": "ffc89e43ceb84ccd783bf6c08c0b304430c025e69d5224afef581d179045ee03"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2021-02.parquet",
+      "size": 3927595,
+      "sha256": "97d5f5c256b77c480780addf16d5c1177b789e0b392daf6cd36faf09e8ca1db5"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2021-03.parquet",
+      "size": 4326414,
+      "sha256": "12c1d5d0b522cdeaecc714b3e7e87b4e5da11c793eecbb1b6d0c2cc519968bbe"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2021-04.parquet",
+      "size": 4013737,
+      "sha256": "ad6b6993172ac84c11dac4ca21d5939c3973b7c3fa8115ccc23355f9f4cbfb83"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2021-05.parquet",
+      "size": 3731653,
+      "sha256": "ce0ac4cea22e604d601766fdcab9175a0611cc31d654717baf8da3a6ade7538b"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2021-06.parquet",
+      "size": 3714150,
+      "sha256": "4eca406ef017730c1c3e8a1343819c874ae3edba45af66e9467f18f2d4857d7b"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2021-07.parquet",
+      "size": 3928788,
+      "sha256": "fee13520521006fa61f8f67255cb0b08a40af7ad83ca150614f5d0ea82bcfdb8"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2021-08.parquet",
+      "size": 4213001,
+      "sha256": "41bc02b15cd5ce015720169f3329831e179efe47a24bbaa5a44b1a3892a0fc32"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2021-09.parquet",
+      "size": 3829419,
+      "sha256": "563ac861d86fe6984a358b18c61fdf6aceb27c41c3dd454b9b3a0af0479127ef"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2021-10.parquet",
+      "size": 4015483,
+      "sha256": "ee1e09c98260053f3d4834ab8abda5aaf1ab8c31e37cec4d38e5fe5790b287ce"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2021-11.parquet",
+      "size": 3760645,
+      "sha256": "54307871823c5b7aa460b2bcaa2762a60b792f5692ef8b6679bb10a0ea6dde07"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2021-12.parquet",
+      "size": 3647661,
+      "sha256": "8df6a3fd987b640901b29b898a51b65bf414b6eea4914951896008c20d7b2381"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2022-01.parquet",
+      "size": 3753522,
+      "sha256": "70415f5347d524c47100b8bb9fbfea34a729b091cacfb307e4f0242935a5bc60"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2022-02.parquet",
+      "size": 3236028,
+      "sha256": "d1d837fc1a07420241e8354477f7dc39a3eb12318bf55abac03d9e1c9a792205"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2022-03.parquet",
+      "size": 3382743,
+      "sha256": "b05b5d26a56d4c55a1892ff35deb1c7634d13d8129b4afd4796028f5b3856a31"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2022-04.parquet",
+      "size": 3466162,
+      "sha256": "c30a90ca5b8bea7d1939eff9cdce1bbcd0b293a6e9dafa24da82b1dddcb26841"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2022-05.parquet",
+      "size": 3736863,
+      "sha256": "45d2ad9141b682d45d41eb8cccbcc4a3450bdc653ba7099e36f88ed051ce42ed"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2022-06.parquet",
+      "size": 3990949,
+      "sha256": "f0f10edf4df5645af692b240b3227650f243313d90eccef19affa54b5c7f16dc"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2022-07.parquet",
+      "size": 4041917,
+      "sha256": "1d7ae87097734350e7095745d6602e32963c367bb0658603973e6f3d3128ecc6"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2022-08.parquet",
+      "size": 3696348,
+      "sha256": "6b34f5e333e95bed50735b1b30fd382cbc9abcdcec2c27389d11b3f23612245e"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2022-09.parquet",
+      "size": 3355557,
+      "sha256": "d5269d41adcabde5085c220c311fb017b81b0adcf100ece379a6abeaef2cd11b"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2022-10.parquet",
+      "size": 3264530,
+      "sha256": "d8f6f1f49dedc15414c7cb23684ed0ca937d4d43e57edb39900a115d6633b7f3"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2022-11.parquet",
+      "size": 3375594,
+      "sha256": "152c7e7d6f2677d32efcc134286dc04a6137d7d2c35b4dd1df1c679f929cca9f"
+    },
+    {
+      "path": "events_wide_v1/BTCUSDT/2022-12.parquet",
+      "size": 3509873,
+      "sha256": "c7c30c9881c90b1aad87ca7182719bf8c94de3c546455ddde552272afa4e08cb"
+    }
+  ]
+}

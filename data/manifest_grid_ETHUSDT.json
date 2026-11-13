@@ -1,0 +1,224 @@
+{
+  "version": "wide_v1",
+  "kind": "grid",
+  "symbol": "ETHUSDT",
+  "config": {
+    "name": "wide_geometry_v1",
+    "period": "dev",
+    "end_exclusive": "2023-01-01",
+    "sl_atr": [
+      1.0,
+      1.5,
+      2.0,
+      3.0,
+      4.0
+    ],
+    "tp_r": [
+      0.5,
+      1.0,
+      1.5,
+      2.0,
+      3.0
+    ],
+    "max_hold_trading_days": 1,
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "USATECHIDXUSD",
+      "USA500IDXUSD",
+      "XAUUSD"
+    ],
+    "starts": {
+      "BTCUSDT": "2020-01-01",
+      "ETHUSDT": "2020-01-01",
+      "USATECHIDXUSD": "2019-01-01",
+      "USA500IDXUSD": "2019-01-01",
+      "XAUUSD": "2008-01-01"
+    },
+    "crypto_venue": "binance_usdt_perp",
+    "crypto_taker_fee_per_side": 0.0005,
+    "crypto_slippage_per_side": 5e-05
+  },
+  "files": [
+    {
+      "path": "labels_wide_v1/ETHUSDT/2020-01.parquet",
+      "size": 6101393,
+      "sha256": "8a216993deb058a21d293dfe65e8265f85a6e092cff1397bed4eccd6a8b6197d"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2020-02.parquet",
+      "size": 5792521,
+      "sha256": "1cbf0d3a623e1c36314f36e9b4e78907715c52358fd3ff392f6666ec98ad3432"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2020-03.parquet",
+      "size": 6043414,
+      "sha256": "901088ce8efccccfb9545f21b294cfbd933ab91ec351cab2b2ed5e166b6af401"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2020-04.parquet",
+      "size": 5876465,
+      "sha256": "8bc20d3a16560191ddfcf00759cea12e8fd4ffb5d3efdc8f667e9d9b05327c35"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2020-05.parquet",
+      "size": 6124741,
+      "sha256": "5257da025abeac940c034f83488fd08ed12cbcf6719e1829fc16e95b19261e9c"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2020-06.parquet",
+      "size": 5745276,
+      "sha256": "3a8181f18d6b8b9779024bdb366f81dd5ec8ea43fe6b7ae4a45bb35c7e389088"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2020-07.parquet",
+      "size": 6163271,
+      "sha256": "e87145d332e009851c2e98fd96790d2279cce0b2443c8d83c8ac482d1552aa9f"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2020-08.parquet",
+      "size": 6221752,
+      "sha256": "98f866d77a358aa071c6cf6a6c3f88eef5c784fbb25d6165fe95871ab35d9239"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2020-09.parquet",
+      "size": 5986827,
+      "sha256": "eb0c84a4570e94faae439bd6c09faa5076e2bcacbadda746ecf5952085b380bf"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2020-10.parquet",
+      "size": 6083086,
+      "sha256": "e0c2b81086ad14a663e4797a16e4636845e223925e974e29714dffe119fd1255"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2020-11.parquet",
+      "size": 6180764,
+      "sha256": "a86d14036e871e7d931bcb104094284b9024ec9b6c158966761ff5cee4b9640f"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2020-12.parquet",
+      "size": 6140000,
+      "sha256": "322464f198a48f24217468fb7e79611a4f936ec0096cc5169bc41754861e88fd"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2021-01.parquet",
+      "size": 6330357,
+      "sha256": "b3e12e01c61782af0eef356672d5dc993631647de0a3355dfff18e232df1f9ed"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2021-02.parquet",
+      "size": 5714549,
+      "sha256": "9db971f17793e3877bb2a83bd7d90cd7fea0f1a6f99d6368552ab8b9c485cc8f"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2021-03.parquet",
+      "size": 6324017,
+      "sha256": "ddad38c697d53e4ef2ba2c363b8c44fdc0aaf8222945b2a3336bdf32944b54c4"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2021-04.parquet",
+      "size": 6044622,
+      "sha256": "a5076291f256c51f110bbc51489a5e88563e8d5194f86f97dfa4a0aac9225e8a"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2021-05.parquet",
+      "size": 6355964,
+      "sha256": "a3f61c6dfc2a75e7f98cf192ff0908ddac92e74eb4f69ccc0bc0f736eb740171"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2021-06.parquet",
+      "size": 6169545,
+      "sha256": "12f6de86a4f3abc1e062bc07057207bbed5834856937ac1feae5e2fad7e54dd4"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2021-07.parquet",
+      "size": 6368087,
+      "sha256": "1e48e9c0a7929da0bf0dde7efc16d2f0d93424504175340c77931a7e7793d459"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2021-08.parquet",
+      "size": 6278215,
+      "sha256": "bf988e015adc191f2db307fe8cc37b6da77b34de76ea5a7978027393a563dfaa"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2021-09.parquet",
+      "size": 6019065,
+      "sha256": "cceaf8494aa82ad5c1915be742ae884ba7126b5c78de423ffc91e0cd8fba9a9a"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2021-10.parquet",
+      "size": 6276048,
+      "sha256": "7476325a9d5f275d2b1ac21edb1bc89187d9baac44ee5c4d4c7f588b0ed80f17"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2021-11.parquet",
+      "size": 6135527,
+      "sha256": "42ec693864aba593c8bc2f4c46f15ea06e52072c6189e49df6c0b3fcd57e7fbe"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2021-12.parquet",
+      "size": 6151767,
+      "sha256": "cbc249694500cceb9cfe1ef7420c9a291bab90b8bdaac863fba76fef77a9a0eb"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2022-01.parquet",
+      "size": 6303250,
+      "sha256": "85b697adc86fd3bd7241fbef3fae7d6674049e1aec6c4cbd14b2610280f79264"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2022-02.parquet",
+      "size": 5707623,
+      "sha256": "6390cf94d033952b68b8df0bffbf2cd57a664cda35e66402e952dda210edea3a"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2022-03.parquet",
+      "size": 6269086,
+      "sha256": "c1adab7daa58b818df66ce3959ff8124e003094ea37e0599e1e2e96fe80a7bd4"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2022-04.parquet",
+      "size": 6012244,
+      "sha256": "92ef1881d48204cad45ae5f3d182b422f6d4d53a8755eb9650d2a4308a716bb6"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2022-05.parquet",
+      "size": 6298362,
+      "sha256": "9f42b821245469724891fdd7f59c09444761df08ac782be81b19abad1cdc254e"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2022-06.parquet",
+      "size": 6088889,
+      "sha256": "100cab424f1bbc6442fe79fa9f1f02304208dbdbd13ee5fcf67d4398e107b2b6"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2022-07.parquet",
+      "size": 6291303,
+      "sha256": "0ea002b35681c9fd4bee5417118133c72c7b239e5207600341f0d84cc497eef1"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2022-08.parquet",
+      "size": 6269998,
+      "sha256": "8177aa91c5124a2f522b71ff97db29882210e58107c5a3916b28b3efc18221d2"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2022-09.parquet",
+      "size": 5942884,
+      "sha256": "3eddaabc026324f901fa0810e12767a9959763557b38aa596f5e9cdeb13e817d"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2022-10.parquet",
+      "size": 6261758,
+      "sha256": "adfe0150814145c3a465dcb63b3ff3ed47a0089379cd2fb4afe9d270fb373fe6"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2022-11.parquet",
+      "size": 5927192,
+      "sha256": "d21a80c0a5160b549026285c223e835e5b91b5beac94b265aab2326346d075ba"
+    },
+    {
+      "path": "labels_wide_v1/ETHUSDT/2022-12.parquet",
+      "size": 6031860,
+      "sha256": "dde1667879773f07de39cf04c9e9e3ffa7553677f671d414ea655333edde8f49"
+    }
+  ]
+}
