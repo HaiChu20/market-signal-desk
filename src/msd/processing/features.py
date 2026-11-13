@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+from .timeutil import epoch_ns
 from bisect import bisect_left, insort_right
 import heapq
 
@@ -320,7 +321,7 @@ def external_feature_frame(known_at: pd.Series, auxiliary: dict[str,pd.DataFrame
                 if not len(times): continue
                 times=np.sort(times)
                 label=event_type.lower().replace(" ","_")
-                now_ns=left.known_at.astype("int64").to_numpy()
+                now_ns=np.asarray(epoch_ns(left.known_at),dtype=np.int64)
                 prior=np.searchsorted(times,now_ns,side="right")-1
                 # Future countdowns are allowed only for dates that were
                 # published on a schedule. Actual EDGAR acceptance timestamps
@@ -527,7 +528,7 @@ def build_features(bars: pd.DataFrame, symbol: str, timeframes: dict[str,pd.Data
                                     on="known_at", direction="backward")
                 out["vix_percentile_1y"] = pct.pct_1y.to_numpy()
         elif {"event","datetime_utc"}.issubset(frame.columns):
-            stamps=pd.to_datetime(out.known_at,utc=True).astype("int64").to_numpy()
+            stamps=np.asarray(epoch_ns(out.known_at),dtype=np.int64)
             for event_type in frame.event.astype(str).unique():
                 subset=frame.loc[frame.event.astype(str)==event_type]
                 times=pd.to_datetime(subset.datetime_utc,utc=True,errors="coerce").dropna().astype("datetime64[ns, UTC]").astype("int64").to_numpy()

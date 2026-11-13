@@ -1,0 +1,24 @@
+# Deadline timestamp-unit bug — 2026-11-13
+
+Pandas 3.1.1 preserves parquet timestamp resolution as `datetime64[us, UTC]` unless code explicitly changes it. Code that reads the raw integer representation and assumes nanoseconds can therefore be wrong by a factor of 1,000. Kernel timestamps and deadlines must use the shared `msd.processing.timeutil` conversion helpers.
+
+| Site | Affected? | Finding | Artifacts affected |
+|---|---|---|---|
+| `processing/wide_v1.py::_event_jobs` | **Yes** | Bar microseconds were divided by 1e9 while deadlines were true epoch seconds. The kernel never reached its deadline; unresolved trades exited at the loaded-window end. Fixed with `epoch_seconds`. | `events_wide_v1`, the invalid scratch `events_wide_hold3_v1`, accepted Family-1 wide-v1 results, and Test-v1 event outcomes. Corrected outputs are versioned as wide-v2; v1 is retained unchanged. |
+| `research/benchmark.py::random_direction` | **Yes** | It used the same raw-integer conversion. Opposite-direction simulations did not honor the declared deadline. Fixed with `epoch_seconds`. | Tournament and Families 3–5 random-direction percentiles. Their model predictions, OOF returns, Brier scores, and CPCV results are unaffected by this site. |
+| `processing/labels.py::label_grid`; `labels_wide_v1` | No | `timestamp_ints` explicitly normalized bars and deadlines to ns; it now delegates to shared `epoch_ints`. Independent validation found no crypto exits after deadline. The roughly 1% of CFD exits after the timestamp were 46–50 hours late because a weekend deadline executes causally at the next market open, not because of unit mismatch. | `labels_wide_v1` is valid. Family-2/Roihu v5 wide targets and Families 3–5 targets are valid. |
+| `processing/crypto_perp.py` grid builder | No | Uses safe `label_grid`; funding timestamps explicitly request `datetime64[ns]`. | Binance-perpetual grid labels are valid. |
+| `processing/pipeline.py::label_method_events` | No | Explicitly casts event-bar timestamps to `datetime64[ns, UTC]` before seconds. | Production native event labels and frozen detector event replay are unaffected. |
+| `processing/features.py` former lines 323 and 530 | No in persisted features; hardened | At line 323, `external_feature_frame` had already normalized input `known_at` to ns before `left.known_at.astype(int64)`. At line 530, `prepare_feature_cache` had already normalized `history.ts` to ns before constructing `out.known_at`. Both local raw casts now use `epoch_ns` so safety no longer depends on upstream dtype. | Persisted dense features, including configured F3/F4/F5 inputs, are valid. |
+| `research/family.py` | No datetime conversion | Its `astype(int64)` creates event keys from numeric anchor indices. Timestamp columns go through `_utc`, and targets come from safe `labels_wide_v1`. | Families 3–5 core OOF/model metrics are valid. Only random-direction percentiles are affected through `benchmark.py`. |
+| `research/sequence_data.py` and `sequence_train.py` | No | Causal alignment uses timezone-aware `DatetimeIndex.searchsorted`, not raw epoch integers. | Sequence windows and Family-2 inputs are unaffected. |
+| `hpc/roihu/sequence/make_bundle.py` and `dev_v5_wide.json` | No | The builder inventories files and checks coverage using timestamps/`DatetimeIndex`; it does not assume a raw datetime integer unit. It packages safe `labels_wide_v1`. | `bundle_dev_v5_wide` is valid for this issue and does not require rebuilding. |
+| `research/test_exam_v1.py` | **Yes, transitively** | It called `_event_jobs`; intended one-day exits could instead extend to the loaded-window end. | Test-v1 did not exercise the preregistered exit. Test is spent, is not reread or regraded, and its verdict remains FAIL. |
+| `data/histdata.py::detect_roll_records` | Potentially, for us input; fixed | Raw `work.ts.astype(int64)` was compared with ns `Timestamp.value`. It now uses `epoch_ns`. | HistData futures roll-detection diagnostics produced with us-resolution input may need regeneration. The five-core-market cash-era DEV replay is not based on this roll detector. |
+| backtest, dataset, levels, live engine, method level joins | No | Datetime conversions explicitly cast to `datetime64[ns, UTC]`, use `Timestamp.value`, or now use the shared helper. Day ordinals and numeric event-key conversions are intentionally not epoch-nanosecond conversions. | No affected artifacts identified. |
+
+## Fix and regression coverage
+
+`msd.processing.timeutil.epoch_ints`, `epoch_ns`, and `epoch_seconds` explicitly normalize to nanoseconds before conversion. Tests verify identical results from us- and ns-resolution inputs and exercise a Rust-kernel time exit that fires at its declared deadline.
+
+Corrected DEV outcomes use new paths and config hashes: `events_wide_v2` for one trading day and `events_wide_hold3_v2` for three trading days. No v1 artifact is overwritten or deleted.

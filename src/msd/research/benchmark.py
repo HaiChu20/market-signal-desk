@@ -4,6 +4,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from msd.processing.labels import first_hit_reference
+from msd.processing.timeutil import epoch_seconds
 
 DEV_END=pd.Timestamp('2023-01-01',tz='UTC')
 BAR_COLUMNS=['ts',*[f'{side}_{field}' for side in ('bid','ask') for field in 'ohlc']]
@@ -57,7 +58,7 @@ def random_direction(signals:pd.DataFrame,data_root:Path,seeds=200):
         if not rows:continue
         if first_hit_batch is not None:
             packed=bars[[c for c in BAR_COLUMNS if c!='ts']].to_numpy(dtype='<f8')
-            stamps=(times.astype('int64').to_numpy()//1_000_000_000).astype('<i8')
+            stamps=np.asarray(epoch_seconds(times),dtype='<i8')
             results=np.asarray(first_hit_batch(packed.tobytes(),stamps.tobytes(),jobs,11),dtype=float).reshape(-1,9)
             opposite_r=results[:,4]
         else:

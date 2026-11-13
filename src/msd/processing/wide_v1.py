@@ -11,6 +11,7 @@ import pandas as pd
 
 from .crypto_perp import apply_perp_costs, executable_perp_bars
 from .labels import deadline_after_trading_days, label_grid
+from .timeutil import epoch_seconds
 
 DEV_END = pd.Timestamp("2023-01-01", tz="UTC")
 CRYPTO = {"BTCUSDT", "ETHUSDT"}
@@ -58,7 +59,8 @@ def _manifest(root: Path, symbol: str, kind: str, config: dict) -> Path:
         files.append({"path":path.relative_to(root.parent).as_posix(),"size":path.stat().st_size,
                       "sha256":hashlib.sha256(path.read_bytes()).hexdigest()})
     payload={"version":"wide_v1","kind":kind,"symbol":symbol,"config":config,"files":files}
-    path=root.parent/f"manifest_{kind}_{symbol}.json";path.write_text(json.dumps(payload,indent=2)+"\n")
+    prefix="" if root.name in {"events_wide_v1","labels_wide_v1"} else f"{root.name}_"
+    path=root.parent/f"manifest_{prefix}{kind}_{symbol}.json";path.write_text(json.dumps(payload,indent=2)+"\n")
     return path
 
 
@@ -94,7 +96,9 @@ def _event_jobs(events: pd.DataFrame, bars: pd.DataFrame, atr_map: pd.Series, co
     bars=bars.sort_values("ts").reset_index(drop=True)
     positions=pd.Series(np.arange(len(bars)),index=bars.ts)
     matrix=bars[["bid_o","bid_h","bid_l","bid_c","ask_o","ask_h","ask_l","ask_c"]].to_numpy(dtype="<f8")
-    stamp=(pd.to_datetime(bars.ts,utc=True).astype("int64").to_numpy()//1_000_000_000).astype("<i8")
+    # Pandas may preserve microsecond resolution. Force nanoseconds before
+    # converting to epoch seconds so the Rust deadline comparison is sound.
+    stamp=np.asarray(epoch_seconds(bars.ts),dtype="<i8")
     jobs=[];meta=[]
     for row in events.itertuples(index=False):
         i=positions.get(row.ts);side=int(row.side)

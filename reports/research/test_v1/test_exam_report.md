@@ -1,5 +1,7 @@
 # One-time protocol Test exam v1
 
+> **Post-exam implementation addendum (2026-11-13):** the event-label helper passed microsecond-resolution bar integers to a kernel expecting epoch seconds, while its deadline was in true epoch seconds. Consequently the intended one-trading-day deadline did not fire; unresolved positions could remain open until the end of the loaded look-ahead window. This exam therefore did **not** test the preregistered exit rule. The recorded verdict remains FAIL, the already-seen 2023–2024 Test period is spent and will not be regraded, and the positive index contribution from Donchian remains only a hypothesis for the still-locked Final period. No Test-period input was read to prepare this addendum.
+
 **Test was graded once using the preregistered fixed rules. The 2025+ Final period was not loaded for decisions or labels.**
 
 | Rule | Events | Trades | Hit | Net avg R | t | PF | Daily Sharpe | MDD | Random pct | Result |
