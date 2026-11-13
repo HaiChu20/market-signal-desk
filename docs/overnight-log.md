@@ -496,3 +496,14 @@ Append-only notes from the autonomous review loop while the user sleeps.
   - Per protocol, next is the shadow-mode daily bot (no Telegram sends without approval, no real money).
 - 2026-11-13 ~19:40: sent the swing v1 shadow daily job (no Telegram, no scheduling) to 2f14d55b.
 - 2026-11-13 ~20:30: reviewed shadow job 3fe5dcf (438 passed). Sent back three fixes: (1) a stale row must not block a later real plan in dedup; (2) the MGC refresh stall: Dukascopy day files for the current UTC day don't exist yet, so refresh only through yesterday, with a 10-min wall-clock limit per market; (3) intended run time ~05:00 UTC, before the 07:00 UTC entry. Allowed one live smoke against the main data root.
+- 2026-11-13 ~16:00 UTC: REVIEWED + MERGED the shadow job fixes (2f14d55b, 38b9ebf). Checks:
+  - a stale row may be followed by a real row, never the reverse;
+  - Dukascopy is refreshed only through yesterday UTC;
+  - each market refresh runs in a spawned child process with a 600 s cap, failing closed;
+  - the load_minutes month filter now uses the month start < end, so the DEV period still never opens 2023-01.
+  445 tests passed.
+  Local --no-refresh run (data refreshed by the worker's one smoke run):
+  - MNQ open SHORT from 2026-11-02;
+  - MGC short exited at the cap, +1.77R, with a new SHORT plan;
+  - MBT open LONG from 2026-11-13.
+  Writes go to data/shadow (gitignored). No scheduling installed and no Telegram; both need user approval.
