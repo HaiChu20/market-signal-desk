@@ -519,3 +519,9 @@ Append-only notes from the autonomous review loop while the user sleeps.
 - User chose "check first": froze docs/final_check_v2.md (03978f7) before any 2025+ result.
 - Part A (S1/S2) -> worker 2f14d55b; Part B (Donchian) -> new worker 1afb2f6f (gpt-5.6-sol). Workers implement and test on synthetic data only; supervisor runs each evaluation once.
 - Answered user: ESP32 cannot run the bot (Python/pandas/LightGBM, 100s of MB data); cPouta or a Raspberry Pi can.
+
+## 2026-11-13: final check v2 Part A run once (S1/S2)
+- Merged 5e1f0e3 (33c645d). Ran `uv run python -m msd.research.swing_final_v2 --run-final-once` once (24 s; log data/logs/swing_final_v2.log).
+- S1 Breakout 20: KEEP, 80 trades, +0.276R, t 1.47; NQ +0.04, gold +0.54, BTC +0.28; 2x cost +0.25; random 95% +0.47 (not beaten); evidence avg +0.10.
+- S2 Breakout 55: KEEP, 47 trades, +0.392R, t 1.57; NQ +0.08, gold +0.73, BTC +0.33; 2x cost +0.36; random 95% +0.38 (just beaten); evidence avg -0.03.
+- Both are mostly a 2025-26 gold/BTC trend story; t < 2, so still low confidence. Markdown table layout of the report is cosmetically interleaved; numbers are correct (JSON is canonical).
