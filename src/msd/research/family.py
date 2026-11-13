@@ -235,15 +235,22 @@ def load_anchor_features(data_root: Path, symbol: str, anchors: pd.DataFrame,
     result = pd.concat(parts, ignore_index=True).sort_values("anchor_index").reset_index(drop=True)
     if len(result) != len(anchors) or not np.array_equal(result.anchor_index, anchors.anchor_index):
         raise RuntimeError("Feature join changed the anchor grid")
+    ratios = {}
     for timeframe in config["families"][family].get("timeframes", ()):
         ratio = f"{timeframe}_atr_ratio14_50"
         if ratio in spec["source"]:
             numerator = pd.to_numeric(result[f"{timeframe}_atr14"], errors="coerce")
             denominator = pd.to_numeric(result[f"{timeframe}_atr50"], errors="coerce")
-            result[ratio] = numerator.div(denominator.where(denominator > 0))
-    for column in spec["source"]:
-        result[f"{column}__missing"] = result[column].isna().astype("int8")
-        result[column] = pd.to_numeric(result[column], errors="coerce").astype("float32")
+            ratios[ratio] = numerator.div(denominator.where(denominator > 0))
+    if ratios:
+        result = result.drop(columns=list(ratios)).join(pd.DataFrame(ratios, index=result.index))
+    converted = pd.DataFrame(
+        {column: pd.to_numeric(result[column], errors="coerce").astype("float32")
+         for column in spec["source"]}, index=result.index)
+    missing = pd.DataFrame(
+        {f"{column}__missing": converted[column].isna().astype("int8")
+         for column in spec["source"]}, index=result.index)
+    result = pd.concat([result.drop(columns=spec["source"]), converted, missing], axis=1)
     return result, spec, manifest
 
 
