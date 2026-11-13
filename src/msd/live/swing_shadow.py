@@ -18,6 +18,8 @@ from msd.research import swing_stage1 as s1
 
 MARKETS = tuple(s1.TRADED)
 LOOKBACK_DAYS = 400
+WARMUP_DAYS = 220
+DATA_WINDOW_DAYS = LOOKBACK_DAYS + WARMUP_DAYS
 REFRESH_DAYS = 21
 REFRESH_TIMEOUT_SECONDS = 10 * 60
 LOG_COLUMNS = (
@@ -25,10 +27,12 @@ LOG_COLUMNS = (
     "state", "side", "entry_ts", "entry_price", "sl", "tp", "cap_session_end",
     "unrealised_R", "exit_ts", "exit_reason", "net_R", "trade_signal_close",
     "plan_entry_ts", "reference_price", "atr", "sl_distance", "tp_distance",
-    "plan_sl", "plan_tp", "refresh_error",
+    "plan_sl", "plan_tp", "refresh_error", "strategy",
 )
 BACKTEST_LINE = "Backtest: DEV +0.16R per trade; final +0.04R on 88 trades."
 TELEGRAM_COLUMNS = ("sent_at", "event_id", "market", "event_type", "reference")
+SETUPS = ("S1", "S2", "S3")
+STRATEGY_NAMES = {"S1": "Breakout 20D", "S2": "Breakout 55D", "S3": "Trend 6M"}
 
 
 def latest_ny_close(now: pd.Timestamp) -> pd.Timestamp:
@@ -86,11 +90,12 @@ def _write_binance_backfill(root: Path, rows: list[dict]) -> None:
                 temporary.unlink()
 
 
-def refresh_market(data_root: Path, market: str, now: pd.Timestamp) -> None:
-    """Refresh only the recent window using the existing public-data clients."""
+def refresh_market(data_root: Path, market: str, now: pd.Timestamp,
+                   lookback_days: int = REFRESH_DAYS) -> None:
+    """Refresh the requested lookback using the existing public-data clients."""
     stamp = pd.Timestamp(now)
     stamp = stamp.tz_localize("UTC") if stamp.tzinfo is None else stamp.tz_convert("UTC")
-    start = (stamp - pd.Timedelta(days=REFRESH_DAYS)).date()
+    start = (stamp - pd.Timedelta(days=lookback_days)).date()
     # A Dukascopy UTC-day candle file is only available after that UTC day ends.
     end = (stamp - pd.Timedelta(days=1)).date()
     if market == "BTCUSDT":
@@ -153,8 +158,18 @@ def _side_text(side: int | str | None) -> str:
     return ""
 
 
+def strategy_event_id(market: str, setup: str, event_type: str, reference: str) -> str:
+    legacy = f"{market}|{event_type}|{reference}"
+    return legacy if setup == "S3" else f"{market}|{setup}|{event_type}|{reference}"
+
+
+def _label_record(record: dict, setup: str) -> dict:
+    return {**record, "setup": setup,
+            "strategy_name": f"{STRATEGY_NAMES[setup]} (swing)"}
+
+
 def analyze_market(bars: pd.DataFrame, market: str, now: pd.Timestamp,
-                   refresh_error: str = "") -> tuple[dict, str]:
+                   refresh_error: str = "", strategies=("S3",)) -> tuple[dict, str]:
     """Replay one market and return its audit row and human-readable block."""
     now = pd.Timestamp(now)
     now = now.tz_localize("UTC") if now.tzinfo is None else now.tz_convert("UTC")
@@ -169,23 +184,25 @@ def analyze_market(bars: pd.DataFrame, market: str, now: pd.Timestamp,
     if eligible.empty:
         raise ValueError(f"{market}: no completed daily signal row")
     latest = eligible.iloc[-1]
-    rows, _, open_trades = s1.replay_market(
-        bars, market, primary_only=True, period=period, setups=("S3",),
-        first_year=first_year,
-    )
-    open_trade = open_trades.get(("S3", 2.0, 3.0))
+    replay = {setup: s1.replay_market(bars, market, primary_only=True, period=period,
+                                      setups=(setup,), first_year=first_year)
+              for setup in strategies}
     mid_close = float((bars.bid_c.iloc[-1] + bars.ask_c.iloc[-1]) / 2)
     record = {column: "" for column in LOG_COLUMNS}
     record.update({
         "run_ts": now.isoformat(), "market": market, "contract": s1.TRADED[market],
+        "strategy": strategies[0],
         "signal_close": expected_close.isoformat(), "data_last_ts": ts[-1].isoformat(),
         "stale": str(stale).lower(), "refresh_error": refresh_error,
     })
-    record["_replay_rows"] = rows
-    record["_open_trade"] = open_trade
+    record["_replays"] = replay
     record["_current_price"] = mid_close
     detail = ""
-    flat = open_trade is None
+    setup = strategies[0]
+    rows, _, open_trades = replay[setup]
+    open_trade = open_trades.get((setup, 2.0, 3.0))
+    record["_replay_rows"] = rows
+    record["_open_trade"] = open_trade
     if open_trade is not None:
         unrealised = open_trade["side"] * (mid_close - open_trade["entry_price"]) / open_trade["risk"]
         record.update({
@@ -200,6 +217,7 @@ def analyze_market(bars: pd.DataFrame, market: str, now: pd.Timestamp,
                   f"TP {open_trade['target']:.2f}; cap session {open_trade['cap_session_end']}; "
                   f"unrealised {unrealised:+.2f}R (gross).")
     else:
+        record["state"] = "FLAT"
         previous_close = eligible.end.iloc[-2] if len(eligible) > 1 else ts[0] - pd.Timedelta(minutes=1)
         recent = [row for row in rows if pd.Timestamp(row["exit_ts"]) > previous_close]
         if recent:
@@ -220,8 +238,8 @@ def analyze_market(bars: pd.DataFrame, market: str, now: pd.Timestamp,
     if stale:
         plan = (f"STALE: last bar {ts[-1].isoformat()} does not cover the latest 17:00 New York "
                 f"close ({expected_close.isoformat()}); no new trade plan issued.")
-    elif flat and int(latest.S3) != 0 and np.isfinite(latest.atr):
-        side = int(latest.S3)
+    elif record["state"] == "FLAT" and int(getattr(latest, strategies[0])) != 0 and np.isfinite(latest.atr):
+        side = int(getattr(latest, strategies[0]))
         risk = float(2 * latest.atr)
         tp_distance = 3 * risk
         entry = s1.entry_time(latest.end)
@@ -238,7 +256,8 @@ def analyze_market(bars: pd.DataFrame, market: str, now: pd.Timestamp,
                 f"TP distance {tp_distance:.2f} points; spot-equivalent SL {sl:.2f}, TP {tp:.2f}. "
                 "On futures, set SL and TP from the actual fill price using those distances.")
     elif not stale:
-        plan = "No new plan while the trade is open." if not flat else "No S3 plan from the latest close."
+        plan = ("No new plan while the trade is open." if record["state"] == "OPEN"
+                else f"No {strategies[0]} plan from the latest close.")
 
     error_text = f" Refresh error: {refresh_error}." if refresh_error else ""
     message = (f"{s1.TRADED[market]} ({market}) — signal close {expected_close.isoformat()}\n"
@@ -248,15 +267,15 @@ def analyze_market(bars: pd.DataFrame, market: str, now: pd.Timestamp,
 
 def append_records(path: Path, records: list[dict]) -> int:
     """Allow a fresh row to supersede stale audit history, never the reverse."""
-    existing: dict[tuple[str, str], set[bool]] = {}
+    existing: dict[tuple[str, str, str], set[bool]] = {}
     if path.exists():
         with path.open(newline="") as handle:
             for row in csv.DictReader(handle):
-                key = (row["market"], row["signal_close"])
+                key = (row["market"], row["signal_close"], row.get("strategy") or "S3")
                 existing.setdefault(key, set()).add(row.get("stale", "").lower() == "true")
     fresh = []
     for row in records:
-        key = (row["market"], row["signal_close"])
+        key = (row["market"], row["signal_close"], row.get("strategy") or "S3")
         stale = str(row.get("stale", "")).lower() == "true"
         prior = existing.get(key, set())
         if False in prior or (stale and True in prior):
@@ -267,8 +286,27 @@ def append_records(path: Path, records: list[dict]) -> int:
         return 0
     path.parent.mkdir(parents=True, exist_ok=True)
     write_header = not path.exists() or path.stat().st_size == 0
+    fieldnames = LOG_COLUMNS
+    if not write_header:
+        with path.open(newline="") as handle:
+            fieldnames = tuple(csv.DictReader(handle).fieldnames or LOG_COLUMNS)
+        if "strategy" not in fieldnames:
+            # Preserve the already deployed append-only legacy CSV byte schema.
+            # New strategies go to a companion schema instead of rewriting it.
+            legacy = [row for row in fresh if row.get("strategy", "S3") == "S3"]
+            extra = [row for row in fresh if row.get("strategy", "S3") != "S3"]
+            count = 0
+            if legacy:
+                with path.open("a", newline="") as handle:
+                    writer = csv.DictWriter(handle, fieldnames=fieldnames, lineterminator="\n",
+                                            extrasaction="ignore")
+                    writer.writerows(legacy)
+                count += len(legacy)
+            if extra:
+                count += append_records(path.with_name("swing_v1_strategies.csv"), extra)
+            return count
     with path.open("a", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=LOG_COLUMNS, lineterminator="\n",
+        writer = csv.DictWriter(handle, fieldnames=fieldnames, lineterminator="\n",
                                 extrasaction="ignore")
         if write_header:
             writer.writeheader()
@@ -295,7 +333,8 @@ def _price(contract: str, value: float) -> str:
 def _side_line(record: dict) -> str:
     side = int(record["side"])
     marker = "🟢" if side > 0 else "🔴"
-    return f"{marker} {record['contract']} · {_side_text(side)}"
+    strategy = record.get("strategy_name") or f"{STRATEGY_NAMES.get(record.get('setup', 'S3'), 'Trend 6M')} (swing)"
+    return f"{marker} {record['contract']} · {_side_text(side)} · {strategy}"
 
 
 def _distance_line(label: str, record: dict, distance: float, *, level=None,
@@ -363,7 +402,9 @@ def _late_entry_text(record: dict) -> str:
 def _exit_text(record: dict) -> str:
     reason = str(record["exit_reason"]).upper()
     marker = "🟢" if int(record["side"]) > 0 else "🔴"
-    side = f"{record['contract']} {marker} {_side_text(record['side'])}"
+    side = f"{record['contract']} {marker} {_side_text(record['side'])} · " + (
+        record.get("strategy_name") or f"{STRATEGY_NAMES.get(record.get('setup', 'S3'), 'Trend 6M')} (swing)"
+    )
     if reason == "CAP":
         return (f"⏰ ACTION: close {side} now\n"
                 f"6-week limit reached\n"
@@ -375,7 +416,8 @@ def _exit_text(record: dict) -> str:
 
 
 def _stale_text(record: dict) -> str:
-    return f"⚠️ {record['contract']}: no fresh data, no signal today."
+    strategy = record.get("strategy_name") or f"{STRATEGY_NAMES.get(record.get('setup', 'S3'), 'Trend 6M')} (swing)"
+    return f"⚠️ {record['contract']} · {strategy}: no fresh data, no signal today."
 
 
 def next_scheduled_run(now: pd.Timestamp) -> pd.Timestamp:
@@ -395,64 +437,90 @@ def _cap_warning_due(record: dict, now: pd.Timestamp) -> bool:
 
 def _cap_warning_text(record: dict) -> str:
     marker = "🟢" if int(record["side"]) > 0 else "🔴"
-    side = f"{record['contract']} {marker} {_side_text(record['side'])}"
+    side = f"{record['contract']} {marker} {_side_text(record['side'])} · " + (
+        record.get("strategy_name") or f"{STRATEGY_NAMES.get(record.get('setup', 'S3'), 'Trend 6M')} (swing)"
+    )
     return (f"⏰ ACTION: close {side} by {_finland_time(record['cap_session_end'])}\n"
             "6-week limit")
 
 
-def _entry_was_announced(sent_ids: set[str], market: str, entry: str) -> bool:
-    return (_event_id(market, "ENTRY", entry) in sent_ids or
-            _event_id(market, "NEW", entry) in sent_ids)
+def _entry_was_announced(sent_ids: set[str], market: str, entry: str, setup: str = "S3") -> bool:
+    return (strategy_event_id(market, setup, "ENTRY", entry) in sent_ids or
+            strategy_event_id(market, setup, "NEW", entry) in sent_ids or
+            strategy_event_id(market, setup, "ENTRY_INFO", entry) in sent_ids)
 
 
 def telegram_events(records: list[dict], now: pd.Timestamp, *,
                     sent_ids: set[str] | None = None,
                     connected_at: pd.Timestamp | None = None,
-                    include_late: bool = True) -> list[dict]:
+                    include_late: bool = True,
+                    first_strategy_run: set[str] | None = None,
+                    strategy_enabled_at: dict[str, pd.Timestamp] | None = None) -> list[dict]:
     sent_ids = sent_ids or set()
+    first_strategy_run = first_strategy_run or set()
+    strategy_enabled_at = strategy_enabled_at or {}
     events = []
     for record in records:
         market = str(record["market"])
         if record.get("plan_entry_ts") and str(record.get("stale", "")).lower() != "true":
             reference = str(record["plan_entry_ts"])
-            events.append({"event_id": _event_id(market, "ENTRY", reference),
+            setup = record.get("setup", "S3")
+            events.append({"event_id": strategy_event_id(market, setup, "ENTRY", reference),
                            "market": market, "event_type": "NEW", "reference": reference,
                            "text": _new_text(record)})
         replay_rows = record.get("_replay_rows")
+        if record.get("setup", "S3") in first_strategy_run:
+            # This setup was not part of the previously enabled deployment. Its
+            # historical exits predate rollout and describe no held user position.
+            replay_rows = []
         if replay_rows is not None:
             for trade in replay_rows:
                 if connected_at is not None and pd.Timestamp(trade["exit_ts"]) <= connected_at:
                     continue
+                enabled_at = strategy_enabled_at.get(record.get("setup", "S3"))
+                if enabled_at is not None and pd.Timestamp(trade["exit_ts"]) <= enabled_at:
+                    continue
                 reason = str(trade["exit"]).upper()
                 event_type = f"EXIT_{reason}"
                 reference = str(trade["entry_ts"])
-                exit_record = {"contract": record["contract"], "entry_ts": trade["entry_ts"],
+                exit_record = {"contract": record["contract"], "setup": record.get("setup", "S3"),
+                               "strategy_name": record.get("strategy_name"), "entry_ts": trade["entry_ts"],
                                "exit_ts": trade["exit_ts"], "exit_reason": trade["exit"],
                                "net_R": trade["net_R"], "side": trade["side"]}
-                events.append({"event_id": _event_id(market, event_type, reference),
+                events.append({"event_id": strategy_event_id(market, record.get("setup", "S3"), event_type, reference),
                                "market": market, "event_type": event_type, "reference": reference,
                                "text": _exit_text(exit_record)})
-        elif record.get("state") == "EXITED":
+        elif record.get("state") == "EXITED" and record.get("setup", "S3") not in first_strategy_run:
+            enabled_at = strategy_enabled_at.get(record.get("setup", "S3"))
+            if enabled_at is not None and pd.Timestamp(record.get("exit_ts", now)) <= enabled_at:
+                continue
             reason = str(record.get("exit_reason", "")).upper()
             event_type = f"EXIT_{reason}"
             reference = str(record["entry_ts"])
-            events.append({"event_id": _event_id(market, event_type, reference),
+            events.append({"event_id": strategy_event_id(market, record.get("setup", "S3"), event_type, reference),
                            "market": market, "event_type": event_type, "reference": reference,
                            "text": _exit_text(record)})
         if (include_late and record.get("state") == "OPEN" and record.get("_open_trade") and
-                not _entry_was_announced(sent_ids, market, str(record["entry_ts"]))):
+                not _entry_was_announced(sent_ids, market, str(record["entry_ts"]), record.get("setup", "S3"))):
             reference = str(record["entry_ts"])
-            events.append({"event_id": _event_id(market, "ENTRY", reference),
-                           "market": market, "event_type": "LATE_ENTRY", "reference": reference,
-                           "text": _late_entry_text(record)})
+            setup = record.get("setup", "S3")
+            # Existing positions first observed after a strategy rollout are informational,
+            # never presented as fresh entry recommendations.
+            event_type = "ENTRY_INFO" if setup in first_strategy_run else "LATE_ENTRY"
+            event_text = (_open_text(record) if event_type == "ENTRY_INFO" else _late_entry_text(record))
+            if event_type == "ENTRY_INFO":
+                event_text = "ℹ️ Already open before this strategy was enabled\n" + event_text
+            events.append({"event_id": strategy_event_id(market, setup, "ENTRY", reference),
+                           "market": market, "event_type": event_type, "reference": reference,
+                           "text": event_text})
         if _cap_warning_due(record, now):
             reference = str(record["entry_ts"])
-            events.append({"event_id": _event_id(market, "CAP_WARNING", reference),
+            events.append({"event_id": strategy_event_id(market, record.get("setup", "S3"), "CAP_WARNING", reference),
                            "market": market, "event_type": "CAP_WARNING", "reference": reference,
                            "text": _cap_warning_text(record)})
         if str(record.get("stale", "")).lower() == "true":
             reference = str(record["signal_close"])
-            events.append({"event_id": _event_id(market, "STALE", reference),
+            events.append({"event_id": strategy_event_id(market, record.get("setup", "S3"), "STALE", reference),
                            "market": market, "event_type": "STALE", "reference": reference,
                            "text": _stale_text(record)})
     local = pd.Timestamp(now).tz_convert("Europe/Helsinki")
@@ -475,12 +543,16 @@ def connected_message(records: list[dict], now: pd.Timestamp | None = None, *,
     for record in records:
         state = str(record.get("state", "UNKNOWN"))
         if state == "OPEN":
-            open_blocks.append(_open_text(record))
+            text = _open_text(record)
+            if record.get("setup") in {"S1", "S2"}:
+                text = "ℹ️ Already open (not a new entry)\n" + text
+            open_blocks.append(text)
         elif state == "EXITED":
             reason = str(record.get("exit_reason", "")).upper()
             label = {"TP": "target hit", "SL": "stop hit", "CAP": "6-week limit"}.get(
                 reason, "closed")
-            info_lines.append(f"ℹ️ {record['contract']}: previous trade closed · {label} "
+            strategy = record.get("strategy_name") or f"{STRATEGY_NAMES.get(record.get('setup', 'S3'), 'Trend 6M')} (swing)"
+            info_lines.append(f"ℹ️ {record['contract']} · {strategy}: previous trade closed · {label} "
                               f"· {float(record['net_R']):+.2f}R")
         elif (state == "FLAT" and not record.get("plan_entry_ts") and
               str(record.get("stale", "")).lower() != "true"):
@@ -492,7 +564,7 @@ def connected_message(records: list[dict], now: pd.Timestamp | None = None, *,
         if now is not None and _cap_warning_due(record, now):
             info_lines.append(_cap_warning_text(record))
     lines = [f"📡 {header}",
-             "6-month trend · MNQ / MGC / MBT",
+             "S1 Breakout 20D · S2 Breakout 55D · S3 Trend 6M · MNQ / MGC / MBT",
              "Confidence: low (backtest +0.16R, final test +0.04R per trade).",
              "", "━━━━ OPEN TRADES ━━━━", ""]
     lines.append("\n\n".join(open_blocks) if open_blocks else "No open trades.")
@@ -501,6 +573,22 @@ def connected_message(records: list[dict], now: pd.Timestamp | None = None, *,
     if info_lines:
         lines += ["", "\n\n".join(info_lines)]
     return "\n".join(lines)
+
+
+def analyze_market_setups(bars: pd.DataFrame, market: str, now: pd.Timestamp,
+                          refresh_error: str = "", strategies=SETUPS) -> list[dict]:
+    """Produce one audit/state record per independently replayed setup."""
+    records = []
+    for setup in strategies:
+        record, _ = analyze_market(bars, market, now, refresh_error, strategies=(setup,))
+        record = _label_record(record, setup)
+        rows, _, opens = record["_replays"][setup]
+        trade = opens.get((setup, 2.0, 3.0))
+        record["_replay_rows"] = rows
+        record["_open_trade"] = trade
+        # Single-setup analyze_market already materializes exactly this replay state.
+        records.append(record)
+    return records
 
 
 def _sent_rows(path: Path) -> list[dict]:
@@ -519,6 +607,17 @@ def _connected_at(path: Path) -> pd.Timestamp | None:
     return pd.Timestamp(rows[0]["sent_at"]) if rows else None
 
 
+def _strategy_enabled_at(path: Path) -> dict[str, pd.Timestamp]:
+    enabled = {}
+    for row in _sent_rows(path):
+        if row.get("event_type") != "STRATEGY_ENABLED":
+            continue
+        parts = row.get("event_id", "").split("|")
+        if len(parts) == 4 and parts[0] == "ALL" and parts[1] in {"S1", "S2"}:
+            enabled[parts[1]] = pd.Timestamp(row["sent_at"])
+    return enabled
+
+
 def _connected_entry_markers(records: list[dict]) -> list[dict]:
     markers = []
     for record in records:
@@ -526,10 +625,21 @@ def _connected_entry_markers(records: list[dict]) -> list[dict]:
                      else record.get("plan_entry_ts"))
         if not reference:
             continue
-        markers.append({"event_id": _event_id(str(record["market"]), "ENTRY", str(reference)),
+        setup = record.get("setup", "S3")
+        markers.append({"event_id": strategy_event_id(str(record["market"]), setup, "ENTRY", str(reference)),
                         "market": str(record["market"]), "event_type": "ENTRY_CONNECTED",
                         "reference": str(reference)})
     return markers
+
+
+def _record_summary(record: dict) -> str:
+    if record.get("state") == "OPEN":
+        return _open_text(record)
+    if record.get("plan_entry_ts") and str(record.get("stale", "")).lower() != "true":
+        return _new_text(record)
+    if str(record.get("stale", "")).lower() == "true":
+        return _stale_text(record)
+    return f"{record['contract']} · {record.get('strategy_name', '')}: FLAT"
 
 
 def _append_sent(path: Path, events: list[dict], now: pd.Timestamp) -> None:
@@ -561,6 +671,7 @@ def deliver_telegram(records: list[dict], shadow_root: Path, now: pd.Timestamp,
     history = shadow_root / "telegram_sent.csv"
     sent = _sent_ids(history)
     statuses = []
+    rollout_markers = {setup: f"ALL|{setup}|STRATEGY_ENABLED|initial" for setup in ("S1", "S2")}
     if not sent:
         connected = {"event_id": _event_id("ALL", "CONNECTED", "initial"),
                      "market": "ALL", "event_type": "CONNECTED", "reference": "initial",
@@ -570,14 +681,19 @@ def deliver_telegram(records: list[dict], shadow_root: Path, now: pd.Timestamp,
         try:
             client.send_message(connected["text"])
             accepted = [connected, *events, *_connected_entry_markers(records)]
+            accepted.extend({"event_id": marker, "market": "ALL", "event_type": "STRATEGY_ENABLED",
+                             "reference": "initial"} for marker in rollout_markers.values())
             unique = {event["event_id"]: event for event in accepted}
             _append_sent(history, list(unique.values()), now)
             statuses.append("Telegram: CONNECTED accepted.")
         except Exception as exc:
             statuses.append(f"Telegram send failed; will retry: {_redacted_error(exc, client)}")
         return statuses
+    first_strategy_run = {setup for setup, marker in rollout_markers.items() if marker not in sent}
     events = telegram_events(records, now, sent_ids=sent,
-                             connected_at=_connected_at(history))
+                             connected_at=_connected_at(history),
+                             first_strategy_run=first_strategy_run,
+                             strategy_enabled_at=_strategy_enabled_at(history))
     for event in events:
         if event["event_id"] in sent:
             continue
@@ -585,9 +701,30 @@ def deliver_telegram(records: list[dict], shadow_root: Path, now: pd.Timestamp,
             client.send_message(event["text"])
             _append_sent(history, [event], now)
             sent.add(event["event_id"])
+            setup = next((name for name in first_strategy_run
+                          if event["event_type"] == "ENTRY_INFO" and
+                          event["event_id"].startswith(f"{event['market']}|{name}|")), None)
+            if setup:
+                marker = {"event_id": rollout_markers[setup], "market": "ALL",
+                          "event_type": "STRATEGY_ENABLED", "reference": "initial"}
+                _append_sent(history, [marker], now)
+                sent.add(marker["event_id"])
             statuses.append(f"Telegram: {event['event_type']} accepted for {event['market']}.")
         except Exception as exc:
             statuses.append(f"Telegram send failed; will retry: {_redacted_error(exc, client)}")
+    # Once the first new-strategy snapshot has been processed, future unannounced
+    # open positions are late entries. Failed INFO deliveries keep rollout pending.
+    for setup in first_strategy_run:
+        has_unannounced_open = any(
+            record.get("setup") == setup and record.get("state") == "OPEN" and
+            not _entry_was_announced(sent, str(record["market"]), str(record["entry_ts"]), setup)
+            for record in records
+        )
+        if not has_unannounced_open and rollout_markers[setup] not in sent:
+            marker = {"event_id": rollout_markers[setup], "market": "ALL",
+                      "event_type": "STRATEGY_ENABLED", "reference": "initial"}
+            _append_sent(history, [marker], now)
+            sent.add(marker["event_id"])
     return statuses
 
 
@@ -616,7 +753,7 @@ def run(data_root: Path = Path("data"), shadow_root: Path = Path("data/shadow"),
     now = pd.Timestamp.now(tz="UTC") if now is None else pd.Timestamp(now)
     now = now.tz_localize("UTC") if now.tzinfo is None else now.tz_convert("UTC")
     records, blocks = [], []
-    start = now - pd.Timedelta(days=LOOKBACK_DAYS)
+    start = now - pd.Timedelta(days=DATA_WINDOW_DAYS)
     for market in MARKETS:
         error = ""
         if refresh:
@@ -629,7 +766,11 @@ def run(data_root: Path = Path("data"), shadow_root: Path = Path("data/shadow"),
                 data_root, market,
                 period=s1.Period(data_start=start, end=now.floor("min") + pd.Timedelta(minutes=1)),
             )
-            record, block = analyze_market(bars, market, now, error)
+            market_records = analyze_market_setups(bars, market, now, error)
+            records.extend(market_records)
+            blocks.extend(f"{record['strategy_name']}\n{_record_summary(record)}"
+                          for record in market_records)
+            continue
         except Exception as exc:
             close = latest_ny_close(now)
             record = {column: "" for column in LOG_COLUMNS}
@@ -638,10 +779,12 @@ def run(data_root: Path = Path("data"), shadow_root: Path = Path("data/shadow"),
                 "signal_close": close.isoformat(), "stale": "true", "state": "STALE",
                 "refresh_error": error or f"{type(exc).__name__}: {exc}",
             })
-            block = (f"{s1.TRADED[market]} ({market}) — STALE\n"
-                     f"No new trade plan issued: {record['refresh_error']}")
-        records.append(record)
-        blocks.append(block)
+            for setup in SETUPS:
+                strategy_record = {**record, "strategy": setup, "setup": setup,
+                                   "strategy_name": f"{STRATEGY_NAMES[setup]} (swing)"}
+                records.append(strategy_record)
+                blocks.append(f"{strategy_record['strategy_name']}\n{_stale_text(strategy_record)}\n"
+                              f"{record['refresh_error']}")
     appended = append_records(shadow_root / "swing_v1.csv", records)
     planned_entry = s1.entry_time(latest_ny_close(now))
     message = (f"Swing v1 SHADOW — no orders sent | run {now.isoformat()} | "

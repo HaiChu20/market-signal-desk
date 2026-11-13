@@ -142,6 +142,126 @@ def test_non_stale_row_may_follow_stale_but_never_reverse(tmp_path: Path):
     assert pd.read_csv(path).state.tolist() == ["STALE", "FLAT"]
 
 
+def test_legacy_audit_schema_stays_append_only_and_new_setups_get_companion(tmp_path: Path):
+    path = tmp_path / "swing_v1.csv"
+    legacy_columns = [column for column in shadow.LOG_COLUMNS if column != "strategy"]
+    path.write_text(",".join(legacy_columns) + "\n")
+    rows = []
+    for setup in shadow.SETUPS:
+        row = {column: "" for column in shadow.LOG_COLUMNS}
+        row.update(market="XAUUSD", signal_close="2026-11-12T22:00:00+00:00",
+                   strategy=setup, stale="false")
+        rows.append(row)
+    assert shadow.append_records(path, rows) == 3
+    assert path.read_text().splitlines()[0] == ",".join(legacy_columns)
+    assert len(pd.read_csv(path)) == 1
+    strategies = pd.read_csv(tmp_path / "swing_v1_strategies.csv")
+    assert strategies.strategy.tolist() == ["S1", "S2"]
+
+
+def test_strategy_event_ids_keep_s3_legacy_and_qualify_new_setups():
+    reference = "2026-11-13T07:00:00+00:00"
+    assert shadow.strategy_event_id("XAUUSD", "S3", "ENTRY", reference) == (
+        f"XAUUSD|ENTRY|{reference}"
+    )
+    assert shadow.strategy_event_id("XAUUSD", "S1", "ENTRY", reference) == (
+        f"XAUUSD|S1|ENTRY|{reference}"
+    )
+
+
+def test_first_run_s1_open_is_informational_then_deduplicated(tmp_path: Path):
+    connected = pd.Timestamp("2026-11-16 05:00Z")
+    now = pd.Timestamp("2026-11-17 05:00Z")
+    _seed_telegram_history(tmp_path, connected)
+    record = _telegram_record(
+        "USATECHIDXUSD", "MNQ", state="OPEN", side=-1,
+        entry_ts="2026-11-16T07:00:00+00:00", entry_price=25000., sl=25500.,
+        tp=23500., unrealised_R=.2, cap_session_end="2026-12-28T22:00:00+00:00",
+        _current_price=24900., _open_trade={"entry_ts": "2026-11-16T07:00:00+00:00"},
+        _replay_rows=[{"entry_ts": "2026-11-01T07:00:00+00:00",
+                       "exit_ts": "2026-11-16T12:00:00+00:00", "exit": "tp",
+                       "net_R": 2.8, "side": 1}], setup="S1", strategy="S1",
+        strategy_name="Breakout 20D (swing)",
+    )
+    client = FakeTelegram()
+    statuses = shadow.deliver_telegram([record], tmp_path, now, client)
+    assert statuses == ["Telegram: ENTRY_INFO accepted for USATECHIDXUSD."]
+    assert client.messages[0].startswith("ℹ️ Already open before this strategy was enabled\n")
+    assert "Already open" in client.messages[0] and "LATE ENTRY" not in client.messages[0]
+    assert "Breakout 20D (swing)" in client.messages[0]
+    assert shadow.deliver_telegram([record], tmp_path, now, client) == []
+    assert len(client.messages) == 1
+
+
+def test_market_setup_analysis_replays_each_rule_independently(monkeypatch):
+    now = pd.Timestamp("2026-11-13 22:05Z")
+    bars = _bars(["2026-11-12 21:59Z", "2026-11-13 21:59Z"])
+    signal = pd.DataFrame({
+        "end": pd.to_datetime(["2026-11-13 22:00Z"], utc=True),
+        "c": [100.], "atr": [2.], "S1": [1], "S2": [-1], "S3": [0],
+    })
+    monkeypatch.setattr(stage1, "daily_bars", lambda bars, period: signal)
+    monkeypatch.setattr(stage1, "signals", lambda frame, first_year: signal)
+    calls = []
+
+    def replay(bars, market, *, setups, **kwargs):
+        setup = setups[0]
+        calls.append(setup)
+        trade = None
+        if setup == "S1":
+            trade = {"entry_ts": "2026-11-13T07:00:00+00:00", "entry_price": 100.,
+                     "side": 1, "risk": 4., "stop": 96., "target": 112.,
+                     "cap_session_end": "2026-12-24T22:00:00+00:00",
+                     "signal_end": "2026-11-12T22:00:00+00:00"}
+        return [], {}, ({(setup, 2.0, 3.0): trade} if trade else {})
+
+    monkeypatch.setattr(stage1, "replay_market", replay)
+    records = shadow.analyze_market_setups(bars, "USATECHIDXUSD", now)
+    assert calls == ["S1", "S2", "S3"]
+    assert [record["state"] for record in records] == ["OPEN", "FLAT", "FLAT"]
+    assert records[0]["plan_entry_ts"] == ""
+    assert records[1]["plan_entry_ts"]
+    assert records[1]["side"] == -1
+
+
+def test_bootstrap_requests_only_replay_window_plus_latest_completed_day(monkeypatch, tmp_path):
+    from msd.data import swing_bootstrap
+
+    calls = []
+    monkeypatch.setattr(
+        shadow, "refresh_market",
+        lambda root, market, now, lookback_days: calls.append((root, market, lookback_days)),
+    )
+    monkeypatch.setattr(
+        swing_bootstrap, "_bootstrap_binance",
+        lambda root, start, end: calls.append((root, "BTCUSDT", shadow.DATA_WINDOW_DAYS)),
+    )
+    swing_bootstrap.bootstrap(tmp_path, now=pd.Timestamp("2026-11-13 05:00Z"))
+    assert calls == [(tmp_path, market, shadow.DATA_WINDOW_DAYS) for market in shadow.MARKETS]
+
+
+def test_binance_bootstrap_chunks_by_month_and_resumes_existing_data(monkeypatch, tmp_path):
+    from msd.data import swing_bootstrap
+
+    class FakeFeed:
+        def __init__(self, symbol):
+            assert symbol == "BTCUSDT"
+
+        def backfill(self, after, now):
+            calls.append((after, now))
+            return []
+
+    calls = []
+    monkeypatch.setattr(swing_bootstrap, "BinanceSpotFeed", FakeFeed)
+    monkeypatch.setattr(shadow, "_write_binance_backfill", lambda root, rows: None)
+    swing_bootstrap._bootstrap_binance(
+        tmp_path, pd.Timestamp("2026-01-15").date(), pd.Timestamp("2026-03-02").date()
+    )
+    assert len(calls) == 3
+    assert calls[0][0] == pd.Timestamp("2026-01-15T00:00Z") - pd.Timedelta(minutes=1)
+    assert calls[0][1] == pd.Timestamp("2026-02-01T00:00Z")
+
+
 def test_dukascopy_refresh_stops_at_last_complete_utc_day(monkeypatch, tmp_path: Path):
     captured = {}
 
@@ -250,12 +370,12 @@ def test_first_send_is_one_connected_message_with_all_current_states(tmp_path: P
     ]
     assert len(client.messages) == 1
     message = client.messages[0]
-    assert message.startswith("📡 Signal Desk connected\n6-month trend · MNQ / MGC / MBT")
+    assert message.startswith("📡 Signal Desk connected\nS1 Breakout 20D · S2 Breakout 55D · S3 Trend 6M")
     assert "━━━━ OPEN TRADES ━━━━" in message
     assert "🟢 MNQ · LONG" in message and "500.0 pts below" in message
     assert "Entry: 25,000.0" in message
     assert "━━━━ NEW SIGNAL ━━━━" in message and "🔴 MGC · SHORT" in message
-    assert "⚠️ MBT: no fresh data, no signal today." in message
+    assert "⚠️ MBT · Trend 6M (swing): no fresh data, no signal today." in message
     assert "T07:00" not in message
     # Embedded NEW and STALE events were accepted by the CONNECTED delivery.
     assert shadow.deliver_telegram(records, tmp_path, now, client) == []
@@ -269,7 +389,7 @@ def test_connected_old_cap_exit_is_information_not_action():
         exit_reason="cap", net_R=.2,
     )
     message = shadow.connected_message([record], pd.Timestamp("2026-11-13 05:00Z"))
-    assert "ℹ️ MNQ: previous trade closed · 6-week limit · +0.20R" in message
+    assert "ℹ️ MNQ · Trend 6M (swing): previous trade closed · 6-week limit · +0.20R" in message
     assert "ACTION" not in message
 
 
@@ -282,7 +402,9 @@ def test_status_sends_snapshot_without_dedup_history(monkeypatch, tmp_path: Path
     record = _telegram_record("BTCUSDT", "MBT", state="STALE", stale="true")
     monkeypatch.setattr(shadow, "MARKETS", ("BTCUSDT",))
     monkeypatch.setattr(shadow.s1, "load_minutes", lambda *args, **kwargs: object())
-    monkeypatch.setattr(shadow, "analyze_market", lambda *args, **kwargs: (record, "MBT block"))
+    monkeypatch.setattr(shadow, "analyze_market_setups", lambda *args, **kwargs: [
+        {**record, "strategy": "S3", "setup": "S3", "strategy_name": "Trend 6M (swing)"}
+    ])
     client = FakeTelegram()
     output = shadow.run(
         tmp_path / "data", shadow_root, now=pd.Timestamp("2026-11-17 05:00Z"),
@@ -290,7 +412,7 @@ def test_status_sends_snapshot_without_dedup_history(monkeypatch, tmp_path: Path
     )
     assert "Telegram status accepted." in output
     assert client.messages[0].startswith("📡 Signal Desk status")
-    assert "⚠️ MBT: no fresh data, no signal today." in client.messages[0]
+    assert "⚠️ MBT · Trend 6M (swing): no fresh data, no signal today." in client.messages[0]
     assert history.read_bytes() == before
 
 
@@ -317,8 +439,8 @@ def test_later_events_are_sent_exactly_once(tmp_path: Path):
     assert "Enter: Tue 17 Nov, 09:00" in client.messages[0]
     assert "Confidence: low" in client.messages[0]
     assert "T07:00" not in client.messages[0]
-    assert "✅ MBT 🔴 SHORT closed: target hit, +2.90R" in client.messages[1]
-    assert "⚠️ MNQ: no fresh data, no signal today." in client.messages[2]
+    assert "✅ MBT 🔴 SHORT · Trend 6M (swing) closed: target hit, +2.90R" in client.messages[1]
+    assert "⚠️ MNQ · Trend 6M (swing): no fresh data, no signal today." in client.messages[2]
     assert shadow.deliver_telegram(records, tmp_path, now, client) == []
     assert len(client.messages) == 3
 
@@ -352,7 +474,7 @@ def test_cap_exit_is_a_manual_action(tmp_path: Path):
     )
     client = FakeTelegram()
     shadow.deliver_telegram([record], tmp_path, now, client)
-    assert client.messages == ["⏰ ACTION: close MNQ 🟢 LONG now\n"
+    assert client.messages == ["⏰ ACTION: close MNQ 🟢 LONG · Trend 6M (swing) now\n"
                                "6-week limit reached\nResult: +0.20R"]
 
 
@@ -396,8 +518,8 @@ def test_missed_run_sends_closed_exit_and_late_open_entry(tmp_path: Path):
         "Telegram: EXIT_SL accepted for USATECHIDXUSD.",
         "Telegram: LATE_ENTRY accepted for USATECHIDXUSD.",
     ]
-    assert "❌ MNQ 🟢 LONG closed: stop hit, -1.03R" in client.messages[0]
-    assert client.messages[1].startswith("⚠️ LATE ENTRY (bot was offline)\n🔴 MNQ · SHORT")
+    assert "❌ MNQ 🟢 LONG · Trend 6M (swing) closed: stop hit, -1.03R" in client.messages[0]
+    assert client.messages[1].startswith("⚠️ LATE ENTRY (bot was offline)\n🔴 MNQ · SHORT · Trend 6M (swing)")
     assert "You can enter now or skip." in client.messages[1]
     assert "Price now: 24,900.0" in client.messages[1]
     assert "Confidence: low" in client.messages[1]
@@ -424,7 +546,7 @@ def test_cap_warning_is_sent_once_before_next_run(tmp_path: Path):
     statuses = shadow.deliver_telegram([record], tmp_path, now, client)
     assert statuses == ["Telegram: CAP_WARNING accepted for XAUUSD."]
     assert len(client.messages) == 1
-    assert client.messages[0] == ("⏰ ACTION: close MGC 🟢 LONG by Wed 18 Nov, 00:00 Finland\n"
+    assert client.messages[0] == ("⏰ ACTION: close MGC 🟢 LONG · Trend 6M (swing) by Wed 18 Nov, 00:00 Finland\n"
                                   "6-week limit")
     assert shadow.deliver_telegram([record], tmp_path, now, client) == []
 
@@ -467,13 +589,16 @@ def test_send_failure_does_not_break_shadow_audit(monkeypatch, tmp_path: Path):
     )
     monkeypatch.setattr(shadow, "MARKETS", ("BTCUSDT",))
     monkeypatch.setattr(shadow.s1, "load_minutes", lambda *args, **kwargs: object())
-    monkeypatch.setattr(shadow, "analyze_market", lambda *args, **kwargs: (record, "MBT block"))
+    monkeypatch.setattr(shadow, "analyze_market_setups", lambda *args, **kwargs: [
+        {**record, "strategy": setup, "setup": setup,
+         "strategy_name": f"{shadow.STRATEGY_NAMES[setup]} (swing)"} for setup in shadow.SETUPS
+    ])
     output = shadow.run(
         tmp_path / "data", tmp_path / "shadow", now=now, refresh=False,
         send=True, telegram_client=FakeTelegram(failures=1),
     )
     audit = pd.read_csv(tmp_path / "shadow/swing_v1.csv")
-    assert len(audit) == 1 and audit.market.iloc[0] == "BTCUSDT"
+    assert len(audit) == 3 and set(audit.market) == {"BTCUSDT"}
     assert not (tmp_path / "shadow/telegram_sent.csv").exists()
     assert "will retry" in output
     assert "token-secret" not in output and "chat-secret" not in output
