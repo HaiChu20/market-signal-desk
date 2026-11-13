@@ -28,8 +28,6 @@ LOG_COLUMNS = (
     "plan_sl", "plan_tp", "refresh_error",
 )
 BACKTEST_LINE = "Backtest: DEV +0.16R per trade; final +0.04R on 88 trades."
-CONFIDENCE_LINE = ("Confidence: low (rule-based; DEV +0.16R per trade, "
-                   "final +0.04R on 88 trades).")
 TELEGRAM_COLUMNS = ("sent_at", "event_id", "market", "event_type", "reference")
 
 
@@ -282,66 +280,101 @@ def _event_id(market: str, event_type: str, reference: str) -> str:
     return f"{market}|{event_type}|{reference}"
 
 
-def _dual_time(value: str | pd.Timestamp) -> str:
+def _finland_time(value: str | pd.Timestamp) -> str:
     stamp = pd.Timestamp(value)
     stamp = stamp.tz_localize("UTC") if stamp.tzinfo is None else stamp.tz_convert("UTC")
-    return f"{stamp.isoformat()} UTC / {stamp.tz_convert('Europe/Helsinki').isoformat()} Helsinki"
+    local = stamp.tz_convert("Europe/Helsinki").strftime("%a %-d %b, %H:%M")
+    return f"{local} (Europe/Helsinki)"
+
+
+def _price(contract: str, value: float) -> str:
+    decimals = 0 if contract == "MBT" else 1
+    return f"{float(value):,.{decimals}f}"
+
+
+def _side_line(record: dict) -> str:
+    side = int(record["side"])
+    marker = "🟢" if side > 0 else "🔴"
+    return f"{marker} {record['contract']} · {_side_text(side)}"
+
+
+def _distance_line(label: str, record: dict, distance: float, *, level=None,
+                   from_fill: bool = False) -> str:
+    side = int(record["side"])
+    below = (label == "Stop" and side > 0) or (label == "Target" and side < 0)
+    direction = "below" if below else "above"
+    suffix = " your fill" if from_fill else ""
+    amount = _price(str(record["contract"]), distance)
+    if level is None:
+        return f"{label}: {amount} pts {direction}{suffix}"
+    return (f"{label}: {_price(str(record['contract']), float(level))} "
+            f"({amount} pts {direction})")
 
 
 def _open_text(record: dict) -> str:
     entry = float(record["entry_price"])
     stop = float(record["sl"])
     target = float(record["tp"])
-    return (f"{record['contract']} OPEN {_side_text(record['side'])}: entry {record['entry_ts']} "
-            f"at spot {entry:.2f}; SL {stop:.2f} ({abs(entry-stop):.2f} points); "
-            f"TP {target:.2f} ({abs(target-entry):.2f} points); "
-            f"unrealised {float(record['unrealised_R']):+.2f}R; "
-            f"30-session cap {record['cap_session_end']}.")
+    return "\n".join([
+        _side_line(record),
+        f"Since: {_finland_time(record['entry_ts'])}",
+        f"Entry: {_price(str(record['contract']), entry)}",
+        _distance_line("Stop", record, abs(entry-stop), level=stop),
+        _distance_line("Target", record, abs(target-entry), level=target),
+        f"Now: {float(record['unrealised_R']):+.2f}R",
+        f"Time limit: {_finland_time(record['cap_session_end'])}",
+    ])
 
 
-def _new_text(record: dict) -> str:
-    return (f"NEW {record['contract']} {_side_text(record['side'])}\n"
-            f"Entry: {_dual_time(record['plan_entry_ts'])} at the 07:00 UTC bar\n"
-            f"Spot reference: {float(record['reference_price']):.2f}\n"
-            f"SL: {float(record['sl_distance']):.2f} points; spot-equivalent "
-            f"{float(record['plan_sl']):.2f}\n"
-            f"TP: {float(record['tp_distance']):.2f} points; spot-equivalent "
-            f"{float(record['plan_tp']):.2f}\n"
-            "On futures, set SL and TP from the actual fill price using those distances.\n"
-            f"{CONFIDENCE_LINE}\n"
-            f"{BACKTEST_LINE}")
+def _new_text(record: dict, *, include_header: bool = True) -> str:
+    lines = [
+        _side_line(record),
+        f"Enter: {_finland_time(record['plan_entry_ts'])} (at the 07:00 UTC open)",
+        f"Price now: {_price(str(record['contract']), float(record['reference_price']))}",
+        _distance_line("Stop", record, float(record["sl_distance"]), from_fill=True),
+        _distance_line("Target", record, float(record["tp_distance"]), from_fill=True),
+        f"Example from price: stop {_price(str(record['contract']), float(record['plan_sl']))} "
+        f"· target {_price(str(record['contract']), float(record['plan_tp']))}",
+        "Confidence: low.",
+    ]
+    return "\n".join((["NEW SIGNAL"] if include_header else []) + lines)
 
 
 def _late_entry_text(record: dict) -> str:
     entry = float(record["entry_price"])
     stop = float(record["sl"])
     target = float(record["tp"])
-    return (f"LATE ENTRY {record['contract']} {_side_text(record['side'])}\n"
-            f"Original entry: {_dual_time(record['entry_ts'])} at spot {entry:.2f}\n"
-            f"Current spot: {float(record['_current_price']):.2f}; "
-            f"unrealised {float(record['unrealised_R']):+.2f}R\n"
-            f"SL: {abs(entry-stop):.2f} points; spot level {stop:.2f}\n"
-            f"TP: {abs(target-entry):.2f} points; spot level {target:.2f}\n"
-            "This trade is already open in the rule replay; you may enter late or skip it. "
-            "If entering, set SL and TP from the actual futures fill using the distances.\n"
-            f"{CONFIDENCE_LINE}\n{BACKTEST_LINE}")
+    return "\n".join([
+        "⚠️ LATE ENTRY (bot was offline)",
+        _side_line(record),
+        f"Since: {_finland_time(record['entry_ts'])}",
+        f"Entry: {_price(str(record['contract']), entry)}",
+        f"Price now: {_price(str(record['contract']), float(record['_current_price']))}",
+        _distance_line("Stop", record, abs(entry-stop), level=stop),
+        _distance_line("Target", record, abs(target-entry), level=target),
+        f"Now: {float(record['unrealised_R']):+.2f}R",
+        f"Time limit: {_finland_time(record['cap_session_end'])}",
+        "You can enter now or skip.",
+        "Confidence: low.",
+    ])
 
 
 def _exit_text(record: dict) -> str:
     reason = str(record["exit_reason"]).upper()
+    marker = "🟢" if int(record["side"]) > 0 else "🔴"
+    side = f"{record['contract']} {marker} {_side_text(record['side'])}"
     if reason == "CAP":
-        return (f"ACTION: {record['contract']} CAP EXIT — close the position manually now. "
-                f"Entry {record['entry_ts']}; model exit {record['exit_ts']}; "
-                f"result {float(record['net_R']):+.2f}R net.")
-    return (f"INFO: {record['contract']} EXIT {reason} at {record['exit_ts']}; "
-            f"result {float(record['net_R']):+.2f}R net. "
-            "The broker protective order fills this exit; no manual close action.")
+        return (f"⏰ ACTION: close {side} now\n"
+                f"6-week limit reached\n"
+                f"Result: {float(record['net_R']):+.2f}R")
+    label = "target hit" if reason == "TP" else "stop hit"
+    icon = "✅" if reason == "TP" else "❌"
+    return (f"{icon} {side} closed: {label}, {float(record['net_R']):+.2f}R\n"
+            "Your broker order closes it, nothing to do.")
 
 
 def _stale_text(record: dict) -> str:
-    detail = f" Refresh error: {record['refresh_error']}." if record.get("refresh_error") else ""
-    return (f"STALE {record['contract']}: data does not cover signal close "
-            f"{record['signal_close']}; no new plan issued.{detail}")
+    return f"⚠️ {record['contract']}: no fresh data, no signal today."
 
 
 def next_scheduled_run(now: pd.Timestamp) -> pd.Timestamp:
@@ -360,8 +393,10 @@ def _cap_warning_due(record: dict, now: pd.Timestamp) -> bool:
 
 
 def _cap_warning_text(record: dict) -> str:
-    return (f"ACTION: {record['contract']} reaches its 30-session cap before the next run. "
-            f"Close the position at {_dual_time(record['cap_session_end'])}.")
+    marker = "🟢" if int(record["side"]) > 0 else "🔴"
+    side = f"{record['contract']} {marker} {_side_text(record['side'])}"
+    return (f"⏰ ACTION: close {side} by {_finland_time(record['cap_session_end'])}\n"
+            "6-week limit")
 
 
 def _entry_was_announced(sent_ids: set[str], market: str, entry: str) -> bool:
@@ -392,7 +427,7 @@ def telegram_events(records: list[dict], now: pd.Timestamp, *,
                 reference = str(trade["entry_ts"])
                 exit_record = {"contract": record["contract"], "entry_ts": trade["entry_ts"],
                                "exit_ts": trade["exit_ts"], "exit_reason": trade["exit"],
-                               "net_R": trade["net_R"]}
+                               "net_R": trade["net_R"], "side": trade["side"]}
                 events.append({"event_id": _event_id(market, event_type, reference),
                                "market": market, "event_type": event_type, "reference": reference,
                                "text": _exit_text(exit_record)})
@@ -423,30 +458,47 @@ def telegram_events(records: list[dict], now: pd.Timestamp, *,
     if local.weekday() == 0:
         reference = local.date().isoformat()
         open_lines = [_open_text(record) for record in records if record.get("state") == "OPEN"]
-        text = (f"Swing v1 weekly heartbeat — {reference}\nOpen trades:\n" +
-                ("\n".join(open_lines) if open_lines else "None."))
+        text = ("Weekly check: bot running\n\n" +
+                ("\n\n".join(open_lines) if open_lines else "No open trades."))
         events.append({"event_id": _event_id("ALL", "HEARTBEAT", reference),
                        "market": "ALL", "event_type": "HEARTBEAT", "reference": reference,
                        "text": text})
     return events
 
 
-def connected_message(records: list[dict], now: pd.Timestamp | None = None) -> str:
-    lines = ["Swing v1 CONNECTED", BACKTEST_LINE]
+def connected_message(records: list[dict], now: pd.Timestamp | None = None, *,
+                      header: str = "Signal Desk connected") -> str:
+    open_blocks = []
+    new_blocks = []
+    info_lines = []
     for record in records:
         state = str(record.get("state", "UNKNOWN"))
         if state == "OPEN":
-            lines.append(_open_text(record))
+            open_blocks.append(_open_text(record))
         elif state == "EXITED":
-            lines.append(f"{record['contract']} current state: FLAT; {_exit_text(record)}")
-        else:
-            lines.append(f"{record['contract']} current state: {state}.")
+            reason = str(record.get("exit_reason", "")).upper()
+            label = {"TP": "target hit", "SL": "stop hit", "CAP": "6-week limit"}.get(
+                reason, "closed")
+            info_lines.append(f"ℹ️ {record['contract']}: previous trade closed · {label} "
+                              f"· {float(record['net_R']):+.2f}R")
+        elif (state == "FLAT" and not record.get("plan_entry_ts") and
+              str(record.get("stale", "")).lower() != "true"):
+            info_lines.append(f"ℹ️ {record['contract']}: flat")
         if record.get("plan_entry_ts") and str(record.get("stale", "")).lower() != "true":
-            lines.append(_new_text(record))
+            new_blocks.append(_new_text(record, include_header=False))
         if str(record.get("stale", "")).lower() == "true":
-            lines.append(_stale_text(record))
+            info_lines.append(_stale_text(record))
         if now is not None and _cap_warning_due(record, now):
-            lines.append(_cap_warning_text(record))
+            info_lines.append(_cap_warning_text(record))
+    lines = [f"📡 {header}",
+             "6-month trend · MNQ / MGC / MBT",
+             "Confidence: low (backtest +0.16R, final test +0.04R per trade).",
+             "", "━━━━ OPEN TRADES ━━━━", ""]
+    lines.append("\n\n".join(open_blocks) if open_blocks else "No open trades.")
+    lines += ["", "━━━━ NEW SIGNAL ━━━━", ""]
+    lines.append("\n\n".join(new_blocks) if new_blocks else "No new signals.")
+    if info_lines:
+        lines += ["", "\n\n".join(info_lines)]
     return "\n".join(lines)
 
 
@@ -541,15 +593,25 @@ def deliver_telegram(records: list[dict], shadow_root: Path, now: pd.Timestamp,
 def test_telegram(client=None) -> str:
     client = client or TelegramClient()
     try:
-        client.send_message("Swing v1 Telegram connection test — delivery OK.")
+        client.send_message("📡 Signal Desk connection test\nTelegram delivery works.")
     except Exception as exc:
         raise RuntimeError(f"Telegram test failed: {_redacted_error(exc, client)}") from None
     return "Telegram connection test accepted."
 
 
+def status_telegram(records: list[dict], now: pd.Timestamp, client=None) -> str:
+    """Send a snapshot without reading or writing Telegram dedup history."""
+    client = client or TelegramClient()
+    try:
+        client.send_message(connected_message(records, now, header="Signal Desk status"))
+    except Exception as exc:
+        raise RuntimeError(f"Telegram status failed: {_redacted_error(exc, client)}") from None
+    return "Telegram status accepted."
+
+
 def run(data_root: Path = Path("data"), shadow_root: Path = Path("data/shadow"), *,
         now: pd.Timestamp | None = None, refresh: bool = True,
-        send: bool = False, telegram_client=None) -> str:
+        send: bool = False, status: bool = False, telegram_client=None) -> str:
     now = pd.Timestamp.now(tz="UTC") if now is None else pd.Timestamp(now)
     now = now.tz_localize("UTC") if now.tzinfo is None else now.tz_convert("UTC")
     records, blocks = [], []
@@ -589,10 +651,11 @@ def run(data_root: Path = Path("data"), shadow_root: Path = Path("data/shadow"),
                "\n\n".join(blocks) + f"\n\nAudit rows appended: {appended}.")
     shadow_root.mkdir(parents=True, exist_ok=True)
     (shadow_root / "swing_v1_latest.txt").write_text(message + "\n")
-    if send:
+    if send or status:
         client = telegram_client or TelegramClient()
         try:
-            statuses = deliver_telegram(records, shadow_root, now, client)
+            statuses = ([status_telegram(records, now, client)] if status else
+                        deliver_telegram(records, shadow_root, now, client))
         except Exception as exc:
             statuses = [f"Telegram delivery failed; audit preserved: {_redacted_error(exc, client)}"]
         if statuses:
@@ -607,13 +670,16 @@ def main() -> None:
     parser.add_argument("--no-refresh", action="store_true", help="use local bars only")
     delivery = parser.add_mutually_exclusive_group()
     delivery.add_argument("--send", action="store_true", help="send deduplicated Telegram events")
+    delivery.add_argument("--status", action="store_true",
+                          help="send the current snapshot without changing send history")
     delivery.add_argument("--test-telegram", action="store_true",
                           help="send one Telegram connection test and exit")
     args = parser.parse_args()
     if args.test_telegram:
         print(test_telegram())
         return
-    print(run(args.data_root, args.shadow_root, refresh=not args.no_refresh, send=args.send))
+    print(run(args.data_root, args.shadow_root, refresh=not args.no_refresh,
+              send=args.send, status=args.status))
 
 
 if __name__ == "__main__":
