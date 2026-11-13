@@ -341,19 +341,46 @@ def audit_labels(data_root: Path, labels_root: Path, samples: int=30, seed: int=
     return {"samples":len(records),"passed":sum(row["ok"] for row in records),"rows":records}
 
 
-def audit_deadline_overruns(labels_root: Path, symbols=SYMBOLS) -> list[dict]:
-    """Count stored exits after their declared maximum-hold deadline."""
+def audit_deadline_execution(data_root: Path, labels_root: Path, symbols=SYMBOLS) -> list[dict]:
+    """Verify that deadlines exit on the first executable source bar.
+
+    ``exit_ts > deadline_ts`` is valid across weekends and maintenance gaps.
+    It is defective only when a non-time exit occurs after the deadline, or a
+    time exit skips an available bar at/after the deadline.
+    """
     rows=[]
     for symbol in symbols:
-        total=overruns=0
+        total=late=correct_delayed=non_time_late=skipped_first=0
         for path in sorted((labels_root/symbol).glob("*.parquet")):
-            part=pd.read_parquet(path,columns=["exit_ts","deadline_ts"])
+            part=pd.read_parquet(path,columns=["exit_ts","deadline_ts","exit_reason"])
             exit_ts=pd.to_datetime(part.exit_ts,utc=True).astype("datetime64[ns, UTC]")
             deadline=pd.to_datetime(part.deadline_ts,utc=True).astype("datetime64[ns, UTC]")
             dev=exit_ts.lt(DEV_END)
-            total+=int(dev.sum());overruns+=int((dev & exit_ts.gt(deadline)).sum())
-        rows.append({"symbol":symbol,"labels":total,"exit_after_deadline":overruns,
-                     "share":overruns/total if total else np.nan})
+            after=dev & exit_ts.gt(deadline)
+            not_time=after & part.exit_reason.ne("time")
+            total+=int(dev.sum());late+=int(after.sum());non_time_late+=int(not_time.sum())
+            time_late=after & ~not_time
+            if time_late.any():
+                month=pd.Period(path.stem,freq="M")
+                left=pd.Timestamp(month.start_time,tz="UTC")
+                right=min(DEV_END,pd.Timestamp((month+1).end_time,tz="UTC")+pd.Timedelta(days=8))
+                bars=_read_range(data_root/"bars"/SOURCE[symbol]/symbol,left,right,["ts"])
+                times=pd.to_datetime(bars.ts,utc=True).to_numpy(dtype="datetime64[ns]")
+                deadlines=deadline[time_late].to_numpy(dtype="datetime64[ns]")
+                exits=exit_ts[time_late].to_numpy(dtype="datetime64[ns]")
+                indices=np.searchsorted(times,deadlines)
+                valid=indices<len(times)
+                first=np.full(len(indices),np.datetime64("NaT","ns"),dtype="datetime64[ns]")
+                first[valid]=times[indices[valid]]
+                skipped=valid & (first<exits)
+                skipped_first+=int(skipped.sum())
+                correct_delayed+=int((valid & (first==exits)).sum())
+        defective=non_time_late+skipped_first
+        rows.append({"symbol":symbol,"labels":total,"exit_after_deadline":late,
+                     "correct_first_bar_after_gap":correct_delayed,
+                     "non_time_after_deadline":non_time_late,
+                     "time_exit_skipped_first_bar":skipped_first,
+                     "defective":defective,"defective_share":defective/total if total else np.nan})
     return rows
 
 
@@ -402,12 +429,16 @@ def write_report(output: Path, family_audit: list[dict], label_audit: dict,
     lines=["# Phase 2 DEV information and correctness audit","",
         "**DEV only: all decisions, targets and label ends are before 2023-01-01. Test and Final were not loaded. Analysis only; no rules, thresholds or ledger rows were changed.**","",
         f"Runtime: {runtime/60:.2f} minutes; peak RSS: {peak_rss_gib:.2f} GiB.","",
-        "## Label correctness","",f"Direct bar-path recomputation: {label_audit['passed']}/{label_audit['samples']} randomly selected labels matched outcome, entry/exit timestamps and prices, gross R and net R. The recomputation used the nanosecond-normalized pure-Python reference and the stored declared deadline independently; these random rows resolved before the deadline and therefore did **not** test the subsequently discovered max-hold timestamp-unit bug.",""]
+        "## Label correctness","",f"Direct bar-path recomputation: {label_audit['passed']}/{label_audit['samples']} randomly selected labels matched outcome, entry/exit timestamps and prices, gross R and net R. The recomputation used the nanosecond-normalized pure-Python reference and the stored declared deadline independently; these random rows resolved before the deadline, so the sample alone did not validate delayed deadline fills.",""]
     if deadline_audit:
-        lines += ["**Known label defect:** the wide-label Rust input converted `datetime64[us]` timestamps as if they were nanoseconds, so some CFD time deadlines did not fire. The following DEV scan is `exit_ts > deadline_ts`; results using affected CFD labels are contaminated and must be rerun after the owning worker rebuilds them. Forward-return ICs below are unaffected because they use nanosecond NumPy timestamps plus `searchsorted`, not the label kernel.","",
-                  "| Market | DEV labels | Exit after deadline | Share |","|---|---:|---:|---:|"]
+        defects=sum(row["defective"] for row in deadline_audit)
+        conclusion=("The corrected executable-bar scan found no defects: `labels_wide_v1` deadlines are enforced correctly. Late CFD time exits are valid fills at the first bar after a weekend or maintenance gap; the timestamp-unit bug was in the separate wide-v1 event-outcome path and random benchmark. Family/model results are not contaminated by the grid-label deadline logic."
+                    if defects==0 else
+                    f"The corrected scan found {defects:,} defective deadline fills; affected results require rebuilding.")
+        lines += [f"**Deadline execution audit:** {conclusion}","",
+                  "| Market | DEV labels | Exit after deadline | Correct first bar after gap | Non-time after deadline | Time exit skipped first bar | Defective |","|---|---:|---:|---:|---:|---:|---:|"]
         for row in deadline_audit:
-            lines.append(f"| {row['symbol']} | {row['labels']:,} | {row['exit_after_deadline']:,} | {row['share']:.4%} |")
+            lines.append(f"| {row['symbol']} | {row['labels']:,} | {row['exit_after_deadline']:,} | {row['correct_first_bar_after_gap']:,} | {row['non_time_after_deadline']:,} | {row['time_exit_skipped_first_bar']:,} | {row['defective']:,} |")
         lines.append("")
     lines += [
         "## Feature coverage and model inputs","",
@@ -463,7 +494,7 @@ def run(data_root: Path, labels_root: Path, output: Path, *, symbols=SYMBOLS,
     end=pd.Timestamp(end);end=end.tz_localize("UTC") if end.tzinfo is None else end.tz_convert("UTC")
     if end>DEV_END:raise ValueError("Audit cannot load 2023+ data")
     label=audit_labels(data_root,labels_root,label_samples,symbols=symbols)
-    deadline_audit=audit_deadline_overruns(labels_root,symbols=symbols)
+    deadline_audit=audit_deadline_execution(data_root,labels_root,symbols=symbols)
     family_rows=[]
     if not skip_family_audit:
         for family in families:

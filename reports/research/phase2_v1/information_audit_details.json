@@ -462,31 +462,51 @@
       "symbol": "USATECHIDXUSD",
       "labels": 4561550,
       "exit_after_deadline": 50930,
-      "share": 0.011165064506582192
+      "correct_first_bar_after_gap": 50930,
+      "non_time_after_deadline": 0,
+      "time_exit_skipped_first_bar": 0,
+      "defective": 0,
+      "defective_share": 0.0
     },
     {
       "symbol": "USA500IDXUSD",
       "labels": 4453650,
       "exit_after_deadline": 90309,
-      "share": 0.020277525175979253
+      "correct_first_bar_after_gap": 90309,
+      "non_time_after_deadline": 0,
+      "time_exit_skipped_first_bar": 0,
+      "defective": 0,
+      "defective_share": 0.0
     },
     {
       "symbol": "XAUUSD",
       "labels": 17923250,
       "exit_after_deadline": 250011,
-      "share": 0.013948976887562244
+      "correct_first_bar_after_gap": 250011,
+      "non_time_after_deadline": 0,
+      "time_exit_skipped_first_bar": 0,
+      "defective": 0,
+      "defective_share": 0.0
     },
     {
       "symbol": "BTCUSDT",
       "labels": 5253450,
       "exit_after_deadline": 0,
-      "share": 0.0
+      "correct_first_bar_after_gap": 0,
+      "non_time_after_deadline": 0,
+      "time_exit_skipped_first_bar": 0,
+      "defective": 0,
+      "defective_share": 0.0
     },
     {
       "symbol": "ETHUSDT",
       "labels": 5253450,
       "exit_after_deadline": 0,
-      "share": 0.0
+      "correct_first_bar_after_gap": 0,
+      "non_time_after_deadline": 0,
+      "time_exit_skipped_first_bar": 0,
+      "defective": 0,
+      "defective_share": 0.0
     }
   ],
   "family_audit": [
