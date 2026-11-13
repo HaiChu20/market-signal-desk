@@ -5,6 +5,7 @@ import argparse
 import csv
 import hashlib
 import json
+from dataclasses import dataclass
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -29,6 +30,18 @@ COST = {"MNQ": (.25, 1.25, .25, 91., .03),
         "MBT": (10., 60., 5., 30., .08)}
 
 
+@dataclass(frozen=True)
+class Period:
+    """Explicit data and scoring bounds; the default is the frozen DEV period."""
+
+    data_start: pd.Timestamp | None = None
+    score_start: pd.Timestamp | None = None
+    end: pd.Timestamp | None = CUT
+
+
+DEV_PERIOD = Period()
+
+
 def ny_day_end(ts: pd.DatetimeIndex) -> pd.DatetimeIndex:
     """Each minute belongs to the first New York 17:00 close after its open."""
     local = ts.tz_convert(NY)
@@ -44,44 +57,56 @@ def globex(ts: pd.DatetimeIndex) -> np.ndarray:
     return np.asarray(((wd < 5) & (hour < 17)) | ((wd < 4) & (hour >= 18)) | ((wd == 6) & (hour >= 18)))
 
 
-def load_minutes(root: Path, symbol: str) -> pd.DataFrame:
+def load_minutes(root: Path, symbol: str, *, period: Period = DEV_PERIOD) -> pd.DataFrame:
     """Use the project's existing Dukascopy and catalog minute loaders."""
     source = "binance_spot" if symbol.endswith("USDT") else "dukascopy"
     directory = root / "bars" / source / symbol
-    paths = sorted(p for p in directory.glob("[0-9][0-9][0-9][0-9]-[0-9][0-9].parquet") if p.stem < "2023-01")
+    paths = sorted(directory.glob("[0-9][0-9][0-9][0-9]-[0-9][0-9].parquet"))
+    if period.data_start is not None:
+        paths = [p for p in paths if p.stem >= period.data_start.strftime("%Y-%m")]
+    if period.end is not None:
+        paths = [p for p in paths if p.stem < period.end.strftime("%Y-%m")]
     if not paths:
         raise FileNotFoundError(directory)
     parts = []
     for path in paths:
         start = pd.Timestamp(path.stem + "-01", tz="UTC")
         end = start + pd.offsets.MonthBegin(1)
-        # Both loaders include their end month/day. Never open a 2023 file.
+        # Both loaders include their end month/day.
         if source == "dukascopy":
             part = load_dukascopy(symbol, start, end-pd.Timedelta(days=1), root=root / "bars" / source)
         else:
             part = _load_parquet(symbol, start, end-pd.Timedelta(days=1), root / "bars" / source)
-        part = part[(part.ts >= start) & (part.ts < end) & (part.ts < CUT)]
+        keep = (part.ts >= start) & (part.ts < end)
+        if period.data_start is not None:
+            keep &= part.ts >= period.data_start
+        if period.end is not None:
+            keep &= part.ts < period.end
+        part = part[keep]
         if len(part):
             cols = ["ts", *[f"{side}_{field}" for side in ("bid", "ask") for field in "ohlc"]]
             part = part[cols]
             part[cols[1:]] = part[cols[1:]].astype("float32")
             parts.append(part)
     bars = pd.concat(parts, ignore_index=True).sort_values("ts").drop_duplicates("ts").reset_index(drop=True)
-    if bars.ts.max() >= CUT:
-        raise AssertionError("DEV cutoff violated")
+    if period.end is not None and bars.ts.max() >= period.end:
+        message = "DEV cutoff violated" if period == DEV_PERIOD else "period end violated"
+        raise AssertionError(message)
     return bars
 
 
-def daily_bars(bars: pd.DataFrame) -> pd.DataFrame:
+def daily_bars(bars: pd.DataFrame, *, period: Period = DEV_PERIOD) -> pd.DataFrame:
     ts = pd.DatetimeIndex(pd.to_datetime(bars.ts, utc=True))
-    if len(ts) == 0 or ts.max() >= CUT:
-        raise ValueError("no DEV-only minute bars")
+    if len(ts) == 0 or (period.end is not None and ts.max() >= period.end):
+        message = "no DEV-only minute bars" if period == DEV_PERIOD else "minute bars outside requested period"
+        raise ValueError(message)
     ohlc = np.column_stack([(bars[f"bid_{c}"].to_numpy(float) + bars[f"ask_{c}"].to_numpy(float)) / 2 for c in "ohlc"])
     frame = pd.DataFrame(ohlc, columns=list("ohlc"))
     frame["end"] = ny_day_end(ts)
     daily = frame.groupby("end", sort=True).agg(o=("o", "first"), h=("h", "max"), l=("l", "min"), c=("c", "last"))
-    # A daily bar is complete only if its closing instant precedes DEV end.
-    daily = daily[daily.index < CUT].reset_index()
+    # A daily bar is complete only if its closing instant is covered by data.
+    complete_through = period.end if period.end is not None else ts.max() + pd.Timedelta(minutes=1)
+    daily = daily[daily.index < complete_through].reset_index()
     prev = daily.c.shift(1)
     tr = pd.concat([daily.h-daily.l, (daily.h-prev).abs(), (daily.l-prev).abs()], axis=1).max(axis=1)
     daily["atr"] = tr.rolling(20, min_periods=20).mean()
@@ -188,10 +213,12 @@ def _summary(rows: list[dict], years: float | None = None) -> dict:
 
 
 def evaluate_market(bars: pd.DataFrame, symbol: str, *, sensitivity: bool = False,
-                    primary_only: bool = False) -> tuple[list[dict], dict]:
+                    primary_only: bool = False,
+                    period: Period = DEV_PERIOD,
+                    setups: tuple[str, ...] = SETUPS) -> tuple[list[dict], dict]:
     ts = pd.DatetimeIndex(pd.to_datetime(bars.ts, utc=True))
     first_year = int(ts[0].tz_convert(NY).year)
-    daily = daily_bars(bars)
+    daily = daily_bars(bars, period=period)
     signal = signals(daily, first_year)
     prices = np.column_stack([(bars[f"bid_{c}"].to_numpy(float) + bars[f"ask_{c}"].to_numpy(float))/2 for c in "ohlc"])
     mask = globex(ts)
@@ -202,7 +229,7 @@ def evaluate_market(bars: pd.DataFrame, symbol: str, *, sensitivity: bool = Fals
     contract = (TRADED | EVIDENCE)[symbol]
     rows = []
     drops = {"unresolved_at_cutoff": 0, "missing_entry": 0}
-    for setup in SETUPS:
+    for setup in setups:
         for sl in ((2.,) if primary_only else SL):
             for tp in ((3.,) if primary_only else TP):
                 next_free = -1
@@ -226,7 +253,7 @@ def evaluate_market(bars: pd.DataFrame, symbol: str, *, sensitivity: bool = Fals
                     while cap < len(ts) and not mask[cap]:
                         cap += 1
                     out = exit_trade(ts, prices, mask, ei, side, stop, target, cap)
-                    if out is None or ts[out[0]] >= CUT:
+                    if out is None or (period.end is not None and ts[out[0]] >= period.end):
                         drops["unresolved_at_cutoff"] += 1
                         next_free = len(ts)
                         continue
@@ -236,6 +263,8 @@ def evaluate_market(bars: pd.DataFrame, symbol: str, *, sensitivity: bool = Fals
                     gross = side*(fill-entry)/risk
                     fee = cost_r(contract, symbol, entry, risk, side, days, reason)
                     no_carry_fee = cost_r(contract, symbol, entry, risk, side, days, reason, carry=False)
+                    if period.score_start is not None and ts[ei] < period.score_start:
+                        continue
                     rows.append({"market": symbol, "setup": setup, "sl_atr": sl, "tp_R": tp,
                                  "entry_ts": ts[ei].isoformat(), "exit_ts": ts[xi].isoformat(),
                                  "year": ts[ei].year, "hold_days": days, "exit": reason,
