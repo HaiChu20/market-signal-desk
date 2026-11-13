@@ -495,3 +495,4 @@ Append-only notes from the autonomous review loop while the user sleeps.
   - Reading: the result does not falsify the small DEV edge (+0.16R, about 1 SE away), but gives no confirmation; it rests on gold's 2025 rally.
   - Per protocol, next is the shadow-mode daily bot (no Telegram sends without approval, no real money).
 - 2026-11-13 ~19:40: sent the swing v1 shadow daily job (no Telegram, no scheduling) to 2f14d55b.
+- 2026-11-13 ~20:30: reviewed shadow job 3fe5dcf (438 passed). Sent back three fixes: (1) a stale row must not block a later real plan in dedup; (2) the MGC refresh stall: Dukascopy day files for the current UTC day don't exist yet, so refresh only through yesterday, with a 10-min wall-clock limit per market; (3) intended run time ~05:00 UTC, before the 07:00 UTC entry. Allowed one live smoke against the main data root.
