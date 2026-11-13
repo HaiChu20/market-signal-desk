@@ -507,3 +507,4 @@ Append-only notes from the autonomous review loop while the user sleeps.
   - MGC short exited at the cap, +1.77R, with a new SHORT plan;
   - MBT open LONG from 2026-11-13.
   Writes go to data/shadow (gitignored). No scheduling installed and no Telegram; both need user approval.
+- 2026-11-13 ~16:15 UTC: the user APPROVED real Telegram sends for the swing job: first a connected message with open trades, then new signals. Assigned Telegram delivery plus a launchd template (not installed) to 2f14d55b. Credentials come only via uv --env-file .env; nobody reads .env.
