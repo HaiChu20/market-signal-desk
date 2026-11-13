@@ -1,0 +1,26 @@
+{
+  "setups": 36698,
+  "labels": 550470,
+  "symbols": {
+    "XAUUSD": {
+      "setups": 17015,
+      "labels": 255225
+    },
+    "USATECHIDXUSD": {
+      "setups": 3830,
+      "labels": 57450
+    },
+    "USA500IDXUSD": {
+      "setups": 4187,
+      "labels": 62805
+    },
+    "BTCUSDT": {
+      "setups": 5861,
+      "labels": 87915
+    },
+    "ETHUSDT": {
+      "setups": 5805,
+      "labels": 87075
+    }
+  }
+}
