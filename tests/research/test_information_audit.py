@@ -8,6 +8,7 @@ from msd.research.information_audit import (
     DEV_END,
     _asof_features,
     _cost_atr,
+    audit_deadline_execution,
     _effective_daily_dvol,
     run,
 )
@@ -62,3 +63,23 @@ def test_asof_join_is_causal_under_future_perturbation(tmp_path: Path):
 def test_audit_rejects_test_period_before_reading_data(tmp_path: Path):
     with pytest.raises(ValueError, match="cannot load 2023"):
         run(tmp_path, tmp_path, tmp_path / "out.md", end=DEV_END + pd.Timedelta(days=1))
+
+
+def test_deadline_audit_distinguishes_gaps_from_skipped_bars(tmp_path: Path):
+    target=tmp_path / "labels" / "USATECHIDXUSD"
+    target.mkdir(parents=True)
+    pd.DataFrame({
+        "exit_ts": pd.to_datetime(["2022-01-01T10:02Z", "2022-01-01T10:02Z",
+                                    "2022-01-01T10:02Z", "2022-01-01T10:00Z"]),
+        "deadline_ts": pd.to_datetime(["2022-01-01T10:01Z", "2022-01-01T10:00Z",
+                                        "2022-01-01T10:01Z", "2022-01-01T10:00Z"]),
+        "exit_reason": ["time","time","tp","time"],
+    }).to_parquet(target / "2022-01.parquet",index=False)
+    bars=tmp_path / "bars" / "dukascopy" / "USATECHIDXUSD"
+    bars.mkdir(parents=True)
+    pd.DataFrame({"ts":pd.to_datetime(["2022-01-01T10:00Z", "2022-01-01T10:02Z",
+                                        "2022-01-01T10:04Z"])}).to_parquet(bars / "2022-01.parquet",index=False)
+    result=audit_deadline_execution(tmp_path,tmp_path/"labels",symbols=("USATECHIDXUSD",))[0]
+    assert result == {"symbol":"USATECHIDXUSD","labels":4,"exit_after_deadline":3,
+        "correct_first_bar_after_gap":1,"non_time_after_deadline":1,
+        "time_exit_skipped_first_bar":1,"defective":2,"defective_share":0.5}

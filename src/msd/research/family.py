@@ -438,7 +438,9 @@ def write_summary(output: Path) -> Path:
 
 def run_one(family: str, symbol: str, data_root: Path, labels_root: Path,
             output: Path, *, ledger: Path = Path("reports/trials.csv"),
-            model_kind="lightgbm", random_seeds=200, append_ledger=True) -> dict:
+            model_kind="lightgbm", random_seeds=200, append_ledger=True,
+            persist_signals_root: Path | None = None,
+            compute_random_benchmark: bool = True) -> dict:
     if symbol not in SYMBOLS:
         raise ValueError(symbol)
     started = time.perf_counter()
@@ -455,6 +457,15 @@ def run_one(family: str, symbol: str, data_root: Path, labels_root: Path,
     manifest.extend(feature_manifest)
     evaluated, cpcv = cpcv_oof(labels, anchor, features, spec, model_kind=model_kind)
     signals = gate_open_signals(_choose_monthly(evaluated))
+    if persist_signals_root is not None:
+        persist_signals_root.mkdir(parents=True,exist_ok=True)
+        target=persist_signals_root/f"{family}_{symbol}.parquet"
+        temporary=target.with_suffix(".parquet.part")
+        keep=[column for column in ("candidate_id","event_key","sym","ts","known_at","side",
+            "price","sl","tp","deadline_ts","net_R","p","p0","p_uncertainty","sl_atr",
+            "tp_r","TP_R","SL_R","planned_risk") if column in signals]
+        signals[keep].to_parquet(temporary,index=False,compression="zstd")
+        temporary.replace(target)
     report_candidates = evaluated[["candidate_id", "event_key", "sym", "known_at", "label_end_ts",
                                    "tp_first", "p", "p0", "net_R"]].copy()
     pooled = metrics(signals, report_candidates)
@@ -465,7 +476,10 @@ def run_one(family: str, symbol: str, data_root: Path, labels_root: Path,
     pooled["beats_cell_base_and_positive_net"] = bool(
         (pooled["brier_skill_vs_cell_base_rate"] or 0) > 0 and (pooled.get("net_avg_R") or 0) > 0
     )
-    percentile, random_n, bar_manifest = random_direction(signals, data_root, seeds=random_seeds)
+    if compute_random_benchmark:
+        percentile, random_n, bar_manifest = random_direction(signals, data_root, seeds=random_seeds)
+    else:
+        percentile,random_n,bar_manifest=None,0,[]
     manifest.extend(bar_manifest)
     pooled["random_direction_percentile"] = percentile
     pooled["random_direction_matched_signals"] = random_n
@@ -520,11 +534,16 @@ def main() -> None:
     parser.add_argument("--model-kind", choices=("lightgbm", "logistic"), default="lightgbm")
     parser.add_argument("--random-seeds", type=int, default=200)
     parser.add_argument("--no-ledger", action="store_true")
+    parser.add_argument("--persist-signals-root",type=Path,
+                        help="opt-in versioned output for selected OOF signals")
+    parser.add_argument("--skip-random-benchmark",action="store_true")
     args = parser.parse_args()
     labels_root = args.labels_root or args.data_root / "labels_wide_v1"
     job = run_one(args.family, args.symbol, args.data_root, labels_root, args.output,
                   ledger=args.ledger, model_kind=args.model_kind,
-                  random_seeds=args.random_seeds, append_ledger=not args.no_ledger)
+                  random_seeds=args.random_seeds, append_ledger=not args.no_ledger,
+                  persist_signals_root=args.persist_signals_root,
+                  compute_random_benchmark=not args.skip_random_benchmark)
     print(json.dumps({key: job[key] for key in ("family", "symbol", "runtime_s",
                                                 "peak_rss_gib", "candidates", "signals")}), flush=True)
 

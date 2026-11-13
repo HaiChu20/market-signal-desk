@@ -6,7 +6,17 @@ Runtime: 45.33 minutes; peak RSS: 9.32 GiB.
 
 ## Label correctness
 
-Direct bar-path recomputation: 30/30 labels matched outcome, entry/exit timestamps and prices, gross R and net R.
+Direct bar-path recomputation: 30/30 randomly selected labels matched outcome, entry/exit timestamps and prices, gross R and net R. The recomputation used the nanosecond-normalized pure-Python reference and the stored declared deadline independently; these random rows resolved before the deadline, so the sample alone did not validate delayed deadline fills.
+
+**Deadline execution audit:** The corrected executable-bar scan found no defects: `labels_wide_v1` deadlines are enforced correctly. Late CFD time exits are valid fills at the first bar after a weekend or maintenance gap; the timestamp-unit bug was in the separate wide-v1 event-outcome path and random benchmark. Family/model results are not contaminated by the grid-label deadline logic.
+
+| Market | DEV labels | Exit after deadline | Correct first bar after gap | Non-time after deadline | Time exit skipped first bar | Defective |
+|---|---:|---:|---:|---:|---:|---:|
+| USATECHIDXUSD | 4,561,550 | 50,930 | 50,930 | 0 | 0 | 0 |
+| USA500IDXUSD | 4,453,650 | 90,309 | 90,309 | 0 | 0 | 0 |
+| XAUUSD | 17,923,250 | 250,011 | 250,011 | 0 | 0 | 0 |
+| BTCUSDT | 5,253,450 | 0 | 0 | 0 | 0 | 0 |
+| ETHUSDT | 5,253,450 | 0 | 0 | 0 | 0 | 0 |
 
 ## Feature coverage and model inputs
 
