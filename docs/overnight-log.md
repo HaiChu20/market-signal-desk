@@ -494,3 +494,4 @@ Append-only notes from the autonomous review loop while the user sleeps.
   - 13 main-version trades were still open at the data end.
   - Reading: the result does not falsify the small DEV edge (+0.16R, about 1 SE away), but gives no confirmation; it rests on gold's 2025 rally.
   - Per protocol, next is the shadow-mode daily bot (no Telegram sends without approval, no real money).
+- 2026-11-13 ~19:40: sent the swing v1 shadow daily job (no Telegram, no scheduling) to 2f14d55b.
