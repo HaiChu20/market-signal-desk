@@ -531,3 +531,8 @@ Append-only notes from the autonomous review loop while the user sleeps.
 - Ran --check-inputs, --generate-events (13 s), --run-final-once (2 s) once. Logs data/logs/final_v2_donchian*.log.
 - Verdict DROP: 608 trades, -0.067R, t -1.57, PF 0.86, random percentile 28.5. NQ -0.11, SPX -0.12, gold +0.17, BTC -0.16; 2025 -0.11, 2026 -0.02.
 - Intraday rule is not deployed; Capital.com feed and msd-intraday service not needed.
+
+## 2026-11-13: labelled S1/S2/S3 swing bot + cPouta setup merged
+- Merged 54d4f37 (acc5261): independent S1/S2/S3 replays, strategy labels, legacy S3 ids kept, S1/S2 rollout INFO, 620-day bootstrap, scripts/setup_cpouta.sh, systemd timer 07:00 Europe/Helsinki, docs/deploy_cpouta.md.
+- Supervisor fix: removed the Rust build step (swing bot imports fine without msd._msd_kernels; a fresh VM has no rustc) and the mktemp/rm temp-dir cleanup (units written with sudo tee).
+- User approved pushing main to the public GitHub repo for the VM clone (scan found no secrets); user may make it private later.
