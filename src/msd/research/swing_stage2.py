@@ -75,10 +75,11 @@ def _bar_arrays(bars: pd.DataFrame) -> tuple[pd.DatetimeIndex, np.ndarray, np.nd
     return ts, prices, mask, sessions, closes, first
 
 
-def market_opportunities(bars: pd.DataFrame, market: str) -> tuple[list[dict], dict]:
+def market_opportunities(bars: pd.DataFrame, market: str, *,
+                         period: s1.Period = s1.DEV_PERIOD) -> tuple[list[dict], dict]:
     """Label all S3 signal-day entry opportunities, even while another trade is open."""
     ts, prices, mask, sessions, closes, first = _bar_arrays(bars)
-    daily = s1.daily_bars(bars)
+    daily = s1.daily_bars(bars, period=period)
     signal = s1.signals(daily, int(ts[0].tz_convert(s1.NY).year))
     features = daily_features(daily)
     contract = (s1.TRADED | s1.EVIDENCE)[market]
@@ -108,7 +109,7 @@ def market_opportunities(bars: pd.DataFrame, market: str) -> tuple[list[dict], d
             risk = float(row.atr*sl)
             out = s1.exit_trade(ts, prices, mask, ei, side, entry-side*risk,
                                 entry+side*risk*tp, cap)
-            if out is None or ts[out[0]] >= s1.CUT:
+            if out is None or (period.end is not None and ts[out[0]] >= period.end):
                 labels.append(None)
                 drops["unresolved_option"] += 1
                 continue
@@ -142,11 +143,12 @@ def make_training_rows(opportunities: list[dict]) -> tuple[np.ndarray, np.ndarra
             np.asarray(exits, dtype="datetime64[ns]"))
 
 
-def walk_forward(traded: dict[str,list[dict]], evidence: dict[str,list[dict]]) -> tuple[dict, list[dict]]:
+def walk_forward(traded: dict[str,list[dict]], evidence: dict[str,list[dict]], *,
+                 years: tuple[int, ...] | None = None) -> tuple[dict, list[dict]]:
     train_opps = [opp for market in s1.TRADED for opp in traded[market]]
     x, y, exits = make_training_rows(train_opps)
     models = []
-    for year in YEARS:
+    for year in YEARS if years is None else years:
         mask = training_mask(exits, year)
         if not mask.any():
             continue
