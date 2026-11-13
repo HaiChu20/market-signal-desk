@@ -1,0 +1,43 @@
+{
+  "version": "wide_v1",
+  "kind": "events",
+  "symbol": "ETHUSDT",
+  "config": {
+    "name": "wide_geometry_v1",
+    "period": "dev",
+    "end_exclusive": "2023-01-01",
+    "sl_atr": [
+      1.0,
+      1.5,
+      2.0,
+      3.0,
+      4.0
+    ],
+    "tp_r": [
+      0.5,
+      1.0,
+      1.5,
+      2.0,
+      3.0
+    ],
+    "max_hold_trading_days": 1,
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "USATECHIDXUSD",
+      "USA500IDXUSD",
+      "XAUUSD"
+    ],
+    "starts": {
+      "BTCUSDT": "2020-01-01",
+      "ETHUSDT": "2020-01-01",
+      "USATECHIDXUSD": "2019-01-01",
+      "USA500IDXUSD": "2019-01-01",
+      "XAUUSD": "2008-01-01"
+    },
+    "crypto_venue": "binance_usdt_perp",
+    "crypto_taker_fee_per_side": 0.0005,
+    "crypto_slippage_per_side": 5e-05
+  },
+  "files": []
+}

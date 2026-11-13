@@ -1,0 +1,944 @@
+{
+  "version": "wide_v1",
+  "kind": "grid",
+  "symbol": "XAUUSD",
+  "config": {
+    "name": "wide_geometry_v1",
+    "period": "dev",
+    "end_exclusive": "2023-01-01",
+    "sl_atr": [
+      1.0,
+      1.5,
+      2.0,
+      3.0,
+      4.0
+    ],
+    "tp_r": [
+      0.5,
+      1.0,
+      1.5,
+      2.0,
+      3.0
+    ],
+    "max_hold_trading_days": 1,
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "USATECHIDXUSD",
+      "USA500IDXUSD",
+      "XAUUSD"
+    ],
+    "starts": {
+      "BTCUSDT": "2020-01-01",
+      "ETHUSDT": "2020-01-01",
+      "USATECHIDXUSD": "2019-01-01",
+      "USA500IDXUSD": "2019-01-01",
+      "XAUUSD": "2008-01-01"
+    },
+    "crypto_venue": "binance_usdt_perp",
+    "crypto_taker_fee_per_side": 0.0005,
+    "crypto_slippage_per_side": 5e-05
+  },
+  "files": [
+    {
+      "path": "labels_wide_v1/XAUUSD/2008-01.parquet",
+      "size": 1713513,
+      "sha256": "f35f7da63fd24d39ac3819bffe0229382c8a4b2f0734408c6721f92f5e06be03"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2008-02.parquet",
+      "size": 1660515,
+      "sha256": "8c5bf90fe9522b717afcd851d47b5ba67eb5ae41c8815e533ad460614582b0f9"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2008-03.parquet",
+      "size": 1655678,
+      "sha256": "fca06c2127cf3e0fe3dae67cedf778a383049573e77c898d1911a3c6c885808b"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2008-04.parquet",
+      "size": 1753078,
+      "sha256": "0a9a4baae07e14015a717deaed8586b33d6545732412f9e51a777445a352a871"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2008-05.parquet",
+      "size": 1724390,
+      "sha256": "3d9480b14fdaead3d731eb589dec1c9eddefb1387ca88ec48b0a6d56e2144fa6"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2008-06.parquet",
+      "size": 1681912,
+      "sha256": "b47649f804363c02fda2b361634db4fc5160378e3afe0fce1d2b13fbf4bcb770"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2008-07.parquet",
+      "size": 1808909,
+      "sha256": "de4e36902e2972a3e04f78ebf9d0f747db6c410dca4c1d66b49464a9e0ab355a"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2008-08.parquet",
+      "size": 1661619,
+      "sha256": "345c8549802afbbbb1bfae49d4b6acf94dffc4f796215c44b61b3b2d3aaf1783"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2008-09.parquet",
+      "size": 1760324,
+      "sha256": "1c73972b1efb87c25d439c980f01da90ec8ac2a1fc77c10eaccf54db3704f3c7"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2008-10.parquet",
+      "size": 1825127,
+      "sha256": "4db9017ef8307f5ce3ddbc36246ee5267271e0e771b23c6a92fdaf3c1a1d740e"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2008-11.parquet",
+      "size": 1550853,
+      "sha256": "94533d85ab53f329ecc3ab28ef7c15eb8d1ae8ed9953e8b495299c0033aa7cf8"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2008-12.parquet",
+      "size": 1752794,
+      "sha256": "39530f1b476146f1ca1744fcf1ecabfbc40ce50e775051b0b1496844498b3024"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2009-01.parquet",
+      "size": 1716449,
+      "sha256": "a4b63efdb446d726d05a74c318c1a89a5d5be0ce3318f64a8885b17ce3c8b201"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2009-02.parquet",
+      "size": 1579424,
+      "sha256": "987f72444a7e83f6fd252ea84bf5f9dff0d576ee14fecd50baea46a5cc88685f"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2009-03.parquet",
+      "size": 1741821,
+      "sha256": "42ee5f255ded9340e7015d617de939e6236d2ecea613b51b7f80c2539ad61894"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2009-04.parquet",
+      "size": 1678902,
+      "sha256": "e38743727a900198927f9e8ff8f27d99e6fa7b810d90afbe473208b8adffb653"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2009-05.parquet",
+      "size": 1642049,
+      "sha256": "8f2de2141f989e82971421b92927db17dfc01d4a77ecf1c6a94b67268b6d2689"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2009-06.parquet",
+      "size": 1745777,
+      "sha256": "570f245dbb1cbbf0e29e49b0491dd73120d0510a69334fb93a58bb67cc309a59"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2009-07.parquet",
+      "size": 1770924,
+      "sha256": "c28035a9e1fd7cb8a97249be20bd8ffb067b1cd6b78106b966772e4cba655d33"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2009-08.parquet",
+      "size": 1617423,
+      "sha256": "8890c726c9dcd4121ed889adcc269a8bc0b537bf95d8f8f63b3187212c909a9b"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2009-09.parquet",
+      "size": 1712893,
+      "sha256": "e6e7c95075ecb846b00e1a899f4a96fbf1720f134ba561db01d0e6a24e35a7f7"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2009-10.parquet",
+      "size": 1734169,
+      "sha256": "fd7f3ebdf7af711d8850cda29b5f03b1e8fd02cc7b39a1a84dd564b88f1e918c"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2009-11.parquet",
+      "size": 1694607,
+      "sha256": "eee5a184d69dc9d10843e2ce121ae970a238c3e9a6b04b678792a8c717c17d2c"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2009-12.parquet",
+      "size": 1802580,
+      "sha256": "7b31b0ca268f86f84683dc83ff3b3f183af6f2a8e3a83b4ff27e339fed0527ac"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2010-01.parquet",
+      "size": 1622620,
+      "sha256": "80bc7a002c1c7b1ff66a46e2e1eea09bbff6995671fb739ee910879b19f61645"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2010-02.parquet",
+      "size": 1589363,
+      "sha256": "a5642b07ac721623f6c48559e00e34ee3042eb8e8e61d0a9409335d1e94564e1"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2010-03.parquet",
+      "size": 1822268,
+      "sha256": "dd604584ebc213493bc3140e279cc4feed4eb3e556ee590c6c98d4ccdb7647b8"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2010-04.parquet",
+      "size": 1703608,
+      "sha256": "c86d2a975434fc7c9698157ca72aba0ed9adef9e40e0ede331607e45a5c14f0c"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2010-05.parquet",
+      "size": 1669264,
+      "sha256": "b060d81ea1b082f883e22484fde7dc9e6015a037fb3cb3bec13aa3e408c90e88"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2010-06.parquet",
+      "size": 1724280,
+      "sha256": "24f3b0bf776e424b5267062c66e839f1ee2c6717555a7acc6b0cc62b4d135029"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2010-07.parquet",
+      "size": 1705199,
+      "sha256": "716b8bdd7ac62984bc69059bca24d2ce96d18dca0671442543c70e1ed68c93b4"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2010-08.parquet",
+      "size": 1670216,
+      "sha256": "d1f51fd0f9f50ec6fd22f13aac26cd9094246b054c2d2663dedfc492bf664844"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2010-09.parquet",
+      "size": 1645873,
+      "sha256": "4667f32daeba8644f9073c3e843e423ff8f0cdd2b44317741314e925932322a9"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2010-10.parquet",
+      "size": 1669016,
+      "sha256": "0ce394016982e0c16993f5ae1e9841b23788f8c019d797bff4f5d74d9036132d"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2010-11.parquet",
+      "size": 1706653,
+      "sha256": "ad3c3906e560f3ba25c7e7ae01ac63064d8ac542bbcb2f7daabc9b980f156c85"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2010-12.parquet",
+      "size": 1788120,
+      "sha256": "1132008ac3929193ee9cd1c544fd75d3493f43b49984f635b88e267cc87329da"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2011-01.parquet",
+      "size": 1657243,
+      "sha256": "8d07392a7cdd1259e29dac00d0b14de28b59854355c4f9996116c1dc250232cc"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2011-02.parquet",
+      "size": 1559485,
+      "sha256": "71df39007f70a9480a9337a872ab9025306c3115cdb470f1fcfbe81cd38d315c"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2011-03.parquet",
+      "size": 1835645,
+      "sha256": "736c8f27e71b4d55fac6cf736440bc1eca5313a50a167a6c6cc17bd6456d10bd"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2011-04.parquet",
+      "size": 1629911,
+      "sha256": "0630ac8d49c1b143bb87abb3c62f561d1d7c4c092c09734f9ef00d45ba9a11c6"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2011-05.parquet",
+      "size": 1743834,
+      "sha256": "f45b53e8e79b8d76134d30748034e8bfd36ff414862c3b95a3e0da793e1a8a54"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2011-06.parquet",
+      "size": 1703364,
+      "sha256": "259a49c06ac6946e4f0a4a1b29208211c4c98146d354a752b4b69867cf043cd3"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2011-07.parquet",
+      "size": 1669408,
+      "sha256": "f4315037917893b8998f9fbba2ccf859a4c2a66860ca496b5fd59a070f900f18"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2011-08.parquet",
+      "size": 1870324,
+      "sha256": "6b32c1dbd3d50e4dd6ba8e74de1a7d5e6e3fcbab6c622f08cd3c397a741ce9ea"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2011-09.parquet",
+      "size": 1761272,
+      "sha256": "599c145e39cdeb434b74e346bbcc1f8ded5b21eedc0926868a08941498f6e4c2"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2011-10.parquet",
+      "size": 1692863,
+      "sha256": "b7586e191a59f972dc54f35e8c29f5834e1d1a25c0298e621242f794c05b6fb1"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2011-11.parquet",
+      "size": 1720010,
+      "sha256": "846a10ce73b9be14d4b7d8dca491f54e3f8b1d01f800d25f4a65b6cce8180d53"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2011-12.parquet",
+      "size": 1632356,
+      "sha256": "b65b6af1bcf85b9a8bacdc39aafeb492464ed6d17c525a00c88264cbf494d3a0"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2012-01.parquet",
+      "size": 1648098,
+      "sha256": "8e5f491d972a32ca89943b52b56e93a991902a4026907edaf76314ed55f679db"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2012-02.parquet",
+      "size": 1618442,
+      "sha256": "c4f10ae648a77c133a0576c405c239943db6d7bb52f14c7d6d5c4694e38dce8c"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2012-03.parquet",
+      "size": 1712609,
+      "sha256": "8f6727b2da15e3b374d204957d7c5b5d055d0290981cfb13fac82113f6f60575"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2012-04.parquet",
+      "size": 1559987,
+      "sha256": "c889e65838c9dd859c8e0e5f348f911098938c2eea6bc626521b4b9a412b9ea1"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2012-05.parquet",
+      "size": 1800420,
+      "sha256": "95b31bcf8853635a477c751ca64c4e83c167e41d025b331f17acf1d2c1c34784"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2012-06.parquet",
+      "size": 1612160,
+      "sha256": "68d80ef082795aa65e3c8641d2f2bd59ee320eb3867486c0a92645d947a46bc7"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2012-07.parquet",
+      "size": 1708228,
+      "sha256": "cf07b5c2bf4aa9fde57199bd7b67de7b2ff9f19dd91966ef213ca149b25ca7f3"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2012-08.parquet",
+      "size": 1775033,
+      "sha256": "fba640b605ad8d01b7f2295599d7450a9fb74951c6a4ea628041e972d5c09e72"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2012-09.parquet",
+      "size": 1536326,
+      "sha256": "588164a12c059ab24879ffc0c4132673a7da9573405f16c873d8166e28713203"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2012-10.parquet",
+      "size": 1799555,
+      "sha256": "ffdaee2222fdcddbdaefb21b6137daf7e4a879a5989b22fc927e2c68e91cfced"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2012-11.parquet",
+      "size": 1643783,
+      "sha256": "71f2107f716b76dee1e50ffffb016fd64a04296a094110dec030ded221c05ef0"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2012-12.parquet",
+      "size": 1535169,
+      "sha256": "70901a1311cba95b43c40e83762ef552168f8e274d26673034d9bff2ed49306c"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2013-01.parquet",
+      "size": 1644990,
+      "sha256": "7fe29ee776573f5f593f60d1c296ac39c3b811a9c42e2bb3307b1085c01c85ad"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2013-02.parquet",
+      "size": 1503078,
+      "sha256": "6a016cbc512c6473b7ad0a3305bacab645821c9c31bba704a9a34cccfae8de9f"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2013-03.parquet",
+      "size": 1483825,
+      "sha256": "aa37b9994c7ea7edded697593a733073b8ef91ac41ebedb9c23027322776704e"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2013-04.parquet",
+      "size": 1685555,
+      "sha256": "0f5a3ae6a45e5f910442716cef95da38044aad0a22f2da7347791180c8e5362d"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2013-05.parquet",
+      "size": 1725424,
+      "sha256": "b747d9ca2c2eadf83a0992043688da1b779cfa7712f722be361ab8d01bb2936f"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2013-06.parquet",
+      "size": 1514340,
+      "sha256": "42c4cffb51c7dd7bd140eb9472b188558616ba67ad2fda3c3163ede296be23e4"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2013-07.parquet",
+      "size": 1701468,
+      "sha256": "e83c8e10f70b8c92cf3a557288cfd99685b57896d60b4e48a4f95116968d52ee"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2013-08.parquet",
+      "size": 1674067,
+      "sha256": "28ffe221358618296ce59bcff0ba3359cc86969cbc31391acae81ea28c6a1eed"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2013-09.parquet",
+      "size": 1564885,
+      "sha256": "75f79915f7a0d190fdb1f99e6f199080545056c8182356cddb3abc19f5f2cefb"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2013-10.parquet",
+      "size": 1699726,
+      "sha256": "6535b27aff9e482510dec75fbe5653834e5a9210ad78eba7f5a66f9ec5ec2722"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2013-11.parquet",
+      "size": 1556338,
+      "sha256": "4d2fd3c2d546a8283a38f74c2c62a3c77797139c23f26a529c210f284f664b3d"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2013-12.parquet",
+      "size": 1534415,
+      "sha256": "0521350e6a339642a5363f8d7205f61c0501135d8d693e4dc678a9d6e638c2df"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2014-01.parquet",
+      "size": 1650518,
+      "sha256": "8a2509ed6225b67ecb46fb63dadda80aaee1559a34d164cd46a51f1c55ca5ba2"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2014-02.parquet",
+      "size": 1532183,
+      "sha256": "2dadcb33466724cf53dca7f5db86f90c621be4fe9c747c9900b0bef0d92e2cab"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2014-03.parquet",
+      "size": 1562387,
+      "sha256": "1d9ca5fe8bd8f2e15f0044bb781513b574be91c1e3803eac1a0d87ba6766acdb"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2014-04.parquet",
+      "size": 1534129,
+      "sha256": "e55bc147328933d2328fcfde64fb53f4b9e347496923644daa0bb76693977b44"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2014-05.parquet",
+      "size": 1625938,
+      "sha256": "e1a60a6fa781f0e8947553eb4f5668e541690a2cb23b712ea5b0040a34b6c8b6"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2014-06.parquet",
+      "size": 1564823,
+      "sha256": "6b4dee3305cc81ec36dbae4d8625275d179016664e68b81aa37b3729eee4c4ea"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2014-07.parquet",
+      "size": 1702224,
+      "sha256": "49d3d3dc41bd820d45c57a77bd056dba0e66b21f0d0b9648935805b3836c2eaa"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2014-08.parquet",
+      "size": 1552181,
+      "sha256": "f843a92cabeaec69e0d97c695cb05755fe6f7ef0f51f64ce0fdd784aacdecbfa"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2014-09.parquet",
+      "size": 1652459,
+      "sha256": "d9b85cfbb7cb647260e874d94687c4244f31f1947394b23bc33e47a5cbc2552d"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2014-10.parquet",
+      "size": 1712839,
+      "sha256": "a7d4dba0160a71b2e41734c09e92587d33e03dd07e6044387b97da9ebce49f96"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2014-11.parquet",
+      "size": 1466832,
+      "sha256": "2fb7ffccab05592d5b6f9544fcc025c5ed817f73da5821f907c19051ff46fb6a"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2014-12.parquet",
+      "size": 1593778,
+      "sha256": "61b641b2e5787f3c0e810ed9b3bdd2fc8ea63045631c148d93e3214e0543c55d"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2015-01.parquet",
+      "size": 1587308,
+      "sha256": "5a3ab59abb112879a90ac17e9bc030fd3df2cceaa39d13d169d0223a8a127431"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2015-02.parquet",
+      "size": 1512098,
+      "sha256": "4f388aa8c210bb18d1d37a7b5d5baffe4ce31087ee4ee91cb96210dfecbfc6c2"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2015-03.parquet",
+      "size": 1675978,
+      "sha256": "1022e849fb76591738164c489bf868c27031686465b583651b1ded45e63fc29a"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2015-04.parquet",
+      "size": 1595350,
+      "sha256": "53b681a1ae876d6179862a08c1b2b44da2ed52eb47465179af4817e7962c0482"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2015-05.parquet",
+      "size": 1553209,
+      "sha256": "90d7bb2b86c7755669893e076562656a344d383f83942b49203bc030c570956e"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2015-06.parquet",
+      "size": 1633668,
+      "sha256": "8eb2e75770e65a1cfe6be929fa246bd72c20202eabe5d8d65d6f7a927a33015d"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2015-07.parquet",
+      "size": 1674448,
+      "sha256": "1ad561ee680e7d433f00c38fb6064799bead2708470bd68467c86bbda7716da0"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2015-08.parquet",
+      "size": 1613477,
+      "sha256": "0a6f5a2c11c3ca8f58ec03771cc1f031e7309e7ef9bcab5f433efb73c1359ff9"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2015-09.parquet",
+      "size": 1640526,
+      "sha256": "bcb096066599d57656e6ce0448d233e94afec342271bb24a09706c87c38562ff"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2015-10.parquet",
+      "size": 1633208,
+      "sha256": "cad516a77fd1438c32b48981b0d2585f929f22b7db365f8d3c899fb0cb367079"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2015-11.parquet",
+      "size": 1572073,
+      "sha256": "1a8747363ac3f6441fd38832b1fc7cde7ce8db277de508e5353a0f3db7bbee52"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2015-12.parquet",
+      "size": 1603348,
+      "sha256": "9643d9579eb234e3d1f58610a6261917c481ecddc081bff5d526bf939ae3dbeb"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2016-01.parquet",
+      "size": 1513958,
+      "sha256": "4994e3c3de80af05c0425d3dd9c78cec3148af966603278e12ea8fef8de983f0"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2016-02.parquet",
+      "size": 1631526,
+      "sha256": "ccb56752716bf5adc9b178d5c9397228f3622dc5cda44789c5a6f5a622d34cac"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2016-03.parquet",
+      "size": 1644938,
+      "sha256": "3bd55f5e765ec786e2c88d497dc6ad68974db9c9bc09bbc81587f644ad244bbb"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2016-04.parquet",
+      "size": 1581631,
+      "sha256": "9f6a68b140abcf4965445e6980ba4a75075113f7d52863710dd45893393e41ab"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2016-05.parquet",
+      "size": 1676302,
+      "sha256": "885b2a07462f5efa7c312d498d7722c99ad83d33516890a3fe4e1f7c3f6fa3f7"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2016-06.parquet",
+      "size": 1649235,
+      "sha256": "d89e53789e14dea33240356e4a67b2d344d33b734427ef7c2d04eec6eaf00b1b"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2016-07.parquet",
+      "size": 1551141,
+      "sha256": "aae3c85fe131657a8f886f2b3b1cf6aa5e5eb144e8fa7676d23e643e7147495f"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2016-08.parquet",
+      "size": 1719322,
+      "sha256": "8f8dc135c3ae33a0cacc23bfacc69be1ed479ff7ddcfdca888a08e710870fb7c"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2016-09.parquet",
+      "size": 1612783,
+      "sha256": "a57e990dbdc6c61f005920cf26327f44c1e5a08b2e843ffc54c250b187844563"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2016-10.parquet",
+      "size": 1563647,
+      "sha256": "56a2eb8e543fd60739e3366ca30da50d1aa755756c1d8f6f0bb1a3035daec1a0"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2016-11.parquet",
+      "size": 1658820,
+      "sha256": "1827710c9e35c6ec5ea3ce894875e9e4aed5f1c9d6a55b848a941409aee9b93a"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2016-12.parquet",
+      "size": 1550428,
+      "sha256": "362bca0d2be8a5ce38f59b250e6d971f4d279a829e6d7e0d5bbff1b7833fe031"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2017-01.parquet",
+      "size": 1615409,
+      "sha256": "b0bc23ee3b464726edb542c474276bf79292428f788daabe0690edd39cd64dd5"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2017-02.parquet",
+      "size": 1509016,
+      "sha256": "9babc1a341b27f400e8d7576dba9e6b02b7174c3b0b65bdc37f8bbc7f6dbf75f"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2017-03.parquet",
+      "size": 1738819,
+      "sha256": "b555aa630eb9627d5616f492dd6ae2c124d131655a487bb578a63c65144e587b"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2017-04.parquet",
+      "size": 1415423,
+      "sha256": "6015d4a9697d27c106d90236eb5a1b049dae861d86c033c33913ea85ebdca971"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2017-05.parquet",
+      "size": 1710488,
+      "sha256": "b69dbab7ac6a379537a5e67bdf6ccf67c738d3eb16ea5ae1b1c9e72a9805ad24"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2017-06.parquet",
+      "size": 1653084,
+      "sha256": "6a3adc77cd9e0f090e1a4d0a96dc1ef0ca29cc64f5ef529d5d4ae6b463e85dc6"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2017-07.parquet",
+      "size": 1573141,
+      "sha256": "8945d0dc0377c97a3f0985873ac3838cac541603846cdbd6f85b69556191eb0a"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2017-08.parquet",
+      "size": 1707325,
+      "sha256": "5238dee928f1b4120f68a217818d5a1ea68cbb94c5a2c927521314a5c55d150b"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2017-09.parquet",
+      "size": 1569296,
+      "sha256": "96c6c1c4922ac3dff254d2fb970a5b1efbece129f3d098d8cd6795d4789ec6a1"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2017-10.parquet",
+      "size": 1651490,
+      "sha256": "f68d55ec0b56246f034f8f312afe6a1d35a65dd58135aeadb2a6f41b6b3c682f"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2017-11.parquet",
+      "size": 1624008,
+      "sha256": "26ab11b7b4fc9abe430683be0477e15e601bcec2f19fb034e9bc422c8fc4737c"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2017-12.parquet",
+      "size": 1496282,
+      "sha256": "80c13c120d490bcb597f86cee26a90cffcac153e065d986f21f5d52f76d6108b"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2018-01.parquet",
+      "size": 1661452,
+      "sha256": "73d0d486b1a40b23e2845391c658fc2bdfdcb70fb34bde56794279e403deb6d7"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2018-02.parquet",
+      "size": 1507187,
+      "sha256": "436c375987e34c5dcee3dd8a0ef6555271d8c9a10384a67cdff88204d5ccae88"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2018-03.parquet",
+      "size": 1595555,
+      "sha256": "6628d55ec1ae353f97ad945f66f60de345742ef4706fd509e80b8434572c8f9f"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2018-04.parquet",
+      "size": 1611103,
+      "sha256": "1635160cff497df6a14b7becdfaf9799de19c3caf5d698c685d60d12c4e32aa9"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2018-05.parquet",
+      "size": 1695644,
+      "sha256": "0fb40a299ac8c48ff65b81cac6cd55732d68f59fd361b41e523f4cecb4925c57"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2018-06.parquet",
+      "size": 1563795,
+      "sha256": "77786b807561cab92c65b703a7f3300628558b943e69dfbea364ebc334e0207c"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2018-07.parquet",
+      "size": 1686237,
+      "sha256": "3c7643e8a53dfb7c72b9ffe1ea287e2925bd5db53c1b54fd09843a26d85f2954"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2018-08.parquet",
+      "size": 1761843,
+      "sha256": "aab0233d475c38a91e04296a4c448b9be84e6a3d859c89ec7622b5e8bf489271"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2018-09.parquet",
+      "size": 1506246,
+      "sha256": "59befdea8295473893d2956a9673bb3824ecf627a571f2f735def1566a5c0d2e"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2018-10.parquet",
+      "size": 1779770,
+      "sha256": "7b36d7712809eee0ca817343ab254a9f8e5ae12dca8210abe7c4d6d09af2d201"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2018-11.parquet",
+      "size": 1630489,
+      "sha256": "cf48c522a278429b89d69951e125b6fe2b2bef89edf0ece43914f8e0017f3674"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2018-12.parquet",
+      "size": 1481148,
+      "sha256": "a987eee77fe04a7dbca1ebb10260edf50592c712ab7a792eaa35a6954fc15bde"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2019-01.parquet",
+      "size": 1670134,
+      "sha256": "98fbf415c7ddfa3e474b1665f5487f0041aba4840e5203a006397f02b3ed261e"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2019-02.parquet",
+      "size": 1501812,
+      "sha256": "301109179c5b959fd2226f6c387b9dd7249b5a913da6b3a8fc2e6b16c8b53d23"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2019-03.parquet",
+      "size": 1634330,
+      "sha256": "206ddee95eea22451463b10895a6aeca0eb8fa3780a36fe6b2c6f2054f254c26"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2019-04.parquet",
+      "size": 1583836,
+      "sha256": "4c7d5af2881d9e2b73e9b4b3297041c5295511b2ce1e5ce620282641ef220216"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2019-05.parquet",
+      "size": 1740475,
+      "sha256": "b11f1c37f9c244961d4818273ed4f7ae4263fad894dfe3f17b77f1a9373e12d3"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2019-06.parquet",
+      "size": 1547738,
+      "sha256": "a190728d4288bd39f58c01d121369acd937e82fe3dfae21ca6f1c9c31c24b910"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2019-07.parquet",
+      "size": 1684346,
+      "sha256": "ec182e1231b10ca195febca83a7a0edf436fd620e824257095d835b0a9300e45"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2019-08.parquet",
+      "size": 1630044,
+      "sha256": "98013e2f50bbb885f1c50e6811e3f05e654cee3ea195aa78e161bcbc5cab454b"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2019-09.parquet",
+      "size": 1576078,
+      "sha256": "fe86e49a12ed0650bfc67a3d679be5cca31025d94cee8feec5cc6438d7bb6fb1"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2019-10.parquet",
+      "size": 1736124,
+      "sha256": "ed8c926c2040e53e00e915ca6124cfe62b5feeebafbe51b5ceee0a5298b5d7ae"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2019-11.parquet",
+      "size": 1552253,
+      "sha256": "58d001e2e693c327a60d5e6f748a04b70c440676180f11c44e97cf7943315a96"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2019-12.parquet",
+      "size": 1537764,
+      "sha256": "2a8e4a59779fd74fd1b3b85859152ae4d6763379cc6bbd88dbeab5c91800170c"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2020-01.parquet",
+      "size": 1687343,
+      "sha256": "7ebd81bb2828cd532e6d347aae68b35d2d2501d040ca104732cec50e84773626"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2020-02.parquet",
+      "size": 1512977,
+      "sha256": "094701b26ee286b486a1eab707b972c1a3826c86e0ae841a3116c2cb7b0f0dfe"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2020-03.parquet",
+      "size": 1609074,
+      "sha256": "1854b8bcab396059d501f73d6057b8e0ef43a62726c05618eb69282e71d38ad0"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2020-04.parquet",
+      "size": 1564507,
+      "sha256": "1da089dbad3165471c2927b7f773c21d70076e5cf7f0fc7a51f84ed6d1ed0971"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2020-05.parquet",
+      "size": 1563494,
+      "sha256": "12dbf8f53af2712b83de585635feeeeec6981c490804fc56daa9f509c037e5d0"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2020-06.parquet",
+      "size": 1660328,
+      "sha256": "99e77bab58675f5e911839bb7920e06ff9684ad99bcc8504e4e237edd5ca3248"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2020-07.parquet",
+      "size": 1761961,
+      "sha256": "c217f224ec8a03dffa8212812dfaef823971ee89ffb848e2f9caacf1b2837ae2"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2020-08.parquet",
+      "size": 1598478,
+      "sha256": "47d5e9818e054b2e3603c8a9d475aafc81a119d4cc4ff5f5ff8cada2b4dfd2da"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2020-09.parquet",
+      "size": 1656360,
+      "sha256": "1411a8144e666dd4198922a883fcd722c07c2742d32b3592cf69a850acdb2221"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2020-10.parquet",
+      "size": 1696162,
+      "sha256": "9ec8797434ae49c721fb80f8d3b6ae80f2fa93705c8f811f1e65650fff078bf4"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2020-11.parquet",
+      "size": 1579300,
+      "sha256": "21c3ce57bf4c56d76af48e6e52d9d5040fd33d422e1d240115ea39209f1b3068"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2020-12.parquet",
+      "size": 1629474,
+      "sha256": "239fc7532de39828e6239be637b0ffb3929638b383b6ff079720de6595cb48fc"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2021-01.parquet",
+      "size": 1497272,
+      "sha256": "75b82e28fdc54c71a89cfc38d2f553d11e1d21d75e4b6d04b5be6baf308d91aa"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2021-02.parquet",
+      "size": 1533972,
+      "sha256": "1c535ac73c02a034a25d540953f316c5e4e169aa4a88381db9967d1c1e83be69"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2021-03.parquet",
+      "size": 1778417,
+      "sha256": "a057415f589f6d1415d9b14278ba5ca4173ac9e07cff94b21151909cfa12879d"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2021-04.parquet",
+      "size": 1627983,
+      "sha256": "b36cff4b0524133ffbc95355316464c1232996357e2bdbd1ecfaecf6eefc9cc6"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2021-05.parquet",
+      "size": 1592449,
+      "sha256": "a77aa005b2b997bbd2058a05f734f661f74232df3bd41e5d13b8999f3072cfec"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2021-06.parquet",
+      "size": 1689851,
+      "sha256": "f037ee42c72e0b93ab42477b8895494e083404d5b4da4144f609039666b4bdb7"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2021-07.parquet",
+      "size": 1658920,
+      "sha256": "54fc5a3c3f67c86d77641b6a2310c011e7b3b562f0e33514121ceef85c2c8d54"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2021-08.parquet",
+      "size": 1682375,
+      "sha256": "d1e9ef33f7777315aa591bcf0286d606a5dad56ddbf74d026d556820d5170029"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2021-09.parquet",
+      "size": 1682074,
+      "sha256": "9d8811c849f7872d413551f5d03c95d9cd7627e91c2989bd07d0e1e3ac17c02d"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2021-10.parquet",
+      "size": 1626146,
+      "sha256": "8388a4f2f9711f397acd2207ff1aea9159dc0ad007a95e4464266631e3956e45"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2021-11.parquet",
+      "size": 1659090,
+      "sha256": "dfae3bf5efedd704e65c2099109eafce14c9d10db4ac64180915a58f521e0884"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2021-12.parquet",
+      "size": 1690859,
+      "sha256": "a44a78b8e00e0a374711f9101d6ffdb92e7188bb918f851ff5f708ef321ee565"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2022-01.parquet",
+      "size": 1603950,
+      "sha256": "8f0fba70e7d5627a9bccdd2b458869629d3364372ceecd46f65ebd68dd94688c"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2022-02.parquet",
+      "size": 1526691,
+      "sha256": "539a488f8ce18af8a772a43a1d79ecccc2e8aa006159bda894c98e8fa4fa823a"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2022-03.parquet",
+      "size": 1793983,
+      "sha256": "70f7928cf8af7d7bb6bfa3f7e05c68114dfd5ca8ddbfdb6992ce846fc0144c3c"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2022-04.parquet",
+      "size": 1532363,
+      "sha256": "8b51cf841467f1c41e9843612355d231b3b6485502cadf10a67fabe29e407921"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2022-05.parquet",
+      "size": 1705678,
+      "sha256": "d1cf28e400bc29fa3a34d21efb2d748eb9b5838193c4fb8937d76f1321e9d0fb"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2022-06.parquet",
+      "size": 1677561,
+      "sha256": "d49c292e567ae0eea789b2b1d6153daa887f2127300258b1b6243161d7ca90ad"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2022-07.parquet",
+      "size": 1582526,
+      "sha256": "3a954cc793e5347062f49a62526507d47a7844581da26a0d51f90bde67b934cd"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2022-08.parquet",
+      "size": 1808009,
+      "sha256": "18f33a7765036cf380bf35ee529cc2fc0d2997d5d8f658e23a0fd8db2e60736a"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2022-09.parquet",
+      "size": 1699046,
+      "sha256": "523b8e9d9971cc6f5e33d64a4b72805db1c31120bdebd7587a3ecb925e150964"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2022-10.parquet",
+      "size": 1643960,
+      "sha256": "3a7c99eacd5ce4a3411e4c534ce9a1790836b632239ed1d53933fb1d629d1136"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2022-11.parquet",
+      "size": 1671427,
+      "sha256": "5943d5ae4ecd5432d23760c5ff8a72866223301413b9a8054e45ce61babef69a"
+    },
+    {
+      "path": "labels_wide_v1/XAUUSD/2022-12.parquet",
+      "size": 1577010,
+      "sha256": "b36bb41b05423e4e459b3a3e8897d1d8d34e5b93d1383815c7981701b20b7248"
+    }
+  ]
+}

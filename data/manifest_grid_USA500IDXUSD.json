@@ -1,0 +1,284 @@
+{
+  "version": "wide_v1",
+  "kind": "grid",
+  "symbol": "USA500IDXUSD",
+  "config": {
+    "name": "wide_geometry_v1",
+    "period": "dev",
+    "end_exclusive": "2023-01-01",
+    "sl_atr": [
+      1.0,
+      1.5,
+      2.0,
+      3.0,
+      4.0
+    ],
+    "tp_r": [
+      0.5,
+      1.0,
+      1.5,
+      2.0,
+      3.0
+    ],
+    "max_hold_trading_days": 1,
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "USATECHIDXUSD",
+      "USA500IDXUSD",
+      "XAUUSD"
+    ],
+    "starts": {
+      "BTCUSDT": "2020-01-01",
+      "ETHUSDT": "2020-01-01",
+      "USATECHIDXUSD": "2019-01-01",
+      "USA500IDXUSD": "2019-01-01",
+      "XAUUSD": "2008-01-01"
+    },
+    "crypto_venue": "binance_usdt_perp",
+    "crypto_taker_fee_per_side": 0.0005,
+    "crypto_slippage_per_side": 5e-05
+  },
+  "files": [
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2019-01.parquet",
+      "size": 1584473,
+      "sha256": "f25e51a9a747821ee5594a3f709780905f4282adf4cf9a4bc7459d7362abcd42"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2019-02.parquet",
+      "size": 1346226,
+      "sha256": "70d9acd0d9ca119da5ce1662dd8fd6ecc6192d1a49a94141dd102ff85a7a0f75"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2019-03.parquet",
+      "size": 1418083,
+      "sha256": "268d51386b5455a03c4ad4348e1a0cb1dda05c9de8d3b2c5c268f91f3cbc8687"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2019-04.parquet",
+      "size": 1294770,
+      "sha256": "67691a7d39798d12b13e3d598be0e80c31590ec635283bf3e26f04a3bec928a6"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2019-05.parquet",
+      "size": 1620864,
+      "sha256": "112c4286ce1d0eb62cc14917b84bb0279ac304d958b7f7fef53c00c22c412b08"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2019-06.parquet",
+      "size": 1348578,
+      "sha256": "03e763c0261379c00dfa8740d577f2558c6deed0e12d4a27dfbe5b6fe1f8905c"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2019-07.parquet",
+      "size": 1421988,
+      "sha256": "442d7326f6b25c4030a38b9753e34d673f2c20d211c65becabbbb224c26eb8fd"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2019-08.parquet",
+      "size": 1588832,
+      "sha256": "a98711a9a8c6c76f89db551a6916b9a56ee008218a504f223a452f8ccc3a457b"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2019-09.parquet",
+      "size": 1415451,
+      "sha256": "2beb7f025a3cc708dbf74f230838ad3aa8241416bff1abf30abbe578f91721fe"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2019-10.parquet",
+      "size": 1558969,
+      "sha256": "f2c5d540fa5a6315ca49818910b16e0c31f6fcde30fe6d98a4eb000ea59316ab"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2019-11.parquet",
+      "size": 1328085,
+      "sha256": "a09b2fd67fa7a2771bf8ac944a4d57d3be6679ae5fa6a3d3ced9cb18f749e915"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2019-12.parquet",
+      "size": 1215216,
+      "sha256": "01ab21e1e819596483cecee282a92f735251c72bcd1ad93f19a9036d6b5cd0a0"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2020-01.parquet",
+      "size": 1537102,
+      "sha256": "46b570bdfe5aa88ad72b2b10a177d7065318fc1dd02e2b9fe228fe010340972e"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2020-02.parquet",
+      "size": 1480939,
+      "sha256": "90bb60a5430ae3f8046afa846f20315dba471f2be59240b141e1859f9df79220"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2020-03.parquet",
+      "size": 1483281,
+      "sha256": "f1eb1e9906fc1e8d647b73ca3d04e9a5a6ed72f2e2ac118908287b65dd93a4b0"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2020-04.parquet",
+      "size": 1582820,
+      "sha256": "dd07923c18665082abc220b64c3f9148672b13f5c973473cfa81f2b318513adf"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2020-05.parquet",
+      "size": 1603454,
+      "sha256": "f271b6aed1f9129f8dde804e8569b9fc0c1a3732c300facafc0f0fe2b340611e"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2020-06.parquet",
+      "size": 1648535,
+      "sha256": "9d6cea7f58ff8d231ff0489eec2b08ca8a24333034f1eb145302ddb268c650cd"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2020-07.parquet",
+      "size": 1687146,
+      "sha256": "111a0791efc0cf3accfe8821d4c68f4a526c0c60c3b7175139ec9ce8a2653549"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2020-08.parquet",
+      "size": 1544485,
+      "sha256": "b1ab189a1b65b1563a491b2f555fe8c332eb25d9309a93f7ba2c2c96781d3e33"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2020-09.parquet",
+      "size": 1643435,
+      "sha256": "30be156b6f2ffc1276d86116acb3938da5c9d52919749d420c61c2fb4b4ad7a9"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2020-10.parquet",
+      "size": 1640668,
+      "sha256": "7fa5d851e9446baea176158f1a93180024e7cc60edd5c73fc33c8679b1f8b5b1"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2020-11.parquet",
+      "size": 1526387,
+      "sha256": "d52155c81d79fb49cd671a12dcf33bb02c5bb0d5cd63536dc83099c137857636"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2020-12.parquet",
+      "size": 1545610,
+      "sha256": "74e0f71cb158f414ed302e72f044204a2062abe732b1cbbabe74db57aafec3a7"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2021-01.parquet",
+      "size": 1479566,
+      "sha256": "541a31374cff8702c79f0aba2b350b63580ec7f99bd0dd913842906f82cba0f5"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2021-02.parquet",
+      "size": 1465106,
+      "sha256": "eecbe44d430dd0e0af4b7861948415fd27a8e761713f1b94dd2e80f5d5e2fa94"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2021-03.parquet",
+      "size": 1723256,
+      "sha256": "d7668200e8c040f7c02c5ec71070b01e0729b74528a0d7dbe9fc33d9713ef615"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2021-04.parquet",
+      "size": 1530978,
+      "sha256": "95a592bafda1584fa0b56c6b3021e99a4adab365de94dc60c7133e600b112b00"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2021-05.parquet",
+      "size": 1553946,
+      "sha256": "0d24627800b9388edc84f3a19dda4e8780dd721570ec56ef79fb518b9a84d43d"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2021-06.parquet",
+      "size": 1567524,
+      "sha256": "dda66dbd56dd818b092f1acb0b94ca74640987c9855eaf3b07abcad24f29eeb2"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2021-07.parquet",
+      "size": 1599689,
+      "sha256": "ef68f0cd923ed22d91376721dbbd7ced68f34da480eac1ce469773481b3243b5"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2021-08.parquet",
+      "size": 1560787,
+      "sha256": "76c9856c6c15cd21122cd780e54debdde58fcab99336b74d89905dffcf6f0b8b"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2021-09.parquet",
+      "size": 1625200,
+      "sha256": "ae5eba991134d41973e02532aa50f5840b11448f28f6c59f929d158b00f77e83"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2021-10.parquet",
+      "size": 1595038,
+      "sha256": "84b605e5e12572b9cb97cbb86cdc6ee91ddaa722c1c4953e5f9c4742fb2a7017"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2021-11.parquet",
+      "size": 1578759,
+      "sha256": "f388d59da312666ae04586173c2b289382d938fa914ae0ca8f0a673adf862e27"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2021-12.parquet",
+      "size": 1639933,
+      "sha256": "5ecf4f416cabdffd4ecadef08da08cba543af5bf6d7300917f402e5dc05f2fc1"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2022-01.parquet",
+      "size": 1572712,
+      "sha256": "6a7346fd1ebcdd298bc533efb4d7d1b31687fe7385034a4ca169829e5bef81f9"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2022-02.parquet",
+      "size": 1483145,
+      "sha256": "500749b004c1c12ffc4d1108a8c1779e501e05851612cc6efe8a61fe8dafdee6"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2022-03.parquet",
+      "size": 1739254,
+      "sha256": "6f89227dc3d1c7a893845900cc20da96d085ce2eca73f0d8075859933e73b5cb"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2022-04.parquet",
+      "size": 1504968,
+      "sha256": "2d5f06dfe3fd1eac37b8d1fc220634dc71d8b45f3b9ffddedcc7de7a192a6bfc"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2022-05.parquet",
+      "size": 1646368,
+      "sha256": "45c26ef6caa76faff86887982384a56add2318872762926553e01fd3aad9e807"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2022-06.parquet",
+      "size": 1645197,
+      "sha256": "b40c0d3f2f20ce9b7580c6fa0bd7e0891bebf50e7d9fcef3343c0028b5cf8ee6"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2022-07.parquet",
+      "size": 1564143,
+      "sha256": "9f02e0072a2c69817def45ab15eff26266478f7558878b31e3bf512500ddb24e"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2022-08.parquet",
+      "size": 1725797,
+      "sha256": "dcaf57f157b8bc50559868b881e3948f2cd3e57d3d65c39bb5e2ceb8dbe7f736"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2022-09.parquet",
+      "size": 1631155,
+      "sha256": "05907123a6766b56688aaefc8e4ee7389c22c7de3794df668101f0be888480a2"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2022-10.parquet",
+      "size": 1572681,
+      "sha256": "335249cf3aa3447295aacde16775bfc86d7f37a16e891c69b6beffcaa6524c28"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2022-11.parquet",
+      "size": 1594236,
+      "sha256": "5d8fb43d551358e13d66e48fd8d5286e87873009338554a860cb15c7c9c4522f"
+    },
+    {
+      "path": "labels_wide_v1/USA500IDXUSD/2022-12.parquet",
+      "size": 1537506,
+      "sha256": "6a93488dcf99dad7ec3b8d2393e14dbdc379e11582a47ffaf3c1ca9c283a6b4e"
+    }
+  ]
+}

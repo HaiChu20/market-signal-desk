@@ -1,0 +1,284 @@
+{
+  "version": "wide_v1",
+  "kind": "grid",
+  "symbol": "USATECHIDXUSD",
+  "config": {
+    "name": "wide_geometry_v1",
+    "period": "dev",
+    "end_exclusive": "2023-01-01",
+    "sl_atr": [
+      1.0,
+      1.5,
+      2.0,
+      3.0,
+      4.0
+    ],
+    "tp_r": [
+      0.5,
+      1.0,
+      1.5,
+      2.0,
+      3.0
+    ],
+    "max_hold_trading_days": 1,
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "USATECHIDXUSD",
+      "USA500IDXUSD",
+      "XAUUSD"
+    ],
+    "starts": {
+      "BTCUSDT": "2020-01-01",
+      "ETHUSDT": "2020-01-01",
+      "USATECHIDXUSD": "2019-01-01",
+      "USA500IDXUSD": "2019-01-01",
+      "XAUUSD": "2008-01-01"
+    },
+    "crypto_venue": "binance_usdt_perp",
+    "crypto_taker_fee_per_side": 0.0005,
+    "crypto_slippage_per_side": 5e-05
+  },
+  "files": [
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2019-01.parquet",
+      "size": 1633181,
+      "sha256": "d04e2e8b3d8e9f548a6c9d5d1c4454059001aeffa83c1e8477cfd8966a9c8658"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2019-02.parquet",
+      "size": 1454630,
+      "sha256": "9ae4edd1276b0f5ecab8094795d7b9a40a4528fa99268913d0f6d7fa52488872"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2019-03.parquet",
+      "size": 1581187,
+      "sha256": "c704ee15a826fb01751cc9ce04ff428a79695e644b5883933a898a8b8dc2583a"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2019-04.parquet",
+      "size": 1541065,
+      "sha256": "54e1fe1c0bc92e4bc44929e065c3a6277757d36accd6f1ea60cc0b2eb7482b3c"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2019-05.parquet",
+      "size": 1722845,
+      "sha256": "c6513311c380c49be3ea38822b24e1384efa81122b22f60222caf2e666b21d88"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2019-06.parquet",
+      "size": 1482937,
+      "sha256": "6ad08e4df9cbf1c08ab29866737409501c17b4f761a2ec8e758905e1164f6fe8"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2019-07.parquet",
+      "size": 1676345,
+      "sha256": "84f34e9ee8e3201c2df29711b7db3ed88c737bbf10b62f7f35c67eb3135c1de4"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2019-08.parquet",
+      "size": 1640342,
+      "sha256": "56e582c80e6eaf2fa3abb99408ca23751b4069bc16ba62bc3e2c00a2c2621118"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2019-09.parquet",
+      "size": 1528667,
+      "sha256": "8ba5eedb993d5d4a1afee25c66eea91814134297dfb72cf7c149116a95ae32a4"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2019-10.parquet",
+      "size": 1706721,
+      "sha256": "c364e7e55b05e24b71a1c0c752cfc278b7297fef779b2ebd2121660d8aa3e7c8"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2019-11.parquet",
+      "size": 1513551,
+      "sha256": "01f3a0de81e6a18a169d10c4f60104124f4f5ed376f22acf70a00e46044f2e94"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2019-12.parquet",
+      "size": 1493530,
+      "sha256": "13ac256ff02d8df7f4688a5426ed2a541d101f3ed8da921ff06a4278b04a2d96"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2020-01.parquet",
+      "size": 1647746,
+      "sha256": "c18e29033d6f298b168b36643b6bc8eed217c8f2429c4f3b58ce58bef8fe08ad"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2020-02.parquet",
+      "size": 1493856,
+      "sha256": "28b540b7ef70b945eee24894d16d3a44e7149c8bc4c14c0a35e7421a84d5330a"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2020-03.parquet",
+      "size": 1477142,
+      "sha256": "c5502a29b8c7485613ac45131966cfb7a230004b6cac708853afe1236722e4e9"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2020-04.parquet",
+      "size": 1577971,
+      "sha256": "359f6a3f72e68aca1dbdb995550f146712fa382c75ecf8572979521b5148e3c0"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2020-05.parquet",
+      "size": 1583176,
+      "sha256": "28fe0bb0b18e999599f22c46ece23f8c68bf03813eeae5d5dd0b2026047f54e5"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2020-06.parquet",
+      "size": 1650240,
+      "sha256": "025dac6360cebbed40707a2ccb7c00d92d617c5a62bb19633cb4e61068286caa"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2020-07.parquet",
+      "size": 1699975,
+      "sha256": "64c4c16e5a56edaf530452232505602815f99469fe0a6832af3106cae5dcbb8c"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2020-08.parquet",
+      "size": 1573221,
+      "sha256": "e4fd6f8893e522cc322d62829e5b0d34403280dc638c64603dd7df8d10aaded3"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2020-09.parquet",
+      "size": 1650171,
+      "sha256": "adca1279185fe181138fcd336d4ae2b25bd590bf26fd4f63f35a53d3bb6836dd"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2020-10.parquet",
+      "size": 1629116,
+      "sha256": "85fe71622d66707f574e0c8d65507077e948cdff56c1459df0fe9b75fb2786b8"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2020-11.parquet",
+      "size": 1533301,
+      "sha256": "81573b4de2ec1d5d57105252a12dfcdbe9b2d3373ce02d58e7123b5e4f2e0d6c"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2020-12.parquet",
+      "size": 1572670,
+      "sha256": "9d80deb7e500ebfa5aa5ffbeedd65c0b08cfec8e48c2b82ae30b0651f4eefd19"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2021-01.parquet",
+      "size": 1499671,
+      "sha256": "fa223ed41ebc6511886c27d218b047cf7f9fd547b54fe3a7f7ca577aae616151"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2021-02.parquet",
+      "size": 1498372,
+      "sha256": "809ce46b8f6eb8cf63919815971b9b27dc9603781590e2d81ac7db95070bfbfd"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2021-03.parquet",
+      "size": 1734933,
+      "sha256": "f92f3be3e551f4b5ff2c2cb18d7caedb9bc0641655b6e7760884246b0ee73b96"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2021-04.parquet",
+      "size": 1604581,
+      "sha256": "3d7de4c5de020d5930aaa467573891a541cfc5e2cae3208a5370568a0dcdffea"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2021-05.parquet",
+      "size": 1562459,
+      "sha256": "9b8756f714ca9a2e0448a2716e85a33f95cb6ef3fc18e43c9d30d041879fbc11"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2021-06.parquet",
+      "size": 1628859,
+      "sha256": "a0ad50fd955cf74fabddf3236da1d25f382ec29b356c1be3e7b4ecce9425f11e"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2021-07.parquet",
+      "size": 1641093,
+      "sha256": "bfae767d9e737998e3138d92e6d61ab61da4ab6624a8404277e323764253d22b"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2021-08.parquet",
+      "size": 1641428,
+      "sha256": "4753184bbc71d06af5c20a509e3e9f113bbf53f43cd3ee28300651f5aaf37980"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2021-09.parquet",
+      "size": 1630843,
+      "sha256": "be709352f72d4953bd133fb683a78fed4cfa03d33acd2594efa6b8155e2da50e"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2021-10.parquet",
+      "size": 1610306,
+      "sha256": "671a3fd4246eed4535fe7482bc50dc7a099c78bea7d0ef311159498115930332"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2021-11.parquet",
+      "size": 1620041,
+      "sha256": "8ae00144b358520b224e74f262ff71cd232c3bdd434ded1d369a7046b4daa37f"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2021-12.parquet",
+      "size": 1655901,
+      "sha256": "0bf3d244948e63afb1f03f1b51eed197f79f6498553d05b3addf4929b96cd47d"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2022-01.parquet",
+      "size": 1571758,
+      "sha256": "5d926e4fd69f73fb736432b4673150b99e848d34f652e9132236801a4b532f7d"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2022-02.parquet",
+      "size": 1485242,
+      "sha256": "b1d6481981ecb35f9177d657fd8639a6d8ef02a26cbc05abc6965295e0b2fb2d"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2022-03.parquet",
+      "size": 1745761,
+      "sha256": "0de3db930713a0511537a3effb171e19d771c6238bcde88bae1c27842c8c8a91"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2022-04.parquet",
+      "size": 1509514,
+      "sha256": "468d37d8a78c5313f55ea383b08f9355bbec2eae4679c7c8a57be62f96885f1d"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2022-05.parquet",
+      "size": 1645854,
+      "sha256": "23cb5ed5b504923eb29f144295d645d557a76ce45d4411f40402cd16f93c510b"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2022-06.parquet",
+      "size": 1641656,
+      "sha256": "ac79381444980201f7cd5af2b4f3a10497ad513420f53a4b4a3850843f39267d"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2022-07.parquet",
+      "size": 1572388,
+      "sha256": "310374aff30cd018adc42ae8ccb5f983b8c081212ae7448bf7d9fe419d4c9ea3"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2022-08.parquet",
+      "size": 1737488,
+      "sha256": "41550f3b1c17650efcc0e6e689e211b1e72070b961fb90d0858360f14fd234fa"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2022-09.parquet",
+      "size": 1625385,
+      "sha256": "dacc2b5c5a0de1d0f47f95c73026fd8ae1feec57513666f78497def6c8fd1536"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2022-10.parquet",
+      "size": 1577585,
+      "sha256": "4a6a018037e869dcd27ed4b1fe157397bf28d1083808dd8eb0ab3b63e6956e06"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2022-11.parquet",
+      "size": 1599202,
+      "sha256": "35a47c4d75258fa317c1fa52d412bd98ab730535b3bfad561219b6dee78bd037"
+    },
+    {
+      "path": "labels_wide_v1/USATECHIDXUSD/2022-12.parquet",
+      "size": 1530486,
+      "sha256": "d49b1b1664df068088cea746d500baaccc7e8929a0b78f234ceb098d3cedf9a6"
+    }
+  ]
+}
