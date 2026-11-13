@@ -2,6 +2,7 @@ from pathlib import Path
 import time
 
 import pandas as pd
+import pytest
 
 from msd.live import swing_shadow as shadow
 from msd.research import swing_stage1 as stage1
@@ -17,6 +18,36 @@ def _bars(times):
 
 def _slow_refresh_worker(data_root, market, now, connection):
     time.sleep(1)
+
+
+class FakeTelegram:
+    token = "token-secret"
+    chat_id = "chat-secret"
+
+    def __init__(self, failures=0):
+        self.messages = []
+        self.failures = failures
+
+    def send_message(self, text):
+        if self.failures:
+            self.failures -= 1
+            raise RuntimeError(f"transport exposed {self.token} and {self.chat_id}")
+        self.messages.append(text)
+
+
+def _telegram_record(market, contract, **values):
+    record = {column: "" for column in shadow.LOG_COLUMNS}
+    record.update({"market": market, "contract": contract,
+                   "signal_close": "2026-11-12T22:00:00+00:00",
+                   "stale": "false", "state": "FLAT"})
+    record.update(values)
+    return record
+
+
+def _seed_telegram_history(path: Path, now: pd.Timestamp):
+    event = {"event_id": "ALL|CONNECTED|initial", "market": "ALL",
+             "event_type": "CONNECTED", "reference": "initial"}
+    shadow._append_sent(path / "telegram_sent.csv", [event], now)
 
 
 def test_state_replay_completed_rows_equal_evaluate_market(monkeypatch):
@@ -145,7 +176,7 @@ def test_message_header_names_run_and_planned_entry_times(monkeypatch, tmp_path:
     )
     assert "run 2026-11-13T05:00:00+00:00" in message
     assert "planned entry 2026-11-13T07:00:00+00:00" in message
-    assert "Intended daily run time: about 05:00 UTC" in message
+    assert "Intended daily run: 07:00 Europe/Helsinki" in message
 
 
 def test_no_plan_while_trade_is_open(monkeypatch):
@@ -195,3 +226,148 @@ def test_refresh_error_fails_closed_even_when_local_bars_are_fresh(monkeypatch):
     assert record["plan_entry_ts"] == ""
     assert "no new trade plan issued" in message
     assert "TimeoutError" in message
+
+
+def test_first_send_is_one_connected_message_with_all_current_states(tmp_path: Path):
+    now = pd.Timestamp("2026-11-17 05:00Z")
+    records = [
+        _telegram_record(
+            "USATECHIDXUSD", "MNQ", state="OPEN", side=1,
+            entry_ts="2026-11-10T07:00:00+00:00", entry_price=25000., sl=24500.,
+            tp=26500., unrealised_R=.4, cap_session_end="2026-12-21T22:00:00+00:00",
+        ),
+        _telegram_record(
+            "XAUUSD", "MGC", side=-1, plan_entry_ts="2026-11-17T07:00:00+00:00",
+            reference_price=4100., sl_distance=100., tp_distance=300.,
+            plan_sl=4200., plan_tp=3800.,
+        ),
+        _telegram_record("BTCUSDT", "MBT", state="STALE", stale="true",
+                         refresh_error="TimeoutError: refresh exceeded 600 seconds"),
+    ]
+    client = FakeTelegram()
+    assert shadow.deliver_telegram(records, tmp_path, now, client) == [
+        "Telegram: CONNECTED accepted."
+    ]
+    assert len(client.messages) == 1
+    message = client.messages[0]
+    assert "Swing v1 CONNECTED" in message
+    assert "MNQ OPEN LONG" in message and "500.00 points" in message
+    assert "NEW MGC SHORT" in message
+    assert "STALE MBT" in message
+    # Embedded NEW and STALE events were accepted by the CONNECTED delivery.
+    assert shadow.deliver_telegram(records, tmp_path, now, client) == []
+    assert len(client.messages) == 1
+
+
+def test_later_events_are_sent_exactly_once(tmp_path: Path):
+    now = pd.Timestamp("2026-11-17 05:00Z")
+    _seed_telegram_history(tmp_path, now)
+    records = [
+        _telegram_record(
+            "XAUUSD", "MGC", side=1, plan_entry_ts="2026-11-17T07:00:00+00:00",
+            reference_price=4100., sl_distance=100., tp_distance=300.,
+            plan_sl=4000., plan_tp=4400.,
+        ),
+        _telegram_record(
+            "BTCUSDT", "MBT", state="EXITED", side=-1,
+            entry_ts="2026-11-01T07:00:00+00:00", exit_ts="2026-11-16T12:00:00+00:00",
+            exit_reason="tp", net_R=2.9,
+        ),
+        _telegram_record("USATECHIDXUSD", "MNQ", state="STALE", stale="true"),
+    ]
+    client = FakeTelegram()
+    statuses = shadow.deliver_telegram(records, tmp_path, now, client)
+    assert len(statuses) == len(client.messages) == 3
+    assert "NEW MGC LONG" in client.messages[0]
+    assert "INFO: MBT EXIT TP" in client.messages[1]
+    assert "STALE MNQ" in client.messages[2]
+    assert shadow.deliver_telegram(records, tmp_path, now, client) == []
+    assert len(client.messages) == 3
+
+
+def test_failed_send_is_redacted_and_retried_next_run(tmp_path: Path):
+    now = pd.Timestamp("2026-11-17 05:00Z")
+    _seed_telegram_history(tmp_path, now)
+    records = [_telegram_record(
+        "XAUUSD", "MGC", side=1, plan_entry_ts="2026-11-17T07:00:00+00:00",
+        reference_price=4100., sl_distance=100., tp_distance=300.,
+        plan_sl=4000., plan_tp=4400.,
+    )]
+    failed = FakeTelegram(failures=1)
+    statuses = shadow.deliver_telegram(records, tmp_path, now, failed)
+    assert len(statuses) == 1 and "will retry" in statuses[0]
+    assert "token-secret" not in statuses[0] and "chat-secret" not in statuses[0]
+    accepted = FakeTelegram()
+    assert shadow.deliver_telegram(records, tmp_path, now, accepted) == [
+        "Telegram: NEW accepted for XAUUSD."
+    ]
+    assert len(accepted.messages) == 1
+
+
+def test_cap_exit_is_a_manual_action(tmp_path: Path):
+    now = pd.Timestamp("2026-11-17 05:00Z")
+    _seed_telegram_history(tmp_path, now)
+    record = _telegram_record(
+        "USATECHIDXUSD", "MNQ", state="EXITED", side=1,
+        entry_ts="2026-10-01T07:00:00+00:00", exit_ts="2026-11-16T23:00:00+00:00",
+        exit_reason="cap", net_R=.2,
+    )
+    client = FakeTelegram()
+    shadow.deliver_telegram([record], tmp_path, now, client)
+    assert client.messages == [
+        "ACTION: MNQ CAP EXIT — close the position manually now. Entry "
+        "2026-10-01T07:00:00+00:00; model exit 2026-11-16T23:00:00+00:00; "
+        "result +0.20R net."
+    ]
+
+
+def test_weekly_heartbeat_only_on_monday(tmp_path: Path):
+    monday = pd.Timestamp("2026-11-16 05:00Z")
+    _seed_telegram_history(tmp_path, monday)
+    record = _telegram_record(
+        "BTCUSDT", "MBT", state="OPEN", side=1,
+        entry_ts="2026-11-10T07:00:00+00:00", entry_price=80000., sl=76000.,
+        tp=92000., unrealised_R=.25, cap_session_end="2026-12-21T22:00:00+00:00",
+    )
+    client = FakeTelegram()
+    shadow.deliver_telegram([record], tmp_path, monday, client)
+    assert len(client.messages) == 1
+    assert "weekly heartbeat" in client.messages[0] and "MBT OPEN LONG" in client.messages[0]
+    tuesday = pd.Timestamp("2026-11-17 05:00Z")
+    assert shadow.deliver_telegram([record], tmp_path, tuesday, client) == []
+    assert len(client.messages) == 1
+
+
+def test_connection_test_uses_client_without_exposing_credentials():
+    client = FakeTelegram()
+    assert shadow.test_telegram(client) == "Telegram connection test accepted."
+    assert client.messages == ["Swing v1 Telegram connection test — delivery OK."]
+
+
+def test_connection_test_failure_is_redacted():
+    with pytest.raises(RuntimeError) as caught:
+        shadow.test_telegram(FakeTelegram(failures=1))
+    assert "token-secret" not in str(caught.value)
+    assert "chat-secret" not in str(caught.value)
+    assert "[REDACTED]" in str(caught.value)
+
+
+def test_send_failure_does_not_break_shadow_audit(monkeypatch, tmp_path: Path):
+    now = pd.Timestamp("2026-11-17 05:00Z")
+    record = _telegram_record(
+        "BTCUSDT", "MBT", side=1, plan_entry_ts="2026-11-17T07:00:00+00:00",
+        reference_price=80000., sl_distance=4000., tp_distance=12000.,
+        plan_sl=76000., plan_tp=92000.,
+    )
+    monkeypatch.setattr(shadow, "MARKETS", ("BTCUSDT",))
+    monkeypatch.setattr(shadow.s1, "load_minutes", lambda *args, **kwargs: object())
+    monkeypatch.setattr(shadow, "analyze_market", lambda *args, **kwargs: (record, "MBT block"))
+    output = shadow.run(
+        tmp_path / "data", tmp_path / "shadow", now=now, refresh=False,
+        send=True, telegram_client=FakeTelegram(failures=1),
+    )
+    audit = pd.read_csv(tmp_path / "shadow/swing_v1.csv")
+    assert len(audit) == 1 and audit.market.iloc[0] == "BTCUSDT"
+    assert not (tmp_path / "shadow/telegram_sent.csv").exists()
+    assert "will retry" in output
+    assert "token-secret" not in output and "chat-secret" not in output
