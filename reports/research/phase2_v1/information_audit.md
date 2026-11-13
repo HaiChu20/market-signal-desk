@@ -6,7 +6,17 @@ Runtime: 45.33 minutes; peak RSS: 9.32 GiB.
 
 ## Label correctness
 
-Direct bar-path recomputation: 30/30 labels matched outcome, entry/exit timestamps and prices, gross R and net R.
+Direct bar-path recomputation: 30/30 randomly selected labels matched outcome, entry/exit timestamps and prices, gross R and net R. The recomputation used the nanosecond-normalized pure-Python reference and the stored declared deadline independently; these random rows resolved before the deadline and therefore did **not** test the subsequently discovered max-hold timestamp-unit bug.
+
+**Known label defect:** the wide-label Rust input converted `datetime64[us]` timestamps as if they were nanoseconds, so some CFD time deadlines did not fire. The following DEV scan is `exit_ts > deadline_ts`; results using affected CFD labels are contaminated and must be rerun after the owning worker rebuilds them. Forward-return ICs below are unaffected because they use nanosecond NumPy timestamps plus `searchsorted`, not the label kernel.
+
+| Market | DEV labels | Exit after deadline | Share |
+|---|---:|---:|---:|
+| USATECHIDXUSD | 4,561,550 | 50,930 | 1.1165% |
+| USA500IDXUSD | 4,453,650 | 90,309 | 2.0278% |
+| XAUUSD | 17,923,250 | 250,011 | 1.3949% |
+| BTCUSDT | 5,253,450 | 0 | 0.0000% |
+| ETHUSDT | 5,253,450 | 0 | 0.0000% |
 
 ## Feature coverage and model inputs
 

@@ -8,6 +8,7 @@ from msd.research.information_audit import (
     DEV_END,
     _asof_features,
     _cost_atr,
+    audit_deadline_overruns,
     _effective_daily_dvol,
     run,
 )
@@ -62,3 +63,14 @@ def test_asof_join_is_causal_under_future_perturbation(tmp_path: Path):
 def test_audit_rejects_test_period_before_reading_data(tmp_path: Path):
     with pytest.raises(ValueError, match="cannot load 2023"):
         run(tmp_path, tmp_path, tmp_path / "out.md", end=DEV_END + pd.Timedelta(days=1))
+
+
+def test_deadline_audit_counts_only_dev_overruns(tmp_path: Path):
+    target=tmp_path / "TEST"
+    target.mkdir()
+    pd.DataFrame({
+        "exit_ts": pd.to_datetime(["2022-01-02T00:00Z", "2022-01-01T00:00Z", "2023-01-02T00:00Z"]),
+        "deadline_ts": pd.to_datetime(["2022-01-01T00:00Z", "2022-01-02T00:00Z", "2023-01-01T00:00Z"]),
+    }).to_parquet(target / "2022-01.parquet",index=False)
+    result=audit_deadline_overruns(tmp_path,symbols=("TEST",))[0]
+    assert result == {"symbol":"TEST","labels":2,"exit_after_deadline":1,"share":0.5}

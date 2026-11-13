@@ -341,6 +341,22 @@ def audit_labels(data_root: Path, labels_root: Path, samples: int=30, seed: int=
     return {"samples":len(records),"passed":sum(row["ok"] for row in records),"rows":records}
 
 
+def audit_deadline_overruns(labels_root: Path, symbols=SYMBOLS) -> list[dict]:
+    """Count stored exits after their declared maximum-hold deadline."""
+    rows=[]
+    for symbol in symbols:
+        total=overruns=0
+        for path in sorted((labels_root/symbol).glob("*.parquet")):
+            part=pd.read_parquet(path,columns=["exit_ts","deadline_ts"])
+            exit_ts=pd.to_datetime(part.exit_ts,utc=True).astype("datetime64[ns, UTC]")
+            deadline=pd.to_datetime(part.deadline_ts,utc=True).astype("datetime64[ns, UTC]")
+            dev=exit_ts.lt(DEV_END)
+            total+=int(dev.sum());overruns+=int((dev & exit_ts.gt(deadline)).sum())
+        rows.append({"symbol":symbol,"labels":total,"exit_after_deadline":overruns,
+                     "share":overruns/total if total else np.nan})
+    return rows
+
+
 def analyse_market(data_root: Path, labels_root: Path, symbol: str, start: pd.Timestamp,
                    end: pd.Timestamp, anchor_limit: int | None=None) -> tuple[dict,pd.DataFrame]:
     config=load_config();dense,flow=_feature_union(data_root,symbol,config);years=[]
@@ -371,7 +387,8 @@ def analyse_market(data_root: Path, labels_root: Path, symbol: str, start: pd.Ti
 
 def write_report(output: Path, family_audit: list[dict], label_audit: dict,
                  market_results: list[dict], ic: pd.DataFrame, runtime: float,
-                 peak_rss_gib: float | None = None) -> None:
+                 peak_rss_gib: float | None = None,
+                 deadline_audit: list[dict] | None = None) -> None:
     peak_rss_gib=_peak_rss_gib() if peak_rss_gib is None else peak_rss_gib
     output.parent.mkdir(parents=True,exist_ok=True);csv_path=output.with_name("information_ic.csv");ic.to_csv(csv_path,index=False)
     coverage_path=output.with_name("information_feature_coverage.csv")
@@ -385,7 +402,14 @@ def write_report(output: Path, family_audit: list[dict], label_audit: dict,
     lines=["# Phase 2 DEV information and correctness audit","",
         "**DEV only: all decisions, targets and label ends are before 2023-01-01. Test and Final were not loaded. Analysis only; no rules, thresholds or ledger rows were changed.**","",
         f"Runtime: {runtime/60:.2f} minutes; peak RSS: {peak_rss_gib:.2f} GiB.","",
-        "## Label correctness","",f"Direct bar-path recomputation: {label_audit['passed']}/{label_audit['samples']} labels matched outcome, entry/exit timestamps and prices, gross R and net R.","",
+        "## Label correctness","",f"Direct bar-path recomputation: {label_audit['passed']}/{label_audit['samples']} randomly selected labels matched outcome, entry/exit timestamps and prices, gross R and net R. The recomputation used the nanosecond-normalized pure-Python reference and the stored declared deadline independently; these random rows resolved before the deadline and therefore did **not** test the subsequently discovered max-hold timestamp-unit bug.",""]
+    if deadline_audit:
+        lines += ["**Known label defect:** the wide-label Rust input converted `datetime64[us]` timestamps as if they were nanoseconds, so some CFD time deadlines did not fire. The following DEV scan is `exit_ts > deadline_ts`; results using affected CFD labels are contaminated and must be rerun after the owning worker rebuilds them. Forward-return ICs below are unaffected because they use nanosecond NumPy timestamps plus `searchsorted`, not the label kernel.","",
+                  "| Market | DEV labels | Exit after deadline | Share |","|---|---:|---:|---:|"]
+        for row in deadline_audit:
+            lines.append(f"| {row['symbol']} | {row['labels']:,} | {row['exit_after_deadline']:,} | {row['share']:.4%} |")
+        lines.append("")
+    lines += [
         "## Feature coverage and model inputs","",
         f"The completed family runner supplied explicit feature lists to ResidualModel. Therefore its automatic ≥50% coverage selection was bypassed: `actual passed` below is the configured count, while `eligible at ≥50%` shows what the automatic path would have retained. Per-feature values are in `{coverage_path.name}`.","",
         "| Family | Market | Training anchors | Actual passed | Eligible at ≥50% | All-NaN source features | Causal stamps |","|---|---|---:|---:|---:|---:|---|"]
@@ -419,7 +443,9 @@ def write_report(output: Path, family_audit: list[dict], label_audit: dict,
               "No model, threshold, rule or trial-ledger entry was changed by this audit.",""]
     output.write_text("\n".join(lines))
     detail=output.with_name("information_audit_details.json")
-    detail.write_text(json.dumps(_jsonable({"runtime_seconds":runtime,"peak_rss_gib":peak_rss_gib,"label_audit":label_audit,"family_audit":family_audit,"markets":market_results}),indent=2,allow_nan=False)+"\n")
+    detail.write_text(json.dumps(_jsonable({"runtime_seconds":runtime,"peak_rss_gib":peak_rss_gib,
+        "label_audit":label_audit,"deadline_audit":deadline_audit or [],
+        "family_audit":family_audit,"markets":market_results}),indent=2,allow_nan=False)+"\n")
 
 
 def _jsonable(value):
@@ -437,6 +463,7 @@ def run(data_root: Path, labels_root: Path, output: Path, *, symbols=SYMBOLS,
     end=pd.Timestamp(end);end=end.tz_localize("UTC") if end.tzinfo is None else end.tz_convert("UTC")
     if end>DEV_END:raise ValueError("Audit cannot load 2023+ data")
     label=audit_labels(data_root,labels_root,label_samples,symbols=symbols)
+    deadline_audit=audit_deadline_overruns(labels_root,symbols=symbols)
     family_rows=[]
     if not skip_family_audit:
         for family in families:
@@ -447,7 +474,8 @@ def run(data_root: Path, labels_root: Path, output: Path, *, symbols=SYMBOLS,
         markets.append(result)
         if len(table):tables.append(table)
     ic=pd.concat(tables,ignore_index=True) if tables else pd.DataFrame()
-    write_report(output,family_rows,label,markets,ic,time.perf_counter()-started);return output
+    write_report(output,family_rows,label,markets,ic,time.perf_counter()-started,
+                 deadline_audit=deadline_audit);return output
 
 
 def main() -> None:
