@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 
 from msd.research import family_random_v2 as correction
-from msd.research.family_random_rerun import compare_jobs
+from msd.research.family_random_rerun import _card_unit,compare_jobs
 
 
 def _fixture(tmp_path):
@@ -59,3 +59,13 @@ def test_rerun_comparison_checks_oof_and_selected_metrics():
     result=compare_jobs(original,rerun)
     assert not result["brier_match"]
     assert not result["deterministic"]
+
+
+def test_determinism_input_is_read_from_report_card(tmp_path):
+    cards=tmp_path/"cards";cards.mkdir()
+    (cards/"phase2_f4_regime_USATECHIDXUSD_dev.json").write_text(json.dumps({
+        "pooled":{"n":15,"net_avg_R":.15,"hit_rate":.8,"brier":.18,
+                  "row_accounting":{"assembled_rows":4561550}}}))
+    unit=_card_unit(tmp_path,"f4_regime","USATECHIDXUSD")
+    assert unit["candidates"]==4561550
+    assert unit["pooled"]["n"]==15

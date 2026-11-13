@@ -47,6 +47,16 @@ def _sha256(path: Path) -> str | None:
     return hashlib.sha256(path.read_bytes()).hexdigest() if path.exists() else None
 
 
+def _card_unit(output: Path, family: str, symbol: str) -> dict:
+    path=output/"cards"/f"phase2_{family}_{symbol}_dev.json"
+    card=json.loads(path.read_text());pooled=card["pooled"]
+    accounting=pooled.get("row_accounting",{})
+    if "assembled_rows" not in accounting:
+        raise ValueError(f"original card lacks OOF row accounting: {path}")
+    return {"family":family,"symbol":symbol,"candidates":accounting["assembled_rows"],
+            "pooled":pooled}
+
+
 def _write_determinism(path: Path, rows: list[dict], ledger_unchanged: bool) -> None:
     table=pd.DataFrame(rows);table.to_csv(path.with_suffix(".csv"),index=False)
     lines=["# Phase 2 family signal determinism rerun","",
@@ -74,8 +84,8 @@ def run(data_root: Path, labels_root: Path, original_output: Path,
                 "--persist-signals-root",str(signals_root),"--skip-random-benchmark"]
             with (logs/f"{family}_{symbol}.log").open("w") as stream:
                 subprocess.run(command,stdout=stream,stderr=subprocess.STDOUT,check=True)
-            original=json.loads((original_output/"jobs"/f"{family}_{symbol}.json").read_text())
-            rerun=json.loads((rerun_output/"jobs"/f"{family}_{symbol}.json").read_text())
+            original=_card_unit(original_output,family,symbol)
+            rerun=_card_unit(rerun_output,family,symbol)
             rows.append(compare_jobs(original,rerun))
     ledger_unchanged=_sha256(ledger)==ledger_before
     _write_determinism(rerun_root/"families_rerun_determinism.md",rows,ledger_unchanged)
