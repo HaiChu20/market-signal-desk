@@ -458,3 +458,4 @@ Append-only notes from the autonomous review loop while the user sleeps.
 - 05:23 audit done (45 min, 9.3 GiB, exit 0). Labels 30/30 recomputed OK; causal joins OK. Findings: f3 order flow on CFDs mostly NaN (6 of 84 features >=50% coverage); direction IC tiny, volatility very predictable; crypto 15m reversal at about 0.3x cost. Bug: CFD median cost = 0 in the audit. Notes at scratchpad/audit_review.txt for 33128ce1 at 06:55.
 - 05:45 hourly: workers still on the usage limit (resume cron 06:55). Supervisor code-read of E3: sign, DST and executable prices look correct, so the negative E3 result is likely real. Disk 200 GiB.
 - 06:45 hourly: workers still on the usage limit until 06:51; resume cron f2b20f5b fires 06:55. Disk 200 GiB.
+- 06:55 resumed both workers: 2dcf8f09 adds tests and sends the real E1-E3 command (skip-build, deadline 08:00); 33128ce1 fixes the CFD cost=0 bug and finishes the audit report (due 07:50).
