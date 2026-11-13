@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import subprocess
 import tempfile
+import time
 
 import pandas as pd
 import pyarrow.parquet as pq
@@ -21,6 +22,7 @@ from msd.processing.pipeline import (
     _adjusted_price_view,
     _feature_label_bars,
     _modelled_spread,
+    replay_events_only,
 )
 from msd.processing.timeframes import build_timeframe
 from msd.processing.wide_v1 import _bars, _event_jobs, _funding
@@ -73,11 +75,17 @@ def _assert_frozen_provenance() -> None:
         raise RuntimeError(f"Donchian detector differs from frozen commit {FROZEN_CODE}")
 
 
-def _month_paths(root: Path, start: pd.Timestamp) -> list[Path]:
+def _month_paths(
+    root: Path, start: pd.Timestamp, end_exclusive: pd.Timestamp | None = None
+) -> list[Path]:
     return sorted(
         path
         for path in root.glob("[0-9][0-9][0-9][0-9]-[0-9][0-9].parquet")
         if path.stem >= start.strftime("%Y-%m")
+        and (
+            end_exclusive is None
+            or pd.Timestamp(f"{path.stem}-01", tz="UTC") < end_exclusive
+        )
     )
 
 
@@ -175,12 +183,14 @@ def input_inventory(data_root: Path) -> dict:
     }
 
 
-def _read_detection_bars(data_root: Path, symbol: str, end: pd.Timestamp) -> pd.DataFrame:
-    paths = _month_paths(data_root / "bars" / SOURCE[symbol] / symbol, WARMUP_START)
-    parts = [pd.read_parquet(path) for path in paths if path.stem <= end.strftime("%Y-%m")]
+def _read_detection_bars(
+    data_root: Path, symbol: str, start: pd.Timestamp, end: pd.Timestamp
+) -> pd.DataFrame:
+    paths = _month_paths(data_root / "bars" / SOURCE[symbol] / symbol, start, end)
+    parts = [pd.read_parquet(path) for path in paths]
     frame = pd.concat(parts, ignore_index=True)
     frame["ts"] = pd.to_datetime(frame.ts, utc=True)
-    frame = frame[(frame.ts >= WARMUP_START) & (frame.ts < end)]
+    frame = frame[(frame.ts >= start) & (frame.ts < end)]
     frame = frame.sort_values("ts").drop_duplicates("ts").reset_index(drop=True)
     frame = _feature_label_bars(_adjusted_price_view(frame))
     frame = _modelled_spread(frame, symbol)
@@ -234,19 +244,75 @@ def _write_events(frame: pd.DataFrame, root: Path, symbol: str) -> list[dict]:
     return records
 
 
-def generate_events(data_root: Path, event_root: Path) -> Path:
-    """Recreate frozen Donchian events from minute bars with 2024 warm-up."""
+def _detection_inventory(
+    data_root: Path,
+    warmup_start: pd.Timestamp,
+    score_start: pd.Timestamp,
+    end_exclusive: pd.Timestamp,
+) -> dict:
+    rows = {}
+    ends = {}
+    for symbol in SYMBOLS:
+        paths = _month_paths(
+            data_root / "bars" / SOURCE[symbol] / symbol,
+            warmup_start,
+            end_exclusive,
+        )
+        label = f"{symbol} detector bars"
+        _require_columns(
+            paths,
+            {"ts", *(f"{side}_{field}" for side in ("bid", "ask") for field in "ohlc")},
+            label,
+        )
+        start, available_end = _range(paths, label)
+        _require_months(paths, warmup_start, end_exclusive, label)
+        rows[symbol] = {
+            "detector_source": SOURCE[symbol],
+            "detector_files": [str(path) for path in paths],
+            "detector_range": [start.isoformat(), available_end.isoformat()],
+            "end_exclusive": end_exclusive.isoformat(),
+        }
+        ends[symbol] = end_exclusive.isoformat()
+    return {
+        "warmup_start": warmup_start.isoformat(),
+        "score_start": score_start.isoformat(),
+        "symbols": rows,
+        "end_exclusive": ends,
+    }
+
+
+def generate_events(
+    data_root: Path,
+    event_root: Path,
+    *,
+    warmup_start: pd.Timestamp = WARMUP_START,
+    score_start: pd.Timestamp = SCORE_START,
+    end_exclusive: pd.Timestamp | None = None,
+) -> Path:
+    """Recreate frozen Donchian events from minute bars for an explicit window."""
     _assert_frozen_provenance()
     if event_root.exists():
         raise FileExistsError(f"event root already exists: {event_root}")
-    inventory = input_inventory(data_root)
+    warmup_start = pd.Timestamp(warmup_start)
+    score_start = pd.Timestamp(score_start)
+    if end_exclusive is None:
+        if warmup_start != WARMUP_START or score_start != SCORE_START:
+            raise ValueError("a non-Final generation window requires end_exclusive")
+        inventory = input_inventory(data_root)
+    else:
+        end_exclusive = pd.Timestamp(end_exclusive)
+        if not warmup_start < score_start < end_exclusive:
+            raise ValueError("generation requires warmup_start < score_start < end_exclusive")
+        inventory = _detection_inventory(
+            data_root, warmup_start, score_start, end_exclusive
+        )
     event_root.parent.mkdir(parents=True, exist_ok=True)
     temp = Path(tempfile.mkdtemp(prefix=f".{event_root.name}-", dir=event_root.parent))
     files = []
     try:
         for symbol in SYMBOLS:
             end = pd.Timestamp(inventory["end_exclusive"][symbol])
-            bars = _read_detection_bars(data_root, symbol, end)
+            bars = _read_detection_bars(data_root, symbol, warmup_start, end)
             active = bars.loc[_active_mask(bars, symbol)].reset_index(drop=True)
             features = _detector_features(bars, symbol)
             events = donchian_atr_breakout.detect(features, pd.DataFrame(), active)
@@ -256,7 +322,7 @@ def generate_events(data_root: Path, event_root: Path) -> Path:
                 frame["known_at"] = pd.to_datetime(frame.known_at, utc=True)
                 atr = features.set_index("ts")["1h_atr14"]
                 frame["1h_atr14"] = frame.ts.map(atr).astype(float)
-                frame = frame[(frame.ts >= SCORE_START) & (frame.ts < end)].copy()
+                frame = frame[(frame.ts >= score_start) & (frame.ts < end)].copy()
                 frame["event_key"] = _event_identity(frame)
                 frame = frame.sort_values(["known_at", "event_key"]).drop_duplicates("event_key")
             files.extend(_write_events(frame, temp, symbol))
@@ -265,6 +331,8 @@ def generate_events(data_root: Path, event_root: Path) -> Path:
             "frozen_code": FROZEN_CODE,
             "wide_config_sha256": WIDE_CONFIG_SHA,
             "config_hash": _config_hash(),
+            "warmup_start": warmup_start.isoformat(),
+            "score_start": score_start.isoformat(),
             "inventory": inventory,
             "files": files,
         }
@@ -276,6 +344,163 @@ def generate_events(data_root: Path, event_root: Path) -> Path:
     return event_root / "manifest.json"
 
 
+def _replay_requirements(data_root: Path) -> list[str]:
+    """List missing persisted inputs without opening any 2023+ data file."""
+    missing = []
+    required = {"ts", "known_at", "1m_atr14", "1h_atr14", "1h_donchian20_position"}
+    months = pd.period_range("2020-12", "2022-12", freq="M")
+    for symbol in SYMBOLS:
+        feature_root = data_root / "features" / symbol
+        if not feature_root.exists():
+            missing.append(
+                f"{feature_root} directory (needs 2020-12..2022-12 monthly parquet with "
+                f"{', '.join(sorted(required))})"
+            )
+        else:
+            for month in months:
+                path = feature_root / f"{month}.parquet"
+                if not path.exists():
+                    missing.append(str(path))
+                else:
+                    absent = required - set(pq.read_schema(path).names)
+                    if absent:
+                        missing.append(f"{path} columns {', '.join(sorted(absent))}")
+        level = data_root / "levels" / f"{symbol}.parquet"
+        if not level.exists():
+            missing.append(str(level))
+        source = data_root / "bars" / SOURCE[symbol] / symbol
+        for month in months:
+            path = source / f"{month}.parquet"
+            if not path.exists():
+                missing.append(str(path))
+    return missing
+
+
+def _parity_frame(root: Path, symbol: str, data_root: Path, *, reference: bool) -> pd.DataFrame:
+    parts = []
+    for path in sorted((root / symbol).glob("2022-*.parquet")):
+        frame = pd.read_parquet(path)
+        parts.append(frame[frame.method.eq(RULE_NAME)])
+    if not parts:
+        return pd.DataFrame(columns=["ts", "known_at", "side", "1h_atr14"])
+    frame = pd.concat(parts, ignore_index=True)
+    frame["ts"] = pd.to_datetime(frame.ts, utc=True).astype("datetime64[ns, UTC]")
+    frame["known_at"] = pd.to_datetime(frame.known_at, utc=True).astype(
+        "datetime64[ns, UTC]"
+    )
+    frame = frame.sort_values(["ts", "known_at", "side"]).drop_duplicates(
+        ["ts", "known_at", "side"]
+    )
+    if reference:
+        feature_parts = [
+            pd.read_parquet(path, columns=["ts", "1h_atr14"])
+            for path in sorted((data_root / "features" / symbol).glob("2022-*.parquet"))
+        ]
+        features = pd.concat(feature_parts, ignore_index=True)
+        features["ts"] = pd.to_datetime(features.ts, utc=True).astype(
+            "datetime64[ns, UTC]"
+        )
+        atr = features.drop_duplicates("ts", keep="last").set_index("ts")["1h_atr14"]
+        frame["1h_atr14"] = frame.ts.map(atr).astype(float)
+    return frame[["ts", "known_at", "side", "1h_atr14"]].reset_index(drop=True)
+
+
+def _compare_parity(left: pd.DataFrame, right: pd.DataFrame) -> dict:
+    merged = left.merge(
+        right,
+        on=["ts", "side"],
+        how="outer",
+        suffixes=("_generated", "_reference"),
+        indicator=True,
+    )
+    both = merged._merge.eq("both")
+    known_mismatch = both & merged.known_at_generated.ne(merged.known_at_reference)
+    atr_mismatch = both & merged["1h_atr14_generated"].ne(
+        merged["1h_atr14_reference"]
+    )
+    return {
+        "generated_events": len(left),
+        "reference_events": len(right),
+        "generated_only": int(merged._merge.eq("left_only").sum()),
+        "reference_only": int(merged._merge.eq("right_only").sum()),
+        "known_at_mismatches": int(known_mismatch.sum()),
+        "atr_mismatches": int(atr_mismatch.sum()),
+        "side_or_ts_mismatches": int((~both).sum()),
+        "exact": bool(
+            len(left) == len(right)
+            and not (~both).any()
+            and not known_mismatch.any()
+            and not atr_mismatch.any()
+        ),
+    }
+
+
+def run_dev_parity(data_root: Path, parity_root: Path) -> Path:
+    """Generate 2022 events and compare with the original persisted-feature replay."""
+    report = parity_root / "parity_report.json"
+    if parity_root.exists():
+        raise FileExistsError(f"parity root already exists: {parity_root}")
+    parity_root.mkdir(parents=True)
+    generated_root = parity_root / "generated"
+    started = time.perf_counter()
+    generate_events(
+        data_root,
+        generated_root,
+        warmup_start=pd.Timestamp("2021-01-01", tz="UTC"),
+        score_start=pd.Timestamp("2022-01-01", tz="UTC"),
+        end_exclusive=pd.Timestamp("2023-01-01", tz="UTC"),
+    )
+    generated_seconds = time.perf_counter() - started
+    generated = {
+        symbol: _parity_frame(generated_root, symbol, data_root, reference=False)
+        for symbol in SYMBOLS
+    }
+    missing = _replay_requirements(data_root)
+    payload = {
+        "window": "2022-01-01 inclusive / 2023-01-01 exclusive",
+        "warmup_start": "2021-01-01T00:00:00+00:00",
+        "hard_end_exclusive": "2023-01-01T00:00:00+00:00",
+        "generated_runtime_seconds": generated_seconds,
+        "symbols": {
+            symbol: {"generated_events": len(generated[symbol])} for symbol in SYMBOLS
+        },
+    }
+    if missing:
+        payload.update(
+            status="BLOCKED_MISSING_REPLAY_INPUTS",
+            missing_replay_inputs=missing,
+            replay_runtime_seconds=None,
+            mismatches=None,
+        )
+    else:
+        replay_root = parity_root / "replay_events_only"
+        replay_started = time.perf_counter()
+        for symbol in SYMBOLS:
+            replay_events_only(
+                symbol,
+                2021,
+                2022,
+                replay_root,
+                data_root,
+                method_names={RULE_NAME},
+                hard_end_exclusive=pd.Timestamp("2023-01-01", tz="UTC"),
+            )
+        replay_seconds = time.perf_counter() - replay_started
+        comparisons = {}
+        for symbol in SYMBOLS:
+            reference = _parity_frame(replay_root, symbol, data_root, reference=True)
+            comparisons[symbol] = _compare_parity(generated[symbol], reference)
+            payload["symbols"][symbol].update(comparisons[symbol])
+        payload.update(
+            status="PASS" if all(item["exact"] for item in comparisons.values()) else "FAIL",
+            replay_runtime_seconds=replay_seconds,
+            mismatches=comparisons,
+        )
+    payload["total_runtime_seconds"] = time.perf_counter() - started
+    report.write_text(json.dumps(_finite(payload), indent=2, allow_nan=False) + "\n")
+    return report
+
+
 def _load_manifest(event_root: Path) -> dict:
     path = event_root / "manifest.json"
     manifest = json.loads(path.read_text())
@@ -284,6 +509,8 @@ def _load_manifest(event_root: Path) -> dict:
         "frozen_code": FROZEN_CODE,
         "wide_config_sha256": WIDE_CONFIG_SHA,
         "config_hash": _config_hash(),
+        "warmup_start": WARMUP_START.isoformat(),
+        "score_start": SCORE_START.isoformat(),
     }
     for key, value in expected.items():
         if manifest.get(key) != value:
@@ -531,15 +758,20 @@ def main() -> None:
     parser.add_argument("--event-root", type=Path, default=Path("data/final_v2_donchian_events"))
     parser.add_argument("--output", type=Path, default=Path("reports/research/final_v2"))
     parser.add_argument("--ledger", type=Path, default=Path("reports/trials.csv"))
+    parser.add_argument("--parity-root", type=Path)
     action = parser.add_mutually_exclusive_group(required=True)
     action.add_argument("--check-inputs", action="store_true")
     action.add_argument("--generate-events", action="store_true")
     action.add_argument("--run-final-once", action="store_true")
+    action.add_argument("--parity-dev-2022", action="store_true")
     args = parser.parse_args()
     if args.check_inputs:
         print(json.dumps(input_inventory(args.data_root), indent=2))
     elif args.generate_events:
         print(generate_events(args.data_root, args.event_root))
+    elif args.parity_dev_2022:
+        root = args.parity_root or args.data_root / "tmp_parity" / "donchian_2022"
+        print(run_dev_parity(args.data_root, root))
     else:
         print(run(args.data_root, args.event_root, args.output, args.ledger)["result"]["verdict"])
 

@@ -98,6 +98,41 @@ def test_verdict_uses_only_strictly_positive_pooled_net_r():
     assert final._verdict(None) == "DROP"
 
 
+def test_parity_month_listing_never_includes_2023(tmp_path: Path):
+    root = tmp_path / "bars"
+    for month in ("2021-01", "2022-12", "2023-01"):
+        _write_stamp(root / f"{month}.parquet", f"{month}-01")
+    paths = final._month_paths(
+        root,
+        pd.Timestamp("2021-01-01", tz="UTC"),
+        pd.Timestamp("2023-01-01", tz="UTC"),
+    )
+    assert [path.stem for path in paths] == ["2021-01", "2022-12"]
+
+
+def test_parity_comparison_requires_exact_timestamp_side_known_at_and_atr():
+    ts = pd.Timestamp("2022-01-03", tz="UTC")
+    base = pd.DataFrame(
+        {
+            "ts": [ts],
+            "known_at": [ts + pd.Timedelta(minutes=1)],
+            "side": [1],
+            "1h_atr14": [2.0],
+        }
+    )
+    assert final._compare_parity(base, base.copy())["exact"]
+    changed = base.copy()
+    changed["1h_atr14"] = 2.0001
+    result = final._compare_parity(base, changed)
+    assert not result["exact"] and result["atr_mismatches"] == 1
+
+
+def test_replay_preflight_names_deleted_feature_store(tmp_path: Path):
+    missing = final._replay_requirements(tmp_path)
+    for symbol in final.SYMBOLS:
+        assert any(f"features/{symbol}" in item for item in missing)
+
+
 def test_run_writes_exact_outputs_and_one_ledger_row_once(tmp_path: Path, monkeypatch):
     data = tmp_path / "data"
     events = tmp_path / "events"
