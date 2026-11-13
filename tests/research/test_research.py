@@ -254,3 +254,25 @@ def test_btc_random_direction_uses_pipeline_executable_loader(monkeypatch, tmp_p
                            'spread_R': [999.], 'planned_risk': [10.], 'net_R': [0.]})
     _, count, _ = benchmark.random_direction(signal, tmp_path, seeds=2)
     assert count == 1 and calls == ['BTCUSDT']
+
+
+def test_one_shot_test_ledger_rejects_duplicate_config(tmp_path):
+    import json
+    from msd.research.ledger import FIELDS, append_test_trial_once, read_trials
+    path=tmp_path/'trials.csv'
+    row=dict(zip(FIELDS,['test-a','2026-11-13','frozen-sha','rule-a',json.dumps({}),
+                         '2023 / 2024','test',json.dumps({'pass':True}),'preregistered']))
+    append_test_trial_once(path,row)
+    assert read_trials(path)==[row]
+    duplicate={**row,'run_id':'test-a-again'}
+    with pytest.raises(ValueError,match='already present'):
+        append_test_trial_once(path,duplicate)
+
+
+def test_exam_final_boundary_is_hard():
+    from msd.research.test_exam_v1 import _assert_test_boundary
+    safe=pd.DataFrame({'ts':[pd.Timestamp('2024-12-31 23:59',tz='UTC')]})
+    _assert_test_boundary(safe,'ts')
+    locked=pd.DataFrame({'ts':[pd.Timestamp('2025-01-01',tz='UTC')]})
+    with pytest.raises(AssertionError,match='locked Final'):
+        _assert_test_boundary(locked,'ts')

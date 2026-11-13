@@ -57,7 +57,7 @@ def random_direction(signals:pd.DataFrame,data_root:Path,seeds=200):
         if not rows:continue
         if first_hit_batch is not None:
             packed=bars[[c for c in BAR_COLUMNS if c!='ts']].to_numpy(dtype='<f8')
-            stamps=(times.astype('int64').to_numpy()//1_000_000_000).astype('<i8')
+            stamps=(times.to_numpy(dtype='datetime64[ns]').astype(np.int64)//1_000_000_000).astype('<i8')
             results=np.asarray(first_hit_batch(packed.tobytes(),stamps.tobytes(),jobs,11),dtype=float).reshape(-1,9)
             opposite_r=results[:,4]
         else:

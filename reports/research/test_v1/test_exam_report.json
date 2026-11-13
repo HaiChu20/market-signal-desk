@@ -1,0 +1,257 @@
+{
+  "protocol": "test_v1",
+  "period": "test",
+  "test_start": "2023-01-01 00:00:00+00:00",
+  "final_boundary_exclusive": "2025-01-01 00:00:00+00:00",
+  "frozen_code": "a196fdd982e10aa4f3d4dffc08e59382615ce53a",
+  "wide_config_sha256": "1cab0902ea0845a1ab74ff15333ea412a1f16bd6b3b71031afeb4a2da02681dd",
+  "rules": {
+    "funding_extreme_fade": {
+      "n": 96,
+      "signals_per_year": 48.16483516483516,
+      "hit_rate": 0.3541666666666667,
+      "net_avg_R": -0.16330550062678417,
+      "t_stat": -1.2268915369970772,
+      "profit_factor": 0.7596808104631155,
+      "daily_sharpe": -0.9029232104282252,
+      "max_drawdown": -0.09260429153289873,
+      "positive_dev_year_share": 0.0,
+      "per_year": {
+        "2023": {
+          "n": 42,
+          "signals_per_year": 42.53373382624768,
+          "hit_rate": 0.3333333333333333,
+          "net_avg_R": -0.19717414404887257,
+          "t_stat": -1.0040113251783178,
+          "profit_factor": 0.702519956693685,
+          "daily_sharpe": -1.0467820835470654,
+          "max_drawdown": -0.06990669608098465,
+          "positive_dev_year_share": 0.0,
+          "per_year": {
+            "2023": -0.19717414404887254
+          },
+          "spread_1_5x_net_avg_R": -0.20469670364493492,
+          "random_direction_percentile": null,
+          "pbo": null,
+          "grade": "ungraded: development",
+          "brier": null,
+          "brier_skill_vs_p0": null,
+          "deflated_sharpe_ratio": null
+        },
+        "2024": {
+          "n": 54,
+          "signals_per_year": 54.33471074380166,
+          "hit_rate": 0.37037037037037035,
+          "net_avg_R": -0.1369632224096043,
+          "t_stat": -0.7514412417184096,
+          "profit_factor": 0.8022309289588239,
+          "daily_sharpe": -0.7893124420436005,
+          "max_drawdown": -0.04545006861033429,
+          "positive_dev_year_share": 0.0,
+          "per_year": {
+            "2024": -0.13696322240960435
+          },
+          "spread_1_5x_net_avg_R": -0.14195539291101472,
+          "random_direction_percentile": null,
+          "pbo": null,
+          "grade": "ungraded: development",
+          "brier": null,
+          "brier_skill_vs_p0": null,
+          "deflated_sharpe_ratio": null
+        }
+      },
+      "spread_1_5x_net_avg_R": -0.16940471635710477,
+      "random_direction_percentile": 25.0,
+      "pbo": null,
+      "grade": "ungraded: development",
+      "brier": null,
+      "brier_skill_vs_p0": null,
+      "deflated_sharpe_ratio": null,
+      "random_direction_matched_signals": 96,
+      "events": 98,
+      "boundary_dropped": 0,
+      "pass": false,
+      "per_market": {
+        "BTCUSDT": {
+          "n": 96,
+          "signals_per_year": 48.16483516483516,
+          "hit_rate": 0.3541666666666667,
+          "net_avg_R": -0.16330550062678417,
+          "t_stat": -1.2268915369970772,
+          "profit_factor": 0.7596808104631155,
+          "daily_sharpe": -0.9029232104282252,
+          "max_drawdown": -0.09260429153289873,
+          "positive_dev_year_share": 0.0,
+          "per_year": {
+            "2023": -0.19717414404887254,
+            "2024": -0.13696322240960435
+          },
+          "spread_1_5x_net_avg_R": -0.16940471635710477,
+          "random_direction_percentile": null,
+          "pbo": null,
+          "grade": "ungraded: development",
+          "brier": null,
+          "brier_skill_vs_p0": null,
+          "deflated_sharpe_ratio": null
+        }
+      }
+    },
+    "donchian_atr_breakout": {
+      "n": 379,
+      "signals_per_year": 190.23804229466552,
+      "hit_rate": 0.3113456464379947,
+      "net_avg_R": 0.020599042774338033,
+      "t_stat": 0.24684906602440496,
+      "profit_factor": 1.030618142132004,
+      "daily_sharpe": 0.16834098752228746,
+      "max_drawdown": -0.1501663279673776,
+      "positive_dev_year_share": 0.5,
+      "per_year": {
+        "2023": {
+          "n": 177,
+          "signals_per_year": 180.6479230176641,
+          "hit_rate": 0.3163841807909605,
+          "net_avg_R": 0.09259412163687157,
+          "t_stat": 0.7232177992207858,
+          "profit_factor": 1.1368092436408959,
+          "daily_sharpe": 0.6588355679125649,
+          "max_drawdown": -0.10195707270422161,
+          "positive_dev_year_share": 1.0,
+          "per_year": {
+            "2023": 0.09259412163687154
+          },
+          "spread_1_5x_net_avg_R": 0.09083943863559293,
+          "random_direction_percentile": null,
+          "pbo": null,
+          "grade": "ungraded: development",
+          "brier": null,
+          "brier_skill_vs_p0": null,
+          "deflated_sharpe_ratio": null
+        },
+        "2024": {
+          "n": 202,
+          "signals_per_year": 202.90271570986593,
+          "hit_rate": 0.3069306930693069,
+          "net_avg_R": -0.04248575405075323,
+          "t_stat": -0.38862735897069595,
+          "profit_factor": 0.9365157482080991,
+          "daily_sharpe": -0.39917851408517463,
+          "max_drawdown": -0.1344274387511719,
+          "positive_dev_year_share": 0.0,
+          "per_year": {
+            "2024": -0.042485754050753215
+          },
+          "spread_1_5x_net_avg_R": -0.04373198692399233,
+          "random_direction_percentile": null,
+          "pbo": null,
+          "grade": "ungraded: development",
+          "brier": null,
+          "brier_skill_vs_p0": null,
+          "deflated_sharpe_ratio": null
+        }
+      },
+      "spread_1_5x_net_avg_R": 0.019115354300405018,
+      "random_direction_percentile": 74.5,
+      "pbo": null,
+      "grade": "ungraded: development",
+      "brier": null,
+      "brier_skill_vs_p0": null,
+      "deflated_sharpe_ratio": null,
+      "random_direction_matched_signals": 379,
+      "events": 690,
+      "boundary_dropped": 0,
+      "pass": false,
+      "per_market": {
+        "USATECHIDXUSD": {
+          "n": 98,
+          "signals_per_year": 49.494084513533934,
+          "hit_rate": 0.32653061224489793,
+          "net_avg_R": 0.20674956617249493,
+          "t_stat": 1.1324214081469883,
+          "profit_factor": 1.3041158106572226,
+          "daily_sharpe": 0.7915365300627695,
+          "max_drawdown": -0.05309716461242542,
+          "positive_dev_year_share": 1.0,
+          "per_year": {
+            "2023": 0.11154054419417317,
+            "2024": 0.31437715623494555
+          },
+          "spread_1_5x_net_avg_R": 0.20660126075418164,
+          "random_direction_percentile": null,
+          "pbo": null,
+          "grade": "ungraded: development",
+          "brier": null,
+          "brier_skill_vs_p0": null,
+          "deflated_sharpe_ratio": null
+        },
+        "USA500IDXUSD": {
+          "n": 111,
+          "signals_per_year": 55.75121755572108,
+          "hit_rate": 0.2972972972972973,
+          "net_avg_R": 0.1680436248236771,
+          "t_stat": 0.9616195753283732,
+          "profit_factor": 1.2346223635053577,
+          "daily_sharpe": 0.7463387120774022,
+          "max_drawdown": -0.04693346953318411,
+          "positive_dev_year_share": 1.0,
+          "per_year": {
+            "2023": 0.2773738911356562,
+            "2024": 0.04839918244453022
+          },
+          "spread_1_5x_net_avg_R": 0.1680436248236771,
+          "random_direction_percentile": null,
+          "pbo": null,
+          "grade": "ungraded: development",
+          "brier": null,
+          "brier_skill_vs_p0": null,
+          "deflated_sharpe_ratio": null
+        },
+        "XAUUSD": {
+          "n": 81,
+          "signals_per_year": 40.73700516351119,
+          "hit_rate": 0.25925925925925924,
+          "net_avg_R": -0.13072518027692462,
+          "t_stat": -0.7622318960765679,
+          "profit_factor": 0.8194518979432068,
+          "daily_sharpe": -0.5490952505905913,
+          "max_drawdown": -0.0900022904200285,
+          "positive_dev_year_share": 0.5,
+          "per_year": {
+            "2023": 0.04199471877571015,
+            "2024": -0.30776307680587517
+          },
+          "spread_1_5x_net_avg_R": -0.1337703408817484,
+          "random_direction_percentile": null,
+          "pbo": null,
+          "grade": "ungraded: development",
+          "brier": null,
+          "brier_skill_vs_p0": null,
+          "deflated_sharpe_ratio": null
+        },
+        "BTCUSDT": {
+          "n": 89,
+          "signals_per_year": 47.91634934283258,
+          "hit_rate": 0.3595505617977528,
+          "net_avg_R": -0.230545202544131,
+          "t_stat": -2.000590675956075,
+          "profit_factor": 0.591323993784394,
+          "daily_sharpe": -1.4283072326555448,
+          "max_drawdown": -0.13315579786603693,
+          "positive_dev_year_share": 0.0,
+          "per_year": {
+            "2023": -0.2777083816939584,
+            "2024": -0.2110810333711864
+          },
+          "spread_1_5x_net_avg_R": -0.23392864065239138,
+          "random_direction_percentile": null,
+          "pbo": null,
+          "grade": "ungraded: development",
+          "brier": null,
+          "brier_skill_vs_p0": null,
+          "deflated_sharpe_ratio": null
+        }
+      }
+    }
+  },
+  "statement": "The 2025+ Final period was not loaded for decisions or labels."
+}
