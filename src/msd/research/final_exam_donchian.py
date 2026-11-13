@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import gc
 import hashlib
 import json
 import os
@@ -16,7 +17,7 @@ import pyarrow.parquet as pq
 
 from msd.methods import donchian_atr_breakout
 from msd.processing.crypto_perp import apply_perp_costs
-from msd.processing.features import indicator_frame
+from msd.processing.features import build_features, indicator_frame, prepare_feature_cache
 from msd.processing.pipeline import (
     _active_mask,
     _adjusted_price_view,
@@ -24,7 +25,7 @@ from msd.processing.pipeline import (
     _modelled_spread,
     replay_events_only,
 )
-from msd.processing.timeframes import build_timeframe
+from msd.processing.timeframes import build_all_timeframes, build_timeframe
 from msd.processing.wide_v1 import _bars, _event_jobs, _funding
 
 from .gating import gate_open_signals
@@ -344,28 +345,92 @@ def generate_events(
     return event_root / "manifest.json"
 
 
-def _replay_requirements(data_root: Path) -> list[str]:
+def rebuild_dev_features(data_root: Path, feature_root: Path) -> dict:
+    """Call the production feature builder unchanged and persist its replay subset."""
+    if feature_root.exists():
+        raise FileExistsError(f"scratch feature root already exists: {feature_root}")
+    boundary = pd.Timestamp("2023-01-01", tz="UTC")
+    input_start = pd.Timestamp("2020-12-01", tz="UTC") - pd.Timedelta(days=370)
+    columns = ["ts", "known_at", "1m_atr14", "1h_atr14", "1h_donchian20_position"]
+    report = {}
+    for symbol in SYMBOLS:
+        paths = _month_paths(
+            data_root / "bars" / SOURCE[symbol] / symbol, input_start, boundary
+        )
+        assert paths and all(
+            pd.Timestamp(f"{path.stem}-01", tz="UTC") < boundary for path in paths
+        ), f"{symbol} input path reaches 2023+"
+        started = time.perf_counter()
+        bars = _read_detection_bars(data_root, symbol, input_start, boundary)
+        assert pd.to_datetime(bars.ts, utc=True).lt(boundary).all(), (
+            f"{symbol} feature rebuild read a 2023+ bar"
+        )
+        timeframes = build_all_timeframes(bars, symbol)
+        cache = prepare_feature_cache(bars, symbol, timeframes)
+        target = feature_root / symbol
+        target.mkdir(parents=True, exist_ok=True)
+        rows = 0
+        for month in pd.period_range("2020-12", "2022-12", freq="M"):
+            left = pd.Timestamp(month.start_time, tz="UTC")
+            right = pd.Timestamp(month.end_time, tz="UTC") + pd.Timedelta(nanoseconds=1)
+            features = build_features(
+                bars,
+                symbol,
+                timeframes,
+                levels=None,
+                auxiliary=None,
+                cross_asset=None,
+                output_start=left,
+                output_end=right,
+                cache=cache,
+            )
+            absent = set(columns) - set(features)
+            if absent:
+                raise RuntimeError(
+                    f"production feature builder omitted {symbol} {month}: {sorted(absent)}"
+                )
+            selected = features[columns].copy()
+            assert pd.to_datetime(selected.ts, utc=True).lt(boundary).all(), (
+                f"{symbol} feature output reaches 2023+"
+            )
+            selected.to_parquet(target / f"{month}.parquet", index=False, compression="zstd")
+            rows += len(selected)
+        report[symbol] = {
+            "rows": rows,
+            "months": 25,
+            "runtime_seconds": time.perf_counter() - started,
+        }
+        del bars, timeframes, cache, features, selected
+        gc.collect()
+    return report
+
+
+def _replay_requirements(
+    data_root: Path,
+    feature_root: Path | None = None,
+    level_root: Path | None = None,
+) -> list[str]:
     """List missing persisted inputs without opening any 2023+ data file."""
     missing = []
     required = {"ts", "known_at", "1m_atr14", "1h_atr14", "1h_donchian20_position"}
     months = pd.period_range("2020-12", "2022-12", freq="M")
     for symbol in SYMBOLS:
-        feature_root = data_root / "features" / symbol
-        if not feature_root.exists():
+        symbol_feature_root = (feature_root or data_root / "features") / symbol
+        if not symbol_feature_root.exists():
             missing.append(
-                f"{feature_root} directory (needs 2020-12..2022-12 monthly parquet with "
+                f"{symbol_feature_root} directory (needs 2020-12..2022-12 monthly parquet with "
                 f"{', '.join(sorted(required))})"
             )
         else:
             for month in months:
-                path = feature_root / f"{month}.parquet"
+                path = symbol_feature_root / f"{month}.parquet"
                 if not path.exists():
                     missing.append(str(path))
                 else:
                     absent = required - set(pq.read_schema(path).names)
                     if absent:
                         missing.append(f"{path} columns {', '.join(sorted(absent))}")
-        level = data_root / "levels" / f"{symbol}.parquet"
+        level = (level_root or data_root / "levels") / f"{symbol}.parquet"
         if not level.exists():
             missing.append(str(level))
         source = data_root / "bars" / SOURCE[symbol] / symbol
@@ -376,7 +441,13 @@ def _replay_requirements(data_root: Path) -> list[str]:
     return missing
 
 
-def _parity_frame(root: Path, symbol: str, data_root: Path, *, reference: bool) -> pd.DataFrame:
+def _parity_frame(
+    root: Path,
+    symbol: str,
+    feature_root: Path,
+    *,
+    reference: bool,
+) -> pd.DataFrame:
     parts = []
     for path in sorted((root / symbol).glob("2022-*.parquet")):
         frame = pd.read_parquet(path)
@@ -394,7 +465,7 @@ def _parity_frame(root: Path, symbol: str, data_root: Path, *, reference: bool) 
     if reference:
         feature_parts = [
             pd.read_parquet(path, columns=["ts", "1h_atr14"])
-            for path in sorted((data_root / "features" / symbol).glob("2022-*.parquet"))
+            for path in sorted((feature_root / symbol).glob("2022-*.parquet"))
         ]
         features = pd.concat(feature_parts, ignore_index=True)
         features["ts"] = pd.to_datetime(features.ts, utc=True).astype(
@@ -452,15 +523,27 @@ def run_dev_parity(data_root: Path, parity_root: Path) -> Path:
     )
     generated_seconds = time.perf_counter() - started
     generated = {
-        symbol: _parity_frame(generated_root, symbol, data_root, reference=False)
+        symbol: _parity_frame(generated_root, symbol, parity_root, reference=False)
         for symbol in SYMBOLS
     }
-    missing = _replay_requirements(data_root)
+    feature_root = parity_root / "rebuilt_features"
+    rebuild_started = time.perf_counter()
+    feature_build = rebuild_dev_features(data_root, feature_root)
+    feature_build_seconds = time.perf_counter() - rebuild_started
+    level_root = parity_root / "empty_levels_for_donchian"
+    level_root.mkdir()
+    for symbol in SYMBOLS:
+        pd.DataFrame(
+            {"known_at": pd.Series(dtype="datetime64[ns, UTC]")}
+        ).to_parquet(level_root / f"{symbol}.parquet", index=False)
+    missing = _replay_requirements(data_root, feature_root, level_root)
     payload = {
         "window": "2022-01-01 inclusive / 2023-01-01 exclusive",
         "warmup_start": "2021-01-01T00:00:00+00:00",
         "hard_end_exclusive": "2023-01-01T00:00:00+00:00",
         "generated_runtime_seconds": generated_seconds,
+        "feature_rebuild_runtime_seconds": feature_build_seconds,
+        "feature_rebuild": feature_build,
         "symbols": {
             symbol: {"generated_events": len(generated[symbol])} for symbol in SYMBOLS
         },
@@ -484,11 +567,15 @@ def run_dev_parity(data_root: Path, parity_root: Path) -> Path:
                 data_root,
                 method_names={RULE_NAME},
                 hard_end_exclusive=pd.Timestamp("2023-01-01", tz="UTC"),
+                feature_root=feature_root,
+                level_root=level_root,
             )
         replay_seconds = time.perf_counter() - replay_started
         comparisons = {}
         for symbol in SYMBOLS:
-            reference = _parity_frame(replay_root, symbol, data_root, reference=True)
+            reference = _parity_frame(
+                replay_root, symbol, feature_root, reference=True
+            )
             comparisons[symbol] = _compare_parity(generated[symbol], reference)
             payload["symbols"][symbol].update(comparisons[symbol])
         payload.update(
