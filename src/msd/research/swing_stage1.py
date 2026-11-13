@@ -119,17 +119,6 @@ def entry_index(ts: pd.DatetimeIndex, signal_end: pd.Timestamp, sensitivity: boo
     return i if i < len(ts) and ts[i] == target else None
 
 
-def cap_index(ts: pd.DatetimeIndex, entry: int, session_end: pd.DatetimeIndex, mask: np.ndarray) -> int:
-    # Count distinct CME session closes, not calendar days or minute bars.
-    close = session_end[entry]
-    future = pd.Index(session_end[(session_end > close) & mask]).unique()
-    if len(future) < 29:
-        return len(ts)
-    cap_close = future[28]
-    candidates = np.flatnonzero((session_end > cap_close) & mask)
-    return int(candidates[0]) if len(candidates) else len(ts)
-
-
 def exit_trade(ts: pd.DatetimeIndex, prices: np.ndarray, mask: np.ndarray, entry: int,
                side: int, stop: float, target: float, cap: int) -> tuple[int, float, str] | None:
     """Minute OHLC is mid; gap fills use the first eligible minute's open."""

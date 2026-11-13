@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from msd.research.swing_stage1 import (CUT, cap_index, cost_r, daily_bars, entry_index,
+from msd.research.swing_stage1 import (CUT, cost_r, daily_bars, entry_index,
                                        exit_trade, globex, ny_day_end, signals)
 
 
@@ -71,11 +71,6 @@ def test_cap_exit():
     ts = stamps(["2022-03-14 12:00Z", "2022-03-14 12:01Z", "2022-03-14 12:02Z"])
     prices = np.array([[100.]*4, [101.]*4, [102.]*4])
     assert exit_trade(ts, prices, globex(ts), 0, 1, 90., 110., 2) == (2, 102., "cap")
-
-
-def test_cap_after_thirty_trading_sessions():
-    ts = pd.date_range("2022-01-03 12:00Z", periods=32, freq="B")
-    assert cap_index(ts, 0, ny_day_end(ts), globex(ts)) == 30
 
 
 def test_cost_to_r():
