@@ -1066,7 +1066,9 @@ def _drop_labels_crossing_boundary(events: pd.DataFrame, boundary: pd.Timestamp)
 def replay_events_only(symbol: str, start_year: int, end_year: int,
                        output_root: Path, source_root: Path = Path('data'),
                        method_names: set[str] | None = None,
-                       hard_end_exclusive: pd.Timestamp | None = None) -> list[dict]:
+                       hard_end_exclusive: pd.Timestamp | None = None,
+                       feature_root: Path | None = None,
+                       level_root: Path | None = None) -> list[dict]:
     """Rebuild method events/labels from persisted bars, features and levels.
 
     Source data is read-only. Detector state is carried in memory between years.
@@ -1121,7 +1123,7 @@ def replay_events_only(symbol: str, start_year: int, end_year: int,
                 bars[f'bid_{field}']=mid-spread/2;bars[f'ask_{field}']=mid+spread/2
             bars['duka_spread']=spread;bars['spread_modeled']=True
         active=bars.loc[_active_mask(bars,symbol)].reset_index(drop=True)
-        path=source_root/'levels'/f'{symbol}.parquet'
+        path=(level_root or source_root/'levels')/f'{symbol}.parquet'
         if not path.exists():raise FileNotFoundError(path)
         levels=pd.read_parquet(path).drop(columns=['touches_so_far'],errors='ignore')
         levels=levels[pd.to_datetime(levels.known_at,utc=True)<=year_end]
@@ -1135,7 +1137,8 @@ def replay_events_only(symbol: str, start_year: int, end_year: int,
             levels.loc[repair.index,'invalidated_at']=repair.invalidated_at
         if hard_end_exclusive is not None and pd.to_datetime(active.ts,utc=True).ge(hard_end_exclusive).any():
             raise AssertionError('Replay read a bar at or after the hard boundary')
-        features=_event_feature_frame(active,{},symbol=symbol,feature_root=source_root/'features',
+        features=_event_feature_frame(active,{},symbol=symbol,
+                                      feature_root=feature_root or source_root/'features',
                                       method_names=method_names)
         if hard_end_exclusive is not None and pd.to_datetime(features.ts,utc=True).ge(hard_end_exclusive).any():
             raise AssertionError('Replay read a feature at or after the hard boundary')
