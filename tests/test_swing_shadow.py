@@ -250,13 +250,48 @@ def test_first_send_is_one_connected_message_with_all_current_states(tmp_path: P
     ]
     assert len(client.messages) == 1
     message = client.messages[0]
-    assert "Swing v1 CONNECTED" in message
-    assert "MNQ OPEN LONG" in message and "500.00 points" in message
-    assert "NEW MGC SHORT" in message
-    assert "STALE MBT" in message
+    assert message.startswith("📡 Signal Desk connected\n6-month trend · MNQ / MGC / MBT")
+    assert "━━━━ OPEN TRADES ━━━━" in message
+    assert "🟢 MNQ · LONG" in message and "500.0 pts below" in message
+    assert "Entry: 25,000.0" in message
+    assert "━━━━ NEW SIGNAL ━━━━" in message and "🔴 MGC · SHORT" in message
+    assert "⚠️ MBT: no fresh data, no signal today." in message
+    assert "T07:00" not in message
     # Embedded NEW and STALE events were accepted by the CONNECTED delivery.
     assert shadow.deliver_telegram(records, tmp_path, now, client) == []
     assert len(client.messages) == 1
+
+
+def test_connected_old_cap_exit_is_information_not_action():
+    record = _telegram_record(
+        "USATECHIDXUSD", "MNQ", state="EXITED", side=1,
+        entry_ts="2026-10-01T07:00:00+00:00", exit_ts="2026-11-12T23:00:00+00:00",
+        exit_reason="cap", net_R=.2,
+    )
+    message = shadow.connected_message([record], pd.Timestamp("2026-11-13 05:00Z"))
+    assert "ℹ️ MNQ: previous trade closed · 6-week limit · +0.20R" in message
+    assert "ACTION" not in message
+
+
+def test_status_sends_snapshot_without_dedup_history(monkeypatch, tmp_path: Path):
+    shadow_root = tmp_path / "shadow"
+    shadow_root.mkdir()
+    history = shadow_root / "telegram_sent.csv"
+    history.write_text("sent_at,event_id,market,event_type,reference\n")
+    before = history.read_bytes()
+    record = _telegram_record("BTCUSDT", "MBT", state="STALE", stale="true")
+    monkeypatch.setattr(shadow, "MARKETS", ("BTCUSDT",))
+    monkeypatch.setattr(shadow.s1, "load_minutes", lambda *args, **kwargs: object())
+    monkeypatch.setattr(shadow, "analyze_market", lambda *args, **kwargs: (record, "MBT block"))
+    client = FakeTelegram()
+    output = shadow.run(
+        tmp_path / "data", shadow_root, now=pd.Timestamp("2026-11-17 05:00Z"),
+        refresh=False, status=True, telegram_client=client,
+    )
+    assert "Telegram status accepted." in output
+    assert client.messages[0].startswith("📡 Signal Desk status")
+    assert "⚠️ MBT: no fresh data, no signal today." in client.messages[0]
+    assert history.read_bytes() == before
 
 
 def test_later_events_are_sent_exactly_once(tmp_path: Path):
@@ -278,11 +313,12 @@ def test_later_events_are_sent_exactly_once(tmp_path: Path):
     client = FakeTelegram()
     statuses = shadow.deliver_telegram(records, tmp_path, now, client)
     assert len(statuses) == len(client.messages) == 3
-    assert "NEW MGC LONG" in client.messages[0]
-    assert shadow.CONFIDENCE_LINE in client.messages[0]
-    assert "UTC /" in client.messages[0] and "Helsinki" in client.messages[0]
-    assert "INFO: MBT EXIT TP" in client.messages[1]
-    assert "STALE MNQ" in client.messages[2]
+    assert client.messages[0].startswith("NEW SIGNAL\n🟢 MGC · LONG")
+    assert "Enter: Tue 17 Nov, 09:00" in client.messages[0]
+    assert "Confidence: low" in client.messages[0]
+    assert "T07:00" not in client.messages[0]
+    assert "✅ MBT 🔴 SHORT closed: target hit, +2.90R" in client.messages[1]
+    assert "⚠️ MNQ: no fresh data, no signal today." in client.messages[2]
     assert shadow.deliver_telegram(records, tmp_path, now, client) == []
     assert len(client.messages) == 3
 
@@ -316,11 +352,8 @@ def test_cap_exit_is_a_manual_action(tmp_path: Path):
     )
     client = FakeTelegram()
     shadow.deliver_telegram([record], tmp_path, now, client)
-    assert client.messages == [
-        "ACTION: MNQ CAP EXIT — close the position manually now. Entry "
-        "2026-10-01T07:00:00+00:00; model exit 2026-11-16T23:00:00+00:00; "
-        "result +0.20R net."
-    ]
+    assert client.messages == ["⏰ ACTION: close MNQ 🟢 LONG now\n"
+                               "6-week limit reached\nResult: +0.20R"]
 
 
 def test_weekly_heartbeat_only_on_monday(tmp_path: Path):
@@ -334,7 +367,8 @@ def test_weekly_heartbeat_only_on_monday(tmp_path: Path):
     client = FakeTelegram()
     shadow.deliver_telegram([record], tmp_path, monday, client)
     assert len(client.messages) == 1
-    assert "weekly heartbeat" in client.messages[0] and "MBT OPEN LONG" in client.messages[0]
+    assert client.messages[0].startswith("Weekly check: bot running\n\n🟢 MBT · LONG")
+    assert "Entry: 80,000" in client.messages[0]
     tuesday = pd.Timestamp("2026-11-17 05:00Z")
     assert shadow.deliver_telegram([record], tmp_path, tuesday, client) == []
     assert len(client.messages) == 1
@@ -347,7 +381,7 @@ def test_missed_run_sends_closed_exit_and_late_open_entry(tmp_path: Path):
     old_trade = {
         "entry_ts": "2026-10-01T07:00:00+00:00",
         "exit_ts": "2026-11-14T12:00:00+00:00",
-        "exit": "sl", "net_R": -1.03,
+        "exit": "sl", "net_R": -1.03, "side": 1,
     }
     record = _telegram_record(
         "USATECHIDXUSD", "MNQ", state="OPEN", side=-1,
@@ -362,12 +396,13 @@ def test_missed_run_sends_closed_exit_and_late_open_entry(tmp_path: Path):
         "Telegram: EXIT_SL accepted for USATECHIDXUSD.",
         "Telegram: LATE_ENTRY accepted for USATECHIDXUSD.",
     ]
-    assert "INFO: MNQ EXIT SL" in client.messages[0]
-    assert "LATE ENTRY MNQ SHORT" in client.messages[1]
-    assert "you may enter late or skip it" in client.messages[1]
-    assert "Current spot: 24900.00" in client.messages[1]
-    assert shadow.CONFIDENCE_LINE in client.messages[1]
-    assert "UTC /" in client.messages[1] and "Helsinki" in client.messages[1]
+    assert "❌ MNQ 🟢 LONG closed: stop hit, -1.03R" in client.messages[0]
+    assert client.messages[1].startswith("⚠️ LATE ENTRY (bot was offline)\n🔴 MNQ · SHORT")
+    assert "You can enter now or skip." in client.messages[1]
+    assert "Price now: 24,900.0" in client.messages[1]
+    assert "Confidence: low" in client.messages[1]
+    assert "Since: Mon 16 Nov, 09:00" in client.messages[1]
+    assert "T07:00" not in client.messages[1]
     assert shadow.deliver_telegram([record], tmp_path, now, client) == []
 
 
@@ -389,17 +424,16 @@ def test_cap_warning_is_sent_once_before_next_run(tmp_path: Path):
     statuses = shadow.deliver_telegram([record], tmp_path, now, client)
     assert statuses == ["Telegram: CAP_WARNING accepted for XAUUSD."]
     assert len(client.messages) == 1
-    assert client.messages[0] == (
-        "ACTION: MGC reaches its 30-session cap before the next run. Close the position at "
-        "2026-11-17T22:00:00+00:00 UTC / 2026-11-18T00:00:00+02:00 Helsinki."
-    )
+    assert client.messages[0] == ("⏰ ACTION: close MGC 🟢 LONG by Wed 18 Nov, 00:00 "
+                                  "(Europe/Helsinki)\n"
+                                  "6-week limit")
     assert shadow.deliver_telegram([record], tmp_path, now, client) == []
 
 
 def test_connection_test_uses_client_without_exposing_credentials():
     client = FakeTelegram()
     assert shadow.test_telegram(client) == "Telegram connection test accepted."
-    assert client.messages == ["Swing v1 Telegram connection test — delivery OK."]
+    assert client.messages == ["📡 Signal Desk connection test\nTelegram delivery works."]
 
 
 def test_connection_test_failure_is_redacted():
@@ -408,6 +442,21 @@ def test_connection_test_failure_is_redacted():
     assert "token-secret" not in str(caught.value)
     assert "chat-secret" not in str(caught.value)
     assert "[REDACTED]" in str(caught.value)
+
+
+def test_rendered_telegram_times_are_never_iso():
+    record = _telegram_record(
+        "USATECHIDXUSD", "MNQ", state="OPEN", side=1,
+        entry_ts="2026-11-13T07:00:00+00:00", entry_price=25000., sl=24500.,
+        tp=26500., unrealised_R=.4, cap_session_end="2026-12-21T22:00:00+00:00",
+        plan_entry_ts="2026-11-17T07:00:00+00:00", reference_price=25100.,
+        sl_distance=500., tp_distance=1500., plan_sl=24600., plan_tp=26600.,
+        _current_price=25100.,
+    )
+    messages = [shadow._open_text(record), shadow._new_text(record),
+                shadow._late_entry_text(record), shadow._cap_warning_text(record),
+                shadow.connected_message([record], pd.Timestamp("2026-11-17 05:00Z"))]
+    assert all("2026-" not in message and "T07:" not in message for message in messages)
 
 
 def test_send_failure_does_not_break_shadow_audit(monkeypatch, tmp_path: Path):
