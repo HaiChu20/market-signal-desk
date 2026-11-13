@@ -1,0 +1,740 @@
+{
+  "method": "phase2_f5_cross_market_ETHUSDT",
+  "period": "dev",
+  "preliminary": true,
+  "protocol": "v2",
+  "grade_in_dev": "not applicable; protocol section 5 grades test only",
+  "pooled": {
+    "n": 19,
+    "signals_per_year": 6.3319488666064725,
+    "hit_rate": 0.3684210526315789,
+    "net_avg_R": -0.30295685247371074,
+    "t_stat": -1.6643213633144824,
+    "profit_factor": 0.45786358954151146,
+    "daily_sharpe": -0.9721111895164731,
+    "max_drawdown": -0.040196239948272705,
+    "positive_dev_year_share": 0.3333333333333333,
+    "per_year": {
+      "2020": 0.4842697620391846,
+      "2021": -0.5364336197574934,
+      "2022": -0.8701627850532532
+    },
+    "spread_1_5x_net_avg_R": -0.30295684933662415,
+    "random_direction_percentile": 70.5,
+    "pbo": 0.3,
+    "grade": "ungraded: development",
+    "brier": 0.1775459214149561,
+    "brier_skill_vs_p0": 0.10549040372689933,
+    "reliability_by_year": {
+      "2020": {
+        "n": 1752700,
+        "predicted": 0.30031105984443063,
+        "observed": 0.3103508872026017
+      },
+      "2021": {
+        "n": 1748750,
+        "predicted": 0.30023833135572475,
+        "observed": 0.3122195854181558
+      },
+      "2022": {
+        "n": 1752000,
+        "predicted": 0.32442536535466593,
+        "observed": 0.31473173515981734
+      }
+    },
+    "reliability_by_vol_tercile": {
+      "unknown": {
+        "n": 5253450,
+        "predicted": 0.30832885373402846,
+        "observed": 0.3124339243735069
+      }
+    },
+    "deflated_sharpe_ratio": null,
+    "random_direction_matched_signals": 19,
+    "row_accounting": {
+      "events": 210138,
+      "candidate_rows": 5253450,
+      "assembled_rows": 5253450,
+      "drops": {},
+      "cpcv_test_groups": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          1,
+          4
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "cpcv_train_scores": [
+        -0.17474770680428559,
+        -0.17625026875394703,
+        -0.17675877462378878,
+        -0.1755845956363016,
+        -0.17608423312135235,
+        -0.17661648097910368,
+        -0.17560762388616985,
+        -0.17714496617151343,
+        -0.1751480230144021,
+        -0.17585035620700507
+      ],
+      "cpcv_test_scores": [
+        -0.18009862216616473,
+        -0.17746630218220408,
+        -0.17831314686725183,
+        -0.17843062846932442,
+        -0.17670888601437604,
+        -0.1787489928163805,
+        -0.17798507934499094,
+        -0.17665854284808738,
+        -0.17704649763808875,
+        -0.1809298246033603
+      ],
+      "pbo": 0.3,
+      "training_anchor_cadence": "hourly (:00) within each purged fold",
+      "maximum_training_anchors_per_fold": 25000,
+      "evaluation_anchor_cadence": "every 15 minutes",
+      "oof_predicted_rows": 5253450,
+      "selected_signals": 19,
+      "no_oof_prediction": 0
+    },
+    "selection_comparison": {
+      "selected_n": 19,
+      "selected_avg_R": -0.30295684933662415,
+      "unselected_n": 5253431,
+      "unselected_avg_R": -0.049439411610364914,
+      "same_event_unselected_n": 456,
+      "same_event_unselected_avg_R": -0.2654183506965637
+    }
+  },
+  "per_instrument": {
+    "ETHUSDT": {
+      "n": 19,
+      "signals_per_year": 6.3319488666064725,
+      "hit_rate": 0.3684210526315789,
+      "net_avg_R": -0.30295685247371074,
+      "t_stat": -1.6643213633144824,
+      "profit_factor": 0.45786358954151146,
+      "daily_sharpe": -0.9721111895164731,
+      "max_drawdown": -0.040196239948272705,
+      "positive_dev_year_share": 0.3333333333333333,
+      "per_year": {
+        "2020": 0.4842697620391846,
+        "2021": -0.5364336197574934,
+        "2022": -0.8701627850532532
+      },
+      "spread_1_5x_net_avg_R": -0.30295684933662415,
+      "random_direction_percentile": null,
+      "pbo": null,
+      "grade": "ungraded: development",
+      "brier": 0.1775459214149561,
+      "brier_skill_vs_p0": 0.10549040372689933,
+      "reliability_by_year": {
+        "2020": {
+          "n": 1752700,
+          "predicted": 0.30031105984443063,
+          "observed": 0.3103508872026017
+        },
+        "2021": {
+          "n": 1748750,
+          "predicted": 0.30023833135572475,
+          "observed": 0.3122195854181558
+        },
+        "2022": {
+          "n": 1752000,
+          "predicted": 0.32442536535466593,
+          "observed": 0.31473173515981734
+        }
+      },
+      "reliability_by_vol_tercile": {
+        "unknown": {
+          "n": 5253450,
+          "predicted": 0.30832885373402846,
+          "observed": 0.3124339243735069
+        }
+      },
+      "deflated_sharpe_ratio": null
+    }
+  },
+  "input_manifest": [
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2020-01.parquet",
+      "size": 6101393,
+      "mtime_ns": 1794526888668993712
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2020-02.parquet",
+      "size": 5792521,
+      "mtime_ns": 1794526890825536191
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2020-03.parquet",
+      "size": 6043414,
+      "mtime_ns": 1794526893186381914
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2020-04.parquet",
+      "size": 5876465,
+      "mtime_ns": 1794526895438813219
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2020-05.parquet",
+      "size": 6124741,
+      "mtime_ns": 1794526897755124480
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2020-06.parquet",
+      "size": 5745276,
+      "mtime_ns": 1794526900025047426
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2020-07.parquet",
+      "size": 6163271,
+      "mtime_ns": 1794526902314471740
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2020-08.parquet",
+      "size": 6221752,
+      "mtime_ns": 1794526904658358911
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2020-09.parquet",
+      "size": 5986827,
+      "mtime_ns": 1794526906936089522
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2020-10.parquet",
+      "size": 6083086,
+      "mtime_ns": 1794526909260181904
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2020-11.parquet",
+      "size": 6180764,
+      "mtime_ns": 1794526911440396128
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2020-12.parquet",
+      "size": 6140000,
+      "mtime_ns": 1794526913806021400
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2021-01.parquet",
+      "size": 6330357,
+      "mtime_ns": 1794526916118815457
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2021-02.parquet",
+      "size": 5714549,
+      "mtime_ns": 1794526918155476402
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2021-03.parquet",
+      "size": 6324017,
+      "mtime_ns": 1794526920474956944
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2021-04.parquet",
+      "size": 6044622,
+      "mtime_ns": 1794526922721960111
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2021-05.parquet",
+      "size": 6355964,
+      "mtime_ns": 1794526925010144497
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2021-06.parquet",
+      "size": 6169545,
+      "mtime_ns": 1794526927241202123
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2021-07.parquet",
+      "size": 6368087,
+      "mtime_ns": 1794526929538045806
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2021-08.parquet",
+      "size": 6278215,
+      "mtime_ns": 1794526931842720446
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2021-09.parquet",
+      "size": 6019065,
+      "mtime_ns": 1794526934127951551
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2021-10.parquet",
+      "size": 6276048,
+      "mtime_ns": 1794526936425262905
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2021-11.parquet",
+      "size": 6135527,
+      "mtime_ns": 1794526938696226320
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2021-12.parquet",
+      "size": 6151767,
+      "mtime_ns": 1794526941111293521
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2022-01.parquet",
+      "size": 6303250,
+      "mtime_ns": 1794526943401141131
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2022-02.parquet",
+      "size": 5707623,
+      "mtime_ns": 1794526945435317300
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2022-03.parquet",
+      "size": 6269086,
+      "mtime_ns": 1794526947746525216
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2022-04.parquet",
+      "size": 6012244,
+      "mtime_ns": 1794526949990698687
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2022-05.parquet",
+      "size": 6298362,
+      "mtime_ns": 1794526952310490108
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2022-06.parquet",
+      "size": 6088889,
+      "mtime_ns": 1794526954480033097
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2022-07.parquet",
+      "size": 6291303,
+      "mtime_ns": 1794526956749555289
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2022-08.parquet",
+      "size": 6269998,
+      "mtime_ns": 1794526959052012364
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2022-09.parquet",
+      "size": 5942884,
+      "mtime_ns": 1794526961313522264
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2022-10.parquet",
+      "size": 6261758,
+      "mtime_ns": 1794526963589154769
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2022-11.parquet",
+      "size": 5927192,
+      "mtime_ns": 1794526965850765587
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/ETHUSDT/2022-12.parquet",
+      "size": 6031860,
+      "mtime_ns": 1794526968046208762
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2020-01.parquet",
+      "size": 23109936,
+      "mtime_ns": 1794369623414058495
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2020-01.parquet",
+      "size": 10504906,
+      "mtime_ns": 1794426681401900993
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2020-02.parquet",
+      "size": 22080688,
+      "mtime_ns": 1794369623775451053
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2020-02.parquet",
+      "size": 9776848,
+      "mtime_ns": 1794426681647388787
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2020-03.parquet",
+      "size": 23629373,
+      "mtime_ns": 1794369624135893859
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2020-03.parquet",
+      "size": 10513019,
+      "mtime_ns": 1794426681902327945
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2020-04.parquet",
+      "size": 22600261,
+      "mtime_ns": 1794369624484841244
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2020-04.parquet",
+      "size": 10179040,
+      "mtime_ns": 1794426682130701698
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2020-05.parquet",
+      "size": 23391274,
+      "mtime_ns": 1794369624845195800
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2020-05.parquet",
+      "size": 10552021,
+      "mtime_ns": 1794426682342061555
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2020-06.parquet",
+      "size": 22401593,
+      "mtime_ns": 1794369625172979674
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2020-06.parquet",
+      "size": 10151708,
+      "mtime_ns": 1794426682551188552
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2020-07.parquet",
+      "size": 23323694,
+      "mtime_ns": 1794369625533082772
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2020-07.parquet",
+      "size": 10556441,
+      "mtime_ns": 1794426682784507058
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2020-08.parquet",
+      "size": 23934729,
+      "mtime_ns": 1794369625914388715
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2020-08.parquet",
+      "size": 10564764,
+      "mtime_ns": 1794426682998219305
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2020-09.parquet",
+      "size": 23381498,
+      "mtime_ns": 1794369626263727349
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2020-09.parquet",
+      "size": 10237151,
+      "mtime_ns": 1794426683214857275
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2020-10.parquet",
+      "size": 23702824,
+      "mtime_ns": 1794369626612718567
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2020-10.parquet",
+      "size": 12194118,
+      "mtime_ns": 1794426683481025543
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2020-11.parquet",
+      "size": 23431012,
+      "mtime_ns": 1794369626995112301
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2020-11.parquet",
+      "size": 15116494,
+      "mtime_ns": 1794426683735360714
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2020-12.parquet",
+      "size": 24162538,
+      "mtime_ns": 1794369627359916777
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2020-12.parquet",
+      "size": 15534286,
+      "mtime_ns": 1794426683995320751
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2021-01.parquet",
+      "size": 24582875,
+      "mtime_ns": 1794369627729118130
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2021-01.parquet",
+      "size": 16000814,
+      "mtime_ns": 1794426684257134061
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2021-02.parquet",
+      "size": 21859774,
+      "mtime_ns": 1794369628068247426
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2021-02.parquet",
+      "size": 14363953,
+      "mtime_ns": 1794426684520637877
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2021-03.parquet",
+      "size": 24563307,
+      "mtime_ns": 1794369628430755108
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2021-03.parquet",
+      "size": 15742184,
+      "mtime_ns": 1794426684792788859
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2021-04.parquet",
+      "size": 23305629,
+      "mtime_ns": 1794369628777871408
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2021-04.parquet",
+      "size": 15257080,
+      "mtime_ns": 1794426685052309785
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2021-05.parquet",
+      "size": 24519184,
+      "mtime_ns": 1794369629132131962
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2021-05.parquet",
+      "size": 16207318,
+      "mtime_ns": 1794426685308438109
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2021-06.parquet",
+      "size": 24022686,
+      "mtime_ns": 1794369629501350815
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2021-06.parquet",
+      "size": 15605565,
+      "mtime_ns": 1794426685574489742
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2021-07.parquet",
+      "size": 24718623,
+      "mtime_ns": 1794369629875672545
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2021-07.parquet",
+      "size": 16053233,
+      "mtime_ns": 1794426685858563040
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2021-08.parquet",
+      "size": 24519166,
+      "mtime_ns": 1794369630241101230
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2021-08.parquet",
+      "size": 16024841,
+      "mtime_ns": 1794426686119608640
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2021-09.parquet",
+      "size": 23929617,
+      "mtime_ns": 1794369630601402578
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2021-09.parquet",
+      "size": 15481309,
+      "mtime_ns": 1794426686385852149
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2021-10.parquet",
+      "size": 24658900,
+      "mtime_ns": 1794369630980387644
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2021-10.parquet",
+      "size": 15999606,
+      "mtime_ns": 1794426686653364303
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2021-11.parquet",
+      "size": 23785889,
+      "mtime_ns": 1794369631333076780
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2021-11.parquet",
+      "size": 15492854,
+      "mtime_ns": 1794426686916296223
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2021-12.parquet",
+      "size": 24939089,
+      "mtime_ns": 1794369631705934343
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2021-12.parquet",
+      "size": 16004545,
+      "mtime_ns": 1794426687173495471
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2022-01.parquet",
+      "size": 24849324,
+      "mtime_ns": 1794369632079397490
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2022-01.parquet",
+      "size": 16000919,
+      "mtime_ns": 1794426687430923216
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2022-02.parquet",
+      "size": 22545795,
+      "mtime_ns": 1794369632414914784
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2022-02.parquet",
+      "size": 14524023,
+      "mtime_ns": 1794426687688649123
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2022-03.parquet",
+      "size": 24914920,
+      "mtime_ns": 1794369632782799553
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2022-03.parquet",
+      "size": 16049367,
+      "mtime_ns": 1794426687939733675
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2022-04.parquet",
+      "size": 23922942,
+      "mtime_ns": 1794369633155405157
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2022-04.parquet",
+      "size": 15552303,
+      "mtime_ns": 1794426688189494205
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2022-05.parquet",
+      "size": 24955163,
+      "mtime_ns": 1794369633525257636
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2022-05.parquet",
+      "size": 16027639,
+      "mtime_ns": 1794426688439376900
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2022-06.parquet",
+      "size": 24118290,
+      "mtime_ns": 1794369633901416325
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2022-06.parquet",
+      "size": 15594856,
+      "mtime_ns": 1794426688692429635
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2022-07.parquet",
+      "size": 24739492,
+      "mtime_ns": 1794369634284247435
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2022-07.parquet",
+      "size": 16202154,
+      "mtime_ns": 1794426688944179544
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2022-08.parquet",
+      "size": 24866968,
+      "mtime_ns": 1794369634672549256
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2022-08.parquet",
+      "size": 15936297,
+      "mtime_ns": 1794426689201852367
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2022-09.parquet",
+      "size": 23983386,
+      "mtime_ns": 1794369635063799161
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2022-09.parquet",
+      "size": 15648631,
+      "mtime_ns": 1794426689458537327
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2022-10.parquet",
+      "size": 24441138,
+      "mtime_ns": 1794369635472139326
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2022-10.parquet",
+      "size": 16108047,
+      "mtime_ns": 1794426689724241551
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2022-11.parquet",
+      "size": 24004303,
+      "mtime_ns": 1794369635851878892
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2022-11.parquet",
+      "size": 15445249,
+      "mtime_ns": 1794426689985243114
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/ETHUSDT/2022-12.parquet",
+      "size": 24164579,
+      "mtime_ns": 1794369636219255369
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/ETHUSDT/2022-12.parquet",
+      "size": 16148505,
+      "mtime_ns": 1794426690247695471
+    }
+  ],
+  "limitations": [
+    "Stage 9 inputs may be rebuilt; inspect manifest before reuse.",
+    "PBO uses like-for-like CPCV train/test ranks across logged development configurations; null until at least two comparable configurations exist.",
+    "Random-direction benchmark uses the executable opposite-side label kernel on raw bars; coverage is reported.",
+    "For BTC, the raw mid-price bars use a monthly median of the modeled decision-time spread in the opposite-direction simulation.",
+    "DSR uses trial-ledger daily Sharpe dispersion; null if too few trials."
+  ]
+}
