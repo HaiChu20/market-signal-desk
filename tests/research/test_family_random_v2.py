@@ -4,6 +4,7 @@ import pandas as pd
 import pytest
 
 from msd.research import family_random_v2 as correction
+from msd.research.family_random_rerun import compare_jobs
 
 
 def _fixture(tmp_path):
@@ -45,3 +46,16 @@ def test_saved_signals_reject_2023(tmp_path):
         "deadline_ts":[pd.Timestamp("2023-01-02",tz="UTC")],"net_R":[1.]}).to_parquet(path,index=False)
     with pytest.raises(ValueError,match="2023"):
         correction._signals(path,"f4_regime","BTCUSDT")
+
+
+def test_rerun_comparison_checks_oof_and_selected_metrics():
+    pooled={"n":15,"net_avg_R":.15,"hit_rate":.8,"brier":.18}
+    original={"family":"f4_regime","symbol":"USATECHIDXUSD","candidates":100,
+              "pooled":pooled}
+    rerun={"family":"f4_regime","symbol":"USATECHIDXUSD","candidates":100,
+           "pooled":dict(pooled)}
+    assert compare_jobs(original,rerun)["deterministic"]
+    rerun["pooled"]["brier"] += 1e-5
+    result=compare_jobs(original,rerun)
+    assert not result["brier_match"]
+    assert not result["deterministic"]

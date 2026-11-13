@@ -46,12 +46,12 @@ def _fmt(value) -> str:
     return "NA" if value is None or not np.isfinite(value) else f"{value:.4f}"
 
 
-def write_correction(summary: Path, rows: list[dict]) -> None:
+def write_correction(summary: Path, rows: list[dict], signals_root: Path) -> None:
     original = summary.read_text()
     if SECTION in original:
         original = original.split(SECTION, 1)[0].rstrip() + "\n"
     lines = ["", SECTION, "",
-        "The original Family 3–5 random-direction percentiles used a broken microsecond timestamp conversion. The table below is the benchmark-only correction from the unchanged saved OOF signals; model fits, selected signals, returns, Brier metrics and trial-ledger rows were not changed.", "",
+        f"The original Family 3–5 random-direction percentiles used a broken microsecond timestamp conversion. The table below is the benchmark-only correction from the deterministically reproduced OOF signals stored under `{signals_root}`. Frozen configs, model fits, thresholds, features, gates, selected-signal metrics and labels were unchanged. This diagnostic rerun appended **no trial-ledger rows** because it is not a new configuration.", "",
         "| Family | Market | Signals | Original pct (invalid) | Corrected pct | Random check ≥95 |", 
         "|---|---|---:|---:|---:|---|"]
     for row in rows:
@@ -80,7 +80,7 @@ def run(data_root: Path, signals_root: Path, output: Path, seeds: int = 200) -> 
     result=pd.DataFrame(rows)
     output.mkdir(parents=True,exist_ok=True)
     result.to_csv(output/"families_random_pct_v2.csv",index=False)
-    write_correction(output/"families_summary.md",rows)
+    write_correction(output/"families_summary.md",rows,signals_root)
     return result
 
 

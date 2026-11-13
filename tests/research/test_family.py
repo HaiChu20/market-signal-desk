@@ -104,13 +104,18 @@ def test_dev_label_end_hard_fails(tmp_path):
 def test_small_synthetic_family_run_writes_report_card(tmp_path, monkeypatch):
     labels = _write_synthetic(tmp_path, days=30)
     monkeypatch.setattr(family, "random_direction", lambda *args, **kwargs: (55., 10, []))
+    persisted=tmp_path/"saved_signals"
     result = family.run_one("f3_order_flow", "BTCUSDT", tmp_path, labels,
                             tmp_path / "reports", ledger=tmp_path / "trials.csv",
-                            model_kind="lightgbm", random_seeds=2)
+                            model_kind="lightgbm", random_seeds=2,
+                            persist_signals_root=persisted)
     assert result["candidates"] == 30 * 4 * 50
     assert result["feature_count"] > 5
     assert (tmp_path / "reports" / "families_summary.md").exists()
     assert (tmp_path / "reports" / "cards" / "phase2_f3_order_flow_BTCUSDT_dev.json").exists()
+    saved=pd.read_parquet(persisted/"f3_order_flow_BTCUSDT.parquet")
+    assert len(saved)==result["signals"]
+    assert {"ts","side","price","sl","tp","deadline_ts","net_R"} <= set(saved)
     rows = pd.read_csv(tmp_path / "trials.csv")
     assert len(rows) == 1
     assert rows.iloc[0].period == "dev"
