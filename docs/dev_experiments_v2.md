@@ -47,3 +47,7 @@ Two fixed variants are evaluated by purged chronological CPCV:
 - **large signals**, traded only when absolute signal return is strictly above the median absolute signal return learned on that split's train sessions.
 
 The median is never learned on a held-out fold. Deduplicate repeated CPCV test membership by deterministic majority vote. Report per market and year: trades, net average R per trade, hit rate, and t-statistic, plus pooled metrics. No parameter is tuned from the results.
+
+## Pre-run implementation correction
+
+The first scratch dry run exposed a timestamp-unit defect before any result was accepted or written to the real ledger: event-label bar timestamps could remain at pandas microsecond resolution before conversion to kernel seconds, while deadline timestamps were true epoch seconds. Consequently the kernel never reached the time deadline and unresolved rows exited at the end of the loaded look-ahead. This is an implementation defect, not an experimental change. The real run therefore uses newly versioned, corrected one-day and three-day outcome stores generated from the same frozen events and the parameters above. The already-seen Test exam is not rerun. The invalid scratch outputs are not graded or ledgered.
