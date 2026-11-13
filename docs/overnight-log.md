@@ -513,3 +513,9 @@ Append-only notes from the autonomous review loop while the user sleeps.
 - 2026-11-13 16:28 UTC: merged Telegram lifecycle fixes (26a5960, 455 tests passed). Ran scripts/run_swing_shadow.sh once with the user's approval: refresh OK; CONNECTED sent to Telegram (MNQ open SHORT since 11-02; MGC new SHORT plan for the 11-13 07:00 UTC entry, already past at send time; MBT open LONG since 11-13). launchd plist not installed; the user installs it.
 - 2026-11-13 ~16:45 UTC: the user said the Telegram text is hard to read. Sent a phone-friendly layout spec to 2f14d55b, plus a --status flag and a fix for the ACTION cap-exit line wrongly shown for a pre-connect trade in CONNECTED.
 - 2026-11-13 16:41 UTC: merged the phone-friendly format (1cc8e81) plus supervisor polish (short 'Finland' time suffix, real price in the example line); 458 tests passed. Sent one --status message to Telegram in the new layout.
+
+## 2026-11-13 ~20:05 UTC: final check v2 started
+- User asked to add swing S1/S2 and the intraday Donchian breakout to the live bot (labelled per strategy), deploy on cPouta via Docker, intraday feed Capital.com demo API, separate signals per strategy.
+- User chose "check first": froze docs/final_check_v2.md (03978f7) before any 2025+ result.
+- Part A (S1/S2) -> worker 2f14d55b; Part B (Donchian) -> new worker 1afb2f6f (gpt-5.6-sol). Workers implement and test on synthetic data only; supervisor runs each evaluation once.
+- Answered user: ESP32 cannot run the bot (Python/pandas/LightGBM, 100s of MB data); cPouta or a Raspberry Pi can.
