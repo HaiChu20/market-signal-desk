@@ -127,7 +127,7 @@ def signals(daily: pd.DataFrame, first_year: int) -> pd.DataFrame:
     return result
 
 
-def entry_index(ts: pd.DatetimeIndex, signal_end: pd.Timestamp, sensitivity: bool = False) -> int | None:
+def entry_time(signal_end: pd.Timestamp, sensitivity: bool = False) -> pd.Timestamp:
     if sensitivity:
         target = signal_end + pd.Timedelta(hours=1)
         # Weekend signals in continuously traded spot markets wait for CME.
@@ -140,6 +140,11 @@ def entry_index(ts: pd.DatetimeIndex, signal_end: pd.Timestamp, sensitivity: boo
             target += pd.Timedelta(days=1)
         while target.tz_convert(NY).weekday() >= 5:
             target += pd.Timedelta(days=1)
+    return target
+
+
+def entry_index(ts: pd.DatetimeIndex, signal_end: pd.Timestamp, sensitivity: bool = False) -> int | None:
+    target = entry_time(signal_end, sensitivity)
     i = int(ts.searchsorted(target))
     return i if i < len(ts) and ts[i] == target else None
 
@@ -212,12 +217,14 @@ def _summary(rows: list[dict], years: float | None = None) -> dict:
             "double_cost_R": float(np.mean([x["double_cost_R"] for x in rows]))}
 
 
-def evaluate_market(bars: pd.DataFrame, symbol: str, *, sensitivity: bool = False,
-                    primary_only: bool = False,
-                    period: Period = DEV_PERIOD,
-                    setups: tuple[str, ...] = SETUPS) -> tuple[list[dict], dict]:
+def replay_market(bars: pd.DataFrame, symbol: str, *, sensitivity: bool = False,
+                  primary_only: bool = False,
+                  period: Period = DEV_PERIOD,
+                  setups: tuple[str, ...] = SETUPS,
+                  first_year: int | None = None) -> tuple[list[dict], dict, dict]:
+    """Run the frozen trade loop and also return unresolved open-trade state."""
     ts = pd.DatetimeIndex(pd.to_datetime(bars.ts, utc=True))
-    first_year = int(ts[0].tz_convert(NY).year)
+    first_year = int(ts[0].tz_convert(NY).year) if first_year is None else first_year
     daily = daily_bars(bars, period=period)
     signal = signals(daily, first_year)
     prices = np.column_stack([(bars[f"bid_{c}"].to_numpy(float) + bars[f"ask_{c}"].to_numpy(float))/2 for c in "ohlc"])
@@ -229,6 +236,7 @@ def evaluate_market(bars: pd.DataFrame, symbol: str, *, sensitivity: bool = Fals
     contract = (TRADED | EVIDENCE)[symbol]
     rows = []
     drops = {"unresolved_at_cutoff": 0, "missing_entry": 0}
+    open_trades = {}
     for setup in setups:
         for sl in ((2.,) if primary_only else SL):
             for tp in ((3.,) if primary_only else TP):
@@ -256,6 +264,17 @@ def evaluate_market(bars: pd.DataFrame, symbol: str, *, sensitivity: bool = Fals
                     if out is None or (period.end is not None and ts[out[0]] >= period.end):
                         drops["unresolved_at_cutoff"] += 1
                         next_free = len(ts)
+                        if period.score_start is None or ts[ei] >= period.score_start:
+                            cap_end = (session_closes[cap_number] if cap_number < len(session_closes)
+                                       else (sessions[ei].tz_convert(NY) +
+                                             pd.offsets.BDay(29)).tz_convert("UTC"))
+                            open_trades[(setup, sl, tp)] = {
+                                "market": symbol, "setup": setup, "sl_atr": sl, "tp_R": tp,
+                                "signal_end": sig.end.isoformat(), "entry_ts": ts[ei].isoformat(),
+                                "entry_index": ei, "entry_price": entry, "side": side,
+                                "risk": risk, "stop": stop, "target": target,
+                                "cap_index": cap, "cap_session_end": cap_end.isoformat(),
+                            }
                         continue
                     xi, fill, reason = out
                     next_free = xi
@@ -266,11 +285,23 @@ def evaluate_market(bars: pd.DataFrame, symbol: str, *, sensitivity: bool = Fals
                     if period.score_start is not None and ts[ei] < period.score_start:
                         continue
                     rows.append({"market": symbol, "setup": setup, "sl_atr": sl, "tp_R": tp,
+                                 "signal_end": sig.end.isoformat(),
                                  "entry_ts": ts[ei].isoformat(), "exit_ts": ts[xi].isoformat(),
                                  "year": ts[ei].year, "hold_days": days, "exit": reason,
                                  "net_R": gross-fee, "no_carry_R": gross-no_carry_fee,
                                  "double_cost_R": gross-2*fee,
                                  "entry_index": ei, "side": side, "risk": risk, "cap_index": cap})
+    return rows, drops, open_trades
+
+
+def evaluate_market(bars: pd.DataFrame, symbol: str, *, sensitivity: bool = False,
+                    primary_only: bool = False,
+                    period: Period = DEV_PERIOD,
+                    setups: tuple[str, ...] = SETUPS) -> tuple[list[dict], dict]:
+    rows, drops, _ = replay_market(
+        bars, symbol, sensitivity=sensitivity, primary_only=primary_only,
+        period=period, setups=setups,
+    )
     return rows, drops
 
 
