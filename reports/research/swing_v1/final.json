@@ -1,0 +1,798 @@
+{
+  "protocol": "docs/swing_v1_design.md section 11",
+  "score_start": "2025-01-01T00:00:00+00:00",
+  "main": {
+    "pooled_traded": {
+      "trades": 88,
+      "trades_per_year": 44.0,
+      "mean_hold_days": 21.210929608585857,
+      "hit_rate": 0.125,
+      "net_R": 0.03679024979464303,
+      "t_stat": 0.23332725416476718,
+      "positive_year_share": 0.5,
+      "max_drawdown_R": 12.673415546461076,
+      "exits": {
+        "sl": 52,
+        "tp": 11,
+        "cap": 25
+      },
+      "no_carry_R": 0.06938063174003375,
+      "double_cost_R": -0.005903692446851849
+    },
+    "per_market": {
+      "USATECHIDXUSD": {
+        "trades": 27,
+        "trades_per_year": 13.5,
+        "mean_hold_days": 23.494650205761324,
+        "hit_rate": 0.07407407407407407,
+        "net_R": -0.18091763135154995,
+        "t_stat": -0.7378185586294762,
+        "positive_year_share": 0.0,
+        "max_drawdown_R": 6.520856530463163,
+        "exits": {
+          "sl": 17,
+          "tp": 2,
+          "cap": 8
+        },
+        "no_carry_R": -0.13087142440440133,
+        "double_cost_R": -0.23331818291015452
+      },
+      "XAUUSD": {
+        "trades": 29,
+        "trades_per_year": 14.5,
+        "mean_hold_days": 20.17102490421456,
+        "hit_rate": 0.20689655172413793,
+        "net_R": 0.44817763503653163,
+        "t_stat": 1.441627823878865,
+        "positive_year_share": 0.5,
+        "max_drawdown_R": 6.061640177604238,
+        "exits": {
+          "sl": 15,
+          "tp": 6,
+          "cap": 8
+        },
+        "no_carry_R": 0.4873101541510515,
+        "double_cost_R": 0.4055352358032607
+      },
+      "BTCUSDT": {
+        "trades": 32,
+        "trades_per_year": 16.0,
+        "mean_hold_days": 20.226453993055557,
+        "hit_rate": 0.09375,
+        "net_R": -0.15233854336371816,
+        "t_stat": -0.6077699607742222,
+        "positive_year_share": 0.5,
+        "max_drawdown_R": 8.861034039241789,
+        "exits": {
+          "sl": 20,
+          "tp": 3,
+          "cap": 9
+        },
+        "no_carry_R": -0.14040532557308386,
+        "double_cost_R": -0.18688924484510477
+      },
+      "USA500IDXUSD": {
+        "trades": 25,
+        "trades_per_year": 12.5,
+        "mean_hold_days": 24.86827777777778,
+        "hit_rate": 0.0,
+        "net_R": -0.3136448868203319,
+        "t_stat": -1.3447474302499398,
+        "positive_year_share": 0.0,
+        "max_drawdown_R": 8.069290436452714,
+        "exits": {
+          "sl": 17,
+          "tp": 0,
+          "cap": 8
+        },
+        "no_carry_R": -0.24494482100048592,
+        "double_cost_R": -0.3894885917366303
+      },
+      "USA30IDXUSD": {
+        "trades": 26,
+        "trades_per_year": 13.0,
+        "mean_hold_days": 22.986832264957265,
+        "hit_rate": 0.0,
+        "net_R": -0.2997644284056305,
+        "t_stat": -1.444884521235686,
+        "positive_year_share": 0.0,
+        "max_drawdown_R": 9.20670120618854,
+        "exits": {
+          "sl": 16,
+          "tp": 0,
+          "cap": 10
+        },
+        "no_carry_R": -0.2428868945966875,
+        "double_cost_R": -0.3633688051131439
+      },
+      "DEUIDXEUR": {
+        "trades": 29,
+        "trades_per_year": 14.5,
+        "mean_hold_days": 20.569659961685826,
+        "hit_rate": 0.06896551724137931,
+        "net_R": -0.1816182900571573,
+        "t_stat": -0.7686472402766853,
+        "positive_year_share": 0.5,
+        "max_drawdown_R": 10.950000509580846,
+        "exits": {
+          "sl": 18,
+          "tp": 2,
+          "cap": 9
+        },
+        "no_carry_R": -0.13301425275463818,
+        "double_cost_R": -0.23626755993740228
+      },
+      "LIGHTCMDUSD": {
+        "trades": 31,
+        "trades_per_year": 15.5,
+        "mean_hold_days": 20.838508064516123,
+        "hit_rate": 0.0967741935483871,
+        "net_R": -0.01890190971364411,
+        "t_stat": -0.06966868235592219,
+        "positive_year_share": 0.5,
+        "max_drawdown_R": 7.515055253242734,
+        "exits": {
+          "sl": 17,
+          "tp": 3,
+          "cap": 11
+        },
+        "no_carry_R": -0.037672464619057155,
+        "double_cost_R": -0.004524749666513602
+      },
+      "BRENTCMDUSD": {
+        "trades": 33,
+        "trades_per_year": 16.5,
+        "mean_hold_days": 19.565004208754207,
+        "hit_rate": 0.12121212121212122,
+        "net_R": -0.004967490502513089,
+        "t_stat": -0.018442679614415005,
+        "positive_year_share": 0.5,
+        "max_drawdown_R": 7.08446537409996,
+        "exits": {
+          "sl": 20,
+          "tp": 4,
+          "cap": 9
+        },
+        "no_carry_R": -0.022518771847616605,
+        "double_cost_R": 0.00784817769285765
+      },
+      "XAGUSD": {
+        "trades": 25,
+        "trades_per_year": 12.5,
+        "mean_hold_days": 24.043500000000005,
+        "hit_rate": 0.24,
+        "net_R": 0.6056958894922619,
+        "t_stat": 1.806674044782618,
+        "positive_year_share": 0.5,
+        "max_drawdown_R": 6.139830236744979,
+        "exits": {
+          "sl": 10,
+          "tp": 6,
+          "cap": 9
+        },
+        "no_carry_R": 0.6350715535521324,
+        "double_cost_R": 0.5720085669649555
+      },
+      "EURUSD": {
+        "trades": 23,
+        "trades_per_year": 11.5,
+        "mean_hold_days": 27.305525362318843,
+        "hit_rate": 0.043478260869565216,
+        "net_R": -0.33556714563271767,
+        "t_stat": -1.2841780902304554,
+        "positive_year_share": 0.0,
+        "max_drawdown_R": 12.940480860139226,
+        "exits": {
+          "sl": 14,
+          "tp": 1,
+          "cap": 8
+        },
+        "no_carry_R": -0.31429030861118934,
+        "double_cost_R": -0.3720011471216469
+      },
+      "GBPUSD": {
+        "trades": 29,
+        "trades_per_year": 14.5,
+        "mean_hold_days": 22.186302681992338,
+        "hit_rate": 0.0,
+        "net_R": -0.6797554030168819,
+        "t_stat": -4.940074334952668,
+        "positive_year_share": 0.0,
+        "max_drawdown_R": 19.790978714302323,
+        "exits": {
+          "sl": 23,
+          "tp": 0,
+          "cap": 6
+        },
+        "no_carry_R": -0.6883684065738845,
+        "double_cost_R": -0.6848351292965567
+      },
+      "USDJPY": {
+        "trades": 24,
+        "trades_per_year": 12.0,
+        "mean_hold_days": 25.86773726851852,
+        "hit_rate": 0.08333333333333333,
+        "net_R": -0.10760387358041891,
+        "t_stat": -0.3995875936914509,
+        "positive_year_share": 0.0,
+        "max_drawdown_R": 5.258552897833031,
+        "exits": {
+          "sl": 14,
+          "tp": 2,
+          "cap": 8
+        },
+        "no_carry_R": -0.04476741815955406,
+        "double_cost_R": -0.18235049694569117
+      },
+      "ETHUSDT": {
+        "trades": 35,
+        "trades_per_year": 17.5,
+        "mean_hold_days": 17.528948412698412,
+        "hit_rate": 0.14285714285714285,
+        "net_R": -0.1986864337131089,
+        "t_stat": -0.7820862258754059,
+        "positive_year_share": 0.0,
+        "max_drawdown_R": 8.556516236715659,
+        "exits": {
+          "sl": 24,
+          "tp": 5,
+          "cap": 6
+        },
+        "no_carry_R": -0.20652041810237728,
+        "double_cost_R": -0.2525915622442342
+      }
+    },
+    "per_year": {
+      "2025": {
+        "trades": 48,
+        "trades_per_year": 48.0,
+        "mean_hold_days": 21.753833912037038,
+        "hit_rate": 0.14583333333333334,
+        "net_R": 0.1040312068487977,
+        "t_stat": 0.4811274682484581,
+        "positive_year_share": 1.0,
+        "max_drawdown_R": 8.861034039241785,
+        "exits": {
+          "sl": 27,
+          "tp": 7,
+          "cap": 14
+        },
+        "no_carry_R": 0.15901782946375145,
+        "double_cost_R": 0.039512695318812074
+      },
+      "2026": {
+        "trades": 40,
+        "trades_per_year": 40.0,
+        "mean_hold_days": 20.559444444444445,
+        "hit_rate": 0.1,
+        "net_R": -0.0438988986703426,
+        "t_stat": -0.18874148521764442,
+        "positive_year_share": 0.0,
+        "max_drawdown_R": 7.415136366653581,
+        "exits": {
+          "sl": 25,
+          "tp": 4,
+          "cap": 11
+        },
+        "no_carry_R": -0.038184005528427455,
+        "double_cost_R": -0.060403357765648605
+      }
+    },
+    "evidence_market_average_R": -0.15348139719501425,
+    "evidence_trades": 280,
+    "random_direction_95pct_R": 0.2623949017674995,
+    "random_direction_seeds": 200,
+    "unresolved_at_end": {
+      "USATECHIDXUSD": 1,
+      "XAUUSD": 1,
+      "BTCUSDT": 1,
+      "USA500IDXUSD": 1,
+      "USA30IDXUSD": 1,
+      "DEUIDXEUR": 1,
+      "LIGHTCMDUSD": 1,
+      "BRENTCMDUSD": 1,
+      "XAGUSD": 1,
+      "EURUSD": 1,
+      "GBPUSD": 1,
+      "USDJPY": 1,
+      "ETHUSDT": 1
+    },
+    "unresolved_at_end_total": 13,
+    "rule": "S3;SL=2ATR;TP=3R",
+    "score_start": "2025-01-01T00:00:00+00:00",
+    "warmup_start": "2023-01-01T00:00:00+00:00",
+    "verdict": "NOT BROKEN"
+  },
+  "stage2": {
+    "pooled_traded": {
+      "trades": 82,
+      "trades_per_year": 41.0,
+      "mean_hold_days": 19.221095867208675,
+      "hit_rate": 0.12195121951219512,
+      "net_R": 0.08940583676306701,
+      "t_stat": 0.4441806782441849,
+      "positive_year_share": 0.5,
+      "max_drawdown_R": 6.685280035493575,
+      "exits": {
+        "sl": 52,
+        "tp": 10,
+        "cap": 20
+      },
+      "no_carry_R": 0.12305852666482127,
+      "double_cost_R": 0.04449409096996494
+    },
+    "per_market": {
+      "USATECHIDXUSD": {
+        "trades": 29,
+        "trades_per_year": 14.5,
+        "mean_hold_days": 19.6036877394636,
+        "hit_rate": 0.06896551724137931,
+        "net_R": -0.1602923863212313,
+        "t_stat": -0.5696683746333847,
+        "positive_year_share": 0.5,
+        "max_drawdown_R": 6.685280035493575,
+        "exits": {
+          "sl": 20,
+          "tp": 2,
+          "cap": 7
+        },
+        "no_carry_R": -0.11376475622918637,
+        "double_cost_R": -0.2096837567949773
+      },
+      "XAUUSD": {
+        "trades": 28,
+        "trades_per_year": 14.0,
+        "mean_hold_days": 18.649627976190477,
+        "hit_rate": 0.17857142857142858,
+        "net_R": 0.4464224899614272,
+        "t_stat": 1.1225694491564358,
+        "positive_year_share": 0.5,
+        "max_drawdown_R": 6.465178254187982,
+        "exits": {
+          "sl": 16,
+          "tp": 5,
+          "cap": 7
+        },
+        "no_carry_R": 0.47011555961191004,
+        "double_cost_R": 0.4183942489159055
+      },
+      "BTCUSDT": {
+        "trades": 25,
+        "trades_per_year": 12.5,
+        "mean_hold_days": 19.417333333333332,
+        "hit_rate": 0.12,
+        "net_R": -0.020802876041310397,
+        "t_stat": -0.05712537867669781,
+        "positive_year_share": 0.5,
+        "max_drawdown_R": 5.3965374674372155,
+        "exits": {
+          "sl": 16,
+          "tp": 3,
+          "cap": 6
+        },
+        "no_carry_R": 0.009069657921130805,
+        "double_cost_R": -0.07942778252215542
+      },
+      "USA500IDXUSD": {
+        "trades": 26,
+        "trades_per_year": 13.0,
+        "mean_hold_days": 20.59102564102564,
+        "hit_rate": 0.07692307692307693,
+        "net_R": -0.1354190310299947,
+        "t_stat": -0.4084613680107897,
+        "positive_year_share": 0.0,
+        "max_drawdown_R": 9.167214946815445,
+        "exits": {
+          "sl": 18,
+          "tp": 2,
+          "cap": 6
+        },
+        "no_carry_R": -0.05842471832021348,
+        "double_cost_R": -0.22088417267402466
+      },
+      "USA30IDXUSD": {
+        "trades": 24,
+        "trades_per_year": 12.0,
+        "mean_hold_days": 21.80627893518518,
+        "hit_rate": 0.0,
+        "net_R": -0.15323473150316605,
+        "t_stat": -0.6385290078207646,
+        "positive_year_share": 0.0,
+        "max_drawdown_R": 6.137363707986003,
+        "exits": {
+          "sl": 14,
+          "tp": 0,
+          "cap": 10
+        },
+        "no_carry_R": -0.07765016894661773,
+        "double_cost_R": -0.2369103485623464
+      },
+      "DEUIDXEUR": {
+        "trades": 26,
+        "trades_per_year": 13.0,
+        "mean_hold_days": 21.013728632478628,
+        "hit_rate": 0.07692307692307693,
+        "net_R": 0.0403433558469198,
+        "t_stat": 0.11447898477175823,
+        "positive_year_share": 0.5,
+        "max_drawdown_R": 8.728348813718798,
+        "exits": {
+          "sl": 17,
+          "tp": 2,
+          "cap": 7
+        },
+        "no_carry_R": 0.10059380658036812,
+        "double_cost_R": -0.026617042554514435
+      },
+      "LIGHTCMDUSD": {
+        "trades": 30,
+        "trades_per_year": 15.0,
+        "mean_hold_days": 17.199374999999996,
+        "hit_rate": 0.03333333333333333,
+        "net_R": -0.34193147545941965,
+        "t_stat": -1.2087743159472057,
+        "positive_year_share": 0.0,
+        "max_drawdown_R": 10.506232257117707,
+        "exits": {
+          "sl": 20,
+          "tp": 1,
+          "cap": 9
+        },
+        "no_carry_R": -0.3545764169406155,
+        "double_cost_R": -0.33496747743267274
+      },
+      "BRENTCMDUSD": {
+        "trades": 28,
+        "trades_per_year": 14.0,
+        "mean_hold_days": 21.57584325396826,
+        "hit_rate": 0.14285714285714285,
+        "net_R": 0.5059894581068359,
+        "t_stat": 1.2434590752668262,
+        "positive_year_share": 1.0,
+        "max_drawdown_R": 4.456750317013277,
+        "exits": {
+          "sl": 15,
+          "tp": 4,
+          "cap": 9
+        },
+        "no_carry_R": 0.4916435430521213,
+        "double_cost_R": 0.5144753854611713
+      },
+      "XAGUSD": {
+        "trades": 19,
+        "trades_per_year": 9.5,
+        "mean_hold_days": 23.15672514619883,
+        "hit_rate": 0.2631578947368421,
+        "net_R": 0.7881830723958739,
+        "t_stat": 1.6178176536811986,
+        "positive_year_share": 0.5,
+        "max_drawdown_R": 2.7368488160875275,
+        "exits": {
+          "sl": 8,
+          "tp": 5,
+          "cap": 6
+        },
+        "no_carry_R": 0.8274602389469834,
+        "double_cost_R": 0.7440424139024261
+      },
+      "EURUSD": {
+        "trades": 22,
+        "trades_per_year": 11.0,
+        "mean_hold_days": 24.40183080808081,
+        "hit_rate": 0.09090909090909091,
+        "net_R": -0.11355407580361825,
+        "t_stat": -0.34881099743004934,
+        "positive_year_share": 0.0,
+        "max_drawdown_R": 9.310151540504345,
+        "exits": {
+          "sl": 12,
+          "tp": 2,
+          "cap": 8
+        },
+        "no_carry_R": -0.05096400556499898,
+        "double_cost_R": -0.1947692152894022
+      },
+      "GBPUSD": {
+        "trades": 34,
+        "trades_per_year": 17.0,
+        "mean_hold_days": 18.078145424836602,
+        "hit_rate": 0.058823529411764705,
+        "net_R": -0.559721627403235,
+        "t_stat": -2.9644031535941178,
+        "positive_year_share": 0.0,
+        "max_drawdown_R": 20.078775437919813,
+        "exits": {
+          "sl": 27,
+          "tp": 2,
+          "cap": 5
+        },
+        "no_carry_R": -0.5652511942598749,
+        "double_cost_R": -0.5724213368641461
+      },
+      "USDJPY": {
+        "trades": 29,
+        "trades_per_year": 14.5,
+        "mean_hold_days": 21.608955938697314,
+        "hit_rate": 0.06896551724137931,
+        "net_R": 0.05524053337838363,
+        "t_stat": 0.1627401067085155,
+        "positive_year_share": 0.5,
+        "max_drawdown_R": 8.388437405456646,
+        "exits": {
+          "sl": 18,
+          "tp": 2,
+          "cap": 9
+        },
+        "no_carry_R": 0.10440233688458606,
+        "double_cost_R": -0.008393415980843066
+      },
+      "ETHUSDT": {
+        "trades": 30,
+        "trades_per_year": 15.0,
+        "mean_hold_days": 16.08013888888889,
+        "hit_rate": 0.1,
+        "net_R": 0.018132090380178194,
+        "t_stat": 0.05224816981768074,
+        "positive_year_share": 0.5,
+        "max_drawdown_R": 7.141882289644076,
+        "exits": {
+          "sl": 20,
+          "tp": 3,
+          "cap": 7
+        },
+        "no_carry_R": 0.013755349166730919,
+        "double_cost_R": -0.051595856990252466
+      }
+    },
+    "per_year": {
+      "2025": {
+        "trades": 37,
+        "trades_per_year": 37.0,
+        "mean_hold_days": 21.957376126126128,
+        "hit_rate": 0.16216216216216217,
+        "net_R": 0.34763615657341057,
+        "t_stat": 1.1025261179124715,
+        "positive_year_share": 1.0,
+        "max_drawdown_R": 5.133983984350078,
+        "exits": {
+          "sl": 20,
+          "tp": 6,
+          "cap": 11
+        },
+        "no_carry_R": 0.4244540167640574,
+        "double_cost_R": 0.2598620792109747
+      },
+      "2026": {
+        "trades": 45,
+        "trades_per_year": 45.0,
+        "mean_hold_days": 16.971265432098765,
+        "hit_rate": 0.08888888888888889,
+        "net_R": -0.12291687063654874,
+        "t_stat": -0.475738547364781,
+        "positive_year_share": 0.0,
+        "max_drawdown_R": 11.850141622429756,
+        "exits": {
+          "sl": 32,
+          "tp": 4,
+          "cap": 9
+        },
+        "no_carry_R": -0.1247555429723285,
+        "double_cost_R": -0.1325862549170876
+      }
+    },
+    "evidence_market_average_R": 0.01040275689087579,
+    "evidence_trades": 268,
+    "random_direction_95pct_R": 0.410660949480178,
+    "random_direction_seeds": 200,
+    "unresolved_at_end": {
+      "USATECHIDXUSD": 1,
+      "XAUUSD": 1,
+      "BTCUSDT": 0,
+      "USA500IDXUSD": 1,
+      "USA30IDXUSD": 1,
+      "DEUIDXEUR": 1,
+      "LIGHTCMDUSD": 0,
+      "BRENTCMDUSD": 0,
+      "XAGUSD": 1,
+      "EURUSD": 1,
+      "GBPUSD": 1,
+      "USDJPY": 1,
+      "ETHUSDT": 1
+    },
+    "unresolved_at_end_total": 10,
+    "models": [
+      {
+        "year": 2025,
+        "training_rows": 126646,
+        "latest_training_exit": "2024-12-31T23:00:00.000000000",
+        "training_markets": [
+          "USATECHIDXUSD",
+          "XAUUSD",
+          "BTCUSDT"
+        ]
+      },
+      {
+        "year": 2026,
+        "training_rows": 137012,
+        "latest_training_exit": "2025-12-31T23:00:00.000000000",
+        "training_markets": [
+          "USATECHIDXUSD",
+          "XAUUSD",
+          "BTCUSDT"
+        ]
+      }
+    ],
+    "selection_counts": {
+      "USATECHIDXUSD": {
+        "flat_opportunities": 85,
+        "blocked_open": 390,
+        "skipped_prediction": 55,
+        "unresolved_chosen": 1,
+        "skip_rate": 0.6470588235294118
+      },
+      "XAUUSD": {
+        "flat_opportunities": 127,
+        "blocked_open": 348,
+        "skipped_prediction": 98,
+        "unresolved_chosen": 1,
+        "skip_rate": 0.7716535433070866
+      },
+      "BTCUSDT": {
+        "flat_opportunities": 192,
+        "skipped_prediction": 167,
+        "blocked_open": 476,
+        "skip_rate": 0.8697916666666666
+      },
+      "USA500IDXUSD": {
+        "flat_opportunities": 110,
+        "skipped_prediction": 83,
+        "blocked_open": 364,
+        "unresolved_chosen": 1,
+        "skip_rate": 0.7545454545454545
+      },
+      "USA30IDXUSD": {
+        "flat_opportunities": 90,
+        "blocked_open": 384,
+        "skipped_prediction": 65,
+        "unresolved_chosen": 1,
+        "skip_rate": 0.7222222222222222
+      },
+      "DEUIDXEUR": {
+        "flat_opportunities": 73,
+        "blocked_open": 407,
+        "skipped_prediction": 46,
+        "unresolved_chosen": 1,
+        "skip_rate": 0.6301369863013698
+      },
+      "LIGHTCMDUSD": {
+        "flat_opportunities": 128,
+        "blocked_open": 346,
+        "skipped_prediction": 98,
+        "skip_rate": 0.765625
+      },
+      "BRENTCMDUSD": {
+        "flat_opportunities": 68,
+        "skipped_prediction": 40,
+        "blocked_open": 404,
+        "skip_rate": 0.5882352941176471
+      },
+      "XAGUSD": {
+        "flat_opportunities": 143,
+        "skipped_prediction": 123,
+        "blocked_open": 332,
+        "unresolved_chosen": 1,
+        "skip_rate": 0.8601398601398601
+      },
+      "EURUSD": {
+        "flat_opportunities": 85,
+        "blocked_open": 396,
+        "skipped_prediction": 62,
+        "unresolved_chosen": 1,
+        "skip_rate": 0.7294117647058823
+      },
+      "GBPUSD": {
+        "flat_opportunities": 58,
+        "blocked_open": 423,
+        "skipped_prediction": 23,
+        "unresolved_chosen": 1,
+        "skip_rate": 0.39655172413793105
+      },
+      "USDJPY": {
+        "flat_opportunities": 44,
+        "skipped_prediction": 14,
+        "blocked_open": 437,
+        "unresolved_chosen": 1,
+        "skip_rate": 0.3181818181818182
+      },
+      "ETHUSDT": {
+        "flat_opportunities": 196,
+        "skipped_prediction": 165,
+        "blocked_open": 472,
+        "unresolved_chosen": 1,
+        "skip_rate": 0.8418367346938775
+      }
+    },
+    "opportunity_drops": {
+      "USATECHIDXUSD": {
+        "missing_entry": 208,
+        "unresolved_option": 60
+      },
+      "XAUUSD": {
+        "missing_entry": 220,
+        "unresolved_option": 222
+      },
+      "BTCUSDT": {
+        "missing_entry": 12,
+        "unresolved_option": 104
+      },
+      "USA500IDXUSD": {
+        "missing_entry": 9,
+        "unresolved_option": 32
+      },
+      "USA30IDXUSD": {
+        "missing_entry": 10,
+        "unresolved_option": 157
+      },
+      "DEUIDXEUR": {
+        "missing_entry": 9,
+        "unresolved_option": 206
+      },
+      "LIGHTCMDUSD": {
+        "missing_entry": 9,
+        "unresolved_option": 117
+      },
+      "BRENTCMDUSD": {
+        "missing_entry": 10,
+        "unresolved_option": 70
+      },
+      "XAGUSD": {
+        "missing_entry": 8,
+        "unresolved_option": 220
+      },
+      "EURUSD": {
+        "missing_entry": 3,
+        "unresolved_option": 263
+      },
+      "GBPUSD": {
+        "missing_entry": 4,
+        "unresolved_option": 124
+      },
+      "USDJPY": {
+        "missing_entry": 3,
+        "unresolved_option": 311
+      },
+      "ETHUSDT": {
+        "unresolved_option": 84,
+        "missing_entry": 2
+      }
+    },
+    "training_features": [
+      "return_20_atr",
+      "return_60_atr",
+      "return_126_atr",
+      "atr_price",
+      "atr_year_percentile",
+      "high_20_atr",
+      "low_20_atr",
+      "high_55_atr",
+      "low_55_atr",
+      "side",
+      "day_of_week",
+      "sl_atr",
+      "tp_R"
+    ],
+    "model_params": {
+      "objective": "regression",
+      "num_leaves": 15,
+      "learning_rate": 0.03,
+      "min_data_in_leaf": 100,
+      "feature_fraction": 0.8,
+      "seed": 7,
+      "verbosity": -1,
+      "num_threads": 4
+    },
+    "num_boost_round": 300,
+    "threshold_R": 0.05,
+    "verdict": "REPORTED ONLY"
+  }
+}

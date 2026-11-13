@@ -486,3 +486,11 @@ Append-only notes from the autonomous review loop while the user sleeps.
 - 2026-11-13 ~17:45: sent swing v1 stage 2 (section 10, frozen in 186c23b) to e128bff8.
 - 2026-11-13 ~18:30: REVIEWED + MERGED swing v1 stage 2 (e128bff8, 8b49e0a). Code checked: features from closed daily bars only, training rows purged by exit < 1 Jan of predicted year (audit table confirms), traded-3-only training, sequential one-trade-per-market, random baseline reuses stage 1. Verdict PASS by frozen section 10, but marginal: 481 trades, +0.184R, t 2.02, 8/13 positive years (61.5%), total 88.5R vs stage 1 primary same years 426 trades +0.167R t 2.21 total 71.3R, 9/13 positive years. Model mostly picks SL 1 ATR / TP 5R (254 of 481). 2x cost: 0.090 vs 0.103 for the plain rule. Evidence avg +0.140 (Dow, DAX negative). Per market NQ +0.20 (t 1.3), gold +0.15 (t 1.1), BTC +0.24 (t 1.0). Supervisor view: the model's gain over the plain rule is within noise; the plain rule is at least as robust. Also fixed the GPT-6-Sol cause with the user's approval: ~/.aws/cli-agent-orchestrator/agent-context/codex_developer.md had model gpt-6-sol (Nov 9 copy); set to gpt-5.6-sol.
 - 2026-11-13 ~18:45: user APPROVED the one-time final test. Protocol frozen in design section 11 (db2507a). Assigned the final runner to new worker 2f14d55b (gpt-5.6-sol); the worker must not touch 2025+ data; the supervisor runs it once.
+- 2026-11-13 ~19:30: Reviewed and merged the final runner (2f14d55b, 9b9d6f3; DEV defaults unchanged, 435 tests passed). RAN THE ONE-TIME FINAL TEST (section 11), once; log data/logs/swing_final.log. Verdict by the frozen rule: NOT BROKEN, but only just.
+  - Main version (S3, 2 ATR / 3R): 88 trades, +0.037R, t 0.23.
+  - Per market: gold +0.45R (29 trades), NQ -0.18R (27), BTC -0.15R (32). 2025 +0.10R, 2026 -0.04R.
+  - Random 95th percentile +0.26R; 2x costs -0.006R; evidence markets average -0.15R (only silver positive; GBP -0.68R).
+  - Stage 2 model (reported only): 82 trades, +0.089R, t 0.44.
+  - 13 main-version trades were still open at the data end.
+  - Reading: the result does not falsify the small DEV edge (+0.16R, about 1 SE away), but gives no confirmation; it rests on gold's 2025 rally.
+  - Per protocol, next is the shadow-mode daily bot (no Telegram sends without approval, no real money).
