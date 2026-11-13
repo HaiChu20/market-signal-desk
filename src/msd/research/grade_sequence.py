@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 
@@ -12,14 +13,16 @@ from msd.research.benchmark import random_direction
 from msd.research.dataset import DEV_END
 from msd.research.decision import choose
 from msd.research.report_card import report
+from msd.research.sequence_data import grid_from_config
 
 REQUIRED = {"known_at", "label_end_ts", "side", "sl", "tp", "p", "p0",
             "tp_first", "net_R", "cost_R", "financing_R", "TP_R",
             "entry_ts", "price", "sym", "event_key", "candidate_id",
-            "config_sha256", "fold", "seed"}
+            "config_sha256", "fold", "seed", "sl_atr", "tp_atr"}
 
 
-def grade(input_dir: Path, *, data_root: Path = Path("data"), output: Path | None = None):
+def grade(input_dir: Path, *, data_root: Path = Path("data"), output: Path | None = None,
+          config_path: Path | None = None):
     files = sorted(Path(input_dir).rglob("oof.parquet"))
     if not files:
         raise FileNotFoundError(f"No OOF predictions under {input_dir}")
@@ -34,6 +37,20 @@ def grade(input_dir: Path, *, data_root: Path = Path("data"), output: Path | Non
             raise ValueError(f"Config SHA mismatch: {path}")
         tables.append(frame)
     all_rows = pd.concat(tables, ignore_index=True)
+    if config_path is not None:
+        raw_config = Path(config_path).read_bytes()
+        expected_sha = hashlib.sha256(raw_config).hexdigest()
+        if set(all_rows.config_sha256) != {expected_sha}:
+            raise ValueError("OOF config SHA does not match grading config")
+        config = json.loads(raw_config)
+        sl_grid, tp_grid, tp_is_r = grid_from_config(config)
+        if tp_is_r and "TP_R" not in all_rows:
+            raise ValueError("R-multiple grid requires TP_R in OOF input")
+        tp_values = all_rows.TP_R if tp_is_r else all_rows.tp_atr
+        sl_ok = all_rows.sl_atr.map(lambda value: any(abs(value - item) < 1e-8 for item in sl_grid))
+        tp_ok = tp_values.map(lambda value: any(abs(value - item) < 1e-8 for item in tp_grid))
+        if not (sl_ok & tp_ok).all():
+            raise ValueError("OOF candidate lies outside configured SL/TP grid")
     if (pd.to_datetime(all_rows.known_at, utc=True).ge(DEV_END).any() or
             pd.to_datetime(all_rows.label_end_ts, utc=True).ge(DEV_END).any()):
         raise ValueError("TEST/FINAL rows or unresolved DEV labels in OOF input")
@@ -59,8 +76,10 @@ def main():
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--data-root", type=Path, default=Path("data"))
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--config", type=Path, help="validate OOF SHA and SL/TP grid")
     args = parser.parse_args()
-    cards = grade(args.input, data_root=args.data_root, output=args.output)
+    cards = grade(args.input, data_root=args.data_root, output=args.output,
+                  config_path=args.config)
     print(json.dumps({key: {"n": card["pooled"]["n"],
                             "brier_skill_vs_p0": card["pooled"]["brier_skill_vs_p0"],
                             "net_avg_R": card["pooled"]["net_avg_R"]}

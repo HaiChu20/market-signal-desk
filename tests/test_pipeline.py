@@ -279,6 +279,31 @@ def test_label_grid_can_limit_signal_timestamps_without_changing_outcomes():
     pd.testing.assert_frame_equal(bounded,all_rows,check_dtype=False)
 
 
+def test_label_grid_accepts_preregistered_stage9_financing(monkeypatch):
+    from msd.processing.labels import label_grid
+    import msd._msd_kernels as kernels
+    ts=pd.date_range("2024-01-01",periods=20,freq="min",tz="UTC")
+    bars=_bars(ts);atr=pd.Series(np.ones(len(bars)))
+    captured=[]
+    def fake_batch(_bars,_times,jobs,size,*_args):
+        captured.extend(jobs)
+        return np.tile([0.,19.,100.,100.,0.,0.,0.,2.,1.],len(jobs)//size).tolist()
+    monkeypatch.setattr(kernels,"first_hit_batch",fake_batch)
+    label_grid(bars,atr,max_trading_days=1,instrument_class="fx",financing_per_night=.00015)
+    assert set(np.asarray(captured).reshape(-1,11)[:,7]) == {.00015}
+
+
+def test_verified_month_is_skipped_on_resume(monkeypatch, tmp_path):
+    from msd.processing import pipeline
+    frame=_bars(pd.date_range("2024-01-01",periods=5,freq="min",tz="UTC"))
+    monkeypatch.setattr(pipeline,"_check_disk",lambda:None)
+    assert pipeline._write_monthly(frame,tmp_path,"EURUSD")==5
+    target=tmp_path/"EURUSD/2024-01.parquet"
+    assert target.exists() and target.with_name(target.name+".verified.json").exists()
+    monkeypatch.setattr(pd.DataFrame,"to_parquet",lambda *_args,**_kwargs: pytest.fail("verified month rewritten"))
+    assert pipeline._write_monthly(frame,tmp_path,"EURUSD")==5
+
+
 def test_label_gap_sl_first_and_favorable_limit_fill_rules():
     from msd.processing.labels import first_hit, first_hit_reference
     ts=pd.date_range("2024-01-02",periods=3,freq="min",tz="UTC")
@@ -524,6 +549,31 @@ def test_bad_tick_flag_is_preserved_in_source_but_excluded_from_features_labels(
     derived=_feature_label_bars(source)
     assert len(source)==3 and source.bad_tick.iloc[1]
     assert derived.ts.tolist()==[source.ts.iloc[0],source.ts.iloc[2]]
+
+
+def test_oil_nonexecutable_quotes_are_excluded_and_audited(capsys):
+    from msd.processing.pipeline import (
+        _exclude_nonexecutable_oil_quotes,
+        assert_executable_spread,
+    )
+    ts=pd.date_range("2020-04-01",periods=4,freq="min",tz="UTC")
+    source=_bars(ts)
+    source.loc[1,"ask_o"]=source.loc[1,"bid_o"]
+    source.loc[2,"ask_c"]=source.loc[2,"bid_c"]-.01
+    source.loc[3,"ask_h"]=np.nan
+
+    result=_exclude_nonexecutable_oil_quotes(
+        source,"LIGHTCMDUSD",ts[0],ts[-1]+pd.Timedelta(minutes=1))
+    assert result.ts.tolist()==[ts[0]]
+    assert_executable_spread(result,"LIGHTCMDUSD")
+    audit=capsys.readouterr().out
+    assert "'excluded': 3" in audit
+    assert "'nonfinite': 1" in audit
+    assert "'zero_spread': 1" in audit
+    assert "'crossed': 1" in audit
+
+    untouched=_exclude_nonexecutable_oil_quotes(source,"EURUSD")
+    assert len(untouched)==4
 
 
 def test_modeled_btc_spread_is_baked_into_every_label_bar(monkeypatch):

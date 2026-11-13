@@ -1,0 +1,780 @@
+{
+  "family": "f5_cross_market",
+  "symbol": "USATECHIDXUSD",
+  "config_hash": "36646f4a2bcecbca0c13f18d3d15dc90ca0dd7f2b87ebb6b9da6102a8ce8e497",
+  "features": [
+    "vix_level",
+    "vix_percentile_1y",
+    "vix3m_level",
+    "vix9d_level",
+    "vix_vix3m_ratio",
+    "dix_level",
+    "dix_z252",
+    "dix_percentile252",
+    "gex_level",
+    "gex_z252",
+    "gex_percentile252",
+    "gex_sign",
+    "dvol_btc_level",
+    "dvol_btc_change",
+    "dvol_btc_minus_realized_vol30d",
+    "dvol_eth_level",
+    "dvol_eth_change",
+    "dvol_eth_minus_realized_vol30d",
+    "funding_z20",
+    "open_interest_change",
+    "time_sin",
+    "time_cos",
+    "minutes_since_session_open",
+    "session_id",
+    "cross_BTCUSDT_return_1m_bars_15",
+    "cross_BTCUSDT_return_1m_bars_240",
+    "cross_BTCUSDT_return_1m_bars_60",
+    "cross_ETHUSDT_return_1m_bars_15",
+    "cross_ETHUSDT_return_1m_bars_240",
+    "cross_ETHUSDT_return_1m_bars_60",
+    "cross_USA500IDXUSD_return_1m_bars_15",
+    "cross_USA500IDXUSD_return_1m_bars_240",
+    "cross_USA500IDXUSD_return_1m_bars_60",
+    "cross_XAUUSD_return_1m_bars_15",
+    "cross_XAUUSD_return_1m_bars_240",
+    "cross_XAUUSD_return_1m_bars_60",
+    "vix_level__missing",
+    "vix_percentile_1y__missing",
+    "vix3m_level__missing",
+    "vix9d_level__missing",
+    "vix_vix3m_ratio__missing",
+    "dix_level__missing",
+    "dix_z252__missing",
+    "dix_percentile252__missing",
+    "gex_level__missing",
+    "gex_z252__missing",
+    "gex_percentile252__missing",
+    "gex_sign__missing",
+    "dvol_btc_level__missing",
+    "dvol_btc_change__missing",
+    "dvol_btc_minus_realized_vol30d__missing",
+    "dvol_eth_level__missing",
+    "dvol_eth_change__missing",
+    "dvol_eth_minus_realized_vol30d__missing",
+    "funding_z20__missing",
+    "open_interest_change__missing",
+    "time_sin__missing",
+    "time_cos__missing",
+    "minutes_since_session_open__missing",
+    "session_id__missing",
+    "cross_BTCUSDT_return_1m_bars_15__missing",
+    "cross_BTCUSDT_return_1m_bars_240__missing",
+    "cross_BTCUSDT_return_1m_bars_60__missing",
+    "cross_ETHUSDT_return_1m_bars_15__missing",
+    "cross_ETHUSDT_return_1m_bars_240__missing",
+    "cross_ETHUSDT_return_1m_bars_60__missing",
+    "cross_USA500IDXUSD_return_1m_bars_15__missing",
+    "cross_USA500IDXUSD_return_1m_bars_240__missing",
+    "cross_USA500IDXUSD_return_1m_bars_60__missing",
+    "cross_XAUUSD_return_1m_bars_15__missing",
+    "cross_XAUUSD_return_1m_bars_240__missing",
+    "cross_XAUUSD_return_1m_bars_60__missing",
+    "side",
+    "sl_atr"
+  ],
+  "feature_count": 74,
+  "pooled": {
+    "n": 9,
+    "signals_per_year": 2.25321300051408,
+    "hit_rate": 0.4444444444444444,
+    "net_avg_R": -0.36501173509491813,
+    "t_stat": -1.4186315621198873,
+    "profit_factor": 0.3529512366073407,
+    "daily_sharpe": -2.160451001281839,
+    "max_drawdown": -0.02095097303390503,
+    "positive_dev_year_share": 0.0,
+    "per_year": {
+      "2022": -0.36501173509491813
+    },
+    "spread_1_5x_net_avg_R": -0.36501172184944153,
+    "random_direction_percentile": 0.5,
+    "pbo": 0.0,
+    "grade": "ungraded: development",
+    "brier": 0.17965005677417809,
+    "brier_skill_vs_p0": 0.099508038871987,
+    "reliability_by_year": {
+      "2019": {
+        "n": 1140550,
+        "predicted": 0.31522111460536634,
+        "observed": 0.31423523738547193
+      },
+      "2020": {
+        "n": 1134850,
+        "predicted": 0.3087675875132285,
+        "observed": 0.3145296735251355
+      },
+      "2021": {
+        "n": 1145850,
+        "predicted": 0.3143665546870615,
+        "observed": 0.32130819915346687
+      },
+      "2022": {
+        "n": 1140300,
+        "predicted": 0.3201501042004243,
+        "observed": 0.3273349118652986
+      }
+    },
+    "reliability_by_vol_tercile": {
+      "unknown": {
+        "n": 4561550,
+        "predicted": 0.3146330566277803,
+        "observed": 0.3193598667119729
+      }
+    },
+    "deflated_sharpe_ratio": null,
+    "random_direction_matched_signals": 9,
+    "row_accounting": {
+      "events": 182462,
+      "candidate_rows": 4561550,
+      "assembled_rows": 4561550,
+      "drops": {},
+      "cpcv_test_groups": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          1,
+          4
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "cpcv_train_scores": [
+        -0.1782393163080624,
+        -0.1787921815959604,
+        -0.17850620315687435,
+        -0.17842747127843386,
+        -0.1791364868982809,
+        -0.17858474102030877,
+        -0.1783421755265749,
+        -0.17900039219374986,
+        -0.18044923710121066,
+        -0.17712200001341935
+      ],
+      "cpcv_test_scores": [
+        -0.1789951259584995,
+        -0.17856389225748961,
+        -0.17923683709744245,
+        -0.18183611039255038,
+        -0.1785581303558774,
+        -0.17901901614887433,
+        -0.18184455594456764,
+        -0.17877446621344145,
+        -0.18221864173038715,
+        -0.1828145758245507
+      ],
+      "pbo": 0.0,
+      "training_anchor_cadence": "hourly (:00) within each purged fold",
+      "maximum_training_anchors_per_fold": 25000,
+      "evaluation_anchor_cadence": "every 15 minutes",
+      "oof_predicted_rows": 4561550,
+      "selected_signals": 9,
+      "no_oof_prediction": 0
+    },
+    "selection_comparison": {
+      "selected_n": 9,
+      "selected_avg_R": -0.36501172184944153,
+      "unselected_n": 4561541,
+      "unselected_avg_R": -0.054557207971811295,
+      "same_event_unselected_n": 216,
+      "same_event_unselected_avg_R": -0.5532793402671814
+    },
+    "brier_skill_vs_cell_base_rate": -0.0028470459966269956,
+    "beats_cell_base_and_positive_net": false
+  },
+  "cpcv": {
+    "cpcv_test_groups": [
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        0,
+        3
+      ],
+      [
+        0,
+        4
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        3,
+        4
+      ]
+    ],
+    "cpcv_train_scores": [
+      -0.1782393163080624,
+      -0.1787921815959604,
+      -0.17850620315687435,
+      -0.17842747127843386,
+      -0.1791364868982809,
+      -0.17858474102030877,
+      -0.1783421755265749,
+      -0.17900039219374986,
+      -0.18044923710121066,
+      -0.17712200001341935
+    ],
+    "cpcv_test_scores": [
+      -0.1789951259584995,
+      -0.17856389225748961,
+      -0.17923683709744245,
+      -0.18183611039255038,
+      -0.1785581303558774,
+      -0.17901901614887433,
+      -0.18184455594456764,
+      -0.17877446621344145,
+      -0.18221864173038715,
+      -0.1828145758245507
+    ],
+    "pbo": 0.0,
+    "training_anchor_cadence": "hourly (:00) within each purged fold",
+    "maximum_training_anchors_per_fold": 25000,
+    "evaluation_anchor_cadence": "every 15 minutes"
+  },
+  "runtime_s": 47.730421582993586,
+  "peak_rss_gib": 3.9639129638671875,
+  "candidates": 4561550,
+  "signals": 9,
+  "input_manifest": [
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2019-01.parquet",
+      "size": 1633181,
+      "mtime_ns": 1794526969982087912
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2019-02.parquet",
+      "size": 1454630,
+      "mtime_ns": 1794526971218766023
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2019-03.parquet",
+      "size": 1581187,
+      "mtime_ns": 1794526972570989747
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2019-04.parquet",
+      "size": 1541065,
+      "mtime_ns": 1794526973907599519
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2019-05.parquet",
+      "size": 1722845,
+      "mtime_ns": 1794526975322297016
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2019-06.parquet",
+      "size": 1482937,
+      "mtime_ns": 1794526976618956874
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2019-07.parquet",
+      "size": 1676345,
+      "mtime_ns": 1794526978051382014
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2019-08.parquet",
+      "size": 1640342,
+      "mtime_ns": 1794526979425927886
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2019-09.parquet",
+      "size": 1528667,
+      "mtime_ns": 1794526980792035672
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2019-10.parquet",
+      "size": 1706721,
+      "mtime_ns": 1794526982224557772
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2019-11.parquet",
+      "size": 1513551,
+      "mtime_ns": 1794526983531028522
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2019-12.parquet",
+      "size": 1493530,
+      "mtime_ns": 1794526984790151324
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2020-01.parquet",
+      "size": 1647746,
+      "mtime_ns": 1794526986121422040
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2020-02.parquet",
+      "size": 1493856,
+      "mtime_ns": 1794526987333974442
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2020-03.parquet",
+      "size": 1477142,
+      "mtime_ns": 1794526988574866680
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2020-04.parquet",
+      "size": 1577971,
+      "mtime_ns": 1794526989905756017
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2020-05.parquet",
+      "size": 1583176,
+      "mtime_ns": 1794526991223388592
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2020-06.parquet",
+      "size": 1650240,
+      "mtime_ns": 1794526992665404081
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2020-07.parquet",
+      "size": 1699975,
+      "mtime_ns": 1794526994084313498
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2020-08.parquet",
+      "size": 1573221,
+      "mtime_ns": 1794526995450927413
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2020-09.parquet",
+      "size": 1650171,
+      "mtime_ns": 1794526996793689582
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2020-10.parquet",
+      "size": 1629116,
+      "mtime_ns": 1794526998232251536
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2020-11.parquet",
+      "size": 1533301,
+      "mtime_ns": 1794526999578245071
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2020-12.parquet",
+      "size": 1572670,
+      "mtime_ns": 1794527000966912799
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2021-01.parquet",
+      "size": 1499671,
+      "mtime_ns": 1794527002193676974
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2021-02.parquet",
+      "size": 1498372,
+      "mtime_ns": 1794527003434865964
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2021-03.parquet",
+      "size": 1734933,
+      "mtime_ns": 1794527004893406166
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2021-04.parquet",
+      "size": 1604581,
+      "mtime_ns": 1794527006263882788
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2021-05.parquet",
+      "size": 1562459,
+      "mtime_ns": 1794527007592654479
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2021-06.parquet",
+      "size": 1628859,
+      "mtime_ns": 1794527008976699492
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2021-07.parquet",
+      "size": 1641093,
+      "mtime_ns": 1794527010337342554
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2021-08.parquet",
+      "size": 1641428,
+      "mtime_ns": 1794527011738066074
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2021-09.parquet",
+      "size": 1630843,
+      "mtime_ns": 1794527013090888806
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2021-10.parquet",
+      "size": 1610306,
+      "mtime_ns": 1794527014408266544
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2021-11.parquet",
+      "size": 1620041,
+      "mtime_ns": 1794527015773600613
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2021-12.parquet",
+      "size": 1655901,
+      "mtime_ns": 1794527017114711432
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2022-01.parquet",
+      "size": 1571758,
+      "mtime_ns": 1794527018437432476
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2022-02.parquet",
+      "size": 1485242,
+      "mtime_ns": 1794527019665430038
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2022-03.parquet",
+      "size": 1745761,
+      "mtime_ns": 1794527021107075857
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2022-04.parquet",
+      "size": 1509514,
+      "mtime_ns": 1794527022321616029
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2022-05.parquet",
+      "size": 1645854,
+      "mtime_ns": 1794527023750192713
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2022-06.parquet",
+      "size": 1641656,
+      "mtime_ns": 1794527025124896088
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2022-07.parquet",
+      "size": 1572388,
+      "mtime_ns": 1794527026412217640
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2022-08.parquet",
+      "size": 1737488,
+      "mtime_ns": 1794527027821721917
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2022-09.parquet",
+      "size": 1625385,
+      "mtime_ns": 1794527029201289718
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2022-10.parquet",
+      "size": 1577585,
+      "mtime_ns": 1794527030519408630
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2022-11.parquet",
+      "size": 1599202,
+      "mtime_ns": 1794527031897971295
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/USATECHIDXUSD/2022-12.parquet",
+      "size": 1530486,
+      "mtime_ns": 1794527033141792897
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2019-01.parquet",
+      "size": 16301374,
+      "mtime_ns": 1794365941211929767
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2019-02.parquet",
+      "size": 14536793,
+      "mtime_ns": 1794365941432901536
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2019-03.parquet",
+      "size": 15468795,
+      "mtime_ns": 1794365941669325333
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2019-04.parquet",
+      "size": 15273193,
+      "mtime_ns": 1794365941901435344
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2019-05.parquet",
+      "size": 17118311,
+      "mtime_ns": 1794365942148480124
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2019-06.parquet",
+      "size": 15074433,
+      "mtime_ns": 1794365942377945713
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2019-07.parquet",
+      "size": 16823909,
+      "mtime_ns": 1794365942633115598
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2019-08.parquet",
+      "size": 16522336,
+      "mtime_ns": 1794365942874088851
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2019-09.parquet",
+      "size": 15725341,
+      "mtime_ns": 1794365943106379991
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2019-10.parquet",
+      "size": 17250030,
+      "mtime_ns": 1794365943350550094
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2019-11.parquet",
+      "size": 14976768,
+      "mtime_ns": 1794365943576966712
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2019-12.parquet",
+      "size": 15178869,
+      "mtime_ns": 1794365943803941380
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-01.parquet",
+      "size": 16066322,
+      "mtime_ns": 1794365944045767566
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-02.parquet",
+      "size": 14816068,
+      "mtime_ns": 1794365944259901046
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-03.parquet",
+      "size": 14991263,
+      "mtime_ns": 1794365944475568886
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-04.parquet",
+      "size": 15910705,
+      "mtime_ns": 1794365944699401915
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-05.parquet",
+      "size": 15728700,
+      "mtime_ns": 1794365944921662665
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-06.parquet",
+      "size": 16430940,
+      "mtime_ns": 1794365945155263495
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-07.parquet",
+      "size": 16936408,
+      "mtime_ns": 1794365945393906874
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-08.parquet",
+      "size": 15579912,
+      "mtime_ns": 1794365945630134418
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-09.parquet",
+      "size": 16455964,
+      "mtime_ns": 1794365945859581047
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-10.parquet",
+      "size": 16517790,
+      "mtime_ns": 1794365946095866217
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-11.parquet",
+      "size": 15788236,
+      "mtime_ns": 1794365946321276858
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2020-12.parquet",
+      "size": 16252003,
+      "mtime_ns": 1794365946557416900
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2021-01.parquet",
+      "size": 14928145,
+      "mtime_ns": 1794365946775552451
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2021-02.parquet",
+      "size": 14986614,
+      "mtime_ns": 1794365946990105188
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2021-03.parquet",
+      "size": 17560645,
+      "mtime_ns": 1794365947235695567
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2021-04.parquet",
+      "size": 16243467,
+      "mtime_ns": 1794365947460759785
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2021-05.parquet",
+      "size": 15965346,
+      "mtime_ns": 1794365947689392025
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2021-06.parquet",
+      "size": 16543636,
+      "mtime_ns": 1794365947918368187
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2021-07.parquet",
+      "size": 16236619,
+      "mtime_ns": 1794365948167614299
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2021-08.parquet",
+      "size": 16543125,
+      "mtime_ns": 1794365948409810700
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2021-09.parquet",
+      "size": 16483967,
+      "mtime_ns": 1794365948644822556
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2021-10.parquet",
+      "size": 15949827,
+      "mtime_ns": 1794365948869375972
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2021-11.parquet",
+      "size": 16205931,
+      "mtime_ns": 1794365949095260746
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2021-12.parquet",
+      "size": 16635041,
+      "mtime_ns": 1794365949348415136
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2022-01.parquet",
+      "size": 15946038,
+      "mtime_ns": 1794365949584258298
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2022-02.parquet",
+      "size": 15245748,
+      "mtime_ns": 1794365949826272237
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2022-03.parquet",
+      "size": 17638881,
+      "mtime_ns": 1794365950071088977
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2022-04.parquet",
+      "size": 15272363,
+      "mtime_ns": 1794365950288785396
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2022-05.parquet",
+      "size": 16794503,
+      "mtime_ns": 1794365950522338517
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2022-06.parquet",
+      "size": 16689859,
+      "mtime_ns": 1794365950756324144
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2022-07.parquet",
+      "size": 15923219,
+      "mtime_ns": 1794365950977869007
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2022-08.parquet",
+      "size": 17601137,
+      "mtime_ns": 1794365951230826436
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2022-09.parquet",
+      "size": 16621785,
+      "mtime_ns": 1794365951463471332
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2022-10.parquet",
+      "size": 16133476,
+      "mtime_ns": 1794365951695846514
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2022-11.parquet",
+      "size": 16588007,
+      "mtime_ns": 1794365951943017504
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/USATECHIDXUSD/2022-12.parquet",
+      "size": 16027462,
+      "mtime_ns": 1794365952173128063
+    }
+  ]
+}

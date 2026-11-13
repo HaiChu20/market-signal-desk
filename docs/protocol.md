@@ -71,3 +71,11 @@ Purging: training rows whose label window overlaps the evaluation fold are dropp
 ## Recorded deviations
 
 - 2026-11-11: label kernel charges XAUUSD the index financing rate (0.02%/night) instead of the gold/FX 0.015%/night stated above. This overstates cost by 0.005%/night (conservative); labels are not regenerated for it.
+
+## Addendum 2026-11-11: Stage 9 markets (written before any Stage 9 result)
+
+- Indices (Dow, DAX, FTSE and Nikkei): 0.02% of notional per night.
+- Silver: 0.015% per night (metal, like gold).
+- FX: 0.015% per night.
+- Oil (WTI and Brent): 0.02% per night.
+- Every non-crypto class uses the 17:00 New York financing boundary as an approximation.

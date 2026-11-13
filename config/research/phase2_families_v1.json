@@ -1,0 +1,65 @@
+{
+  "protocol": "phase2_family_v1",
+  "development_end": "2023-01-01T00:00:00Z",
+  "anchor_minutes": [0, 15, 30, 45],
+  "training_anchor_minutes": [0],
+  "shared_geometry_features": ["side", "sl_atr"],
+  "families": {
+    "f3_order_flow": {
+      "description": "Scale-free order-flow and causal activity features; raw deltas are excluded.",
+      "flow_columns": [
+        "flow_coverage", "tick_flow_coverage", "spot_flow_coverage",
+        "perp_flow_coverage", "bybit_flow_coverage",
+        "spot_imbalance_1m", "spot_imbalance_5m", "spot_imbalance_15m", "spot_imbalance_60m",
+        "perp_imbalance_1m", "perp_imbalance_5m", "perp_imbalance_15m", "perp_imbalance_60m",
+        "bybit_imbalance_1m", "bybit_imbalance_5m", "bybit_imbalance_15m", "bybit_imbalance_60m",
+        "spot_trade_intensity_z20d", "perp_trade_intensity_z20d", "bybit_trade_intensity_z20d",
+        "spot_large100k_imbalance_1m", "spot_large1m_imbalance_1m",
+        "perp_large100k_imbalance_1m", "perp_large1m_imbalance_1m",
+        "bybit_large100k_imbalance_1m", "bybit_large1m_imbalance_1m",
+        "cum_delta_divergence_60m",
+        "ticks_size_imbalance", "ticks_size_imbalance_5m", "ticks_size_imbalance_15m",
+        "ticks_size_imbalance_60m", "ticks_count_z20d"
+      ],
+      "dense_columns": [
+        "volume_z20", "5m_volume_ratio20", "15m_volume_ratio20", "1h_volume_ratio20",
+        "4h_volume_ratio20", "1d_volume_ratio20", "taker_buy_ratio", "trade_count_z20",
+        "quote_volume_z20"
+      ],
+      "add_missing_flags": true
+    },
+    "f4_regime": {
+      "description": "Trend, volatility, structure, session and time regime features.",
+      "timeframes": ["1m", "5m", "15m", "1h", "4h", "1d"],
+      "timeframe_suffixes": [
+        "adx14", "plus_di14", "minus_di14",
+        "realized_vol14", "realized_vol30", "realized_vol50",
+        "parkinson_vol14", "parkinson_vol50", "atr14", "atr50", "atr14_price", "atr50_price",
+        "atr_ratio14_50", "vol_ratio14_50",
+        "bollinger_width20", "donchian20_position", "donchian20_width_atr",
+        "donchian55_position", "donchian55_width_atr", "range_position14", "range_position50",
+        "ema20_slope", "ema50_slope", "ema200_slope",
+        "ema20_distance_atr", "ema50_distance_atr", "ema200_distance_atr",
+        "higher_high", "higher_low", "bos_up", "bos_down", "choch_up", "choch_down"
+      ],
+      "dense_columns": [
+        "minutes_since_session_open", "session_id", "time_sin", "time_cos"
+      ],
+      "add_missing_flags": true
+    },
+    "f5_cross_market": {
+      "description": "Cross-asset, volatility-index, options-positioning and crypto derivatives context. DXY and yields are unavailable in v1.",
+      "dense_prefixes": ["cross_"],
+      "dense_columns": [
+        "vix_level", "vix_percentile_1y", "vix3m_level", "vix9d_level", "vix_vix3m_ratio",
+        "dix_level", "dix_z252", "dix_percentile252",
+        "gex_level", "gex_z252", "gex_percentile252", "gex_sign",
+        "dvol_btc_level", "dvol_btc_change", "dvol_btc_minus_realized_vol30d",
+        "dvol_eth_level", "dvol_eth_change", "dvol_eth_minus_realized_vol30d",
+        "funding_z20", "open_interest_change", "time_sin", "time_cos",
+        "minutes_since_session_open", "session_id"
+      ],
+      "add_missing_flags": true
+    }
+  }
+}

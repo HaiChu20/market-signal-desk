@@ -1,0 +1,846 @@
+{
+  "family": "f3_order_flow",
+  "symbol": "BTCUSDT",
+  "config_hash": "98a4e56434297105a535951485fad1fe258090cb0d9b1206d08fbce7c1c415ac",
+  "features": [
+    "volume_z20",
+    "5m_volume_ratio20",
+    "15m_volume_ratio20",
+    "1h_volume_ratio20",
+    "4h_volume_ratio20",
+    "1d_volume_ratio20",
+    "taker_buy_ratio",
+    "trade_count_z20",
+    "quote_volume_z20",
+    "flow_coverage",
+    "tick_flow_coverage",
+    "spot_flow_coverage",
+    "perp_flow_coverage",
+    "bybit_flow_coverage",
+    "spot_imbalance_1m",
+    "spot_imbalance_5m",
+    "spot_imbalance_15m",
+    "spot_imbalance_60m",
+    "perp_imbalance_1m",
+    "perp_imbalance_5m",
+    "perp_imbalance_15m",
+    "perp_imbalance_60m",
+    "bybit_imbalance_1m",
+    "bybit_imbalance_5m",
+    "bybit_imbalance_15m",
+    "bybit_imbalance_60m",
+    "spot_trade_intensity_z20d",
+    "perp_trade_intensity_z20d",
+    "bybit_trade_intensity_z20d",
+    "spot_large100k_imbalance_1m",
+    "spot_large1m_imbalance_1m",
+    "perp_large100k_imbalance_1m",
+    "perp_large1m_imbalance_1m",
+    "bybit_large100k_imbalance_1m",
+    "bybit_large1m_imbalance_1m",
+    "cum_delta_divergence_60m",
+    "ticks_size_imbalance",
+    "ticks_size_imbalance_5m",
+    "ticks_size_imbalance_15m",
+    "ticks_size_imbalance_60m",
+    "ticks_count_z20d",
+    "volume_z20__missing",
+    "5m_volume_ratio20__missing",
+    "15m_volume_ratio20__missing",
+    "1h_volume_ratio20__missing",
+    "4h_volume_ratio20__missing",
+    "1d_volume_ratio20__missing",
+    "taker_buy_ratio__missing",
+    "trade_count_z20__missing",
+    "quote_volume_z20__missing",
+    "flow_coverage__missing",
+    "tick_flow_coverage__missing",
+    "spot_flow_coverage__missing",
+    "perp_flow_coverage__missing",
+    "bybit_flow_coverage__missing",
+    "spot_imbalance_1m__missing",
+    "spot_imbalance_5m__missing",
+    "spot_imbalance_15m__missing",
+    "spot_imbalance_60m__missing",
+    "perp_imbalance_1m__missing",
+    "perp_imbalance_5m__missing",
+    "perp_imbalance_15m__missing",
+    "perp_imbalance_60m__missing",
+    "bybit_imbalance_1m__missing",
+    "bybit_imbalance_5m__missing",
+    "bybit_imbalance_15m__missing",
+    "bybit_imbalance_60m__missing",
+    "spot_trade_intensity_z20d__missing",
+    "perp_trade_intensity_z20d__missing",
+    "bybit_trade_intensity_z20d__missing",
+    "spot_large100k_imbalance_1m__missing",
+    "spot_large1m_imbalance_1m__missing",
+    "perp_large100k_imbalance_1m__missing",
+    "perp_large1m_imbalance_1m__missing",
+    "bybit_large100k_imbalance_1m__missing",
+    "bybit_large1m_imbalance_1m__missing",
+    "cum_delta_divergence_60m__missing",
+    "ticks_size_imbalance__missing",
+    "ticks_size_imbalance_5m__missing",
+    "ticks_size_imbalance_15m__missing",
+    "ticks_size_imbalance_60m__missing",
+    "ticks_count_z20d__missing",
+    "side",
+    "sl_atr"
+  ],
+  "feature_count": 84,
+  "pooled": {
+    "n": 7,
+    "signals_per_year": 2.33282326664449,
+    "hit_rate": 0.42857142857142855,
+    "net_avg_R": -0.21797508001327515,
+    "t_stat": -0.7490044413940208,
+    "profit_factor": 0.541817841488882,
+    "daily_sharpe": -0.7124546500154819,
+    "max_drawdown": -0.012980639934539795,
+    "positive_dev_year_share": 0.0,
+    "per_year": {
+      "2020": -0.7227622270584106,
+      "2021": -0.1338438888390859
+    },
+    "spread_1_5x_net_avg_R": -0.21797506511211395,
+    "random_direction_percentile": 50.0,
+    "pbo": 0.4,
+    "grade": "ungraded: development",
+    "brier": 0.17396693677595665,
+    "brier_skill_vs_p0": 0.12055042748034261,
+    "reliability_by_year": {
+      "2020": {
+        "n": 1752700,
+        "predicted": 0.30194372521870194,
+        "observed": 0.3069315912592001
+      },
+      "2021": {
+        "n": 1748750,
+        "predicted": 0.3015426305124546,
+        "observed": 0.30693809864188704
+      },
+      "2022": {
+        "n": 1752000,
+        "predicted": 0.306978612527776,
+        "observed": 0.30589440639269405
+      }
+    },
+    "reliability_by_vol_tercile": {
+      "unknown": {
+        "n": 5253450,
+        "predicted": 0.3034893206270427,
+        "observed": 0.3065878613101866
+      }
+    },
+    "deflated_sharpe_ratio": null,
+    "random_direction_matched_signals": 7,
+    "row_accounting": {
+      "events": 210138,
+      "candidate_rows": 5253450,
+      "assembled_rows": 5253450,
+      "drops": {},
+      "cpcv_test_groups": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          1,
+          4
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "cpcv_train_scores": [
+        -0.17135659646719448,
+        -0.17325573487848472,
+        -0.17235105448502522,
+        -0.1732791977740082,
+        -0.17402397883358997,
+        -0.17305212974065456,
+        -0.17345134734311043,
+        -0.17423670991553822,
+        -0.17436945705814078,
+        -0.17362772466994805
+      ],
+      "cpcv_test_scores": [
+        -0.17638823377693366,
+        -0.17396086327558716,
+        -0.17554800698329048,
+        -0.17555867397347583,
+        -0.17351987265205177,
+        -0.17503804420006497,
+        -0.17445046034034722,
+        -0.17256006736050275,
+        -0.17154556403854765,
+        -0.17328099233543892
+      ],
+      "pbo": 0.4,
+      "training_anchor_cadence": "hourly (:00) within each purged fold",
+      "maximum_training_anchors_per_fold": 25000,
+      "evaluation_anchor_cadence": "every 15 minutes",
+      "oof_predicted_rows": 5253450,
+      "selected_signals": 7,
+      "no_oof_prediction": 0
+    },
+    "selection_comparison": {
+      "selected_n": 7,
+      "selected_avg_R": -0.21797506511211395,
+      "unselected_n": 5253443,
+      "unselected_avg_R": -0.07279995083808899,
+      "same_event_unselected_n": 168,
+      "same_event_unselected_avg_R": -0.23221361637115479
+    },
+    "brier_skill_vs_cell_base_rate": -0.0011106986533759855,
+    "beats_cell_base_and_positive_net": false
+  },
+  "cpcv": {
+    "cpcv_test_groups": [
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        0,
+        3
+      ],
+      [
+        0,
+        4
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        3,
+        4
+      ]
+    ],
+    "cpcv_train_scores": [
+      -0.17135659646719448,
+      -0.17325573487848472,
+      -0.17235105448502522,
+      -0.1732791977740082,
+      -0.17402397883358997,
+      -0.17305212974065456,
+      -0.17345134734311043,
+      -0.17423670991553822,
+      -0.17436945705814078,
+      -0.17362772466994805
+    ],
+    "cpcv_test_scores": [
+      -0.17638823377693366,
+      -0.17396086327558716,
+      -0.17554800698329048,
+      -0.17555867397347583,
+      -0.17351987265205177,
+      -0.17503804420006497,
+      -0.17445046034034722,
+      -0.17256006736050275,
+      -0.17154556403854765,
+      -0.17328099233543892
+    ],
+    "pbo": 0.4,
+    "training_anchor_cadence": "hourly (:00) within each purged fold",
+    "maximum_training_anchors_per_fold": 25000,
+    "evaluation_anchor_cadence": "every 15 minutes"
+  },
+  "runtime_s": 54.254064333974384,
+  "peak_rss_gib": 5.051055908203125,
+  "candidates": 5253450,
+  "signals": 7,
+  "input_manifest": [
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2020-01.parquet",
+      "size": 6164413,
+      "mtime_ns": 1794526805169739936
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2020-02.parquet",
+      "size": 5718717,
+      "mtime_ns": 1794526807349960493
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2020-03.parquet",
+      "size": 6105856,
+      "mtime_ns": 1794526809661325994
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2020-04.parquet",
+      "size": 5842977,
+      "mtime_ns": 1794526811932295368
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2020-05.parquet",
+      "size": 6147810,
+      "mtime_ns": 1794526814277859264
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2020-06.parquet",
+      "size": 5816333,
+      "mtime_ns": 1794526816583121618
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2020-07.parquet",
+      "size": 6136481,
+      "mtime_ns": 1794526818893214731
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2020-08.parquet",
+      "size": 6134892,
+      "mtime_ns": 1794526821279714426
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2020-09.parquet",
+      "size": 5922555,
+      "mtime_ns": 1794526823562314129
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2020-10.parquet",
+      "size": 6079247,
+      "mtime_ns": 1794526825895225186
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2020-11.parquet",
+      "size": 6085145,
+      "mtime_ns": 1794526828167093486
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2020-12.parquet",
+      "size": 6158619,
+      "mtime_ns": 1794526830570809193
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2021-01.parquet",
+      "size": 6294183,
+      "mtime_ns": 1794526832959774748
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2021-02.parquet",
+      "size": 5631015,
+      "mtime_ns": 1794526835062785964
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2021-03.parquet",
+      "size": 6285308,
+      "mtime_ns": 1794526837399874898
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2021-04.parquet",
+      "size": 5950552,
+      "mtime_ns": 1794526839678438100
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2021-05.parquet",
+      "size": 6273425,
+      "mtime_ns": 1794526842046679399
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2021-06.parquet",
+      "size": 6066182,
+      "mtime_ns": 1794526844310455156
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2021-07.parquet",
+      "size": 6238910,
+      "mtime_ns": 1794526846678777038
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2021-08.parquet",
+      "size": 6265946,
+      "mtime_ns": 1794526849003683513
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2021-09.parquet",
+      "size": 5978342,
+      "mtime_ns": 1794526851302717135
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2021-10.parquet",
+      "size": 6244704,
+      "mtime_ns": 1794526853639901695
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2021-11.parquet",
+      "size": 6020040,
+      "mtime_ns": 1794526855922246312
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2021-12.parquet",
+      "size": 6174678,
+      "mtime_ns": 1794526858302958364
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2022-01.parquet",
+      "size": 6095483,
+      "mtime_ns": 1794526860681493353
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2022-02.parquet",
+      "size": 5562061,
+      "mtime_ns": 1794526862743976565
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2022-03.parquet",
+      "size": 6192406,
+      "mtime_ns": 1794526865091559483
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2022-04.parquet",
+      "size": 6067763,
+      "mtime_ns": 1794526867276456630
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2022-05.parquet",
+      "size": 6259780,
+      "mtime_ns": 1794526869613341521
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2022-06.parquet",
+      "size": 6028973,
+      "mtime_ns": 1794526871812996405
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2022-07.parquet",
+      "size": 6205749,
+      "mtime_ns": 1794526874156842659
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2022-08.parquet",
+      "size": 6111680,
+      "mtime_ns": 1794526876510906019
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2022-09.parquet",
+      "size": 5901920,
+      "mtime_ns": 1794526878801595638
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2022-10.parquet",
+      "size": 6044376,
+      "mtime_ns": 1794526881208597797
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2022-11.parquet",
+      "size": 5866733,
+      "mtime_ns": 1794526883516500345
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/labels_wide_v1/BTCUSDT/2022-12.parquet",
+      "size": 5926431,
+      "mtime_ns": 1794526885827003628
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-01.parquet",
+      "size": 24939549,
+      "mtime_ns": 1794373599793892638
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2020-01.parquet",
+      "size": 10539238,
+      "mtime_ns": 1794426591737977724
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-02.parquet",
+      "size": 23072438,
+      "mtime_ns": 1794373600147936763
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2020-02.parquet",
+      "size": 9788789,
+      "mtime_ns": 1794426591954195555
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-03.parquet",
+      "size": 24880672,
+      "mtime_ns": 1794373600526537987
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2020-03.parquet",
+      "size": 11564196,
+      "mtime_ns": 1794426592208729732
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-04.parquet",
+      "size": 24073170,
+      "mtime_ns": 1794373600903852319
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2020-04.parquet",
+      "size": 14822967,
+      "mtime_ns": 1794426592472202103
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-05.parquet",
+      "size": 24958717,
+      "mtime_ns": 1794373601272333191
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2020-05.parquet",
+      "size": 15144799,
+      "mtime_ns": 1794426592750100319
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-06.parquet",
+      "size": 24051671,
+      "mtime_ns": 1794373601628190550
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2020-06.parquet",
+      "size": 15066592,
+      "mtime_ns": 1794426593015068999
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-07.parquet",
+      "size": 24956190,
+      "mtime_ns": 1794373601990654128
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2020-07.parquet",
+      "size": 15634798,
+      "mtime_ns": 1794426593289893802
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-08.parquet",
+      "size": 24851655,
+      "mtime_ns": 1794373602357935358
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2020-08.parquet",
+      "size": 15707587,
+      "mtime_ns": 1794426593561976946
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-09.parquet",
+      "size": 24246278,
+      "mtime_ns": 1794373602713029206
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2020-09.parquet",
+      "size": 15110316,
+      "mtime_ns": 1794426593837737635
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-10.parquet",
+      "size": 24927928,
+      "mtime_ns": 1794373603083082559
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2020-10.parquet",
+      "size": 15548083,
+      "mtime_ns": 1794426594105482267
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-11.parquet",
+      "size": 23940906,
+      "mtime_ns": 1794373603449675780
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2020-11.parquet",
+      "size": 14470172,
+      "mtime_ns": 1794426594368244754
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2020-12.parquet",
+      "size": 24413611,
+      "mtime_ns": 1794373603822314544
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2020-12.parquet",
+      "size": 15978435,
+      "mtime_ns": 1794426594652143252
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-01.parquet",
+      "size": 24502805,
+      "mtime_ns": 1794373604187157906
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2021-01.parquet",
+      "size": 16349357,
+      "mtime_ns": 1794426594919046706
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-02.parquet",
+      "size": 22216330,
+      "mtime_ns": 1794373604518821671
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2021-02.parquet",
+      "size": 14788010,
+      "mtime_ns": 1794426595186541169
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-03.parquet",
+      "size": 24820224,
+      "mtime_ns": 1794373604877618697
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2021-03.parquet",
+      "size": 16370728,
+      "mtime_ns": 1794426595472783404
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-04.parquet",
+      "size": 23898373,
+      "mtime_ns": 1794373605225939865
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2021-04.parquet",
+      "size": 15679187,
+      "mtime_ns": 1794426595740513244
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-05.parquet",
+      "size": 25094996,
+      "mtime_ns": 1794373605590154594
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2021-05.parquet",
+      "size": 16477096,
+      "mtime_ns": 1794426596011291621
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-06.parquet",
+      "size": 24267127,
+      "mtime_ns": 1794373605958857969
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2021-06.parquet",
+      "size": 16005898,
+      "mtime_ns": 1794426596274744992
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-07.parquet",
+      "size": 25020085,
+      "mtime_ns": 1794373606339692017
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2021-07.parquet",
+      "size": 16448915,
+      "mtime_ns": 1794426596540572101
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-08.parquet",
+      "size": 24884204,
+      "mtime_ns": 1794373606712154196
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2021-08.parquet",
+      "size": 16366961,
+      "mtime_ns": 1794426596803566090
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-09.parquet",
+      "size": 24221042,
+      "mtime_ns": 1794373607079350675
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2021-09.parquet",
+      "size": 15837309,
+      "mtime_ns": 1794426597072046898
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-10.parquet",
+      "size": 25010778,
+      "mtime_ns": 1794373607452147775
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2021-10.parquet",
+      "size": 16409216,
+      "mtime_ns": 1794426597346995994
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-11.parquet",
+      "size": 24313984,
+      "mtime_ns": 1794373607822210962
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2021-11.parquet",
+      "size": 15881666,
+      "mtime_ns": 1794426597626288976
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2021-12.parquet",
+      "size": 25156429,
+      "mtime_ns": 1794373608197779476
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2021-12.parquet",
+      "size": 16352112,
+      "mtime_ns": 1794426597896989312
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-01.parquet",
+      "size": 25077401,
+      "mtime_ns": 1794373608574372714
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2022-01.parquet",
+      "size": 16369803,
+      "mtime_ns": 1794426598174982403
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-02.parquet",
+      "size": 22752471,
+      "mtime_ns": 1794373608938478941
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2022-02.parquet",
+      "size": 14831656,
+      "mtime_ns": 1794426598472040021
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-03.parquet",
+      "size": 25220344,
+      "mtime_ns": 1794373609315815689
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2022-03.parquet",
+      "size": 16418290,
+      "mtime_ns": 1794426598738210592
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-04.parquet",
+      "size": 24185098,
+      "mtime_ns": 1794373609683332047
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2022-04.parquet",
+      "size": 15896128,
+      "mtime_ns": 1794426599013181021
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-05.parquet",
+      "size": 25121483,
+      "mtime_ns": 1794373610050431317
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2022-05.parquet",
+      "size": 16428216,
+      "mtime_ns": 1794426599288339911
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-06.parquet",
+      "size": 24212366,
+      "mtime_ns": 1794373610407414609
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2022-06.parquet",
+      "size": 15913162,
+      "mtime_ns": 1794426599576674505
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-07.parquet",
+      "size": 24948629,
+      "mtime_ns": 1794373610778919440
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2022-07.parquet",
+      "size": 16461532,
+      "mtime_ns": 1794426599856011488
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-08.parquet",
+      "size": 25095661,
+      "mtime_ns": 1794373611143237295
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2022-08.parquet",
+      "size": 16135194,
+      "mtime_ns": 1794426600125676061
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-09.parquet",
+      "size": 24305456,
+      "mtime_ns": 1794373611505902293
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2022-09.parquet",
+      "size": 15715753,
+      "mtime_ns": 1794426600382516558
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-10.parquet",
+      "size": 25048864,
+      "mtime_ns": 1794373611871952089
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2022-10.parquet",
+      "size": 16305173,
+      "mtime_ns": 1794426600655941177
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-11.parquet",
+      "size": 24366789,
+      "mtime_ns": 1794373612233592197
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2022-11.parquet",
+      "size": 15634524,
+      "mtime_ns": 1794426600932004495
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features/BTCUSDT/2022-12.parquet",
+      "size": 24882739,
+      "mtime_ns": 1794373612603439380
+    },
+    {
+      "path": "/Users/bfhach/Projects/market-signal-desk/data/features_flow/BTCUSDT/2022-12.parquet",
+      "size": 16306148,
+      "mtime_ns": 1794426601200223049
+    }
+  ]
+}
