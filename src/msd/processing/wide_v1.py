@@ -149,9 +149,11 @@ def build_event_labels(symbol: str, data_root: Path, output_root: Path, config: 
         if len(result):
             result=result[pd.to_datetime(result.exit_ts,utc=True)<DEV_END].copy()
             result["known_at"]=pd.to_datetime(result.known_at,utc=True);result["label_end_ts"]=result.exit_ts
-            result["event_key"]=(symbol+"|"+result.method.astype(str)+"|"+result.get("variant","").fillna("").astype(str)+"|"+
-                result.ts.astype(str)+"|"+result.side.astype(str)+"|"+result.get("entry_type","market").astype(str)+"|"+
-                result.get("limit_price",pd.Series(np.nan,index=result.index)).astype(str))
+            variant=result.get("variant",pd.Series("",index=result.index)).fillna("").astype(str)
+            entry_type=result.get("entry_type",pd.Series("market",index=result.index)).fillna("market").astype(str)
+            limit=result.get("limit_price",pd.Series(np.nan,index=result.index)).astype(object).fillna("").astype(str)
+            result["event_key"]=(symbol+"|"+result.method.astype(str)+"|"+variant+"|"+
+                result.ts.astype(str)+"|"+result.side.astype(str)+"|"+entry_type+"|"+limit)
         result.to_parquet(target/path.name,index=False,compression="zstd")
     _manifest(output_root,symbol,"events",config)
 
