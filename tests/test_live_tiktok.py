@@ -317,3 +317,15 @@ def test_capital_prices_treats_404_as_empty_range_but_raises_other_errors():
     client.code = 500
     with pytest.raises(capital.CapitalHTTPError):
         client.prices("US100", "MINUTE", start, start + timedelta(hours=1))
+
+
+def test_engine_bar_memory_is_bounded(tmp_path):
+    live = SignalEngine(SignalStore(tmp_path / "s.db"), lambda _m: None)
+    start = pd.Timestamp("2026-01-01T00:00Z")
+    for day in range(70):
+        ts = start + pd.Timedelta(days=day)
+        live.process_completed("USATECHIDXUSD", "MINUTE",
+                               {"ts": ts, **{f"{s}_{f}": 1.0 for s in ("bid", "ask") for f in "ohlc"}})
+    records = live._bar_records[("USATECHIDXUSD", "MINUTE")]
+    assert records[0]["ts"] >= records[-1]["ts"] - engine.BAR_RETENTION
+    assert len(records) == 61

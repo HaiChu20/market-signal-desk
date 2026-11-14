@@ -31,6 +31,7 @@ CONFIG_PATH = Path("live.toml")
 STATE_PATH = Path("data/live/state.db")
 HEARTBEAT_PATH = Path("data/live/heartbeat")
 EPICS_PATH = Path("data/live/epics.json")
+BAR_RETENTION = pd.Timedelta(days=60)
 RESOLUTION = {"MINUTE": pd.Timedelta(minutes=1), "HOUR": pd.Timedelta(hours=1), "DAY": pd.Timedelta(days=1)}
 
 
@@ -248,6 +249,12 @@ class SignalEngine:
             if existing is not None and not existing.empty:
                 records.extend(existing.to_dict("records"))
         records.append(row)
+        # Bounded memory: strategies read <= 42 days plus an open trade (B's longest
+        # dev hold was 13.4 days), so 60 days of completed bars is always enough.
+        cutoff = row["ts"] - BAR_RETENTION
+        if records[0]["ts"] < cutoff:
+            keep = next(i for i, item in enumerate(records) if item["ts"] >= cutoff)
+            del records[:keep]
         self._frame_dirty.add(key)
         self._check_exits(symbol, resolution, row, seconds=seconds)
         self._check_pending(symbol, resolution, row)
