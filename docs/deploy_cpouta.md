@@ -3,7 +3,8 @@
 This deployment runs the S1 Breakout 20D, S2 Breakout 55D, and S3 Trend 6M
 rules once daily. Each has independent MNQ, MGC, and MBT trade state. It sends
 plain text notifications through the configured Telegram bot; it does not place
-orders. There is no intraday service or Capital.com feed.
+orders. The optional `msd-live.service` runs the frozen TikTok A/B Nasdaq
+signals through Capital.com and sends Telegram alerts; it does not place orders.
 
 ## Prepare the VM
 
@@ -49,6 +50,24 @@ after downtime.
 The setup script needs `sudo` for the systemd unit files. It uses the current
 repository path and current non-root user in the service definition.
 
+## Add the live TikTok A/B service
+
+The repository's `live.toml` enables only USATECHIDXUSD with the frozen A and B
+strategies. On the existing VM, install and start the separate service without
+rerunning the swing bootstrap:
+
+```sh
+./scripts/install_live_service.sh
+```
+
+The Capital epic is cached in the ignored file `data/live/epics.json`; runtime
+resolution never edits tracked `live.toml`. To verify Capital login, epic
+resolution, and a short recent-bar request without sending a Telegram message:
+
+```sh
+uv run --env-file .env python -m msd.live.engine --check
+```
+
 ## Check, stop, and update
 
 View the next timer activation and service result:
@@ -58,12 +77,16 @@ systemctl list-timers msd-swing.timer
 systemctl status msd-swing.service
 journalctl -u msd-swing.service
 tail -n 100 data/logs/swing_shadow.log
+systemctl status msd-live.service
+journalctl -u msd-live.service
+tail -n 100 data/logs/live.log
 ```
 
 Stop and disable the daily timer:
 
 ```sh
 sudo systemctl disable --now msd-swing.timer
+sudo systemctl disable --now msd-live.service
 ```
 
 Update the code and reinstall/reload the timer configuration:

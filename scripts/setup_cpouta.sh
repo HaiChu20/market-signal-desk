@@ -53,9 +53,27 @@ Unit=msd-swing.service
 [Install]
 WantedBy=timers.target
 UNIT
+sudo tee /etc/systemd/system/msd-live.service >/dev/null <<UNIT
+[Unit]
+Description=Market Signal Desk live TikTok A/B alerts
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=$run_user
+WorkingDirectory=$repo_root
+ExecStart=$repo_root/scripts/run_live.sh
+Restart=on-failure
+RestartSec=60
+
+[Install]
+WantedBy=multi-user.target
+UNIT
 
 sudo systemctl daemon-reload
 sudo systemctl enable --now msd-swing.timer
+sudo systemctl enable --now msd-live.service
 
 echo "Sending the configured Telegram connection test..."
 uv run --env-file .env python -m msd.live.swing_shadow --test-telegram

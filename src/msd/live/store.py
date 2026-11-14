@@ -7,7 +7,8 @@ import sqlite3
 SIGNAL_FIELDS = ("signal_key", "symbol", "setup", "side", "decision_ts", "entry_ts", "entry_price",
                  "initial_stop", "stop", "take_profit", "planned_risk", "notional", "confidence", "expected_r", "stop_loss_pct",
                  "status", "exit_ts", "planned_exit_ts", "exit_price", "realized_r", "created_at",
-                 "entry_type", "limit_price", "expiry_ts", "eligible_ts")
+                 "entry_type", "limit_price", "expiry_ts", "eligible_ts", "trigger_price",
+                 "risk_distance", "risk_from_mid", "exit_at_close", "reminder_minutes")
 
 
 class SignalStore:
@@ -41,14 +42,22 @@ class SignalStore:
             entry_type TEXT NOT NULL DEFAULT 'market',
             limit_price REAL,
             expiry_ts TEXT,
-            eligible_ts TEXT
+            eligible_ts TEXT,
+            trigger_price REAL,
+            risk_distance REAL,
+            risk_from_mid INTEGER NOT NULL DEFAULT 0,
+            exit_at_close INTEGER NOT NULL DEFAULT 0,
+            reminder_minutes INTEGER NOT NULL DEFAULT 5
         )""")
         columns = {row[1] for row in self.connection.execute("PRAGMA table_info(signals)")}
         if "planned_exit_ts" not in columns:
             self.connection.execute("ALTER TABLE signals ADD COLUMN planned_exit_ts TEXT")
         for name, definition in (("entry_type", "TEXT NOT NULL DEFAULT 'market'"),
                                  ("limit_price", "REAL"), ("expiry_ts", "TEXT"),
-                                 ("eligible_ts", "TEXT")):
+                                 ("eligible_ts", "TEXT"), ("trigger_price", "REAL"),
+                                 ("risk_distance", "REAL"), ("risk_from_mid", "INTEGER NOT NULL DEFAULT 0"),
+                                 ("exit_at_close", "INTEGER NOT NULL DEFAULT 0"),
+                                 ("reminder_minutes", "INTEGER NOT NULL DEFAULT 5")):
             if name not in columns:
                 self.connection.execute(f"ALTER TABLE signals ADD COLUMN {name} {definition}")
         self.connection.execute("CREATE TABLE IF NOT EXISTS state (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
@@ -57,6 +66,9 @@ class SignalStore:
     def insert(self, values: dict) -> bool:
         row = {key: values.get(key) for key in SIGNAL_FIELDS}
         row["entry_type"] = row["entry_type"] or "market"
+        row["exit_at_close"] = 0 if row["exit_at_close"] is None else row["exit_at_close"]
+        row["risk_from_mid"] = 0 if row["risk_from_mid"] is None else row["risk_from_mid"]
+        row["reminder_minutes"] = 5 if row["reminder_minutes"] is None else row["reminder_minutes"]
         placeholders = ",".join("?" for _ in SIGNAL_FIELDS)
         cursor = self.connection.execute(
             f"INSERT OR IGNORE INTO signals ({','.join(SIGNAL_FIELDS)}) VALUES ({placeholders})",
