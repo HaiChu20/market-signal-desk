@@ -43,6 +43,12 @@ def parse_prices(payload: dict) -> pd.DataFrame:
     return pd.DataFrame(rows, columns=columns).sort_values("ts").drop_duplicates("ts", keep="last").reset_index(drop=True)
 
 
+class CapitalHTTPError(RuntimeError):
+    def __init__(self, code: int):
+        super().__init__(f"Capital API returned HTTP {code}")
+        self.code = code
+
+
 class CapitalClient:
     def __init__(self, api_key: str | None = None, identifier: str | None = None,
                  password: str | None = None, *, opener=urlopen,
@@ -127,7 +133,7 @@ class CapitalClient:
                 self.cst = self.security_token = None
                 self.login()
                 return self.request(method, path, query=query, body=body, _retried=True)
-            raise RuntimeError(f"Capital API returned HTTP {exc.code}") from None
+            raise CapitalHTTPError(exc.code) from None
         except RuntimeError:
             raise
         except Exception:
@@ -137,12 +143,17 @@ class CapitalClient:
 
     def prices(self, epic: str, resolution: str, start: datetime, end: datetime,
                max_bars: int = 1000) -> pd.DataFrame:
-        payload = self.request("GET", f"/api/v1/prices/{quote(epic, safe='')}", query={
-            "resolution": resolution,
-            "max": min(1000, int(max_bars)),
-            "from": _api_time(start),
-            "to": _api_time(end),
-        })
+        try:
+            payload = self.request("GET", f"/api/v1/prices/{quote(epic, safe='')}", query={
+                "resolution": resolution,
+                "max": min(1000, int(max_bars)),
+                "from": _api_time(start),
+                "to": _api_time(end),
+            })
+        except CapitalHTTPError as exc:
+            if exc.code != 404:
+                raise
+            payload = {}  # Capital answers 404 for a range with no prices (weekends, daily break).
         return parse_prices(payload)
 
     def search_market(self, term: str) -> dict:

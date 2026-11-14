@@ -823,7 +823,7 @@ def run_check(client=None, *, config_path=CONFIG_PATH, epics_path=EPICS_PATH):
     _resolve_instruments(client, config, epics_path, refresh=True)
     now = _now_utc()
     for item in instruments:
-        bars = _history(client, item["epic"], "MINUTE", now - timedelta(minutes=120), now)
+        bars = _history(client, item["epic"], "MINUTE", now - timedelta(days=4), now)
         latest = bars.ts.iloc[-1].isoformat() if len(bars) else "none"
         print(f"epic: {item['epic']}; bars: {len(bars)}; latest: {latest}")
 

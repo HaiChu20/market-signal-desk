@@ -300,3 +300,20 @@ def test_us_calendar_skips_holidays_and_half_days_only():
         assert skip_day(date.fromisoformat(day)), day
     for day in ("2022-01-18", "2021-12-31", "2026-11-16"):
         assert not skip_day(date.fromisoformat(day)), day
+
+
+def test_capital_prices_treats_404_as_empty_range_but_raises_other_errors():
+    from msd.live import capital
+
+    class Client(capital.CapitalClient):
+        code = 404
+
+        def request(self, *args, **kwargs):
+            raise capital.CapitalHTTPError(self.code)
+
+    client = Client("k", "i", "p")
+    start = pd.Timestamp("2026-11-14T10:00Z").to_pydatetime()
+    assert client.prices("US100", "MINUTE", start, start + timedelta(hours=1)).empty
+    client.code = 500
+    with pytest.raises(capital.CapitalHTTPError):
+        client.prices("US100", "MINUTE", start, start + timedelta(hours=1))
