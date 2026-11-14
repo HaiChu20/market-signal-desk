@@ -541,3 +541,9 @@ Append-only notes from the autonomous review loop while the user sleeps.
 - User reported the cPouta VM setup succeeded (daily S1/S2/S3 timer live there).
 - User added docs/research/tiktok_strategy_specs.md (Larry Williams breakout; first 5-min candle vs EMA with hourly EMA trail). Froze docs/research/tiktok_test_plan.md (102c54d): Nasdaq-dev grid selection, frozen cell applied to similar indices (SPX, Dow, DAX, FTSE, Nikkei) and different markets (gold, silver, WTI, Brent, EURUSD, GBPUSD, USDJPY, BTC, ETH); all local data, no downloads; holdout 2023+ run once by supervisor.
 - 2f14d55b: harness (common.py, runner, metrics, random benchmark) + Strategy A. 1afb2f6f: Strategy B simulator.
+
+## 2026-11-14: TikTok Strategy A dev (fixed) + holdout run once
+- Merged full_day fix (cda3407). Dev rerun: Nasdaq grid 23/24 cells positive; chosen = full_day, k 0.7, half_range stop, long-only (279 trades, +0.159R, t 2.74). Dev checks all pass.
+- Holdout 2023-01-01 -> 2026-11-14 run once (log data/logs/tiktok_A_holdout.log). Frozen decision rule status: "edge" (holdout net > 0), but chosen cell weak: Nasdaq +0.046R, t 0.79, random pct 75; 2025 -0.15.
+- Spec default (RTH, k 0.5, opposite-trigger stop, both sides): Nasdaq holdout +0.060R, t 2.51, pct 99.7, positive all 4 holdout years (dev +0.058R, t 2.36). Does not generalise: S&P +0.03, other markets ~0 or negative.
+- Chosen cell on other markets holdout: tier 2 avg +0.049R, tier 3 avg +0.036R (1.5x cost ~0). Mostly long drift.

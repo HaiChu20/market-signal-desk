@@ -1,0 +1,13 @@
+{
+  "strategy": "A",
+  "params": {
+    "session": "full_day",
+    "k": 0.7,
+    "stop": "half_range",
+    "direction": "long_only"
+  },
+  "spec_commit": "102c54d",
+  "selection_period": "dev",
+  "selection_market": "USATECHIDXUSD",
+  "selection_metric": "highest dev net avg R after cost"
+}
