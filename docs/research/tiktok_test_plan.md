@@ -60,3 +60,12 @@ Nothing below may be changed after results are seen. A genuine bug found later i
 
 A similar session-open momentum rule already tested negative here (intraday_momentum, wide_v1). Strategy A's own
 video shows the edge fading since 2024. Expect "no edge" unless the evidence is clear.
+
+## Amendment 2026-11-14 (dev bug, before any holdout number)
+
+The first Strategy A dev run produced 0 complete `full_day` sessions for all index CFDs and Brent, because the
+5-minute gap rule treated each market's normal daily trading break (e.g. Nasdaq CFD has no bars 16:15–18:00 ET) as
+missing data. Fix: a `full_day` session is the bars present inside its 24-hour window; it is complete when that day's
+RTH session is complete (same rule as `rth`) and the first bar is within 3 hours of the window start. "Today's open" is
+the first bar in the window, the exit is the last bar's close, and the prior range is the previous complete window's
+high − low. The gap rule still applies to `rth`. The Nasdaq dev grid and selection are rerun after the fix.
