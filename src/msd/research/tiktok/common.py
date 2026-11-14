@@ -185,6 +185,10 @@ def session_frames(bars_1m: pd.DataFrame, market: str, kind: str) -> list[Sessio
         keys = list(local_dates)
     grouped = {day: part.reset_index(drop=True)
                for day, part in bars.groupby(pd.Series(keys, index=bars.index), sort=True)}
+    rth_complete = None
+    if kind == "full_day":
+        rth_complete = {item.session_id: item.complete
+                        for item in session_frames(bars, market, "rth")}
     first_day, last_day = min(keys), max(keys)
     window_start = bars.ts.min()
     window_end = bars.ts.max() + pd.Timedelta(minutes=1)
@@ -202,6 +206,12 @@ def session_frames(bars_1m: pd.DataFrame, market: str, kind: str) -> list[Sessio
                 part = part[(part.ts >= start) & (part.ts < end)].reset_index(drop=True)
             if part.empty:
                 rows.append(SessionFrame(day, start, end, part, False))
+            elif kind == "full_day":
+                # A full-day window may contain the market's scheduled daily
+                # pause. Its quality is anchored to the unchanged RTH rule.
+                complete = (rth_complete.get(day, False) and
+                            part.ts.iloc[0] <= start + pd.Timedelta(hours=3))
+                rows.append(SessionFrame(day, start, end, part, bool(complete)))
             else:
                 ts = pd.DatetimeIndex(part.ts)
                 expected_last = end - pd.Timedelta(minutes=1)

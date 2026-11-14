@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import argparse
-from datetime import date
+from datetime import date, datetime, timezone
 import json
 from pathlib import Path
 import time
@@ -36,8 +36,9 @@ def _run_id(strategy: str, period: str) -> str:
 
 
 def _ensure_run_unused(strategy: str, period: str, reports: Path, ledger: Path) -> None:
-    report_period = "dev" if period == "dev" else "holdout"
-    target = reports / f"strategy_{strategy}_{report_period}.json"
+    if period == "dev":
+        return
+    target = reports / f"strategy_{strategy}_holdout.json"
     if target.exists():
         raise FileExistsError(f"TikTok {strategy} {period} report already exists: {target}")
     if ledger.exists() and any(row["run_id"] == _run_id(strategy, period)
@@ -230,19 +231,17 @@ def _run_dev(strategy: str, reports: Path, ledger: Path) -> dict:
     started = time.perf_counter()
     _ensure_run_unused(strategy, "dev", reports, ledger)
     selection_path = reports / _selection_file(strategy)
-    frozen = _load_selection(selection_path, strategy) if selection_path.exists() else None
     grid_params = _param_grid(strategy)
     # This end is exclusive; the source-aware loader receives only the final
     # 2022 calendar day, never a 2023 minute.
     nasdaq = c.load_1m("USATECHIDXUSD", c.WARMUP_START, c.DEV_END_EXCLUSIVE)
     nasdaq_grid, nasdaq_kept, nasdaq_quality = _run_market_grid(
         strategy, nasdaq, "USATECHIDXUSD", grid_params, period="dev",
-        allow_holdout=False, chosen_params=frozen,
+        allow_holdout=False,
         keep_params={c.config_hash((A_DEFAULT if strategy == "A" else B_DEFAULT))},
     )
-    chosen = frozen if frozen is not None else _select(nasdaq_grid, grid_params)
-    if frozen is None:
-        _write_selection(selection_path, strategy, chosen)
+    chosen = _select(nasdaq_grid, grid_params)
+    _write_selection(selection_path, strategy, chosen)
     default = dict(A_DEFAULT if strategy == "A" else B_DEFAULT)
     chosen_trades = nasdaq_kept.get(c.config_hash(chosen))
     if chosen_trades is None:
@@ -362,7 +361,11 @@ def _run_dev(strategy: str, reports: Path, ledger: Path) -> dict:
         "Nasdaq default": selected_by_market["USATECHIDXUSD"]["default"],
     }, **report}, full_grid_for_report, chosen_equity, allow_holdout=False)
     ledger_row = _ledger_row(strategy, "dev", chosen, chosen_nasdaq, elapsed)
-    c.append_trial_once(ledger, ledger_row, run_id=_run_id(strategy, "dev"))
+    existing_ids = {row["run_id"] for row in c.read_trials(ledger)} if ledger.exists() else set()
+    if _run_id(strategy, "dev") in existing_ids:
+        ledger_row["run_id"] = (f"{_run_id(strategy, 'dev')}-rerun-" +
+                                datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ"))
+    c.append_trial_once(ledger, ledger_row, run_id=ledger_row["run_id"])
     return report
 
 
@@ -384,8 +387,14 @@ def _ledger_row(strategy: str, period: str, params: dict, summary: dict, runtime
 
 def _run_holdout(strategy: str, reports: Path, ledger: Path) -> dict:
     started = time.perf_counter()
-    _ensure_run_unused(strategy, "holdout", reports, ledger)
     selection = _load_selection(reports / _selection_file(strategy), strategy)
+    existing_report = reports / f"strategy_{strategy}_holdout.json"
+    if existing_report.exists():
+        old_report = json.loads(existing_report.read_text())
+        frozen_hash = old_report.get("dev_selection_hash")
+        if frozen_hash is not None and frozen_hash != c.config_hash(selection):
+            raise ValueError("DEV selection changed after the one-time holdout was recorded")
+    _ensure_run_unused(strategy, "holdout", reports, ledger)
     dev_report_path = reports / f"strategy_{strategy}_dev.json"
     if not dev_report_path.exists():
         raise FileNotFoundError(f"completed DEV report required before holdout: {dev_report_path}")
@@ -448,6 +457,7 @@ def _run_holdout(strategy: str, reports: Path, ledger: Path) -> dict:
                           decision["holdout_net_positive"] else "no edge")
     report = {"strategy": strategy, "period": "holdout", "spec_commit": FROZEN_SPEC_COMMIT,
               "chosen_params": selection, "default_params": default,
+              "dev_selection_hash": c.config_hash(selection),
               "data_range": {"start": str(c.HOLDOUT_START), "end_exclusive": str(end)},
               "markets": results, "session_quality": quality,
               "unresolved_at_end_by_market": unresolved_by_market,

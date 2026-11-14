@@ -38,8 +38,12 @@ def test_dev_runner_freezes_nasdaq_choice_and_writes_crlf_once(monkeypatch, tmp_
     assert (report_dir / "strategy_A_selection.json").exists()
     assert (report_dir / "strategy_A_dev_equity.csv").exists()
     assert ledger.read_bytes().count(b"\r\n") == 2  # header plus one append-only row
-    with pytest.raises(FileExistsError):
-        run.run("A", dev=True, reports=report_dir, ledger=ledger)
+    rerun = run.run("A", dev=True, reports=report_dir, ledger=ledger)
+    assert rerun["chosen_params"] == result["chosen_params"]
+    rows = common.read_trials(ledger)
+    assert len(rows) == 2
+    assert rows[0]["run_id"] == "tiktok-A-dev"
+    assert rows[1]["run_id"].startswith("tiktok-A-dev-rerun-")
 
 
 def test_common_hook_exposes_strategy_b_shared_simulator():
@@ -73,3 +77,18 @@ def test_holdout_flag_must_be_explicit_and_loader_guard_precedes_data_call(monke
         common.load_1m("USATECHIDXUSD", common.WARMUP_START,
                        pd.Timestamp("2023-01-02", tz="UTC"))
     assert not called
+
+
+def test_holdout_refuses_a_changed_selection_after_recorded_holdout(tmp_path: Path):
+    reports = tmp_path / "reports/research/tiktok"
+    reports.mkdir(parents=True)
+    selection_path = reports / run.A_SELECTION
+    selection_path.write_text(json.dumps({
+        "strategy": "A", "params": run.A_DEFAULT, "spec_commit": run.FROZEN_SPEC_COMMIT,
+    }))
+    (reports / "strategy_A_holdout.json").write_text(json.dumps({
+        "dev_selection_hash": "changed-after-holdout",
+    }))
+    with pytest.raises(ValueError, match="DEV selection changed"):
+        run.run("A", run_holdout_once=True, reports=reports,
+                ledger=tmp_path / "reports/trials.csv")

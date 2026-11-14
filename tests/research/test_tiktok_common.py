@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from msd.research.tiktok import common
+from msd.research.tiktok import common, strategy_a
 
 
 def _bars(times, price=100.0, spread=0.2):
@@ -24,6 +24,46 @@ def test_market_sessions_follow_dst_and_frozen_hours():
     assert full == (pd.Timestamp("2022-07-10 22:00Z"), pd.Timestamp("2022-07-11 21:00Z"))
     dax = common.session_bounds("DEUIDXEUR", date(2022, 1, 10), "full_day")
     assert dax == (pd.Timestamp("2022-01-09 23:00Z"), pd.Timestamp("2022-01-10 23:00Z"))
+
+
+def test_full_day_cfd_session_accepts_scheduled_daily_break_and_random_mapping():
+    market = "USATECHIDXUSD"
+    times = []
+    days = (date(2022, 1, 10), date(2022, 1, 11))
+    for day in days:
+        start, end = common.session_bounds(market, day, "full_day")
+        window = pd.date_range(start, end, freq="min", inclusive="left")
+        local = window.tz_convert("America/New_York")
+        # The CFD's regular pause begins at 16:15 ET and includes the window end.
+        pause = ((local.date == day) &
+                 ((local.hour * 60 + local.minute) >= 16 * 60 + 15))
+        window = window[~pause]
+        times.extend(window)
+    bars = _bars(times)
+
+    rth = common.session_frames(bars, market, "rth")
+    full = common.session_frames(bars, market, "full_day")
+    assert all(item.complete for item in rth if item.session_id in days)
+    full_by_day = {item.session_id: item for item in full if item.session_id in days}
+    assert set(full_by_day) == set(days)
+    assert all(item.complete for item in full_by_day.values())
+    assert full_by_day[days[0]].bars.ts.iloc[0] == full_by_day[days[0]].start
+    assert full_by_day[days[0]].bars.ts.iloc[-1] < full_by_day[days[0]].end - pd.Timedelta(minutes=30)
+
+    entry_ts = full_by_day[days[0]].bars.ts.iloc[0]
+    assert strategy_session_id(entry_ts, market) == full_by_day[days[0]].session_id
+    callback = strategy_a.random_exit_factory(
+        bars, market, {"session": "full_day", "k": .5,
+                       "stop": "opposite_trigger", "direction": "both"},
+        sessions=full,
+    )
+    outcome = callback({"entry_ts": entry_ts, "risk_points": 1., "period": "dev"}, 1)
+    assert outcome["exit_reason"] == "session_close"
+    assert pd.Timestamp(outcome["exit_ts"]) == full_by_day[days[0]].bars.ts.iloc[-1]
+
+
+def strategy_session_id(entry_ts, market):
+    return strategy_a._session_id_for(pd.Timestamp(entry_ts), market, "full_day")
 
 
 def test_resample_emits_only_fully_closed_bars():
