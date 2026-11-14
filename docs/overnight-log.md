@@ -560,3 +560,8 @@ Append-only notes from the autonomous review loop while the user sleeps.
 - A default Nasdaq: always-long at its entries ~0 (dev +0.002, holdout -0.013) vs actual +0.058/+0.060; direction adds +0.072R holdout (t 2.1). But buy-every-open baseline earns as much per trade (dev +0.058, holdout +0.079; different stop size).
 - A chosen (long-only): buy-every-open baseline beats it on holdout (+0.061 vs +0.046).
 - B (both cells, all three markets): actual minus always-long ~0 (Nasdaq holdout +0.03/+0.04, t < 0.5). B's direction choice adds nothing; its result is being long with a trailing exit in a rising market.
+
+## 2026-11-14: user asked to add TikTok A and B (tuned cells) to the live bot
+- User choices: tuned cells; exact tested rules, Telegram alerts at any hour; Capital.com demo API for live minute data (user is creating the API key; steps given).
+- Design: reuse the existing live engine (src/msd/live/engine.py) with two thin strategy plug-ins over the research code; engine gains stop entries, risk-from-fill stops, dynamic exit. Parity: replay 2022 Dukascopy bars through the engine vs research simulators. New msd-live.service on cPouta.
+- Delegated to 2f14d55b (task text in session scratchpad).
