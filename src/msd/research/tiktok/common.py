@@ -127,7 +127,12 @@ def load_1m(market: str, start= WARMUP_START, end=DEV_END_EXCLUSIVE,
 
 
 def resample_closed_bars(bars_1m: pd.DataFrame, minutes: int) -> pd.DataFrame:
-    """Resample minute OHLC into complete, right-labelled closed bars only."""
+    """Resample minute OHLC into right-labelled closed bars.
+
+    A bar is kept when it has at least one minute (as a chart would draw it) and its
+    end is not after the last available minute's close, so a still-forming bar at the
+    end of the data is never emitted.
+    """
     if minutes not in (5, 60):
         raise ValueError("only frozen 5-minute and 1-hour bars are supported")
     bars = bars_1m.copy()
@@ -143,7 +148,8 @@ def resample_closed_bars(bars_1m: pd.DataFrame, minutes: int) -> pd.DataFrame:
     grouped = bars.resample(rule, closed="left", label="right", origin="epoch")
     result = grouped.agg(**agg)
     counts = bars.bid_o.resample(rule, closed="left", label="right", origin="epoch").count()
-    result = result[counts == minutes].dropna().reset_index()
+    data_end = bars.index.max() + pd.Timedelta(minutes=1)
+    result = result[(counts > 0) & (result.index <= data_end)].dropna().reset_index()
     return result
 
 

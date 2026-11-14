@@ -147,3 +147,10 @@ def test_metrics_reject_holdout_without_explicit_guard():
     with pytest.raises(PermissionError):
         common.metrics([record])
     assert common.metrics([record], allow_holdout=True)["trades"] == 1
+
+
+def test_resample_keeps_closed_bars_with_missing_minutes():
+    times = pd.date_range("2022-01-03 14:30Z", periods=11, freq="min").delete([2, 7])
+    five = common.resample_closed_bars(_bars(times), 5)
+    assert five.ts.tolist() == [pd.Timestamp("2022-01-03 14:35Z"),
+                                pd.Timestamp("2022-01-03 14:40Z")]
