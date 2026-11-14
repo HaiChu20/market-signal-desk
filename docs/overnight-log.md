@@ -536,3 +536,8 @@ Append-only notes from the autonomous review loop while the user sleeps.
 - Merged 54d4f37 (acc5261): independent S1/S2/S3 replays, strategy labels, legacy S3 ids kept, S1/S2 rollout INFO, 620-day bootstrap, scripts/setup_cpouta.sh, systemd timer 07:00 Europe/Helsinki, docs/deploy_cpouta.md.
 - Supervisor fix: removed the Rust build step (swing bot imports fine without msd._msd_kernels; a fresh VM has no rustc) and the mktemp/rm temp-dir cleanup (units written with sudo tee).
 - User approved pushing main to the public GitHub repo for the VM clone (scan found no secrets); user may make it private later.
+
+## 2026-11-14: TikTok strategies A/B experiment started
+- User reported the cPouta VM setup succeeded (daily S1/S2/S3 timer live there).
+- User added docs/research/tiktok_strategy_specs.md (Larry Williams breakout; first 5-min candle vs EMA with hourly EMA trail). Froze docs/research/tiktok_test_plan.md (102c54d): Nasdaq-dev grid selection, frozen cell applied to similar indices (SPX, Dow, DAX, FTSE, Nikkei) and different markets (gold, silver, WTI, Brent, EURUSD, GBPUSD, USDJPY, BTC, ETH); all local data, no downloads; holdout 2023+ run once by supervisor.
+- 2f14d55b: harness (common.py, runner, metrics, random benchmark) + Strategy A. 1afb2f6f: Strategy B simulator.
