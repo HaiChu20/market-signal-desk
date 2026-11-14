@@ -53,7 +53,14 @@ def test_entry_is_next_bar_open_and_session_clock_handles_us_dst():
     sessions = strategy_b._complete_sessions(bars, "EURUSD")
     five = pd.DataFrame(
         {
-            "ts": [sessions[0][1], sessions[1][1]],
+            "ts": [
+                sessions[0][1] + pd.Timedelta(minutes=5),
+                sessions[1][1] + pd.Timedelta(minutes=5),
+            ],
+            "known_at": [
+                sessions[0][1] + pd.Timedelta(minutes=5),
+                sessions[1][1] + pd.Timedelta(minutes=5),
+            ],
             "mid_close": [101.0, 101.0],
             "fast_ema": [100.0, 100.0],
         }
@@ -76,6 +83,16 @@ def test_entry_is_next_bar_open_and_session_clock_handles_us_dst():
         pd.Timestamp("2021-03-15 13:35", tz="UTC"),
     ]
     assert all(row["entry_price"] == 100.1 for row in candidates)
+
+
+def test_indicator_bars_use_common_complete_right_labelled_resampler():
+    times = pd.date_range("2021-06-01", periods=120, freq="min", tz="UTC")
+    five, hourly = strategy_b._indicator_bars(_bars(times), "JPNIDXJPY", 2, 2)
+    assert five.known_at.iloc[0] == pd.Timestamp("2021-06-01 00:05", tz="UTC")
+    assert hourly.known_at.tolist() == [
+        pd.Timestamp("2021-06-01 01:00", tz="UTC"),
+        pd.Timestamp("2021-06-01 02:00", tz="UTC"),
+    ]
 
 
 def test_same_minute_stop_wins_over_hourly_close_exit():

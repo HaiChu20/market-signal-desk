@@ -1,13 +1,10 @@
 """Strategy B: first session candle versus fast EMA, managed by hourly EMA."""
 from __future__ import annotations
 
-from datetime import datetime, time
-from zoneinfo import ZoneInfo
-
 import numpy as np
 import pandas as pd
 
-from msd.processing.timeframes import build_timeframe
+from msd.research.tiktok import common
 
 PARAM_KEYS = {
     "fast_ema",
@@ -17,16 +14,9 @@ PARAM_KEYS = {
     "overlap",
     "time_stop_days",
 }
-CRYPTO = {"BTCUSDT", "ETHUSDT"}
-US_INDICES = {"USATECHIDXUSD", "USA500IDXUSD", "USA30IDXUSD"}
-SESSION = {
-    "DEUIDXEUR": ("Europe/Berlin", time(9, 0), time(17, 30)),
-    "GBRIDXGBP": ("Europe/London", time(8, 0), time(16, 30)),
-    "JPNIDXJPY": ("Asia/Tokyo", time(9, 0), time(15, 0)),
-}
-NY_SESSION = ("America/New_York", time(9, 30), time(16, 0))
-DEV_START = pd.Timestamp("2019-01-01", tz="UTC")
-HOLDOUT_START = pd.Timestamp("2023-01-01", tz="UTC")
+CRYPTO = common.CRYPTO_MARKETS
+DEV_START = common.DEV_START
+HOLDOUT_START = common.HOLDOUT_START
 
 
 def _validate(bars: pd.DataFrame, market: str, params: dict) -> pd.DataFrame:
@@ -59,52 +49,27 @@ def _validate(bars: pd.DataFrame, market: str, params: dict) -> pd.DataFrame:
     return result
 
 
-def _session_rule(market: str) -> tuple[ZoneInfo, time, time]:
-    name, opened, closed = SESSION.get(market, NY_SESSION)
-    return ZoneInfo(name), opened, closed
-
-
-def _session_bounds(day, zone: ZoneInfo, opened: time, closed: time) -> tuple[pd.Timestamp, pd.Timestamp]:
-    start = pd.Timestamp(datetime.combine(day, opened), tz=zone).tz_convert("UTC")
-    end = pd.Timestamp(datetime.combine(day, closed), tz=zone).tz_convert("UTC")
-    return start, end
-
-
 def _complete_sessions(
     bars: pd.DataFrame, market: str
 ) -> list[tuple[object, pd.Timestamp, pd.Timestamp]]:
-    zone, opened, closed = _session_rule(market)
-    local = pd.to_datetime(bars.ts, utc=True).dt.tz_convert(zone)
-    minute = local.dt.hour * 60 + local.dt.minute
-    opened_minute = opened.hour * 60 + opened.minute
-    closed_minute = closed.hour * 60 + closed.minute
-    active = bars.loc[(minute >= opened_minute) & (minute < closed_minute)].copy()
-    active["_day"] = local.loc[active.index].dt.date.to_numpy()
-    sessions = []
-    for day, current in active.groupby("_day", sort=True):
-        start, end = _session_bounds(day, zone, opened, closed)
-        if current.empty or current.ts.iloc[0] != start:
-            continue
-        if current.ts.iloc[-1] < end - pd.Timedelta(minutes=1):
-            continue
-        gaps = current.ts.diff().dropna().dt.total_seconds().div(60).sub(1)
-        if len(gaps) and gaps.max() > 5:
-            continue
-        required = pd.date_range(start, periods=6, freq="min")
-        if not required.isin(current.ts).all():
-            continue
-        sessions.append((day, start, end))
-    return sessions
+    return [
+        (session.session_id, session.start, session.end)
+        for session in common.session_frames(bars, market, "rth")
+        if session.complete
+    ]
 
 
 def _indicator_bars(bars: pd.DataFrame, market: str, fast: int, slow: int) -> tuple[pd.DataFrame, pd.DataFrame]:
-    five = build_timeframe(bars, market, "5m")
+    del market  # All frozen markets use the same UTC-anchored closed-bar construction.
+    five = common.resample_closed_bars(bars, 5)
+    five["known_at"] = five.ts
     five["mid_close"] = (five.bid_c.to_numpy(float) + five.ask_c.to_numpy(float)) / 2
     five["fast_ema"] = five.mid_close.ewm(
         span=fast, adjust=False, min_periods=fast
     ).mean()
 
-    hourly = build_timeframe(bars, market, "1h")
+    hourly = common.resample_closed_bars(bars, 60)
+    hourly["known_at"] = hourly.ts
     hourly["mid_close"] = (hourly.bid_c.to_numpy(float) + hourly.ask_c.to_numpy(float)) / 2
     hourly["mid_high"] = (hourly.bid_h.to_numpy(float) + hourly.ask_h.to_numpy(float)) / 2
     hourly["mid_low"] = (hourly.bid_l.to_numpy(float) + hourly.ask_l.to_numpy(float)) / 2
@@ -121,9 +86,6 @@ def _indicator_bars(bars: pd.DataFrame, market: str, fast: int, slow: int) -> tu
     hourly["slow_ema"] = hourly.mid_close.ewm(
         span=slow, adjust=False, min_periods=slow
     ).mean()
-    hourly["known_at"] = pd.to_datetime(hourly.known_at, utc=True).astype(
-        "datetime64[ns, UTC]"
-    )
     return five, hourly
 
 
@@ -135,18 +97,18 @@ def _entry_candidates(
     hourly: pd.DataFrame,
     sessions: list[tuple[object, pd.Timestamp, pd.Timestamp]],
 ) -> list[dict]:
-    five_by_open = five.drop_duplicates("ts", keep="last").set_index("ts")
+    five_by_close = five.drop_duplicates("known_at", keep="last").set_index("known_at")
     hourly_known = hourly.sort_values("known_at")
     hourly_times = hourly_known.known_at.to_numpy(dtype="datetime64[ns]")
     minute_times = bars.ts.to_numpy(dtype="datetime64[ns]")
     candidates = []
     for session_index, (day, start, end) in enumerate(sessions):
-        if start not in five_by_open.index:
+        entry_ts = start + pd.Timedelta(minutes=5)
+        if entry_ts not in five_by_close.index:
             continue
-        signal = five_by_open.loc[start]
+        signal = five_by_close.loc[entry_ts]
         if not np.isfinite(signal.fast_ema) or signal.mid_close == signal.fast_ema:
             continue
-        entry_ts = start + pd.Timedelta(minutes=5)
         if entry_ts < DEV_START:
             continue
         minute_i = int(np.searchsorted(minute_times, entry_ts.to_datetime64()))
@@ -196,6 +158,52 @@ def _stop_fill(row, side: int, stop: float) -> float | None:
     return None
 
 
+def _minute_arrays(bars: pd.DataFrame) -> dict[str, np.ndarray]:
+    cached = bars.attrs.get("_strategy_b_minute_arrays")
+    if cached is None or len(cached["ts"]) != len(bars):
+        cached = {
+            "ts": bars.ts.to_numpy(dtype="datetime64[ns]"),
+            "bid_o": bars.bid_o.to_numpy(float, copy=False),
+            "bid_l": bars.bid_l.to_numpy(float, copy=False),
+            "ask_o": bars.ask_o.to_numpy(float, copy=False),
+            "ask_h": bars.ask_h.to_numpy(float, copy=False),
+        }
+        bars.attrs["_strategy_b_minute_arrays"] = cached
+    return cached
+
+
+def _hourly_arrays(hourly: pd.DataFrame) -> dict[str, np.ndarray]:
+    cached = hourly.attrs.get("_strategy_b_hourly_arrays")
+    if cached is None or len(cached["known_at"]) != len(hourly):
+        cached = {
+            "known_at": hourly.known_at.to_numpy(dtype="datetime64[ns]"),
+            "mid_close": hourly.mid_close.to_numpy(float, copy=False),
+            "slow_ema": hourly.slow_ema.to_numpy(float, copy=False),
+        }
+        hourly.attrs["_strategy_b_hourly_arrays"] = cached
+    return cached
+
+
+def _utc_timestamp(value: np.datetime64) -> pd.Timestamp:
+    return pd.Timestamp(value).tz_localize("UTC")
+
+
+def _stop_fill_arrays(
+    minute: dict[str, np.ndarray], index: int, side: int, stop: float
+) -> float | None:
+    if side > 0:
+        if minute["bid_o"][index] <= stop:
+            return float(minute["bid_o"][index])
+        if minute["bid_l"][index] <= stop:
+            return stop
+    else:
+        if minute["ask_o"][index] >= stop:
+            return float(minute["ask_o"][index])
+        if minute["ask_h"][index] >= stop:
+            return stop
+    return None
+
+
 def _fill_record(
     bars: pd.DataFrame,
     market: str,
@@ -205,19 +213,18 @@ def _fill_record(
     exit_price: float,
     reason: str,
 ) -> dict:
+    minute = _minute_arrays(bars)
     side = candidate["side"]
     entry_i = candidate["entry_i"]
     risk = candidate["risk"]
     entry = candidate["entry_price"]
-    exit_row = bars.iloc[exit_i]
-    entry_row = bars.iloc[entry_i]
     if market in CRYPTO:
         gross = side * (exit_price - entry) / risk
         net = gross - 0.0005 * (abs(entry) + abs(exit_price)) / risk
         net15 = gross - 0.00075 * (abs(entry) + abs(exit_price)) / risk
     else:
-        entry_half = (float(entry_row.ask_o) - float(entry_row.bid_o)) / 2
-        exit_half = (float(exit_row.ask_o) - float(exit_row.bid_o)) / 2
+        entry_half = (minute["ask_o"][entry_i] - minute["bid_o"][entry_i]) / 2
+        exit_half = (minute["ask_o"][exit_i] - minute["bid_o"][exit_i]) / 2
         mid_entry = entry - side * entry_half
         mid_exit = exit_price + side * exit_half
         gross = side * (mid_exit - mid_entry) / risk
@@ -232,7 +239,7 @@ def _fill_record(
         "period": "holdout" if candidate["entry_ts"] >= HOLDOUT_START else "dev",
         "side": side,
         "entry_ts": candidate["entry_ts"],
-        "exit_ts": pd.Timestamp(exit_row.ts),
+        "exit_ts": _utc_timestamp(minute["ts"][exit_i]),
         "entry_price": entry,
         "exit_price": float(exit_price),
         "risk_points": risk,
@@ -250,7 +257,27 @@ def _simulate_candidate(
     params: dict,
     candidate: dict,
 ) -> dict | None:
+    minute = _minute_arrays(bars)
+    hour = _hourly_arrays(hourly)
     side = candidate["side"]
+    initial_slow_key = candidate.get("initial_slow", np.nan)
+    if not np.isfinite(initial_slow_key):
+        initial_slow_key = None
+    deadline_key = candidate.get("time_deadline")
+    cache_key = (
+        id(bars), market, tuple(sorted(params.items())), candidate["entry_i"], side,
+        float(candidate["entry_price"]), float(candidate["risk"]),
+        float(candidate["initial_stop"]), initial_slow_key, deadline_key,
+    )
+    outcome_cache = hourly.attrs.setdefault("_strategy_b_outcome_cache", {})
+    if cache_key in outcome_cache:
+        cached = outcome_cache[cache_key]
+        return None if cached is None else dict(cached)
+
+    def finish(record: dict | None) -> dict | None:
+        outcome_cache[cache_key] = record
+        return None if record is None else dict(record)
+
     initial_stop = candidate["initial_stop"]
     initial_slow = candidate.get("initial_slow", np.nan)
     active = bool(
@@ -260,22 +287,20 @@ def _simulate_candidate(
     trail = float(initial_slow) if active else None
     if trail is not None:
         trail = max(trail, initial_stop) if side > 0 else min(trail, initial_stop)
-    hourly_times = hourly.known_at.to_numpy(dtype="datetime64[ns]")
+    hourly_times = hour["known_at"]
     decision_i = int(
         np.searchsorted(hourly_times, candidate["entry_ts"].to_datetime64(), side="right")
     )
     for minute_i in range(candidate["entry_i"], len(bars)):
-        minute = bars.iloc[minute_i]
-        now = pd.Timestamp(minute.ts)
+        now = minute["ts"][minute_i]
         close_exit = False
         while (
             decision_i < len(hourly)
-            and hourly_times[decision_i] <= now.to_datetime64()
+            and hourly_times[decision_i] <= now
         ):
-            hour = hourly.iloc[decision_i]
+            slow = float(hour["slow_ema"][decision_i])
+            close = float(hour["mid_close"][decision_i])
             decision_i += 1
-            slow = float(hour.slow_ema)
-            close = float(hour.mid_close)
             if not np.isfinite(slow):
                 continue
             if not active and (
@@ -296,23 +321,33 @@ def _simulate_candidate(
         if active and params["exit_mode"] == "touch" and trail is not None:
             stop = trail
             reason = "slow_ema_touch"
-        stop_price = _stop_fill(minute, side, stop)
+        stop_price = _stop_fill_arrays(minute, minute_i, side, stop)
         if stop_price is not None:
-            return _fill_record(
-                bars, market, params, candidate, minute_i, stop_price, reason
+            return finish(
+                _fill_record(
+                    bars, market, params, candidate, minute_i, stop_price, reason
+                )
             )
         if close_exit:
-            price = float(minute.bid_o if side > 0 else minute.ask_o)
-            return _fill_record(
-                bars, market, params, candidate, minute_i, price, "slow_ema_close"
+            price = float(
+                minute["bid_o"][minute_i] if side > 0 else minute["ask_o"][minute_i]
+            )
+            return finish(
+                _fill_record(
+                    bars, market, params, candidate, minute_i, price, "slow_ema_close"
+                )
             )
         deadline = candidate["time_deadline"]
-        if deadline is not None and now >= deadline:
-            price = float(minute.bid_o if side > 0 else minute.ask_o)
-            return _fill_record(
-                bars, market, params, candidate, minute_i, price, "time_stop"
+        if deadline is not None and now >= deadline.to_datetime64():
+            price = float(
+                minute["bid_o"][minute_i] if side > 0 else minute["ask_o"][minute_i]
             )
-    return None
+            return finish(
+                _fill_record(
+                    bars, market, params, candidate, minute_i, price, "time_stop"
+                )
+            )
+    return finish(None)
 
 
 def simulate(bars_1m: pd.DataFrame, market: str, params: dict) -> list[dict]:
