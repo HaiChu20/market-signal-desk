@@ -279,3 +279,24 @@ def test_capital_check_prints_only_epic_bars_and_latest_without_telegram(tmp_pat
     assert "epic: IX.D.NASDAQ.CASH; bars: 1; latest: 2022-01-03T15:00:00+00:00" in output
     assert "Telegram" not in output and "token" not in output.lower()
     assert config_path.read_text() == source
+
+
+def test_b_market_signal_message_derives_stop_from_risk_when_stop_is_none():
+    order = {"side": -1, "entry_type": "market", "risk_distance": 40.0, "stop": None,
+             "exit_rule": "Bot will message when to exit", "confidence": "low"}
+    text = engine.format_signal("USATECHIDXUSD", tiktok_b, order, 15000.0)
+    assert "SL: 15,040.0" in text and "SHORT" in text
+
+
+def test_b_update_gate_runs_on_hour_closes_and_first_bar_after_a_gap():
+    gate = lambda ts: tiktok_b.should_update(pd.DataFrame(), pd.Timestamp(ts), phase="update")
+    assert gate("2022-02-02T21:59Z") and gate("2022-02-02T23:00Z")
+    assert not gate("2022-02-02T23:01Z") and not gate("2022-02-02T21:14Z")
+
+
+def test_us_calendar_skips_holidays_and_half_days_only():
+    from msd.live.strategies.us_calendar import skip_day
+    for day in ("2022-01-17", "2022-06-20", "2022-07-04", "2022-11-25", "2025-12-24", "2026-07-03"):
+        assert skip_day(date.fromisoformat(day)), day
+    for day in ("2022-01-18", "2021-12-31", "2026-11-16"):
+        assert not skip_day(date.fromisoformat(day)), day

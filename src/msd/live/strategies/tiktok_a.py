@@ -9,6 +9,7 @@ import pandas as pd
 
 from msd.research.tiktok import common
 from msd.research.tiktok import strategy_a as research
+from msd.live.strategies.us_calendar import skip_day
 
 NAME = "TikTok A breakout (intraday)"
 SYMBOLS = ("USATECHIDXUSD",)
@@ -55,7 +56,7 @@ def orders(bars: pd.DataFrame) -> list[dict]:
     complete_prior = [session for session in sessions if session.complete]
     result = []
     for current in sessions:
-        if current.bars.empty:
+        if current.bars.empty or skip_day(current.session_id):
             continue
         prior = next((session for session in reversed(complete_prior)
                       if session.session_id < current.session_id), None)
@@ -70,8 +71,7 @@ def orders(bars: pd.DataFrame) -> list[dict]:
         level = opening + float(PARAMS["k"]) * prior_range
         distance = 0.5 * prior_range
         # The CFD's normal final bar is stamped 16:14 ET; its close is the
-        # frozen research session-close exit. The 17:00 window end expires
-        # unfilled orders after the session's last possible trigger.
+        # frozen research session-close exit.
         exit_ts = current.end - pd.Timedelta(minutes=46)
         result.append({
             "decision_ts": pd.Timestamp(current.bars.ts.iloc[0]),
@@ -82,7 +82,8 @@ def orders(bars: pd.DataFrame) -> list[dict]:
             "risk_from_mid": True,
             "stop": float(level - distance),
             "tp": None,
-            "expiry_ts": current.end,
+            # No entry after the session-close exit (the live feed may trade past 16:15 ET).
+            "expiry_ts": exit_ts + pd.Timedelta(minutes=1),
             "exit_ts": exit_ts,
             "exit_at_close": True,
             "reminder_minutes": 10,

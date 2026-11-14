@@ -83,7 +83,8 @@ def format_signal(symbol: str, module, order: dict, entry_price: float) -> str:
             reference = entry_price
             entry_line = f"Entry: approx. {entry_price:,.1f}"
         risk = float(order.get("risk_distance") or abs(reference - float(order.get("stop", reference))))
-        stop = float(order.get("stop", reference - side * risk))
+        stop = (float(order["stop"]) if order.get("stop") is not None
+                else reference - side * risk)
         exit_rule = str(order.get("exit_rule", "Bot will message when to exit; can last days"))
         return (f"{marker} · {module.NAME}\n{pair}\n{entry_line}\n"
                 f"SL: {stop:,.1f}\nTP: none · {exit_rule}\n"
@@ -429,9 +430,17 @@ class SignalEngine:
             self.store.update(row["signal_key"], status="open", entry_ts=ts.isoformat(), entry_price=fill,
                               initial_stop=stop, stop=stop)
             self.send(_fill_notice(row, fill, stop))
-            # The signal candle itself can cross the stop. Research gives the
-            # stop priority when trigger and stop are both touched in one bar.
-            _, reason, price = evaluate_bar(side, stop, row.get("take_profit"), bar)
+            if row["entry_type"] == "stop":
+                # The trigger candle itself can cross the stop. Research gives the
+                # stop priority when trigger and stop are both touched in one bar.
+                _, reason, price = evaluate_bar(side, stop, row.get("take_profit"), bar)
+            else:
+                # Limit fills keep the reference-kernel convention (no TP on the fill bar).
+                deadline = row.get("planned_exit_ts")
+                time_exit = deadline is not None and ts >= _utc(deadline)
+                _, reason, price = evaluate_bar(side, stop, None, bar,
+                                                time_exit=time_exit, time_at_open=time_exit,
+                                                stop_active=not time_exit)
             if reason is not None:
                 risk = float(row["planned_risk"])
                 realized = side * (price - fill) / risk

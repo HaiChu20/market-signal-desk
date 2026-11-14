@@ -8,6 +8,7 @@ import pandas as pd
 
 from msd.research.tiktok import common
 from msd.research.tiktok import strategy_b as research
+from msd.live.strategies.us_calendar import skip_day
 
 NAME = "TikTok B first-candle trend"
 SYMBOLS = ("USATECHIDXUSD",)
@@ -42,8 +43,10 @@ def should_update(bars: pd.DataFrame, through, *, phase: str) -> bool:
         local = stamp.tz_convert("America/New_York")
         return local.hour == 9 and local.minute == 34
     if phase == "update":
+        # Hour closes, plus the first bar of each hour: after the daily break
+        # the pre-break hourly candle is only acted on at the reopen.
         boundary = stamp + pd.Timedelta(minutes=1)
-        return boundary.minute == 0
+        return boundary.minute == 0 or stamp.minute == 0
     return True
 
 
@@ -86,7 +89,7 @@ def orders(bars: pd.DataFrame) -> list[dict]:
         current = research.live_candidate_from_closed_candle(
             checked, SYMBOLS[0], PARAMS, five, hourly
         )
-        candidates = [] if current is None else [current]
+        candidates = [] if current is None or skip_day(current["day"]) else [current]
 
     output = []
     observe_through = pd.Timestamp(checked.ts.iloc[-1]) + pd.Timedelta(minutes=1)
