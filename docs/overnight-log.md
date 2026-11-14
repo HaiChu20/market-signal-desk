@@ -547,3 +547,9 @@ Append-only notes from the autonomous review loop while the user sleeps.
 - Holdout 2023-01-01 -> 2026-11-14 run once (log data/logs/tiktok_A_holdout.log). Frozen decision rule status: "edge" (holdout net > 0), but chosen cell weak: Nasdaq +0.046R, t 0.79, random pct 75; 2025 -0.15.
 - Spec default (RTH, k 0.5, opposite-trigger stop, both sides): Nasdaq holdout +0.060R, t 2.51, pct 99.7, positive all 4 holdout years (dev +0.058R, t 2.36). Does not generalise: S&P +0.03, other markets ~0 or negative.
 - Chosen cell on other markets holdout: tier 2 avg +0.049R, tier 3 avg +0.036R (1.5x cost ~0). Mostly long drift.
+
+## 2026-11-14: TikTok Strategy B dev + holdout run once
+- Merged B fix (e0f3d56: harness resampler, numpy loops). Supervisor change: resampler keeps closed bars with missing minutes (chart convention), drops only the forming end bar.
+- Dev: chosen fast EMA 9, slow EMA 50, stop 1.0 hourly ATR, close exit, single position: Nasdaq +0.360R, t 2.55, p98, 12/12 neighbours positive. 10-day time stop never binds (max hold 13.4 calendar days). Daily-overlap variant (~249 trades/yr) matches the video's trade count; win rate here 24-31% vs the video's 56%, so their unshown stop/exit rules differ.
+- Holdout (2023-01-01 -> 2026-11-14, run once): frozen rule status "edge". Nasdaq chosen +0.139R, t 1.10, p99, max DD 69R, streak 26; default (20/50/1.5) +0.161R, t 1.63, p98. Longs carry it (+0.33R), shorts ~0. 2025 slightly negative.
+- Does not generalise: tier 2 avg -0.04R, tier 3 avg -0.08R; oil strongly negative (t -3 to -4); gold +0.17 the only other clear positive.

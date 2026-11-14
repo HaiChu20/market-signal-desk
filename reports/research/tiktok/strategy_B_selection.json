@@ -1,0 +1,15 @@
+{
+  "strategy": "B",
+  "params": {
+    "fast_ema": 9,
+    "slow_ema": 50,
+    "stop_atr": 1.0,
+    "exit_mode": "close",
+    "overlap": "single",
+    "time_stop_days": null
+  },
+  "spec_commit": "102c54d",
+  "selection_period": "dev",
+  "selection_market": "USATECHIDXUSD",
+  "selection_metric": "highest dev net avg R after cost"
+}
