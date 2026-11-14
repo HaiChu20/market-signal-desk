@@ -553,3 +553,10 @@ Append-only notes from the autonomous review loop while the user sleeps.
 - Dev: chosen fast EMA 9, slow EMA 50, stop 1.0 hourly ATR, close exit, single position: Nasdaq +0.360R, t 2.55, p98, 12/12 neighbours positive. 10-day time stop never binds (max hold 13.4 calendar days). Daily-overlap variant (~249 trades/yr) matches the video's trade count; win rate here 24-31% vs the video's 56%, so their unshown stop/exit rules differ.
 - Holdout (2023-01-01 -> 2026-11-14, run once): frozen rule status "edge". Nasdaq chosen +0.139R, t 1.10, p99, max DD 69R, streak 26; default (20/50/1.5) +0.161R, t 1.63, p98. Longs carry it (+0.33R), shorts ~0. 2025 slightly negative.
 - Does not generalise: tier 2 avg -0.04R, tier 3 avg -0.08R; oil strongly negative (t -3 to -4); gold +0.17 the only other clear positive.
+
+## 2026-11-14: TikTok post-hoc direction check (verdicts unchanged)
+- New diagnostic src/msd/research/tiktok/direction_check.py (report reports/research/tiktok/direction_check.json): same entries/stops/exits replayed always-long and always-short; A also vs "buy every session open, same stop rule, close exit". Nasdaq, S&P, gold; dev and already-revealed holdout (post-hoc).
+- Bug found: strategy_a.random_exit_factory replays at the breakout minute's open, not the trigger price (look-ahead for the matching side). Diagnostic replays from the real entry mid; same-side replay reproduces every real trade exactly (asserted). Corrected A random percentiles: default Nasdaq dev/holdout still p99.7; chosen holdout p82 (reported p75). Verdicts unaffected. Original factory left as is (documented here).
+- A default Nasdaq: always-long at its entries ~0 (dev +0.002, holdout -0.013) vs actual +0.058/+0.060; direction adds +0.072R holdout (t 2.1). But buy-every-open baseline earns as much per trade (dev +0.058, holdout +0.079; different stop size).
+- A chosen (long-only): buy-every-open baseline beats it on holdout (+0.061 vs +0.046).
+- B (both cells, all three markets): actual minus always-long ~0 (Nasdaq holdout +0.03/+0.04, t < 0.5). B's direction choice adds nothing; its result is being long with a trailing exit in a rising market.
