@@ -144,6 +144,48 @@ def _entry_candidates(
     return candidates
 
 
+def live_candidate_from_closed_candle(
+    bars: pd.DataFrame, market: str, params: dict, five: pd.DataFrame,
+    hourly: pd.DataFrame,
+) -> dict | None:
+    """Return today's causally known first-candle candidate, even before entry minute exists."""
+    if bars.empty:
+        return None
+    spec = common.MARKET_SESSIONS[market]
+    day = pd.Timestamp(bars.ts.iloc[-1]).tz_convert(spec.timezone).date()
+    start, _end = common.session_bounds(market, day, "rth")
+    entry_ts = start + pd.Timedelta(minutes=5)
+    candle = five[five.known_at == entry_ts]
+    if candle.empty or not np.isfinite(float(candle.fast_ema.iloc[-1])):
+        return None
+    signal = candle.iloc[-1]
+    if signal.mid_close == signal.fast_ema:
+        return None
+    hourly_known = hourly.sort_values("known_at")
+    hourly_times = hourly_known.known_at.to_numpy(dtype="datetime64[ns]")
+    pos = int(np.searchsorted(hourly_times, entry_ts.to_datetime64(), side="right") - 1)
+    if pos < 0:
+        return None
+    atr = float(hourly_known.atr14.iloc[pos])
+    slow = float(hourly_known.slow_ema.iloc[pos])
+    if not np.isfinite(atr) or atr <= 0:
+        return None
+    side = 1 if signal.mid_close > signal.fast_ema else -1
+    minute_times = bars.ts.to_numpy(dtype="datetime64[ns]")
+    minute_i = int(np.searchsorted(minute_times, entry_ts.to_datetime64()))
+    has_entry_bar = minute_i < len(bars) and bars.ts.iloc[minute_i] == entry_ts
+    risk = float(params["stop_atr"]) * atr
+    entry_price = (float(bars.ask_o.iloc[minute_i] if side > 0 else bars.bid_o.iloc[minute_i])
+                   if has_entry_bar else None)
+    return {
+        "day": day, "entry_ts": entry_ts,
+        "entry_i": minute_i if has_entry_bar else None,
+        "entry_price": entry_price, "side": side, "risk": risk,
+        "initial_stop": (entry_price - side * risk) if has_entry_bar else None,
+        "initial_slow": slow, "time_deadline": None,
+    }
+
+
 def _stop_fill(row, side: int, stop: float) -> float | None:
     if side > 0:
         if float(row.bid_o) <= stop:
@@ -256,6 +298,9 @@ def _simulate_candidate(
     market: str,
     params: dict,
     candidate: dict,
+    *,
+    expose_state: bool = False,
+    observe_through=None,
 ) -> dict | None:
     minute = _minute_arrays(bars)
     hour = _hourly_arrays(hourly)
@@ -270,13 +315,17 @@ def _simulate_candidate(
         float(candidate["initial_stop"]), initial_slow_key, deadline_key,
     )
     outcome_cache = hourly.attrs.setdefault("_strategy_b_outcome_cache", {})
-    if cache_key in outcome_cache:
+    if not expose_state and cache_key in outcome_cache:
         cached = outcome_cache[cache_key]
         return None if cached is None else dict(cached)
 
-    def finish(record: dict | None) -> dict | None:
-        outcome_cache[cache_key] = record
-        return None if record is None else dict(record)
+    def finish(record: dict | None, planned_exit_ts=None):
+        if not expose_state:
+            outcome_cache[cache_key] = record
+            return None if record is None else dict(record)
+        return {"trade": None if record is None else dict(record),
+                "active": active, "trail": trail,
+                "planned_exit_ts": planned_exit_ts}
 
     initial_stop = candidate["initial_stop"]
     initial_slow = candidate.get("initial_slow", np.nan)
@@ -347,7 +396,32 @@ def _simulate_candidate(
                     bars, market, params, candidate, minute_i, price, "time_stop"
                 )
             )
-    return finish(None)
+    planned_exit = None
+    if observe_through is not None:
+        boundary = pd.Timestamp(observe_through)
+        boundary = boundary.tz_localize("UTC") if boundary.tzinfo is None else boundary.tz_convert("UTC")
+        close_exit = False
+        while decision_i < len(hourly) and hourly_times[decision_i] <= boundary.to_datetime64():
+            slow = float(hour["slow_ema"][decision_i])
+            close = float(hour["mid_close"][decision_i])
+            decision_i += 1
+            if not np.isfinite(slow):
+                continue
+            if not active and (
+                side * (close - candidate["entry_price"]) >= candidate["risk"]
+                or side * (slow - candidate["entry_price"]) > 0
+            ):
+                active = True
+            if active:
+                trail = slow if trail is None else (
+                    max(trail, slow) if side > 0 else min(trail, slow)
+                )
+                trail = max(trail, initial_stop) if side > 0 else min(trail, initial_stop)
+                if params["exit_mode"] == "close" and side * (close - trail) <= 0:
+                    close_exit = True
+        if close_exit:
+            planned_exit = boundary
+    return finish(None, planned_exit)
 
 
 def simulate(bars_1m: pd.DataFrame, market: str, params: dict) -> list[dict]:

@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 from datetime import datetime, timedelta, timezone
 import importlib
+import json
 import os
 import re
 from pathlib import Path
@@ -25,9 +26,11 @@ from msd.live.store import SignalStore
 from msd.live.telegram import TelegramClient
 
 NY = ZoneInfo("America/New_York")
+HELSINKI = ZoneInfo("Europe/Helsinki")
 CONFIG_PATH = Path("live.toml")
 STATE_PATH = Path("data/live/state.db")
 HEARTBEAT_PATH = Path("data/live/heartbeat")
+EPICS_PATH = Path("data/live/epics.json")
 RESOLUTION = {"MINUTE": pd.Timedelta(minutes=1), "HOUR": pd.Timedelta(hours=1), "DAY": pd.Timedelta(days=1)}
 
 
@@ -68,6 +71,23 @@ def _strategy_orders(module, bars: pd.DataFrame) -> list[dict]:
 def format_signal(symbol: str, module, order: dict, entry_price: float) -> str:
     side = int(order["side"])
     pair = {"USATECHIDXUSD": "US100", "USA500IDXUSD": "US500", "BTCUSDT": "BTCUSDT"}.get(symbol, symbol)
+    if getattr(module, "PAIR", None):
+        pair = module.PAIR
+        marker = "🟢 LONG" if side > 0 else "🔴 SHORT"
+        kind = order.get("entry_type", "market")
+        if kind == "stop":
+            level = float(order["trigger_price"])
+            reference = level
+            entry_line = f"Stop entry: {level:,.1f}"
+        else:
+            reference = entry_price
+            entry_line = f"Entry: approx. {entry_price:,.1f}"
+        risk = float(order.get("risk_distance") or abs(reference - float(order.get("stop", reference))))
+        stop = float(order.get("stop", reference - side * risk))
+        exit_rule = str(order.get("exit_rule", "Bot will message when to exit; can last days"))
+        return (f"{marker} · {module.NAME}\n{pair}\n{entry_line}\n"
+                f"SL: {stop:,.1f}\nTP: none · {exit_rule}\n"
+                "Confidence: low\nSize: 1 micro contract max")
     sl = float(order["stop"])
     tp = order.get("tp")
     distance = abs(entry_price - sl)
@@ -85,6 +105,33 @@ def format_signal(symbol: str, module, order: dict, entry_price: float) -> str:
     return (f"{'🟢' if side > 0 else '🔴'} {'LONG' if side > 0 else 'SHORT'} {pair} | Entry ≈ {entry_price:.2f} "
             f"| SL {sl:.2f} (−{distance:.2f}) | TP {tp_text} "
             f"| Confidence {confidence} | Size {size}×{suffix}")
+
+
+def _local_time(value) -> str:
+    return _utc(value).tz_convert(HELSINKI).strftime("%a %d %b, %H:%M")
+
+
+def _fill_notice(row: dict, price: float, stop: float) -> str:
+    if not row["setup"].startswith("TikTok"):
+        return f"{row['entry_type'].upper()} FILLED at {price:.2f} {row['symbol']} {row['setup']}"
+    marker = "🟢 LONG" if int(row["side"]) > 0 else "🔴 SHORT"
+    pair = "US100 / MNQ"
+    return (f"✅ FILLED · {marker} · {row['setup']}\n{pair}\n"
+            f"Entry: {price:,.1f}\nSL: {stop:,.1f}")
+
+
+def _expired_notice(row: dict) -> str:
+    if row["setup"].startswith("TikTok"):
+        return f"⌛ EXPIRED · {row['setup']}\nUS100 / MNQ\nNo entry was triggered."
+    return f"{row['entry_type'].upper()} EXPIRED {row['symbol']} {row['setup']}"
+
+
+def _exit_now_notice(row: dict, exit_ts) -> str:
+    if row["setup"].startswith("TikTok"):
+        side = "LONG" if int(row["side"]) > 0 else "SHORT"
+        return (f"⚠️ EXIT NOW · {row['setup']}\nUS100 / MNQ · {side}\n"
+                f"Exit at next minute open · {_local_time(exit_ts)} Helsinki")
+    return f"Exit now at {_utc(exit_ts).isoformat()} ({row['symbol']} {row['setup']})"
 
 
 class StaleDataAlarm:
@@ -140,6 +187,8 @@ class SignalEngine:
                 raise ValueError(f"enabled strategy {entry['module']} requires unconfigured instrument(s): {', '.join(missing)}")
         self.mode = mode
         self.bars: dict[tuple[str, str], pd.DataFrame] = {}
+        self._bar_records: dict[tuple[str, str], list[dict]] = {}
+        self._frame_dirty: set[tuple[str, str]] = set()
         self.last_processed: dict[tuple[str, str], pd.Timestamp] = {}
         self.alarm: dict[str, StaleDataAlarm] = {}
         self.ambiguity_stats = dict.fromkeys(AMBIGUITY_KEYS, 0)
@@ -148,7 +197,41 @@ class SignalEngine:
         self._send(("📝 PAPER " if self.mode == "paper" else "") + message)
 
     def _strategy_bars(self, symbol, module):
-        return self.bars.get((symbol, module.RESOLUTION), pd.DataFrame(columns=COLUMNS))
+        key = (symbol, module.RESOLUTION)
+        if key not in self._bar_records:
+            existing = self.bars.get(key, pd.DataFrame(columns=COLUMNS))
+            self._bar_records[key] = existing.to_dict("records") if not existing.empty else []
+        records = self._bar_records[key]
+        if key in self._frame_dirty:
+            frame = pd.DataFrame.from_records(records, columns=COLUMNS)
+            history_days = getattr(module, "HISTORY_DAYS", None)
+            if history_days and not frame.empty:
+                cutoff = pd.Timestamp(frame.ts.iloc[-1]) - pd.Timedelta(days=int(history_days))
+                self.store.connection.row_factory = sqlite3.Row
+                active_entries = self.store.connection.execute(
+                    "SELECT entry_ts FROM signals WHERE symbol=? AND setup=? AND status='open' AND entry_ts IS NOT NULL",
+                    (symbol, module.NAME),
+                ).fetchall()
+                if active_entries:
+                    active_cutoff = min(_utc(row["entry_ts"]) for row in active_entries) - pd.Timedelta(days=int(history_days))
+                    cutoff = min(cutoff, active_cutoff)
+                frame = frame[frame.ts >= cutoff].reset_index(drop=True)
+            self.store.connection.row_factory = sqlite3.Row
+            active = self.store.connection.execute(
+                "SELECT * FROM signals WHERE symbol=? AND setup=? AND status='open'",
+                (symbol, module.NAME),
+            ).fetchall()
+            frame.attrs["open_signals"] = [dict(row) for row in active]
+            self.bars[key] = frame
+            self._frame_dirty.discard(key)
+        return self.bars.get(key, pd.DataFrame(columns=COLUMNS))
+
+    def _last_completed_frame(self, symbol, resolution):
+        key = (symbol, resolution)
+        records = self._bar_records.get(key)
+        if records:
+            return pd.DataFrame.from_records(records[-1:], columns=COLUMNS)
+        return pd.DataFrame(columns=COLUMNS)
 
     def process_completed(self, symbol: str, resolution: str, bar: dict,
                           seconds: pd.DataFrame | None = None):
@@ -158,17 +241,23 @@ class SignalEngine:
         last = self.last_processed.get(key)
         if last is not None and row["ts"] <= last:
             return
-        frame = self.bars.get(key)
-        one = pd.DataFrame([row], columns=COLUMNS)
-        frame = one if frame is None else pd.concat([frame, one], ignore_index=True)
-        frame = frame.drop_duplicates("ts", keep="last").sort_values("ts").reset_index(drop=True)
-        self.bars[key] = frame
+        records = self._bar_records.setdefault(key, [])
+        if not records:
+            existing = self.bars.get(key)
+            if existing is not None and not existing.empty:
+                records.extend(existing.to_dict("records"))
+        records.append(row)
+        self._frame_dirty.add(key)
         self._check_exits(symbol, resolution, row, seconds=seconds)
         self._check_pending(symbol, resolution, row)
         for entry, module in self.strategies:
             if symbol not in module.SYMBOLS or module.RESOLUTION != resolution:
                 continue
-            self._apply_updates(entry, module, frame, row["ts"], symbol)
+            should_update = getattr(module, "should_update", None)
+            gate_bars = self._last_completed_frame(symbol, resolution)
+            if should_update is None or should_update(gate_bars, row["ts"], phase="update"):
+                frame = self._strategy_bars(symbol, module)
+                self._apply_updates(entry, module, frame, row["ts"], symbol)
         self.last_processed[key] = row["ts"]
         self.store.set_state(f"last_processed:{symbol}:{resolution}", row["ts"].isoformat())
 
@@ -177,14 +266,33 @@ class SignalEngine:
         for entry, module in self.strategies:
             if symbol not in module.SYMBOLS or module.RESOLUTION != resolution:
                 continue
-            bars = self._strategy_bars(symbol, module)
-            if bars.empty:
+            completed = self._last_completed_frame(symbol, resolution)
+            if completed.empty:
                 continue
-            completed_ts = _utc(bars.ts.iloc[-1])
+            completed_ts = _utc(completed.ts.iloc[-1])
             if forming_ts <= completed_ts:
                 continue
-            for order in _strategy_orders(module, bars):
-                if _utc(order["decision_ts"]) != completed_ts:
+            should_update = getattr(module, "should_update", None)
+            if should_update is not None:
+                gate_bars = completed
+                if not getattr(module, "USES_FORMING_BAR", False) and not should_update(
+                    gate_bars, completed_ts, phase="entry"
+                ):
+                    continue
+                if getattr(module, "USES_FORMING_BAR", False) and not should_update(
+                    gate_bars, forming_ts, phase="entry"
+                ):
+                    continue
+            bars = self._strategy_bars(symbol, module)
+            if getattr(module, "USES_FORMING_BAR", False):
+                forming_row = pd.DataFrame([forming], columns=COLUMNS)
+                order_bars = pd.concat([bars, forming_row], ignore_index=True)
+                decision_ts = forming_ts
+            else:
+                order_bars = bars
+                decision_ts = completed_ts
+            for order in _strategy_orders(module, order_bars):
+                if _utc(order["decision_ts"]) != decision_ts:
                     continue
                 self._create_signal(entry, module, order, forming, symbol)
 
@@ -195,13 +303,21 @@ class SignalEngine:
             stop_value = order.get("stop")
             tp_value = order.get("tp")
             entry_type = order.get("entry_type", "market")
-            valid = (side in (-1, 1) and entry_type in {"market", "limit"}
+            risk_distance = order.get("risk_distance")
+            if stop_value is None and risk_distance is not None:
+                stop_value = float(entry_price) - side * float(risk_distance)
+            valid = (side in (-1, 1) and entry_type in {"market", "limit", "stop"}
                      and stop_value is not None and np.isfinite(float(entry_price))
                      and np.isfinite(float(stop_value)))
-            if entry_type == "limit":
+            if risk_distance is not None:
+                valid = valid and np.isfinite(float(risk_distance)) and float(risk_distance) > 0
+            if entry_type in {"limit", "stop"}:
                 valid = valid and order.get("expiry_ts") is not None
                 if valid:
                     valid = _utc(order["expiry_ts"]) > _utc(order["decision_ts"])
+            if entry_type == "stop":
+                level = order.get("trigger_price")
+                valid = valid and level is not None and np.isfinite(float(level))
             if tp_value is not None:
                 valid = valid and np.isfinite(float(tp_value))
             if valid:
@@ -224,13 +340,14 @@ class SignalEngine:
         entry_type = order.get("entry_type", "market")
         entry_price = (order.get("limit_price", order.get("entry_price"))
                        if entry_type == "limit" else
+                       order.get("trigger_price") if entry_type == "stop" else
                        forming["ask_o"] if side > 0 else forming["bid_o"])
         if not self._validate(entry, module, order, entry_price):
             return
         entry_price = float(entry_price)
         decision = _utc(order["decision_ts"])
         key = f"{symbol}:{module.NAME}:{decision.isoformat()}"
-        risk = abs(entry_price - float(order["stop"]))
+        risk = float(order.get("risk_distance") or abs(entry_price - float(order["stop"])))
         opposite = self.store.connection.execute(
             "SELECT signal_key,side,status FROM signals WHERE symbol=? AND setup=? AND status IN ('open','pending')",
             (symbol, module.NAME)).fetchall()
@@ -242,18 +359,27 @@ class SignalEngine:
                     self.store.update(old_key, status="flip", exit_ts=decision.isoformat(), exit_price=entry_price,
                                       realized_r=None)
                     self.send(f"EXIT now {symbol} ({module.NAME} flip)")
-        stop = float(order["stop"])
+        stop = (entry_price - side * risk if order.get("stop") is None
+                else float(order["stop"]))
+        pending = entry_type in {"limit", "stop"}
         values = {"signal_key": key, "symbol": symbol, "setup": module.NAME, "side": side,
                   "decision_ts": decision.isoformat(),
-                  "entry_ts": None if entry_type == "limit" else _utc(forming["ts"]).isoformat(),
-                  "entry_price": None if entry_type == "limit" else entry_price,
-                  "entry_type": entry_type, "limit_price": entry_price if entry_type == "limit" else None,
-                  "eligible_ts": _utc(forming["ts"]).isoformat() if entry_type == "limit" else None,
-                  "expiry_ts": _utc(order["expiry_ts"]).isoformat() if entry_type == "limit" else None,
-                  "initial_stop": stop, "stop": stop,
+                  "entry_ts": None if pending else _utc(forming["ts"]).isoformat(),
+                  "entry_price": None if pending else entry_price,
+                  "entry_type": entry_type,
+                  "limit_price": entry_price if entry_type == "limit" else None,
+                  "trigger_price": entry_price if entry_type == "stop" else None,
+                  "eligible_ts": _utc(forming["ts"]).isoformat() if pending else None,
+                  "expiry_ts": _utc(order["expiry_ts"]).isoformat() if pending else None,
+                  "initial_stop": None if pending and order.get("risk_distance") is not None else stop,
+                  "stop": None if pending and order.get("risk_distance") is not None else stop,
                   "take_profit": order.get("tp"), "planned_exit_ts": None if order.get("exit_ts") is None else _utc(order["exit_ts"]).isoformat(),
-                  "planned_risk": risk, "notional": order.get("size"), "confidence": order.get("confidence"),
-                  "status": "pending" if entry_type == "limit" else "open",
+                  "planned_risk": risk, "risk_distance": order.get("risk_distance"),
+                  "risk_from_mid": int(bool(order.get("risk_from_mid", False))),
+                  "exit_at_close": int(bool(order.get("exit_at_close", False))),
+                  "reminder_minutes": int(order.get("reminder_minutes", 5)),
+                  "notional": order.get("size"), "confidence": order.get("confidence"),
+                  "status": "pending" if pending else "open",
                   "created_at": datetime.now(timezone.utc).isoformat()}
         if self.store.insert(values):
             self.send(format_signal(symbol, module, order, entry_price))
@@ -278,20 +404,34 @@ class SignalEngine:
                 continue
             if ts >= _utc(row["expiry_ts"]):
                 self.store.update(row["signal_key"], status="expired")
-                self.send(f"LIMIT EXPIRED {symbol} {row['setup']}")
+                self.send(_expired_notice(row))
                 continue
-            side, limit = int(row["side"]), float(row["limit_price"])
-            touched = float(bar["ask_l"]) <= limit if side > 0 else float(bar["bid_h"]) >= limit
+            side = int(row["side"])
+            level = float(row["trigger_price"] if row["entry_type"] == "stop" else row["limit_price"])
+            if row["entry_type"] == "stop":
+                touched = float(bar["ask_h"]) >= level if side > 0 else float(bar["bid_l"]) <= level
+            else:
+                touched = float(bar["ask_l"]) <= level if side > 0 else float(bar["bid_h"]) >= level
             if not touched:
                 continue
-            fill = min(float(bar["ask_o"]), limit) if side > 0 else max(float(bar["bid_o"]), limit)
-            self.store.update(row["signal_key"], status="open", entry_ts=ts.isoformat(), entry_price=fill)
-            self.send(f"LIMIT FILLED at {fill:.2f} {symbol} {row['setup']}")
-            deadline = row.get("planned_exit_ts")
-            time_exit = deadline is not None and ts >= _utc(deadline)
-            _, reason, price = evaluate_bar(side, float(row["stop"]), None, bar,
-                                            time_exit=time_exit, time_at_open=time_exit,
-                                            stop_active=not time_exit)
+            if row["entry_type"] == "stop":
+                fill = max(float(bar["ask_o"]), level) if side > 0 else min(float(bar["bid_o"]), level)
+            else:
+                fill = min(float(bar["ask_o"]), level) if side > 0 else max(float(bar["bid_o"]), level)
+            if row.get("risk_distance") is not None:
+                risk_entry = fill
+                if row.get("risk_from_mid"):
+                    half_spread = (float(bar["ask_o"]) - float(bar["bid_o"])) / 2
+                    risk_entry = fill - side * half_spread
+                stop = risk_entry - side * float(row["risk_distance"])
+            else:
+                stop = float(row["stop"])
+            self.store.update(row["signal_key"], status="open", entry_ts=ts.isoformat(), entry_price=fill,
+                              initial_stop=stop, stop=stop)
+            self.send(_fill_notice(row, fill, stop))
+            # The signal candle itself can cross the stop. Research gives the
+            # stop priority when trigger and stop are both touched in one bar.
+            _, reason, price = evaluate_bar(side, stop, row.get("take_profit"), bar)
             if reason is not None:
                 risk = float(row["planned_risk"])
                 realized = side * (price - fill) / risk
@@ -308,6 +448,17 @@ class SignalEngine:
             saved = self.store.get(key)
             if not saved or saved["status"] != "open":
                 continue
+            planned_exit = order.get("exit_ts")
+            if planned_exit is not None:
+                planned_exit = _utc(planned_exit).isoformat()
+                if saved.get("planned_exit_ts") != planned_exit:
+                    self.store.update(
+                        key, planned_exit_ts=planned_exit,
+                        exit_at_close=int(bool(order.get("exit_at_close", False))),
+                        reminder_minutes=int(order.get("reminder_minutes", 0)),
+                    )
+                    if saved.get("planned_exit_ts") is None:
+                        self.send(_exit_now_notice(saved, planned_exit))
             path = order.get("stop_path") or {}
             if not isinstance(path, dict):
                 continue
@@ -332,16 +483,31 @@ class SignalEngine:
             side, stop = int(row["side"]), float(row["stop"])
             deadline = row.get("planned_exit_ts")
             time_exit = deadline is not None and ts >= _utc(deadline)
-            _active_stop, reason, price = evaluate_bar(
-                side, stop, row.get("take_profit"), bar, time_exit=time_exit,
-                time_at_open=time_exit, seconds=seconds,
-                ambiguity_stats=self.ambiguity_stats if seconds is not None else None)
+            scheduled_tiktok_exit = bool(row.get("exit_at_close")) or row["setup"].startswith("TikTok B")
+            if time_exit and scheduled_tiktok_exit:
+                _active_stop, reason, price = evaluate_bar(
+                    side, stop, row.get("take_profit"), bar, seconds=seconds,
+                    ambiguity_stats=self.ambiguity_stats if seconds is not None else None)
+                if reason is None:
+                    prefix = "bid" if side > 0 else "ask"
+                    price, reason = float(bar[f"{prefix}_{'c' if row.get('exit_at_close') else 'o'}"]), "time"
+            else:
+                _active_stop, reason, price = evaluate_bar(
+                    side, stop, row.get("take_profit"), bar, time_exit=time_exit,
+                    time_at_open=time_exit, seconds=seconds,
+                    ambiguity_stats=self.ambiguity_stats if seconds is not None else None)
             if reason is None:
                 continue
             risk = max(float(row["planned_risk"] or 0), 1e-12)
             realized = side * (price - float(row["entry_price"])) / risk
             self.store.update(row["signal_key"], status=reason, exit_ts=ts.isoformat(), exit_price=price, realized_r=realized)
-            self.send(f"{symbol} {reason.upper()} hit at {price:.2f}; realized {realized:.2f}R")
+            if row["setup"].startswith("TikTok"):
+                marker = "🛑" if reason == "stop" else "✅"
+                side_label = "LONG" if side > 0 else "SHORT"
+                self.send(f"{marker} EXIT · {row['setup']}\nUS100 / MNQ · {side_label}\n"
+                          f"{reason.upper()} at {price:,.1f} · {_local_time(ts)} Helsinki · {realized:+.2f}R")
+            else:
+                self.send(f"{symbol} {reason.upper()} hit at {price:.2f}; realized {realized:.2f}R")
 
     def reminder(self, now: datetime):
         now_ts = pd.Timestamp(now).tz_convert("UTC")
@@ -351,9 +517,20 @@ class SignalEngine:
             row = dict(raw)
             end = _utc(row["planned_exit_ts"])
             flag = f"reminded:{row['signal_key']}"
-            if end - pd.Timedelta(minutes=5) <= now_ts < end and not self.store.get_state(flag):
-                self.send(f"Exit by {end.isoformat()} ({row['symbol']} {row['setup']})")
+            remind_minutes = int(row["reminder_minutes"] if row.get("reminder_minutes") is not None else 5)
+            if end - pd.Timedelta(minutes=remind_minutes) <= now_ts < end and not self.store.get_state(flag):
+                if row["setup"].startswith("TikTok"):
+                    self.send(f"⏰ EXIT BY · {row['setup']}\nUS100 / MNQ\n{_local_time(end)} Helsinki")
+                else:
+                    self.send(f"Exit by {end.isoformat()} ({row['symbol']} {row['setup']})")
                 self.store.set_state(flag, "1")
+        pending = self.store.connection.execute("SELECT * FROM signals WHERE status='pending'").fetchall()
+        for raw in pending:
+            row = dict(raw)
+            expiry = row.get("expiry_ts")
+            if expiry and now_ts >= _utc(expiry):
+                self.store.update(row["signal_key"], status="expired")
+                self.send(_expired_notice(row))
 
     def daily_summary(self, now):
         now = now.astimezone(timezone.utc)
@@ -420,21 +597,24 @@ def process_poll_cycle(engine: SignalEngine, client, strategies, instruments, no
     engine.reminder(now)
     engine.daily_summary(now)
 
-def _resolve_instruments(client, config, path=CONFIG_PATH):
+def _resolve_instruments(client, config, path=EPICS_PATH, *, refresh=False):
+    try:
+        resolved = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError):
+        resolved = {}
     for item in config.get("instruments", []):
-        if not item.get("epic"):
+        if refresh or not item.get("epic"):
+            epic = None if refresh else resolved.get(item["symbol"])
+            if epic:
+                item["epic"] = epic
+                continue
             market = client.search_market(item["search_term"])
             if not market.get("epic"):
                 raise RuntimeError(f"market not found for {item['symbol']}")
             item["epic"] = market["epic"]
-    lines = [f'mode = "{config.get("mode", "paper")}"', ""]
-    for item in config.get("instruments", []):
-        lines += ["[[instruments]]"]
-        lines += [f'{key} = "{str(item.get(key, "")).replace(chr(34), "")}"' for key in ("symbol", "search_term", "epic", "hours")]
-        lines.append("")
-    for entry in config.get("strategies", []):
-        lines += ["[[strategies]]", f'module = "{entry["module"]}"', f'enabled = {str(bool(entry.get("enabled", False))).lower()}', ""]
-    path.write_text("\n".join(lines))
+        resolved[item["symbol"]] = item["epic"]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(resolved, indent=2, sort_keys=True) + "\n")
     return config
 
 
@@ -463,6 +643,8 @@ def _seed_history(engine, client, strategies, instruments, now):
                 if last is not None:
                     engine.store.set_state(f"last_processed:{symbol}:{resolution}", last.isoformat())
             engine.bars[key] = history
+            engine._bar_records[key] = history.to_dict("records")
+            engine._frame_dirty.add(key)
             if last is not None:
                 engine.last_processed[key] = last
 
@@ -484,8 +666,12 @@ def run_live():
     config = tomllib.loads(CONFIG_PATH.read_text())
     instruments = config.get("instruments", [])
     strategies = config.get("strategies", [])
-    client, telegram = CapitalClient(), TelegramClient()
-    print(f"credentials present: {'yes' if client.credentials_present and telegram.credentials_present else 'no'}", flush=True)
+    client = CapitalClient()
+    if not client.credentials_present:
+        print("Capital credentials present: no; live engine not started.", flush=True)
+        return
+    telegram = TelegramClient()
+    print("Capital credentials present: yes", flush=True)
     store = SignalStore(STATE_PATH)
     try:
         engine = create_engine(config, store, telegram.send_message if telegram.credentials_present else print)
@@ -617,20 +803,20 @@ def verify_bars(module, symbol: str, bars: pd.DataFrame, window_start=None, wind
         sys.modules[proxy_name] = old_module
     return result
 
-def run_check():
-    config = tomllib.loads(CONFIG_PATH.read_text())
-    client, telegram = CapitalClient(), TelegramClient()
+def run_check(client=None, *, config_path=CONFIG_PATH, epics_path=EPICS_PATH):
+    config = tomllib.loads(config_path.read_text())
+    client = client or CapitalClient()
     print(f"credentials present: {'yes' if client.credentials_present else 'no'}")
     if not client.credentials_present:
-        raise SystemExit("Capital credentials missing")
+        return
     instruments = config.get("instruments", [])
-    _resolve_instruments(client, config)
+    client.login()
+    _resolve_instruments(client, config, epics_path, refresh=True)
     now = _now_utc()
     for item in instruments:
         bars = _history(client, item["epic"], "MINUTE", now - timedelta(minutes=120), now)
-        print(f"{item['symbol']} epic resolved; bars={len(bars)}; latest={bars.ts.iloc[-1] if len(bars) else 'none'}")
-    if telegram.credentials_present:
-        telegram.send_message("check OK")
+        latest = bars.ts.iloc[-1].isoformat() if len(bars) else "none"
+        print(f"epic: {item['epic']}; bars: {len(bars)}; latest: {latest}")
 
 
 def main():
