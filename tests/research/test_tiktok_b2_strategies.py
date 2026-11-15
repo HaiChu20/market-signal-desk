@@ -59,6 +59,12 @@ def test_strategy_b_grid_and_first_causal_setup_simulate():
     assert trades[0]["exit_reason"] == "time"
 
 
+def test_b_selects_earliest_engulf_signal_across_gap_sides():
+    early = {"signal_i": 19, "side": -1}
+    late = {"signal_i": 24, "side": 1}
+    assert strategy_b._earliest_signal([late, early]) is early
+
+
 def test_grouped_b_cells_equal_individual_cell_simulations():
     data = _signal_day()
     cells = [dict(body_ratio=.6, deadline="10:00", target_r=target, stop_mode=stop)

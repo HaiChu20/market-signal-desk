@@ -60,7 +60,8 @@ def simulate(data, params: dict | None = None, *, model: str = "futures", multip
              fill_model: str = "trade_through", signal_delay: int = 0,
              allow_holdout: bool = False, selection_path: Path | None = None) -> tuple[list[dict], dict]:
     params = dict(DEFAULT if params is None else params)
-    diagnostics = {"minimum_stop_skips": 0, "bad_opening_range": 0, "signals": 0, "unresolved_at_end": 0}
+    diagnostics = {"minimum_stop_skips": 0, "entry_beyond_stop": 0,
+                   "bad_opening_range": 0, "signals": 0, "unresolved_at_end": 0}
     exec_bars = execution_bars(data, data.market, model, multiplier)
     five_ts = pd.DatetimeIndex(data.five.ts)
     five_ny = five_ts.tz_convert("America/New_York")
@@ -88,7 +89,8 @@ def simulate(data, params: dict | None = None, *, model: str = "futures", multip
                                side=order["side"], entry_i=entry_i, stop=order["stop"],
                                target_r=params["target_r"], risk_points=risk,
                                deadline_i=order["deadline_i"], fill_model=fill_model,
-                               allow_holdout=allow_holdout, selection_path=selection_path)
+                               allow_holdout=allow_holdout, selection_path=selection_path,
+                               diagnostics=diagnostics)
         if trade is None:
             diagnostics["unresolved_at_end"] += 1
             continue
