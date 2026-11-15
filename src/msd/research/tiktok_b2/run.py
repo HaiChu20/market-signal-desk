@@ -13,10 +13,11 @@ import time
 import pandas as pd
 
 from msd.research.tiktok import common
-from . import prep, reporting, strategy_b, strategy_b_alt
+from . import prep, reporting, strategy_b, strategy_b_alt, strategy_c, strategy_d
 
 REPORTS = Path("reports/research/tiktok_b2")
-STRATEGIES = {"B": strategy_b, "B-alt": strategy_b_alt}
+STRATEGIES = {"B": strategy_b, "B-alt": strategy_b_alt,
+              "C": strategy_c, "D": strategy_d}
 _WORKER_DATA = None
 _WORKER_STRATEGY = None
 _WORKER_MODEL = None
@@ -148,6 +149,25 @@ def _output_name(strategy: str, market: str, period: str) -> str:
     return f"{strategy.replace('-', '_')}_{market}_{period}"
 
 
+def _append_extras_markdown(markdown_path: Path, extras: dict) -> None:
+    lines = ["", "## Strategy-specific diagnostics", ""]
+    for section, values in extras.items():
+        lines += [f"### {section.replace('_', ' ').title()}", "",
+                  "| Rung | Trades | Net avg R | t | Daily Sharpe | Win rate | Winning months |",
+                  "|---|---:|---:|---:|---:|---:|---:|"]
+        for label, item in values.items():
+            overall = item["summary"]["overall"]
+            daily = item["summary"]["daily"]
+            lines.append(
+                f"| {label} | {overall['trades']} | {overall['net_avg_R']} | "
+                f"{overall['t']} | {daily['sharpe_annualized']} | "
+                f"{overall['win_rate']} | {daily['winning_periods']['month']} |"
+            )
+        lines.append("")
+    with markdown_path.open("a") as handle:
+        handle.write("\n".join(lines))
+
+
 def run_dev(strategy: str, market: str, *, workers: int = 12, trials: int = 0) -> dict:
     module = STRATEGIES[strategy]
     started = time.perf_counter()
@@ -183,15 +203,7 @@ def run_dev(strategy: str, market: str, *, workers: int = 12, trials: int = 0) -
     else:
         selection = None
     project_count = reporting.project_configuration_count()
-    grid_path = REPORTS / f"{_output_name(strategy, market, 'dev')}_grid.csv"
-    current_new = 0 if grid_path.exists() else len(module.GRID)
-    count_paths = dict(project_count["by_dev_grid"])
-    if current_new:
-        count_paths[str(grid_path)] = current_new
-    project_count = {**project_count,
-                     "tried": project_count["tried"] + current_new,
-                     "by_dev_grid": count_paths,
-                     "current_grid_cells": len(module.GRID)}
+    project_count = {**project_count, "current_grid_cells": len(module.GRID)}
     if trials <= 0:
         trials = max(1, project_count["tried"])
     scopes = {"default": default["summary"]}
@@ -199,6 +211,7 @@ def run_dev(strategy: str, market: str, *, workers: int = 12, trials: int = 0) -
     random_rows = {}
     sensitivity = {}
     lookahead = {}
+    extras = {}
     if chosen:
         scopes["chosen"] = chosen["summary"]
         chosen_trades = _cell(grid_results, chosen_params)
@@ -221,12 +234,25 @@ def run_dev(strategy: str, market: str, *, workers: int = 12, trials: int = 0) -
         sensitivity = _sensitivity(module, data, None, module.DEFAULT, workers,
                                    primary_map,
                                    cost15_map, cost2_map, touch_map)
+    if hasattr(module, "extra_runs") and market == "USATECHIDXUSD":
+        raw_extras = module.extra_runs(data)
+        for section, values in raw_extras.items():
+            extras[section] = {}
+            for label, (params, trades, diagnostics) in values.items():
+                extras[section][label] = {
+                    "params": params,
+                    "summary": reporting.summarize(
+                        trades, data, diagnostics=diagnostics
+                    ),
+                }
     report = {"strategy": strategy, "market": market, "period": "dev",
               "primary_cost_model": "futures", "selection": selection,
               "chosen_params": chosen_params, "default_params": module.DEFAULT,
               "chosen_eligible": chosen is not None,
               "scopes": scopes, "random_benchmark": random_rows,
               "lookahead_audit": lookahead, "sensitivity": sensitivity,
+              "extras": extras,
+              "video_comparison": getattr(module, "VIDEO_COMPARISON", {}),
               "dsr": reporting.dsr(reporting.daily_returns(chosen_trades, data), trials) if chosen else None,
               "project_configuration_count": project_count,
               "skip_counts": {str(reason): int(count) for reason, count in
@@ -256,6 +282,8 @@ def run_dev(strategy: str, market: str, *, workers: int = 12, trials: int = 0) -
     output_name = _output_name(strategy, market, "dev")
     reporting.write_b2_report(REPORTS, output_name, report, clean_grid,
                               chosen_trades or default_trades)
+    if extras:
+        _append_extras_markdown(REPORTS / f"{output_name}.md", extras)
     print(json.dumps({"strategy": strategy, "market": market,
                       "chosen_params": chosen_params,
                       "chosen": chosen["summary"]["overall"] if chosen else None,
