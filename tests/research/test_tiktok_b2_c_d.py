@@ -88,6 +88,71 @@ def test_d_chain_enforces_sweep_recency_and_session(monkeypatch):
     assert strategy_d._candidate_orders(data, stale, diagnostics) == []
 
 
+def test_d_limit_fill_distinguishes_trade_through_from_touch():
+    bars = SimpleNamespace(
+        tick=0.25,
+        ts=pd.date_range("2019-01-02", periods=2, freq="min", tz="UTC"),
+        ask_l=np.array([100.0, 99.75]),
+        bid_h=np.array([100.0, 100.25]),
+    )
+    long = {"side": 1, "limit": 100.0, "entry_i": 0, "expiry_i": 1}
+    short = {"side": -1, "limit": 100.0, "entry_i": 0, "expiry_i": 1}
+    assert strategy_d._first_limit_fill(bars, long, "touch") == 0
+    assert strategy_d._first_limit_fill(bars, long, "trade_through") == 1
+    assert strategy_d._first_limit_fill(bars, short, "touch") == 0
+    assert strategy_d._first_limit_fill(bars, short, "trade_through") == 1
+
+
+def test_d_pending_limit_expires_on_fvg_invalidation(monkeypatch):
+    data = _data()
+    series = _series(4)
+    series["c"][7] = 99.0  # Bullish zone far edge is 100; invalid at bar 7 close.
+    monkeypatch.setattr(strategy_c, "_series", lambda *args: series)
+    monkeypatch.setattr(strategy_c, "_bias_for", lambda *args: 0)
+    diagnostics = {"entry_beyond_stop_skips": 0, "missing_target_skips": 0}
+    orders = strategy_d._candidate_orders(data, strategy_d.DEFAULT, diagnostics)
+    assert orders[0]["entry_i"] == 6
+    assert orders[0]["expiry_i"] == 7
+
+
+def test_c_stop_out_blocks_later_windows_that_day(monkeypatch):
+    data = _data()
+    data.bars = _bars_for_execution(data.ts)
+    data.mid_o = np.full(len(data.ts), 100.0)
+    data.mid_h = np.full(len(data.ts), 101.0)
+    data.mid_l = np.full(len(data.ts), 99.0)
+    data.atr15_at = np.full(len(data.ts), 10.0)
+    orders = [
+        {"day": DAY, "window": (600, 660), "side": 1, "entry_i": 1,
+         "limit": 100.0, "stop": 95.0, "risk": 5.0, "target_r": 2.0,
+         "expiry_i": 2, "deadline_i": 10, "signal_i": 0},
+        {"day": DAY, "window": (840, 900), "side": 1, "entry_i": 3,
+         "limit": 100.0, "stop": 95.0, "risk": 5.0, "target_r": 2.0,
+         "expiry_i": 4, "deadline_i": 10, "signal_i": 2},
+    ]
+    monkeypatch.setattr(strategy_c, "_orders", lambda *args: orders)
+    calls = []
+
+    def stopped(*args, **kwargs):
+        calls.append(kwargs["entry_i"])
+        return {"_entry_i": kwargs["entry_i"], "_exit_i": kwargs["entry_i"],
+                "exit_reason": "stop"}
+
+    monkeypatch.setattr(strategy_c, "simulate_trade", stopped)
+    trades, diagnostics = strategy_c.simulate(data)
+    assert len(trades) == 1
+    assert calls == [1]
+    assert diagnostics["signals"] == 1
+
+
+def _bars_for_execution(times):
+    frame = pd.DataFrame({"ts": times})
+    for side, offset in (("bid", -0.125), ("ask", 0.125)):
+        for field in "ohlc":
+            frame[f"{side}_{field}"] = 100.0 + offset
+    return frame
+
+
 def test_frozen_grid_sizes_and_defaults_are_present():
     assert len(strategy_c.GRID) == 36
     assert len(strategy_d.GRID) == 25
