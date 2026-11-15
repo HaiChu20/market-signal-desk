@@ -133,8 +133,8 @@ def resample_closed_bars(bars_1m: pd.DataFrame, minutes: int) -> pd.DataFrame:
     end is not after the last available minute's close, so a still-forming bar at the
     end of the data is never emitted.
     """
-    if minutes not in (5, 60):
-        raise ValueError("only frozen 5-minute and 1-hour bars are supported")
+    if minutes not in (5, 15, 60):
+        raise ValueError("only frozen 5-minute, 15-minute, and 1-hour bars are supported")
     bars = bars_1m.copy()
     bars["ts"] = pd.to_datetime(bars.ts, utc=True)
     bars = bars.sort_values("ts").drop_duplicates("ts").set_index("ts")

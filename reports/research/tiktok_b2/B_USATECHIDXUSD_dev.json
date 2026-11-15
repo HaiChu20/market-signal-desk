@@ -1,0 +1,5335 @@
+{
+  "strategy": "B",
+  "market": "USATECHIDXUSD",
+  "period": "dev",
+  "primary_cost_model": "futures",
+  "selection": {
+    "strategy": "B",
+    "market": "USATECHIDXUSD",
+    "selection_period": "dev",
+    "selection_metric": "highest NQ dev futures net avg R among cells with at least 100 trades",
+    "params": {
+      "body_ratio": 0.5,
+      "deadline": "10:00",
+      "target_r": 3.0,
+      "stop_mode": "fvg"
+    },
+    "config_hash": "f522906410f1c182834232423f3506b94653c742123f5fccba3105fd74826b47"
+  },
+  "chosen_params": {
+    "body_ratio": 0.5,
+    "deadline": "10:00",
+    "target_r": 3.0,
+    "stop_mode": "fvg"
+  },
+  "default_params": {
+    "body_ratio": 0.6,
+    "deadline": "10:00",
+    "target_r": 3.0,
+    "stop_mode": "engulf"
+  },
+  "chosen_eligible": true,
+  "scopes": {
+    "default": {
+      "overall": {
+        "trades": 184,
+        "win_rate": 0.2826086956521739,
+        "avg_win_R": 2.863286469876888,
+        "avg_loss_R": -1.1003565726587212,
+        "net_avg_R": 0.019803417623081354,
+        "net_avg_R_cost15": -0.028260352918791525,
+        "profit_factor": 1.025087107802471,
+        "t": 0.1491085400397921,
+        "max_drawdown_R": 22.854281434773824,
+        "longest_losing_streak": 15,
+        "exit_reason_counts": {
+          "stop": 132,
+          "target": 51,
+          "time": 1
+        },
+        "trades_per_year": 46.0,
+        "total_R": 3.643828842646969,
+        "longest_losing_streak_days": 3,
+        "winning_days": 0.05220883534136546,
+        "winning_weeks": 0.22488038277511962,
+        "winning_months": 0.4375,
+        "net_avg_R_cost2": -0.07632412346066442,
+        "fill_touch_net_avg_R": 0.019803417623081354
+      },
+      "by_year": {
+        "2019": {
+          "trades": 43,
+          "win_rate": 0.3023255813953488,
+          "avg_win_R": 2.6547234560938215,
+          "avg_loss_R": -1.1613920438295027,
+          "net_avg_R": -0.007682706643381802,
+          "net_avg_R_cost15": -0.08514378557037706,
+          "profit_factor": 0.9905183787157089,
+          "t": -0.027715522717940456,
+          "max_drawdown_R": 13.422596759954983,
+          "longest_losing_streak": 10,
+          "exit_reason_counts": {
+            "stop": 30,
+            "target": 12,
+            "time": 1
+          }
+        },
+        "2020": {
+          "trades": 38,
+          "win_rate": 0.2631578947368421,
+          "avg_win_R": 2.9214419726575533,
+          "avg_loss_R": -1.102524092364354,
+          "net_avg_R": -0.04358565420069427,
+          "net_avg_R_cost15": -0.09169427077472561,
+          "profit_factor": 0.9463486016477701,
+          "t": -0.14957214118365758,
+          "max_drawdown_R": 8.921642200083554,
+          "longest_losing_streak": 6,
+          "exit_reason_counts": {
+            "stop": 28,
+            "target": 10
+          }
+        },
+        "2021": {
+          "trades": 48,
+          "win_rate": 0.3541666666666667,
+          "avg_win_R": 2.930891494168377,
+          "avg_loss_R": -1.0958653647674648,
+          "net_avg_R": 0.3302776894389791,
+          "net_avg_R_cost15": 0.2870832008251352,
+          "profit_factor": 1.4666610781957004,
+          "t": 1.1753915987332277,
+          "max_drawdown_R": 8.06324921299024,
+          "longest_losing_streak": 6,
+          "exit_reason_counts": {
+            "stop": 31,
+            "target": 17
+          }
+        },
+        "2022": {
+          "trades": 55,
+          "win_rate": 0.21818181818181817,
+          "avg_win_R": 2.944993031411712,
+          "avg_loss_R": -1.0596001251644835,
+          "net_avg_R": -0.1858707091842224,
+          "net_avg_R_cost15": -0.21516970013997,
+          "profit_factor": 0.7756308260782696,
+          "t": -0.825661492291552,
+          "max_drawdown_R": 22.854281434773814,
+          "longest_losing_streak": 15,
+          "exit_reason_counts": {
+            "stop": 43,
+            "target": 12
+          }
+        }
+      },
+      "long_vs_short": {
+        "long": {
+          "trades": 111,
+          "win_rate": 0.3063063063063063,
+          "avg_win_R": 2.829990489071841,
+          "avg_loss_R": -1.1076902631035996,
+          "net_avg_R": 0.0984461835086974,
+          "net_avg_R_cost15": 0.047077850028558695,
+          "profit_factor": 1.1281187815793783,
+          "t": 0.5630577433545692,
+          "max_drawdown_R": 14.621608327245445,
+          "longest_losing_streak": 9,
+          "exit_reason_counts": {
+            "stop": 77,
+            "target": 33,
+            "time": 1
+          }
+        },
+        "short": {
+          "trades": 73,
+          "win_rate": 0.2465753424657534,
+          "avg_win_R": 2.9261788780641984,
+          "avg_loss_R": -1.090089406035891,
+          "net_avg_R": -0.0997766784495677,
+          "net_avg_R_cost15": -0.14281570260585844,
+          "profit_factor": 0.878513759155264,
+          "t": -0.4888539409696271,
+          "max_drawdown_R": 13.900074328202766,
+          "longest_losing_streak": 11,
+          "exit_reason_counts": {
+            "stop": 55,
+            "target": 18
+          }
+        }
+      },
+      "by_entry_hour": {
+        "10": {
+          "trades": 3,
+          "win_rate": 0.3333333333333333,
+          "avg_win_R": 2.983672326926665,
+          "avg_loss_R": -1.0812156652928246,
+          "net_avg_R": 0.27374699878033854,
+          "net_avg_R_cost15": 0.24395383150384106,
+          "profit_factor": 1.379776682258206,
+          "t": 0.20202953896482842,
+          "max_drawdown_R": 1.0946969696969762,
+          "longest_losing_streak": 1,
+          "exit_reason_counts": {
+            "stop": 2,
+            "target": 1
+          }
+        },
+        "9": {
+          "trades": 181,
+          "win_rate": 0.281767955801105,
+          "avg_win_R": 2.8609259628759123,
+          "avg_loss_R": -1.1006510481566578,
+          "net_avg_R": 0.015594407990640614,
+          "net_avg_R_cost15": -0.032772190229663926,
+          "profit_factor": 1.0197267010636266,
+          "t": 0.11660331320020197,
+          "max_drawdown_R": 22.854281434773824,
+          "longest_losing_streak": 15,
+          "exit_reason_counts": {
+            "stop": 130,
+            "target": 50,
+            "time": 1
+          }
+        }
+      },
+      "daily": {
+        "sharpe_annualized": 0.07516520560194233,
+        "max_drawdown_R": 22.854281434773824,
+        "winning_periods": {
+          "day": 0.05220883534136546,
+          "week": 0.22488038277511962,
+          "month": 0.4375
+        },
+        "winning_days": {
+          "wins": 52,
+          "days": 996,
+          "percent": 5.220883534136546
+        }
+      },
+      "costs": {
+        "x1_net_avg_R": 0.019803417623081354,
+        "x1_5_net_avg_R": -0.028260352918791587,
+        "x2_net_avg_R": -0.0763241234606644,
+        "median_stop_points": 12.668000000001484,
+        "median_cost_R": 0.08485490586509803
+      },
+      "diagnostics": {
+        "minimum_stop_skips": 20,
+        "bad_opening_range": 0,
+        "signals": 184,
+        "unresolved_at_end": 0
+      }
+    },
+    "chosen": {
+      "overall": {
+        "trades": 212,
+        "win_rate": 0.28773584905660377,
+        "avg_win_R": 2.88201993132142,
+        "avg_loss_R": -1.07931926108733,
+        "net_avg_R": 0.06050003484160297,
+        "net_avg_R_cost15": 0.0190730423701354,
+        "profit_factor": 1.0786981658995967,
+        "t": 0.48686611930138474,
+        "max_drawdown_R": 26.41330862260112,
+        "longest_losing_streak": 13,
+        "exit_reason_counts": {
+          "stop": 150,
+          "target": 60,
+          "time": 2
+        },
+        "trades_per_year": 53.0,
+        "total_R": 12.82600738641983,
+        "longest_losing_streak_days": 3,
+        "winning_days": 0.06124497991967871,
+        "winning_weeks": 0.2631578947368421,
+        "winning_months": 0.4583333333333333,
+        "net_avg_R_cost2": -0.022353950101332128,
+        "fill_touch_net_avg_R": 0.06050003484160297
+      },
+      "by_year": {
+        "2019": {
+          "trades": 53,
+          "win_rate": 0.2830188679245283,
+          "avg_win_R": 2.6907863921381594,
+          "avg_loss_R": -1.1373311288335426,
+          "net_avg_R": -0.05390164176607986,
+          "net_avg_R_cost15": -0.12215449045903838,
+          "profit_factor": 0.9338991049174789,
+          "t": -0.22074205111136455,
+          "max_drawdown_R": 18.80443890999114,
+          "longest_losing_streak": 13,
+          "exit_reason_counts": {
+            "stop": 38,
+            "target": 14,
+            "time": 1
+          }
+        },
+        "2020": {
+          "trades": 43,
+          "win_rate": 0.20930232558139536,
+          "avg_win_R": 2.9359910248300753,
+          "avg_loss_R": -1.0844755917218571,
+          "net_avg_R": -0.2429825789551737,
+          "net_avg_R_cost15": -0.2830785195955513,
+          "profit_factor": 0.7166358567591333,
+          "t": -0.9624351041145548,
+          "max_drawdown_R": 18.359382158339223,
+          "longest_losing_streak": 9,
+          "exit_reason_counts": {
+            "stop": 34,
+            "target": 9
+          }
+        },
+        "2021": {
+          "trades": 54,
+          "win_rate": 0.4444444444444444,
+          "avg_win_R": 2.9425253218218543,
+          "avg_loss_R": -1.0767458649351622,
+          "net_avg_R": 0.709596884734623,
+          "net_avg_R_cost15": 0.6755064382130458,
+          "profit_factor": 2.1862357071593994,
+          "t": 2.586298085102399,
+          "max_drawdown_R": 5.328770285896061,
+          "longest_losing_streak": 5,
+          "exit_reason_counts": {
+            "stop": 30,
+            "target": 24
+          }
+        },
+        "2022": {
+          "trades": 62,
+          "win_rate": 0.20967741935483872,
+          "avg_win_R": 2.9536071524106964,
+          "avg_loss_R": -1.0323281522839625,
+          "net_avg_R": -0.1965675238802439,
+          "net_avg_R_cost15": -0.22237577974351644,
+          "profit_factor": 0.7590707074198887,
+          "t": -0.9429648893237992,
+          "max_drawdown_R": 26.413308622601107,
+          "longest_losing_streak": 10,
+          "exit_reason_counts": {
+            "stop": 48,
+            "target": 13,
+            "time": 1
+          }
+        }
+      },
+      "long_vs_short": {
+        "long": {
+          "trades": 127,
+          "win_rate": 0.29133858267716534,
+          "avg_win_R": 2.8428378400493823,
+          "avg_loss_R": -1.082966406819266,
+          "net_avg_R": 0.06077183833144256,
+          "net_avg_R_cost15": 0.014829728134067414,
+          "profit_factor": 1.0791860354782532,
+          "t": 0.3783986269915835,
+          "max_drawdown_R": 24.565508523371484,
+          "longest_losing_streak": 15,
+          "exit_reason_counts": {
+            "stop": 89,
+            "target": 36,
+            "time": 2
+          }
+        },
+        "short": {
+          "trades": 85,
+          "win_rate": 0.2823529411764706,
+          "avg_win_R": 2.942425655365813,
+          "avg_loss_R": -1.0739382264008668,
+          "net_avg_R": 0.060093928450901495,
+          "net_avg_R_cost15": 0.02541305305226051,
+          "profit_factor": 1.0779723071825795,
+          "t": 0.3045544579899017,
+          "max_drawdown_R": 22.80085188208909,
+          "longest_losing_streak": 10,
+          "exit_reason_counts": {
+            "stop": 61,
+            "target": 24
+          }
+        }
+      },
+      "by_entry_hour": {
+        "10": {
+          "trades": 3,
+          "win_rate": 0.6666666666666666,
+          "avg_win_R": 2.9744320159489783,
+          "avg_loss_R": -1.0307209175314045,
+          "net_avg_R": 1.639381038122184,
+          "net_avg_R_cost15": 1.6257382238499432,
+          "profit_factor": 5.771556520018625,
+          "t": 1.227943705722722,
+          "max_drawdown_R": 1.0307209175314045,
+          "longest_losing_streak": 1,
+          "exit_reason_counts": {
+            "target": 2,
+            "stop": 1
+          }
+        },
+        "9": {
+          "trades": 209,
+          "win_rate": 0.2822966507177033,
+          "avg_win_R": 2.8788873182831978,
+          "avg_loss_R": -1.0796432500443693,
+          "net_avg_R": 0.0378366711581496,
+          "net_avg_R_cost15": -0.003989137268330705,
+          "profit_factor": 1.0488301067457748,
+          "t": 0.30421927418426814,
+          "max_drawdown_R": 26.41330862260112,
+          "longest_losing_streak": 13,
+          "exit_reason_counts": {
+            "stop": 149,
+            "target": 58,
+            "time": 2
+          }
+        }
+      },
+      "daily": {
+        "sharpe_annualized": 0.24524309751068488,
+        "max_drawdown_R": 26.41330862260112,
+        "winning_periods": {
+          "day": 0.06124497991967871,
+          "week": 0.2631578947368421,
+          "month": 0.4583333333333333
+        },
+        "winning_days": {
+          "wins": 61,
+          "days": 996,
+          "percent": 6.124497991967871
+        }
+      },
+      "costs": {
+        "x1_net_avg_R": 0.06050003484160297,
+        "x1_5_net_avg_R": 0.019073042370135383,
+        "x2_net_avg_R": -0.02235395010133208,
+        "median_stop_points": 14.945000000000618,
+        "median_cost_R": 0.06649988628609782
+      },
+      "diagnostics": {
+        "minimum_stop_skips": 19,
+        "bad_opening_range": 0,
+        "signals": 212,
+        "unresolved_at_end": 0
+      }
+    }
+  },
+  "random_benchmark": {
+    "default": {
+      "seeds": 1000,
+      "actual_avg_R": 0.019803417623081354,
+      "random_percentile": 49.1,
+      "random_mean_R": 0.023094874325683808,
+      "random_p05_R": -0.1659080253570891,
+      "random_p95_R": 0.2084434926499737
+    },
+    "chosen": {
+      "seeds": 1000,
+      "actual_avg_R": 0.06050003484160297,
+      "random_percentile": 69.0,
+      "random_mean_R": 0.004532389023257499,
+      "random_p05_R": -0.16939492488639418,
+      "random_p95_R": 0.16784313710923915
+    }
+  },
+  "lookahead_audit": {
+    "summary": {
+      "overall": {
+        "trades": 181,
+        "win_rate": 0.281767955801105,
+        "avg_win_R": 2.9032296221042815,
+        "avg_loss_R": -1.0421086772260266,
+        "net_avg_R": 0.06956123032008227,
+        "net_avg_R_cost15": 0.03254946720641664,
+        "profit_factor": 1.092937174574578,
+        "t": 0.522272179005751,
+        "max_drawdown_R": 17.889229773095995,
+        "longest_losing_streak": 15,
+        "exit_reason_counts": {
+          "stop": 128,
+          "target": 50,
+          "time": 3
+        },
+        "trades_per_year": 45.25,
+        "total_R": 12.59058268793489,
+        "longest_losing_streak_days": 3,
+        "winning_days": 0.05120481927710843,
+        "winning_weeks": 0.22009569377990432,
+        "winning_months": 0.4791666666666667
+      },
+      "by_year": {
+        "2019": {
+          "trades": 45,
+          "win_rate": 0.24444444444444444,
+          "avg_win_R": 2.8806760128951194,
+          "avg_loss_R": -1.0738348210200026,
+          "net_avg_R": -0.1071766171740841,
+          "net_avg_R_cost15": -0.17198956924887623,
+          "profit_factor": 0.8679020252401519,
+          "t": -0.4156212060354135,
+          "max_drawdown_R": 12.716751176529636,
+          "longest_losing_streak": 9,
+          "exit_reason_counts": {
+            "stop": 33,
+            "target": 11,
+            "time": 1
+          }
+        },
+        "2020": {
+          "trades": 37,
+          "win_rate": 0.21621621621621623,
+          "avg_win_R": 2.9491550744379085,
+          "avg_loss_R": -1.0605767313719758,
+          "net_avg_R": -0.19360769227794677,
+          "net_avg_R_cost15": -0.22284397084935248,
+          "profit_factor": 0.7670920891147249,
+          "t": -0.7036416847591869,
+          "max_drawdown_R": 14.865826358331057,
+          "longest_losing_streak": 8,
+          "exit_reason_counts": {
+            "stop": 29,
+            "target": 8
+          }
+        },
+        "2021": {
+          "trades": 48,
+          "win_rate": 0.4166666666666667,
+          "avg_win_R": 2.857967605192136,
+          "avg_loss_R": -1.0782504864207887,
+          "net_avg_R": 0.5618403850845967,
+          "net_avg_R_cost15": 0.5284145152652533,
+          "profit_factor": 1.8932571401441836,
+          "t": 1.9675612816557906,
+          "max_drawdown_R": 5.3782181630865855,
+          "longest_losing_streak": 5,
+          "exit_reason_counts": {
+            "stop": 28,
+            "target": 19,
+            "time": 1
+          }
+        },
+        "2022": {
+          "trades": 51,
+          "win_rate": 0.23529411764705882,
+          "avg_win_R": 2.9687234905105035,
+          "avg_loss_R": -0.9747693665418967,
+          "net_avg_R": -0.04688869429427333,
+          "net_avg_R_cost15": -0.06838599275971115,
+          "profit_factor": 0.9370969308731125,
+          "t": -0.19649765867663602,
+          "max_drawdown_R": 15.831881694788583,
+          "longest_losing_streak": 15,
+          "exit_reason_counts": {
+            "stop": 38,
+            "target": 12,
+            "time": 1
+          }
+        }
+      },
+      "long_vs_short": {
+        "long": {
+          "trades": 104,
+          "win_rate": 0.3076923076923077,
+          "avg_win_R": 2.8763419520112823,
+          "avg_loss_R": -1.0582818791362498,
+          "net_avg_R": 0.15237160737068317,
+          "net_avg_R_cost15": 0.11324810226918561,
+          "profit_factor": 1.2079713600853572,
+          "t": 0.8454204351144687,
+          "max_drawdown_R": 8.820914773300071,
+          "longest_losing_streak": 8,
+          "exit_reason_counts": {
+            "stop": 70,
+            "target": 31,
+            "time": 3
+          }
+        },
+        "short": {
+          "trades": 77,
+          "win_rate": 0.24675324675324675,
+          "avg_win_R": 2.9485141191030166,
+          "avg_loss_R": -1.022031598992646,
+          "net_avg_R": -0.04228655167033981,
+          "net_avg_R_cost15": -0.07644609183940114,
+          "profit_factor": 0.9450711281431082,
+          "t": -0.21408664708484473,
+          "max_drawdown_R": 22.66928170691753,
+          "longest_losing_streak": 10,
+          "exit_reason_counts": {
+            "stop": 58,
+            "target": 19
+          }
+        }
+      },
+      "by_entry_hour": {
+        "10": {
+          "trades": 8,
+          "win_rate": 0.625,
+          "avg_win_R": 2.9422297121301155,
+          "avg_loss_R": -1.028368310670457,
+          "net_avg_R": 1.453255453579901,
+          "net_avg_R_cost15": 1.4298831803698513,
+          "profit_factor": 4.768443500253805,
+          "t": 2.0000438501177835,
+          "max_drawdown_R": 2.065067528858819,
+          "longest_losing_streak": 2,
+          "exit_reason_counts": {
+            "target": 5,
+            "stop": 3
+          }
+        },
+        "9": {
+          "trades": 173,
+          "win_rate": 0.2658959537572254,
+          "avg_win_R": 2.8989904818840815,
+          "avg_loss_R": -1.0424332528139535,
+          "net_avg_R": 0.005575370284946074,
+          "net_avg_R_cost15": -0.032067120685534085,
+          "profit_factor": 1.0072856422432652,
+          "t": 0.04168290093048947,
+          "max_drawdown_R": 25.680712232382028,
+          "longest_losing_streak": 13,
+          "exit_reason_counts": {
+            "stop": 125,
+            "target": 45,
+            "time": 3
+          }
+        }
+      },
+      "daily": {
+        "sharpe_annualized": 0.2631378395876834,
+        "max_drawdown_R": 17.889229773095995,
+        "winning_periods": {
+          "day": 0.05120481927710843,
+          "week": 0.22009569377990432,
+          "month": 0.4791666666666667
+        },
+        "winning_days": {
+          "wins": 51,
+          "days": 996,
+          "percent": 5.120481927710843
+        }
+      },
+      "costs": {
+        "x1_net_avg_R": 0.06956123032008227,
+        "x1_5_net_avg_R": 0.03254946720641664,
+        "x2_net_avg_R": -0.004462295907248996,
+        "median_stop_points": 18.784999999999854,
+        "median_cost_R": 0.057559478127398034
+      },
+      "diagnostics": {
+        "minimum_stop_skips": 50,
+        "bad_opening_range": 0,
+        "signals": 212,
+        "unresolved_at_end": 0
+      }
+    },
+    "change_net_avg_R": 0.009061195478479299
+  },
+  "sensitivity": {
+    "cost_multipliers": {
+      "chosen": {
+        "1.0": {
+          "summary": {
+            "trades": 212,
+            "win_rate": 0.28773584905660377,
+            "avg_win_R": 2.88201993132142,
+            "avg_loss_R": -1.07931926108733,
+            "net_avg_R": 0.06050003484160297,
+            "net_avg_R_cost15": 0.019073042370135383,
+            "profit_factor": 1.0786981658995967,
+            "t": 0.48686611930138474,
+            "max_drawdown_R": 26.41330862260112,
+            "longest_losing_streak": 13,
+            "exit_reason_counts": {
+              "stop": 150,
+              "target": 60,
+              "time": 2
+            },
+            "trades_per_year": 53.0,
+            "total_R": 12.82600738641983,
+            "longest_losing_streak_days": 3,
+            "winning_days": 0.06124497991967871,
+            "winning_weeks": 0.2631578947368421,
+            "winning_months": 0.4583333333333333
+          }
+        },
+        "1.5": {
+          "summary": {
+            "trades": 212,
+            "win_rate": 0.28773584905660377,
+            "avg_win_R": 2.844552173934952,
+            "avg_loss_R": -1.1223456796527373,
+            "net_avg_R": 0.0190730423701354,
+            "net_avg_R_cost15": -0.04306744633706593,
+            "profit_factor": 1.02385900059757,
+            "t": 0.15316651945252385,
+            "max_drawdown_R": 27.626481557137012,
+            "longest_losing_streak": 13,
+            "exit_reason_counts": {
+              "stop": 150,
+              "target": 60,
+              "time": 2
+            },
+            "trades_per_year": 53.0,
+            "total_R": 4.043484982468705,
+            "longest_losing_streak_days": 3,
+            "winning_days": 0.06124497991967871,
+            "winning_weeks": 0.2631578947368421,
+            "winning_months": 0.4583333333333333
+          }
+        },
+        "2.0": {
+          "summary": {
+            "trades": 212,
+            "win_rate": 0.28773584905660377,
+            "avg_win_R": 2.807084416548483,
+            "avg_loss_R": -1.165372098218145,
+            "net_avg_R": -0.022353950101332128,
+            "net_avg_R_cost15": -0.10520793504426727,
+            "profit_factor": 0.9730692421479469,
+            "t": -0.1791035274420631,
+            "max_drawdown_R": 28.839654491672917,
+            "longest_losing_streak": 13,
+            "exit_reason_counts": {
+              "stop": 150,
+              "target": 60,
+              "time": 2
+            },
+            "trades_per_year": 53.0,
+            "total_R": -4.739037421482411,
+            "longest_losing_streak_days": 3,
+            "winning_days": 0.06124497991967871,
+            "winning_weeks": 0.2631578947368421,
+            "winning_months": 0.4583333333333333
+          }
+        }
+      },
+      "default": {
+        "1.0": {
+          "summary": {
+            "trades": 184,
+            "win_rate": 0.2826086956521739,
+            "avg_win_R": 2.863286469876888,
+            "avg_loss_R": -1.1003565726587212,
+            "net_avg_R": 0.019803417623081354,
+            "net_avg_R_cost15": -0.028260352918791587,
+            "profit_factor": 1.025087107802471,
+            "t": 0.1491085400397921,
+            "max_drawdown_R": 22.854281434773824,
+            "longest_losing_streak": 15,
+            "exit_reason_counts": {
+              "stop": 132,
+              "target": 51,
+              "time": 1
+            },
+            "trades_per_year": 46.0,
+            "total_R": 3.643828842646969,
+            "longest_losing_streak_days": 3,
+            "winning_days": 0.05220883534136546,
+            "winning_weeks": 0.22488038277511962,
+            "winning_months": 0.4375
+          }
+        },
+        "1.5": {
+          "summary": {
+            "trades": 184,
+            "win_rate": 0.2826086956521739,
+            "avg_win_R": 2.8205903163340227,
+            "avg_loss_R": -1.150534858988082,
+            "net_avg_R": -0.028260352918791525,
+            "net_avg_R_cost15": -0.10035600873160085,
+            "profit_factor": 0.9657609511677199,
+            "t": -0.212232129041076,
+            "max_drawdown_R": 23.781422152160722,
+            "longest_losing_streak": 15,
+            "exit_reason_counts": {
+              "stop": 132,
+              "target": 51,
+              "time": 1
+            },
+            "trades_per_year": 46.0,
+            "total_R": -5.1999049370576405,
+            "longest_losing_streak_days": 3,
+            "winning_days": 0.05220883534136546,
+            "winning_weeks": 0.22488038277511962,
+            "winning_months": 0.4375
+          }
+        },
+        "2.0": {
+          "summary": {
+            "trades": 184,
+            "win_rate": 0.2826086956521739,
+            "avg_win_R": 2.7778941627911564,
+            "avg_loss_R": -1.2007131453174422,
+            "net_avg_R": -0.07632412346066442,
+            "net_avg_R_cost15": -0.17245166454441016,
+            "profit_factor": 0.9113933225311809,
+            "t": -0.571564936190569,
+            "max_drawdown_R": 24.708562869547627,
+            "longest_losing_streak": 15,
+            "exit_reason_counts": {
+              "stop": 132,
+              "target": 51,
+              "time": 1
+            },
+            "trades_per_year": 46.0,
+            "total_R": -14.043638716762253,
+            "longest_losing_streak_days": 3,
+            "winning_days": 0.05220883534136546,
+            "winning_weeks": 0.22488038277511962,
+            "winning_months": 0.4375
+          }
+        }
+      }
+    },
+    "cost_models": {
+      "chosen": {
+        "futures": {
+          "summary": {
+            "trades": 212,
+            "win_rate": 0.28773584905660377,
+            "avg_win_R": 2.88201993132142,
+            "avg_loss_R": -1.07931926108733,
+            "net_avg_R": 0.06050003484160297,
+            "net_avg_R_cost15": 0.019073042370135383,
+            "profit_factor": 1.0786981658995967,
+            "t": 0.48686611930138474,
+            "max_drawdown_R": 26.41330862260112,
+            "longest_losing_streak": 13,
+            "exit_reason_counts": {
+              "stop": 150,
+              "target": 60,
+              "time": 2
+            },
+            "trades_per_year": 53.0,
+            "total_R": 12.82600738641983,
+            "longest_losing_streak_days": 3,
+            "winning_days": 0.06124497991967871,
+            "winning_weeks": 0.2631578947368421,
+            "winning_months": 0.4583333333333333
+          }
+        },
+        "dukascopy": {
+          "summary": {
+            "trades": 212,
+            "win_rate": 0.2830188679245283,
+            "avg_win_R": 2.84422883718207,
+            "avg_loss_R": -1.1147432881315797,
+            "net_avg_R": 0.005720520919453302,
+            "net_avg_R_cost15": -0.05369791692931165,
+            "profit_factor": 1.0071573620288563,
+            "t": 0.04625724174580882,
+            "max_drawdown_R": 27.564601704082353,
+            "longest_losing_streak": 13,
+            "exit_reason_counts": {
+              "stop": 151,
+              "target": 59,
+              "time": 2
+            },
+            "trades_per_year": 53.0,
+            "total_R": 1.2127504349241,
+            "longest_losing_streak_days": 3,
+            "winning_days": 0.060240963855421686,
+            "winning_weeks": 0.2583732057416268,
+            "winning_months": 0.4583333333333333
+          }
+        },
+        "capital": {
+          "summary": {
+            "trades": 212,
+            "win_rate": 0.27358490566037735,
+            "avg_win_R": 2.818495860912896,
+            "avg_loss_R": -1.1421521805622805,
+            "net_avg_R": -0.05857865978133591,
+            "net_avg_R_cost15": -0.1312787634521936,
+            "profit_factor": 0.9293957899843475,
+            "t": -0.4779950802097838,
+            "max_drawdown_R": 33.99679876223106,
+            "longest_losing_streak": 13,
+            "exit_reason_counts": {
+              "stop": 153,
+              "target": 57,
+              "time": 2
+            },
+            "trades_per_year": 53.0,
+            "total_R": -12.418675873643213,
+            "longest_losing_streak_days": 3,
+            "winning_days": 0.05823293172690763,
+            "winning_weeks": 0.24880382775119617,
+            "winning_months": 0.4375
+          }
+        }
+      },
+      "default": {
+        "futures": {
+          "summary": {
+            "trades": 184,
+            "win_rate": 0.2826086956521739,
+            "avg_win_R": 2.863286469876888,
+            "avg_loss_R": -1.1003565726587212,
+            "net_avg_R": 0.019803417623081354,
+            "net_avg_R_cost15": -0.028260352918791587,
+            "profit_factor": 1.025087107802471,
+            "t": 0.1491085400397921,
+            "max_drawdown_R": 22.854281434773824,
+            "longest_losing_streak": 15,
+            "exit_reason_counts": {
+              "stop": 132,
+              "target": 51,
+              "time": 1
+            },
+            "trades_per_year": 46.0,
+            "total_R": 3.643828842646969,
+            "longest_losing_streak_days": 3,
+            "winning_days": 0.05220883534136546,
+            "winning_weeks": 0.22488038277511962,
+            "winning_months": 0.4375
+          }
+        },
+        "dukascopy": {
+          "summary": {
+            "trades": 184,
+            "win_rate": 0.2717391304347826,
+            "avg_win_R": 2.818712246846984,
+            "avg_loss_R": -1.1407678894472262,
+            "net_avg_R": -0.064822200236843,
+            "net_avg_R_cost15": -0.13362140064600425,
+            "profit_factor": 0.9219739710345024,
+            "t": -0.49411030678178847,
+            "max_drawdown_R": 27.772925539849997,
+            "longest_losing_streak": 15,
+            "exit_reason_counts": {
+              "stop": 134,
+              "target": 49,
+              "time": 1
+            },
+            "trades_per_year": 46.0,
+            "total_R": -11.92728484357911,
+            "longest_losing_streak_days": 3,
+            "winning_days": 0.050200803212851405,
+            "winning_weeks": 0.215311004784689,
+            "winning_months": 0.4375
+          }
+        },
+        "capital": {
+          "summary": {
+            "trades": 184,
+            "win_rate": 0.2717391304347826,
+            "avg_win_R": 2.7865056647485664,
+            "avg_loss_R": -1.1705525272020096,
+            "net_avg_R": -0.09526497504152695,
+            "net_avg_R_cost15": -0.17912381148092124,
+            "profit_factor": 0.888247981632751,
+            "t": -0.7259960477735895,
+            "max_drawdown_R": 28.17303923358952,
+            "longest_losing_streak": 15,
+            "exit_reason_counts": {
+              "stop": 134,
+              "target": 49,
+              "time": 1
+            },
+            "trades_per_year": 46.0,
+            "total_R": -17.528755407640958,
+            "longest_losing_streak_days": 3,
+            "winning_days": 0.050200803212851405,
+            "winning_weeks": 0.215311004784689,
+            "winning_months": 0.4375
+          }
+        }
+      }
+    },
+    "fill_variants": {
+      "chosen": {
+        "trade_through": {
+          "summary": {
+            "trades": 212,
+            "win_rate": 0.28773584905660377,
+            "avg_win_R": 2.88201993132142,
+            "avg_loss_R": -1.07931926108733,
+            "net_avg_R": 0.06050003484160297,
+            "net_avg_R_cost15": 0.019073042370135383,
+            "profit_factor": 1.0786981658995967,
+            "t": 0.48686611930138474,
+            "max_drawdown_R": 26.41330862260112,
+            "longest_losing_streak": 13,
+            "exit_reason_counts": {
+              "stop": 150,
+              "target": 60,
+              "time": 2
+            },
+            "trades_per_year": 53.0,
+            "total_R": 12.82600738641983,
+            "longest_losing_streak_days": 3,
+            "winning_days": 0.06124497991967871,
+            "winning_weeks": 0.2631578947368421,
+            "winning_months": 0.4583333333333333
+          }
+        },
+        "touch": {
+          "summary": {
+            "trades": 212,
+            "win_rate": 0.28773584905660377,
+            "avg_win_R": 2.88201993132142,
+            "avg_loss_R": -1.07931926108733,
+            "net_avg_R": 0.06050003484160297,
+            "net_avg_R_cost15": 0.019073042370135383,
+            "profit_factor": 1.0786981658995967,
+            "t": 0.48686611930138474,
+            "max_drawdown_R": 26.41330862260112,
+            "longest_losing_streak": 13,
+            "exit_reason_counts": {
+              "stop": 150,
+              "target": 60,
+              "time": 2
+            },
+            "trades_per_year": 53.0,
+            "total_R": 12.82600738641983,
+            "longest_losing_streak_days": 3,
+            "winning_days": 0.06124497991967871,
+            "winning_weeks": 0.2631578947368421,
+            "winning_months": 0.4583333333333333
+          }
+        }
+      },
+      "default": {
+        "trade_through": {
+          "summary": {
+            "trades": 184,
+            "win_rate": 0.2826086956521739,
+            "avg_win_R": 2.863286469876888,
+            "avg_loss_R": -1.1003565726587212,
+            "net_avg_R": 0.019803417623081354,
+            "net_avg_R_cost15": -0.028260352918791587,
+            "profit_factor": 1.025087107802471,
+            "t": 0.1491085400397921,
+            "max_drawdown_R": 22.854281434773824,
+            "longest_losing_streak": 15,
+            "exit_reason_counts": {
+              "stop": 132,
+              "target": 51,
+              "time": 1
+            },
+            "trades_per_year": 46.0,
+            "total_R": 3.643828842646969,
+            "longest_losing_streak_days": 3,
+            "winning_days": 0.05220883534136546,
+            "winning_weeks": 0.22488038277511962,
+            "winning_months": 0.4375
+          }
+        },
+        "touch": {
+          "summary": {
+            "trades": 184,
+            "win_rate": 0.2826086956521739,
+            "avg_win_R": 2.863286469876888,
+            "avg_loss_R": -1.1003565726587212,
+            "net_avg_R": 0.019803417623081354,
+            "net_avg_R_cost15": -0.028260352918791587,
+            "profit_factor": 1.025087107802471,
+            "t": 0.1491085400397921,
+            "max_drawdown_R": 22.854281434773824,
+            "longest_losing_streak": 15,
+            "exit_reason_counts": {
+              "stop": 132,
+              "target": 51,
+              "time": 1
+            },
+            "trades_per_year": 46.0,
+            "total_R": 3.643828842646969,
+            "longest_losing_streak_days": 3,
+            "winning_days": 0.05220883534136546,
+            "winning_weeks": 0.22488038277511962,
+            "winning_months": 0.4375
+          }
+        }
+      }
+    }
+  },
+  "dsr": {
+    "trials": 801,
+    "observations": 996,
+    "sharpe_annualized": 0.24524309751068488,
+    "expected_max_sharpe_annualized": 1.6053233142392171,
+    "dsr": 0.0029830853458167605
+  },
+  "project_configuration_count": {
+    "tried": 801,
+    "by_dev_grid": {
+      "reports/research/tiktok/strategy_A_dev_grid.csv": 360,
+      "reports/research/tiktok/strategy_B_dev_grid.csv": 405,
+      "reports/research/tiktok_b2/B_USATECHIDXUSD_dev_grid.csv": 36
+    },
+    "current_grid_cells": 36
+  },
+  "skip_counts": {
+    "holiday_or_half_day": 54,
+    "incomplete_rth": 4,
+    "gap_over_5m": 4,
+    "no_rth_data": 1
+  },
+  "rth_quality": {
+    "sessions": 1304,
+    "complete": 1241,
+    "skipped": 63
+  },
+  "grid_cells": 36,
+  "grid_details": [
+    {
+      "params": {
+        "body_ratio": 0.5,
+        "deadline": "10:00",
+        "target_r": 2.0,
+        "stop_mode": "engulf"
+      },
+      "summary": {
+        "trades": 208,
+        "win_rate": 0.3605769230769231,
+        "avg_win_R": 1.9208379187972742,
+        "avg_loss_R": -1.1042378429046265,
+        "net_avg_R": -0.01346533267557589,
+        "net_avg_R_cost15": -0.06106338362874848,
+        "profit_factor": 0.9809293210491923,
+        "t": -0.1332799371843006,
+        "max_drawdown_R": 18.571627135053994,
+        "longest_losing_streak": 8,
+        "exit_reason_counts": {
+          "stop": 133,
+          "target": 75
+        },
+        "trades_per_year": 52.0,
+        "total_R": -2.8007891965197853,
+        "longest_losing_streak_days": 3,
+        "winning_days": 0.07530120481927711,
+        "winning_weeks": 0.27751196172248804,
+        "winning_months": 0.4375,
+        "net_avg_R_cost2": -0.1233227519563207,
+        "fill_touch_net_avg_R": -0.01346533267557589
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 208,
+          "win_rate": 0.3605769230769231,
+          "avg_win_R": 1.8812568781959116,
+          "avg_loss_R": -1.1563567643569401,
+          "net_avg_R": -0.06106338362874848,
+          "net_avg_R_cost15": -0.13246046005850737,
+          "profit_factor": 0.91741508722851,
+          "t": -0.6013861948591747,
+          "max_drawdown_R": 24.357440702581,
+          "longest_losing_streak": 8,
+          "exit_reason_counts": {
+            "stop": 133,
+            "target": 75
+          },
+          "trades_per_year": 52.0,
+          "total_R": -12.701183794779684,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.07530120481927711,
+          "winning_weeks": 0.27751196172248804,
+          "winning_months": 0.4166666666666667
+        },
+        "x2": {
+          "trades": 208,
+          "win_rate": 0.3557692307692308,
+          "avg_win_R": 1.8418800928128922,
+          "avg_loss_R": -1.2085840244408115,
+          "net_avg_R": -0.1233227519563207,
+          "net_avg_R_cost15": -0.2186379740883272,
+          "profit_factor": 0.8416110445161631,
+          "t": -1.2115487167440857,
+          "max_drawdown_R": 30.143254270107995,
+          "longest_losing_streak": 8,
+          "exit_reason_counts": {
+            "stop": 134,
+            "target": 74
+          },
+          "trades_per_year": 52.0,
+          "total_R": -25.651132406914705,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.07429718875502007,
+          "winning_weeks": 0.2727272727272727,
+          "winning_months": 0.3958333333333333
+        },
+        "touch": {
+          "trades": 208,
+          "win_rate": 0.3605769230769231,
+          "avg_win_R": 1.9208379187972742,
+          "avg_loss_R": -1.1042378429046265,
+          "net_avg_R": -0.01346533267557589,
+          "net_avg_R_cost15": -0.06106338362874848,
+          "profit_factor": 0.9809293210491923,
+          "t": -0.1332799371843006,
+          "max_drawdown_R": 18.571627135053994,
+          "longest_losing_streak": 8,
+          "exit_reason_counts": {
+            "stop": 133,
+            "target": 75
+          },
+          "trades_per_year": 52.0,
+          "total_R": -2.8007891965197853,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.07530120481927711,
+          "winning_weeks": 0.27751196172248804,
+          "winning_months": 0.4375
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 133,
+        "target": 75
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.5,
+        "deadline": "10:00",
+        "target_r": 3.0,
+        "stop_mode": "engulf"
+      },
+      "summary": {
+        "trades": 208,
+        "win_rate": 0.28846153846153844,
+        "avg_win_R": 2.8705903819781655,
+        "avg_loss_R": -1.1013537347578937,
+        "net_avg_R": 0.044399375839046476,
+        "net_avg_R_cost15": -0.003908860284834572,
+        "profit_factor": 1.0566567496268935,
+        "t": 0.352913186776287,
+        "max_drawdown_R": 23.21785457095797,
+        "longest_losing_streak": 16,
+        "exit_reason_counts": {
+          "stop": 148,
+          "target": 59,
+          "time": 1
+        },
+        "trades_per_year": 52.0,
+        "total_R": 9.235070174521667,
+        "longest_losing_streak_days": 3,
+        "winning_days": 0.060240963855421686,
+        "winning_weeks": 0.2583732057416268,
+        "winning_months": 0.4791666666666667,
+        "net_avg_R_cost2": -0.05221709640871559,
+        "fill_touch_net_avg_R": 0.044399375839046476
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 208,
+          "win_rate": 0.28846153846153844,
+          "avg_win_R": 2.82812476961678,
+          "avg_loss_R": -1.1520306021368405,
+          "net_avg_R": -0.003908860284834572,
+          "net_avg_R_cost15": -0.07637121447065612,
+          "profit_factor": 0.9952314345095596,
+          "t": -0.030985116345434358,
+          "max_drawdown_R": 24.32678185643695,
+          "longest_losing_streak": 16,
+          "exit_reason_counts": {
+            "stop": 148,
+            "target": 59,
+            "time": 1
+          },
+          "trades_per_year": 52.0,
+          "total_R": -0.8130429392455909,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.060240963855421686,
+          "winning_weeks": 0.2583732057416268,
+          "winning_months": 0.4791666666666667
+        },
+        "x2": {
+          "trades": 208,
+          "win_rate": 0.28846153846153844,
+          "avg_win_R": 2.7856591572553935,
+          "avg_loss_R": -1.202707469515787,
+          "net_avg_R": -0.05221709640871559,
+          "net_avg_R_cost15": -0.14883356865647765,
+          "profit_factor": 0.9389825112028863,
+          "t": -0.41269756396859136,
+          "max_drawdown_R": 25.43570914191593,
+          "longest_losing_streak": 16,
+          "exit_reason_counts": {
+            "stop": 148,
+            "target": 59,
+            "time": 1
+          },
+          "trades_per_year": 52.0,
+          "total_R": -10.861156053012841,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.060240963855421686,
+          "winning_weeks": 0.2583732057416268,
+          "winning_months": 0.4791666666666667
+        },
+        "touch": {
+          "trades": 208,
+          "win_rate": 0.28846153846153844,
+          "avg_win_R": 2.8705903819781655,
+          "avg_loss_R": -1.1013537347578937,
+          "net_avg_R": 0.044399375839046476,
+          "net_avg_R_cost15": -0.003908860284834563,
+          "profit_factor": 1.0566567496268935,
+          "t": 0.352913186776287,
+          "max_drawdown_R": 23.21785457095797,
+          "longest_losing_streak": 16,
+          "exit_reason_counts": {
+            "stop": 148,
+            "target": 59,
+            "time": 1
+          },
+          "trades_per_year": 52.0,
+          "total_R": 9.235070174521667,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.060240963855421686,
+          "winning_weeks": 0.2583732057416268,
+          "winning_months": 0.4791666666666667
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 148,
+        "target": 59,
+        "time": 1
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.5,
+        "deadline": "10:00",
+        "target_r": 2.0,
+        "stop_mode": "fvg"
+      },
+      "summary": {
+        "trades": 212,
+        "win_rate": 0.33962264150943394,
+        "avg_win_R": 1.9262255423756314,
+        "avg_loss_R": -1.0783047919087196,
+        "net_avg_R": -0.05789826328384565,
+        "net_avg_R_cost15": -0.09867939960163234,
+        "profit_factor": 0.9186922717671625,
+        "t": -0.5899087198772085,
+        "max_drawdown_R": 25.318435329979277,
+        "longest_losing_streak": 13,
+        "exit_reason_counts": {
+          "stop": 139,
+          "target": 72,
+          "time": 1
+        },
+        "trades_per_year": 53.0,
+        "total_R": -12.274431816175277,
+        "longest_losing_streak_days": 3,
+        "winning_days": 0.07228915662650602,
+        "winning_weeks": 0.2822966507177033,
+        "winning_months": 0.4791666666666667,
+        "net_avg_R_cost2": -0.13946053591941898,
+        "fill_touch_net_avg_R": -0.05789826328384565
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 212,
+          "win_rate": 0.33962264150943394,
+          "avg_win_R": 1.889338313563447,
+          "avg_loss_R": -1.1210885092293874,
+          "net_avg_R": -0.09867939960163234,
+          "net_avg_R_cost15": -0.1598511040783123,
+          "profit_factor": 0.8667109653868833,
+          "t": -1.0025967692262865,
+          "max_drawdown_R": 30.479519363016703,
+          "longest_losing_streak": 13,
+          "exit_reason_counts": {
+            "stop": 139,
+            "target": 72,
+            "time": 1
+          },
+          "trades_per_year": 53.0,
+          "total_R": -20.920032715546057,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.07228915662650602,
+          "winning_weeks": 0.2822966507177033,
+          "winning_months": 0.4583333333333333
+        },
+        "x2": {
+          "trades": 212,
+          "win_rate": 0.33962264150943394,
+          "avg_win_R": 1.8524510847512627,
+          "avg_loss_R": -1.1638722265500554,
+          "net_avg_R": -0.13946053591941898,
+          "net_avg_R_cost15": -0.22102280855499226,
+          "profit_factor": 0.8185513044886431,
+          "t": -1.412542761434529,
+          "max_drawdown_R": 35.640603396054104,
+          "longest_losing_streak": 13,
+          "exit_reason_counts": {
+            "stop": 139,
+            "target": 72,
+            "time": 1
+          },
+          "trades_per_year": 53.0,
+          "total_R": -29.565633614916827,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.07228915662650602,
+          "winning_weeks": 0.2822966507177033,
+          "winning_months": 0.4583333333333333
+        },
+        "touch": {
+          "trades": 212,
+          "win_rate": 0.33962264150943394,
+          "avg_win_R": 1.9262255423756314,
+          "avg_loss_R": -1.0783047919087196,
+          "net_avg_R": -0.05789826328384565,
+          "net_avg_R_cost15": -0.09867939960163234,
+          "profit_factor": 0.9186922717671625,
+          "t": -0.5899087198772085,
+          "max_drawdown_R": 25.318435329979277,
+          "longest_losing_streak": 13,
+          "exit_reason_counts": {
+            "stop": 139,
+            "target": 72,
+            "time": 1
+          },
+          "trades_per_year": 53.0,
+          "total_R": -12.274431816175277,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.07228915662650602,
+          "winning_weeks": 0.2822966507177033,
+          "winning_months": 0.4791666666666667
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 139,
+        "target": 72,
+        "time": 1
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.5,
+        "deadline": "10:00",
+        "target_r": 3.0,
+        "stop_mode": "fvg"
+      },
+      "summary": {
+        "trades": 212,
+        "win_rate": 0.28773584905660377,
+        "avg_win_R": 2.88201993132142,
+        "avg_loss_R": -1.07931926108733,
+        "net_avg_R": 0.06050003484160297,
+        "net_avg_R_cost15": 0.0190730423701354,
+        "profit_factor": 1.0786981658995967,
+        "t": 0.48686611930138474,
+        "max_drawdown_R": 26.41330862260112,
+        "longest_losing_streak": 13,
+        "exit_reason_counts": {
+          "stop": 150,
+          "target": 60,
+          "time": 2
+        },
+        "trades_per_year": 53.0,
+        "total_R": 12.82600738641983,
+        "longest_losing_streak_days": 3,
+        "winning_days": 0.06124497991967871,
+        "winning_weeks": 0.2631578947368421,
+        "winning_months": 0.4583333333333333,
+        "net_avg_R_cost2": -0.022353950101332128,
+        "fill_touch_net_avg_R": 0.06050003484160297
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 212,
+          "win_rate": 0.28773584905660377,
+          "avg_win_R": 2.844552173934952,
+          "avg_loss_R": -1.1223456796527373,
+          "net_avg_R": 0.0190730423701354,
+          "net_avg_R_cost15": -0.04306744633706593,
+          "profit_factor": 1.02385900059757,
+          "t": 0.15316651945252385,
+          "max_drawdown_R": 27.626481557137012,
+          "longest_losing_streak": 13,
+          "exit_reason_counts": {
+            "stop": 150,
+            "target": 60,
+            "time": 2
+          },
+          "trades_per_year": 53.0,
+          "total_R": 4.043484982468705,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.06124497991967871,
+          "winning_weeks": 0.2631578947368421,
+          "winning_months": 0.4583333333333333
+        },
+        "x2": {
+          "trades": 212,
+          "win_rate": 0.28773584905660377,
+          "avg_win_R": 2.807084416548483,
+          "avg_loss_R": -1.165372098218145,
+          "net_avg_R": -0.022353950101332128,
+          "net_avg_R_cost15": -0.10520793504426727,
+          "profit_factor": 0.9730692421479469,
+          "t": -0.1791035274420631,
+          "max_drawdown_R": 28.839654491672917,
+          "longest_losing_streak": 13,
+          "exit_reason_counts": {
+            "stop": 150,
+            "target": 60,
+            "time": 2
+          },
+          "trades_per_year": 53.0,
+          "total_R": -4.739037421482411,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.06124497991967871,
+          "winning_weeks": 0.2631578947368421,
+          "winning_months": 0.4583333333333333
+        },
+        "touch": {
+          "trades": 212,
+          "win_rate": 0.28773584905660377,
+          "avg_win_R": 2.88201993132142,
+          "avg_loss_R": -1.07931926108733,
+          "net_avg_R": 0.06050003484160297,
+          "net_avg_R_cost15": 0.019073042370135383,
+          "profit_factor": 1.0786981658995967,
+          "t": 0.48686611930138474,
+          "max_drawdown_R": 26.41330862260112,
+          "longest_losing_streak": 13,
+          "exit_reason_counts": {
+            "stop": 150,
+            "target": 60,
+            "time": 2
+          },
+          "trades_per_year": 53.0,
+          "total_R": 12.82600738641983,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.06124497991967871,
+          "winning_weeks": 0.2631578947368421,
+          "winning_months": 0.4583333333333333
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 150,
+        "target": 60,
+        "time": 2
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.5,
+        "deadline": "10:30",
+        "target_r": 2.0,
+        "stop_mode": "engulf"
+      },
+      "summary": {
+        "trades": 420,
+        "win_rate": 0.3523809523809524,
+        "avg_win_R": 1.9217175859550188,
+        "avg_loss_R": -1.1094130246949796,
+        "net_avg_R": -0.04130033332307554,
+        "net_avg_R_cost15": -0.09052192855604185,
+        "profit_factor": 0.9425168335921549,
+        "t": -0.5834098676064764,
+        "max_drawdown_R": 47.94875933862512,
+        "longest_losing_streak": 14,
+        "exit_reason_counts": {
+          "stop": 272,
+          "target": 148
+        },
+        "trades_per_year": 105.0,
+        "total_R": -17.346139995691725,
+        "longest_losing_streak_days": 6,
+        "winning_days": 0.14859437751004015,
+        "winning_weeks": 0.3875598086124402,
+        "winning_months": 0.4166666666666667,
+        "net_avg_R_cost2": -0.1470043666791871,
+        "fill_touch_net_avg_R": -0.04130033332307554
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 420,
+          "win_rate": 0.3523809523809524,
+          "avg_win_R": 1.882576378932528,
+          "avg_loss_R": -1.1641195370424693,
+          "net_avg_R": -0.09052192855604185,
+          "net_avg_R_cost15": -0.16435432140549136,
+          "profit_factor": 0.8799294205779808,
+          "t": -1.2710489273845196,
+          "max_drawdown_R": 59.923139007937706,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 272,
+            "target": 148
+          },
+          "trades_per_year": 105.0,
+          "total_R": -38.01920999353758,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.14859437751004015,
+          "winning_weeks": 0.3875598086124402,
+          "winning_months": 0.3958333333333333
+        },
+        "x2": {
+          "trades": 420,
+          "win_rate": 0.35,
+          "avg_win_R": 1.8435499625254996,
+          "avg_loss_R": -1.2188413131740181,
+          "net_avg_R": -0.1470043666791871,
+          "net_avg_R_cost15": -0.24550655001878063,
+          "profit_factor": 0.8144462600033838,
+          "t": -2.054214961580783,
+          "max_drawdown_R": 71.89751867725025,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 273,
+            "target": 147
+          },
+          "trades_per_year": 105.0,
+          "total_R": -61.74183400525858,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.14759036144578314,
+          "winning_weeks": 0.3827751196172249,
+          "winning_months": 0.3333333333333333
+        },
+        "touch": {
+          "trades": 420,
+          "win_rate": 0.3523809523809524,
+          "avg_win_R": 1.9217175859550188,
+          "avg_loss_R": -1.1094130246949796,
+          "net_avg_R": -0.04130033332307554,
+          "net_avg_R_cost15": -0.09052192855604187,
+          "profit_factor": 0.9425168335921549,
+          "t": -0.5834098676064764,
+          "max_drawdown_R": 47.94875933862512,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 272,
+            "target": 148
+          },
+          "trades_per_year": 105.0,
+          "total_R": -17.346139995691725,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.14859437751004015,
+          "winning_weeks": 0.3875598086124402,
+          "winning_months": 0.4166666666666667
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 272,
+        "target": 148
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.5,
+        "deadline": "10:30",
+        "target_r": 3.0,
+        "stop_mode": "engulf"
+      },
+      "summary": {
+        "trades": 420,
+        "win_rate": 0.27380952380952384,
+        "avg_win_R": 2.8959361000857062,
+        "avg_loss_R": -1.1073968451994303,
+        "net_avg_R": -0.011246157799928594,
+        "net_avg_R_cost15": -0.06131125622615023,
+        "profit_factor": 0.9860153905554603,
+        "t": -0.1285374885195985,
+        "max_drawdown_R": 38.79067630623438,
+        "longest_losing_streak": 14,
+        "exit_reason_counts": {
+          "stop": 305,
+          "target": 114,
+          "time": 1
+        },
+        "trades_per_year": 105.0,
+        "total_R": -4.723386275970009,
+        "longest_losing_streak_days": 6,
+        "winning_days": 0.11546184738955824,
+        "winning_weeks": 0.3923444976076555,
+        "winning_months": 0.4375,
+        "net_avg_R_cost2": -0.1210815009911816,
+        "fill_touch_net_avg_R": -0.011246157799928594
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 420,
+          "win_rate": 0.27380952380952384,
+          "avg_win_R": 2.8555072092500535,
+          "avg_loss_R": -1.1610952677991453,
+          "net_avg_R": -0.06131125622615023,
+          "net_avg_R_cost15": -0.13640890386548268,
+          "profit_factor": 0.9272853679861028,
+          "t": -0.6979843015155225,
+          "max_drawdown_R": 50.35166266037965,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 305,
+            "target": 114,
+            "time": 1
+          },
+          "trades_per_year": 105.0,
+          "total_R": -25.7507276149831,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.11546184738955824,
+          "winning_weeks": 0.3923444976076555,
+          "winning_months": 0.4166666666666667
+        },
+        "x2": {
+          "trades": 420,
+          "win_rate": 0.2714285714285714,
+          "avg_win_R": 2.815794488909707,
+          "avg_loss_R": -1.2152117717385713,
+          "net_avg_R": -0.1210815009911816,
+          "net_avg_R_cost15": -0.221302366251125,
+          "profit_factor": 0.8632417004648265,
+          "t": -1.3759994913331468,
+          "max_drawdown_R": 64.73231201358243,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 306,
+            "target": 113,
+            "time": 1
+          },
+          "trades_per_year": 105.0,
+          "total_R": -50.854230416296275,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.1144578313253012,
+          "winning_weeks": 0.37799043062200954,
+          "winning_months": 0.3333333333333333
+        },
+        "touch": {
+          "trades": 420,
+          "win_rate": 0.27380952380952384,
+          "avg_win_R": 2.8959361000857062,
+          "avg_loss_R": -1.1073968451994303,
+          "net_avg_R": -0.011246157799928594,
+          "net_avg_R_cost15": -0.06131125622615018,
+          "profit_factor": 0.9860153905554603,
+          "t": -0.1285374885195985,
+          "max_drawdown_R": 38.79067630623438,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 305,
+            "target": 114,
+            "time": 1
+          },
+          "trades_per_year": 105.0,
+          "total_R": -4.723386275970009,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.11546184738955824,
+          "winning_weeks": 0.3923444976076555,
+          "winning_months": 0.4375
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 305,
+        "target": 114,
+        "time": 1
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.5,
+        "deadline": "10:30",
+        "target_r": 2.0,
+        "stop_mode": "fvg"
+      },
+      "summary": {
+        "trades": 433,
+        "win_rate": 0.3441108545034642,
+        "avg_win_R": 1.9294305189011558,
+        "avg_loss_R": -1.0911925419793813,
+        "net_avg_R": -0.051763359366910115,
+        "net_avg_R_cost15": -0.09498542009258949,
+        "profit_factor": 0.9276746371851203,
+        "t": -0.748719777148096,
+        "max_drawdown_R": 46.240782150835955,
+        "longest_losing_streak": 11,
+        "exit_reason_counts": {
+          "stop": 283,
+          "target": 149,
+          "time": 1
+        },
+        "trades_per_year": 108.25,
+        "total_R": -22.41353460587208,
+        "longest_losing_streak_days": 5,
+        "winning_days": 0.1495983935742972,
+        "winning_weeks": 0.3827751196172249,
+        "winning_months": 0.4166666666666667,
+        "net_avg_R_cost2": -0.13820748081826886,
+        "fill_touch_net_avg_R": -0.051763359366910115
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 433,
+          "win_rate": 0.3441108545034642,
+          "avg_win_R": 1.8941457783517341,
+          "avg_loss_R": -1.138578900966548,
+          "net_avg_R": -0.09498542009258949,
+          "net_avg_R_cost15": -0.15981851118110854,
+          "profit_factor": 0.8728069526426271,
+          "t": -1.3672021076079202,
+          "max_drawdown_R": 57.363039594301775,
+          "longest_losing_streak": 11,
+          "exit_reason_counts": {
+            "stop": 283,
+            "target": 149,
+            "time": 1
+          },
+          "trades_per_year": 108.25,
+          "total_R": -41.12868690009125,
+          "longest_losing_streak_days": 5,
+          "winning_days": 0.1495983935742972,
+          "winning_weeks": 0.3827751196172249,
+          "winning_months": 0.3541666666666667
+        },
+        "x2": {
+          "trades": 433,
+          "win_rate": 0.3441108545034642,
+          "avg_win_R": 1.8588610378023125,
+          "avg_loss_R": -1.1859652599537145,
+          "net_avg_R": -0.13820748081826886,
+          "net_avg_R_cost15": -0.22465160226962763,
+          "profit_factor": 0.8223238481284336,
+          "t": -1.979031485769679,
+          "max_drawdown_R": 68.48529703776754,
+          "longest_losing_streak": 11,
+          "exit_reason_counts": {
+            "stop": 283,
+            "target": 149,
+            "time": 1
+          },
+          "trades_per_year": 108.25,
+          "total_R": -59.84383919431042,
+          "longest_losing_streak_days": 5,
+          "winning_days": 0.1495983935742972,
+          "winning_weeks": 0.3827751196172249,
+          "winning_months": 0.3333333333333333
+        },
+        "touch": {
+          "trades": 433,
+          "win_rate": 0.3441108545034642,
+          "avg_win_R": 1.9294305189011558,
+          "avg_loss_R": -1.0911925419793813,
+          "net_avg_R": -0.051763359366910115,
+          "net_avg_R_cost15": -0.09498542009258953,
+          "profit_factor": 0.9276746371851203,
+          "t": -0.748719777148096,
+          "max_drawdown_R": 46.240782150835955,
+          "longest_losing_streak": 11,
+          "exit_reason_counts": {
+            "stop": 283,
+            "target": 149,
+            "time": 1
+          },
+          "trades_per_year": 108.25,
+          "total_R": -22.41353460587208,
+          "longest_losing_streak_days": 5,
+          "winning_days": 0.1495983935742972,
+          "winning_weeks": 0.3827751196172249,
+          "winning_months": 0.4166666666666667
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 283,
+        "target": 149,
+        "time": 1
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.5,
+        "deadline": "10:30",
+        "target_r": 3.0,
+        "stop_mode": "fvg"
+      },
+      "summary": {
+        "trades": 433,
+        "win_rate": 0.2471131639722864,
+        "avg_win_R": 2.8856258752060313,
+        "avg_loss_R": -1.0916549610901691,
+        "net_avg_R": -0.10881650962667383,
+        "net_avg_R_cost15": -0.15313028110276475,
+        "profit_factor": 0.8676025273278309,
+        "t": -1.3111712071076178,
+        "max_drawdown_R": 53.88609461246877,
+        "longest_losing_streak": 14,
+        "exit_reason_counts": {
+          "stop": 325,
+          "target": 105,
+          "time": 3
+        },
+        "trades_per_year": 108.25,
+        "total_R": -47.11754866834977,
+        "longest_losing_streak_days": 6,
+        "winning_days": 0.10742971887550201,
+        "winning_weeks": 0.3684210526315789,
+        "winning_months": 0.4166666666666667,
+        "net_avg_R_cost2": -0.19744405257885564,
+        "fill_touch_net_avg_R": -0.09952662396004745
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 433,
+          "win_rate": 0.2471131639722864,
+          "avg_win_R": 2.850675226606343,
+          "avg_loss_R": -1.1390419047986988,
+          "net_avg_R": -0.15313028110276475,
+          "net_avg_R_cost15": -0.21960093831690108,
+          "profit_factor": 0.8214369176126142,
+          "t": -1.838126076157044,
+          "max_drawdown_R": 69.97956450954496,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 325,
+            "target": 105,
+            "time": 3
+          },
+          "trades_per_year": 108.25,
+          "total_R": -66.30541171749714,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.10742971887550201,
+          "winning_weeks": 0.3684210526315789,
+          "winning_months": 0.375
+        },
+        "x2": {
+          "trades": 433,
+          "win_rate": 0.2471131639722864,
+          "avg_win_R": 2.8157245780066544,
+          "avg_loss_R": -1.1864288485072285,
+          "net_avg_R": -0.19744405257885564,
+          "net_avg_R_cost15": -0.2860715955310374,
+          "profit_factor": 0.7789590927175278,
+          "t": -2.3605333539521816,
+          "max_drawdown_R": 89.05881182270825,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 325,
+            "target": 105,
+            "time": 3
+          },
+          "trades_per_year": 108.25,
+          "total_R": -85.49327476664449,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.10742971887550201,
+          "winning_weeks": 0.3684210526315789,
+          "winning_months": 0.3541666666666667
+        },
+        "touch": {
+          "trades": 433,
+          "win_rate": 0.24942263279445728,
+          "avg_win_R": 2.8859550640673435,
+          "avg_loss_R": -1.0916251541353035,
+          "net_avg_R": -0.09952662396004745,
+          "net_avg_R_cost15": -0.14381439024716697,
+          "profit_factor": 0.8785296526109998,
+          "t": -1.195454845112393,
+          "max_drawdown_R": 53.88609461246877,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 324,
+            "target": 106,
+            "time": 3
+          },
+          "trades_per_year": 108.25,
+          "total_R": -43.095028174700545,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.10843373493975904,
+          "winning_weeks": 0.3684210526315789,
+          "winning_months": 0.4166666666666667
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 325,
+        "target": 105,
+        "time": 3
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.5,
+        "deadline": "11:00",
+        "target_r": 2.0,
+        "stop_mode": "engulf"
+      },
+      "summary": {
+        "trades": 564,
+        "win_rate": 0.3475177304964539,
+        "avg_win_R": 1.9164962597281054,
+        "avg_loss_R": -1.111606552238639,
+        "net_avg_R": -0.05928713531402542,
+        "net_avg_R_cost15": -0.11020560039230377,
+        "profit_factor": 0.9182588669169017,
+        "t": -0.9748618033070746,
+        "max_drawdown_R": 62.1158555533313,
+        "longest_losing_streak": 12,
+        "exit_reason_counts": {
+          "stop": 368,
+          "target": 196
+        },
+        "trades_per_year": 141.0,
+        "total_R": -33.437944317110336,
+        "longest_losing_streak_days": 7,
+        "winning_days": 0.19678714859437751,
+        "winning_weeks": 0.3923444976076555,
+        "winning_months": 0.3333333333333333,
+        "net_avg_R_cost2": -0.16649371301834828,
+        "fill_touch_net_avg_R": -0.05928713531402542
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 564,
+          "win_rate": 0.3475177304964539,
+          "avg_win_R": 1.8747443895921585,
+          "avg_loss_R": -1.167407225492724,
+          "net_avg_R": -0.11020560039230377,
+          "net_avg_R_cost15": -0.18658329800972123,
+          "profit_factor": 0.8553186430728784,
+          "t": -1.8020768166399044,
+          "max_drawdown_R": 78.67282547559077,
+          "longest_losing_streak": 12,
+          "exit_reason_counts": {
+            "stop": 368,
+            "target": 196
+          },
+          "trades_per_year": 141.0,
+          "total_R": -62.15595862125933,
+          "longest_losing_streak_days": 7,
+          "winning_days": 0.19678714859437751,
+          "winning_weeks": 0.3923444976076555,
+          "winning_months": 0.3333333333333333
+        },
+        "x2": {
+          "trades": 564,
+          "win_rate": 0.34574468085106386,
+          "avg_win_R": 1.8330255018563093,
+          "avg_loss_R": -1.223150208683818,
+          "net_avg_R": -0.16649371301834828,
+          "net_avg_R_cost15": -0.26835759080411825,
+          "profit_factor": 0.7919485328122102,
+          "t": -2.7097745911097415,
+          "max_drawdown_R": 96.76867049831779,
+          "longest_losing_streak": 12,
+          "exit_reason_counts": {
+            "stop": 369,
+            "target": 195
+          },
+          "trades_per_year": 141.0,
+          "total_R": -93.90245414234843,
+          "longest_losing_streak_days": 7,
+          "winning_days": 0.19578313253012047,
+          "winning_weeks": 0.3827751196172249,
+          "winning_months": 0.3333333333333333
+        },
+        "touch": {
+          "trades": 564,
+          "win_rate": 0.3475177304964539,
+          "avg_win_R": 1.9164962597281054,
+          "avg_loss_R": -1.111606552238639,
+          "net_avg_R": -0.05928713531402542,
+          "net_avg_R_cost15": -0.11020560039230375,
+          "profit_factor": 0.9182588669169017,
+          "t": -0.9748618033070746,
+          "max_drawdown_R": 62.1158555533313,
+          "longest_losing_streak": 12,
+          "exit_reason_counts": {
+            "stop": 368,
+            "target": 196
+          },
+          "trades_per_year": 141.0,
+          "total_R": -33.437944317110336,
+          "longest_losing_streak_days": 7,
+          "winning_days": 0.19678714859437751,
+          "winning_weeks": 0.3923444976076555,
+          "winning_months": 0.3333333333333333
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 368,
+        "target": 196
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.5,
+        "deadline": "11:00",
+        "target_r": 3.0,
+        "stop_mode": "engulf"
+      },
+      "summary": {
+        "trades": 564,
+        "win_rate": 0.26773049645390073,
+        "avg_win_R": 2.8969534021879877,
+        "avg_loss_R": -1.1103986774004673,
+        "net_avg_R": -0.03750831566667887,
+        "net_avg_R_cost15": -0.08935589610041174,
+        "profit_factor": 0.9538706134878253,
+        "t": -0.5002823785881528,
+        "max_drawdown_R": 48.89725322840791,
+        "longest_losing_streak": 16,
+        "exit_reason_counts": {
+          "stop": 413,
+          "target": 150,
+          "time": 1
+        },
+        "trades_per_year": 141.0,
+        "total_R": -21.154690036006883,
+        "longest_losing_streak_days": 10,
+        "winning_days": 0.15160642570281124,
+        "winning_weeks": 0.4019138755980861,
+        "winning_months": 0.4375,
+        "net_avg_R_cost2": -0.14839335005429552,
+        "fill_touch_net_avg_R": -0.03035035114871688
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 564,
+          "win_rate": 0.26773049645390073,
+          "avg_win_R": 2.8542668701625895,
+          "avg_loss_R": -1.1655956968406374,
+          "net_avg_R": -0.08935589610041174,
+          "net_avg_R_cost15": -0.16712726675101103,
+          "profit_factor": 0.8953102093429058,
+          "t": -1.1873201068997536,
+          "max_drawdown_R": 64.593219272661,
+          "longest_losing_streak": 16,
+          "exit_reason_counts": {
+            "stop": 413,
+            "target": 150,
+            "time": 1
+          },
+          "trades_per_year": 141.0,
+          "total_R": -50.39672540063222,
+          "longest_losing_streak_days": 10,
+          "winning_days": 0.15160642570281124,
+          "winning_weeks": 0.4019138755980861,
+          "winning_months": 0.4375
+        },
+        "x2": {
+          "trades": 564,
+          "win_rate": 0.26595744680851063,
+          "avg_win_R": 2.8121013078451087,
+          "avg_loss_R": -1.2210363420468333,
+          "net_avg_R": -0.14839335005429552,
+          "net_avg_R_cost15": -0.2521390467144718,
+          "profit_factor": 0.8344364949393512,
+          "t": -1.9676198563879428,
+          "max_drawdown_R": 85.50068326534935,
+          "longest_losing_streak": 16,
+          "exit_reason_counts": {
+            "stop": 414,
+            "target": 149,
+            "time": 1
+          },
+          "trades_per_year": 141.0,
+          "total_R": -83.69384943062268,
+          "longest_losing_streak_days": 10,
+          "winning_days": 0.15060240963855423,
+          "winning_weeks": 0.3827751196172249,
+          "winning_months": 0.375
+        },
+        "touch": {
+          "trades": 564,
+          "win_rate": 0.2695035460992908,
+          "avg_win_R": 2.8967772484995336,
+          "avg_loss_R": -1.1102615044170032,
+          "net_avg_R": -0.03035035114871688,
+          "net_avg_R_cost15": -0.0821650486142489,
+          "profit_factor": 0.9625785745861862,
+          "t": -0.4040017268265938,
+          "max_drawdown_R": 44.86016124027734,
+          "longest_losing_streak": 16,
+          "exit_reason_counts": {
+            "stop": 412,
+            "target": 151,
+            "time": 1
+          },
+          "trades_per_year": 141.0,
+          "total_R": -17.11759804787632,
+          "longest_losing_streak_days": 10,
+          "winning_days": 0.15261044176706828,
+          "winning_weeks": 0.40669856459330145,
+          "winning_months": 0.4375
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 413,
+        "target": 150,
+        "time": 1
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.5,
+        "deadline": "11:00",
+        "target_r": 2.0,
+        "stop_mode": "fvg"
+      },
+      "summary": {
+        "trades": 596,
+        "win_rate": 0.34395973154362414,
+        "avg_win_R": 1.9235029318839805,
+        "avg_loss_R": -1.0961173420209203,
+        "net_avg_R": -0.0574895632449057,
+        "net_avg_R_cost15": -0.1132561249349771,
+        "profit_factor": 0.9200531304879519,
+        "t": -0.97643051164223,
+        "max_drawdown_R": 56.24064857800255,
+        "longest_losing_streak": 12,
+        "exit_reason_counts": {
+          "stop": 390,
+          "target": 205,
+          "time": 1
+        },
+        "trades_per_year": 149.0,
+        "total_R": -34.2637796939638,
+        "longest_losing_streak_days": 7,
+        "winning_days": 0.20582329317269077,
+        "winning_weeks": 0.37799043062200954,
+        "winning_months": 0.4583333333333333,
+        "net_avg_R_cost2": -0.1588475233934853,
+        "fill_touch_net_avg_R": -0.0574895632449057
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 596,
+          "win_rate": 0.34060402684563756,
+          "avg_win_R": 1.8857893463344106,
+          "avg_loss_R": -1.145841953605933,
+          "net_avg_R": -0.1132561249349771,
+          "net_avg_R_cost15": -0.18164322262273938,
+          "profit_factor": 0.8501037776038841,
+          "t": -1.9186291481723936,
+          "max_drawdown_R": 75.42986336373794,
+          "longest_losing_streak": 12,
+          "exit_reason_counts": {
+            "stop": 392,
+            "target": 203,
+            "time": 1
+          },
+          "trades_per_year": 149.0,
+          "total_R": -67.50065046124635,
+          "longest_losing_streak_days": 7,
+          "winning_days": 0.20381526104417672,
+          "winning_weeks": 0.37799043062200954,
+          "winning_months": 0.4375
+        },
+        "x2": {
+          "trades": 596,
+          "win_rate": 0.34060402684563756,
+          "avg_win_R": 1.8477191284458805,
+          "avg_loss_R": -1.1953183384657275,
+          "net_avg_R": -0.1588475233934853,
+          "net_avg_R_cost15": -0.25003032031050165,
+          "profit_factor": 0.7984649557756405,
+          "t": -2.6773660820862832,
+          "max_drawdown_R": 95.27605193531281,
+          "longest_losing_streak": 12,
+          "exit_reason_counts": {
+            "stop": 392,
+            "target": 203,
+            "time": 1
+          },
+          "trades_per_year": 149.0,
+          "total_R": -94.67312394251724,
+          "longest_losing_streak_days": 7,
+          "winning_days": 0.20381526104417672,
+          "winning_weeks": 0.37320574162679426,
+          "winning_months": 0.3333333333333333
+        },
+        "touch": {
+          "trades": 596,
+          "win_rate": 0.34395973154362414,
+          "avg_win_R": 1.9235029318839805,
+          "avg_loss_R": -1.0961173420209203,
+          "net_avg_R": -0.0574895632449057,
+          "net_avg_R_cost15": -0.10302693713461215,
+          "profit_factor": 0.9200531304879519,
+          "t": -0.97643051164223,
+          "max_drawdown_R": 56.24064857800255,
+          "longest_losing_streak": 12,
+          "exit_reason_counts": {
+            "stop": 390,
+            "target": 205,
+            "time": 1
+          },
+          "trades_per_year": 149.0,
+          "total_R": -34.2637796939638,
+          "longest_losing_streak_days": 7,
+          "winning_days": 0.20582329317269077,
+          "winning_weeks": 0.37799043062200954,
+          "winning_months": 0.4583333333333333
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 390,
+        "target": 205,
+        "time": 1
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.5,
+        "deadline": "11:00",
+        "target_r": 3.0,
+        "stop_mode": "fvg"
+      },
+      "summary": {
+        "trades": 596,
+        "win_rate": 0.26677852348993286,
+        "avg_win_R": 2.891820385699974,
+        "avg_loss_R": -1.0957109132062033,
+        "net_avg_R": -0.031923200914118904,
+        "net_avg_R_cost15": -0.09188762795505422,
+        "profit_factor": 0.9602648124906825,
+        "t": -0.43980355522199227,
+        "max_drawdown_R": 54.68685260794754,
+        "longest_losing_streak": 16,
+        "exit_reason_counts": {
+          "stop": 436,
+          "target": 157,
+          "time": 3
+        },
+        "trades_per_year": 149.0,
+        "total_R": -19.026227744814868,
+        "longest_losing_streak_days": 13,
+        "winning_days": 0.15963855421686746,
+        "winning_weeks": 0.44019138755980863,
+        "winning_months": 0.4375,
+        "net_avg_R_cost2": -0.1383211870664397,
+        "fill_touch_net_avg_R": -0.02517400545497591
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 596,
+          "win_rate": 0.2634228187919463,
+          "avg_win_R": 2.8529716179446876,
+          "avg_loss_R": -1.145060524552456,
+          "net_avg_R": -0.09188762795505422,
+          "net_avg_R_cost15": -0.16153796662213246,
+          "profit_factor": 0.8910542389074104,
+          "t": -1.2668262590415726,
+          "max_drawdown_R": 61.28193956561941,
+          "longest_losing_streak": 16,
+          "exit_reason_counts": {
+            "stop": 438,
+            "target": 155,
+            "time": 3
+          },
+          "trades_per_year": 149.0,
+          "total_R": -54.76502626121231,
+          "longest_losing_streak_days": 13,
+          "winning_days": 0.1576305220883534,
+          "winning_weeks": 0.44019138755980863,
+          "winning_months": 0.4375
+        },
+        "x2": {
+          "trades": 596,
+          "win_rate": 0.2634228187919463,
+          "avg_win_R": 2.814065326161114,
+          "avg_loss_R": -1.1941860676512368,
+          "net_avg_R": -0.1383211870664397,
+          "net_avg_R_cost15": -0.23118830528921064,
+          "profit_factor": 0.8427471783758076,
+          "t": -1.9003815708720868,
+          "max_drawdown_R": 84.20916450301273,
+          "longest_losing_streak": 16,
+          "exit_reason_counts": {
+            "stop": 438,
+            "target": 155,
+            "time": 3
+          },
+          "trades_per_year": 149.0,
+          "total_R": -82.43942749159807,
+          "longest_losing_streak_days": 13,
+          "winning_days": 0.1576305220883534,
+          "winning_weeks": 0.4258373205741627,
+          "winning_months": 0.375
+        },
+        "touch": {
+          "trades": 596,
+          "win_rate": 0.2684563758389262,
+          "avg_win_R": 2.892003872490773,
+          "avg_loss_R": -1.0956979973616727,
+          "net_avg_R": -0.02517400545497591,
+          "net_avg_R_cost15": -0.07153464696597472,
+          "profit_factor": 0.9685933782143641,
+          "t": -0.346121760022753,
+          "max_drawdown_R": 54.68685260794755,
+          "longest_losing_streak": 16,
+          "exit_reason_counts": {
+            "stop": 435,
+            "target": 158,
+            "time": 3
+          },
+          "trades_per_year": 149.0,
+          "total_R": -15.003707251165643,
+          "longest_losing_streak_days": 13,
+          "winning_days": 0.1606425702811245,
+          "winning_weeks": 0.44019138755980863,
+          "winning_months": 0.4375
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 436,
+        "target": 157,
+        "time": 3
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.6,
+        "deadline": "10:00",
+        "target_r": 2.0,
+        "stop_mode": "engulf"
+      },
+      "summary": {
+        "trades": 184,
+        "win_rate": 0.3532608695652174,
+        "avg_win_R": 1.9213118905356767,
+        "avg_loss_R": -1.1035714703634147,
+        "net_avg_R": -0.03499854395884462,
+        "net_avg_R_cost15": -0.08238912028609299,
+        "profit_factor": 0.9509633973382351,
+        "t": -0.32721411647831317,
+        "max_drawdown_R": 14.422596759954983,
+        "longest_losing_streak": 10,
+        "exit_reason_counts": {
+          "stop": 119,
+          "target": 65
+        },
+        "trades_per_year": 46.0,
+        "total_R": -6.4397320884274105,
+        "longest_losing_streak_days": 3,
+        "winning_days": 0.06526104417670683,
+        "winning_weeks": 0.24401913875598086,
+        "winning_months": 0.4583333333333333,
+        "net_avg_R_cost2": -0.14635335973222793,
+        "fill_touch_net_avg_R": -0.03499854395884462
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 184,
+          "win_rate": 0.3532608695652174,
+          "avg_win_R": 1.881967835803515,
+          "avg_loss_R": -1.155357205545123,
+          "net_avg_R": -0.08238912028609299,
+          "net_avg_R_cost15": -0.15347498477696564,
+          "profit_factor": 0.8897383594137381,
+          "t": -0.7664303977540582,
+          "max_drawdown_R": 20.371153522439982,
+          "longest_losing_streak": 10,
+          "exit_reason_counts": {
+            "stop": 119,
+            "target": 65
+          },
+          "trades_per_year": 46.0,
+          "total_R": -15.159598132641111,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.06526104417670683,
+          "winning_weeks": 0.24401913875598086,
+          "winning_months": 0.4583333333333333
+        },
+        "x2": {
+          "trades": 184,
+          "win_rate": 0.34782608695652173,
+          "avg_win_R": 1.842874762784389,
+          "avg_loss_R": -1.2072750250744235,
+          "net_avg_R": -0.14635335973222793,
+          "net_avg_R_cost15": -0.2412691700331245,
+          "profit_factor": 0.814119831635782,
+          "t": -1.3588427741124862,
+          "max_drawdown_R": 28.422875119577448,
+          "longest_losing_streak": 10,
+          "exit_reason_counts": {
+            "stop": 120,
+            "target": 64
+          },
+          "trades_per_year": 46.0,
+          "total_R": -26.92901819072994,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.0642570281124498,
+          "winning_weeks": 0.23923444976076555,
+          "winning_months": 0.3958333333333333
+        },
+        "touch": {
+          "trades": 184,
+          "win_rate": 0.3532608695652174,
+          "avg_win_R": 1.9213118905356767,
+          "avg_loss_R": -1.1035714703634147,
+          "net_avg_R": -0.03499854395884462,
+          "net_avg_R_cost15": -0.082389120286093,
+          "profit_factor": 0.9509633973382351,
+          "t": -0.32721411647831317,
+          "max_drawdown_R": 14.422596759954983,
+          "longest_losing_streak": 10,
+          "exit_reason_counts": {
+            "stop": 119,
+            "target": 65
+          },
+          "trades_per_year": 46.0,
+          "total_R": -6.4397320884274105,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.06526104417670683,
+          "winning_weeks": 0.24401913875598086,
+          "winning_months": 0.4583333333333333
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 119,
+        "target": 65
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.6,
+        "deadline": "10:00",
+        "target_r": 3.0,
+        "stop_mode": "engulf"
+      },
+      "summary": {
+        "trades": 184,
+        "win_rate": 0.2826086956521739,
+        "avg_win_R": 2.863286469876888,
+        "avg_loss_R": -1.1003565726587212,
+        "net_avg_R": 0.019803417623081354,
+        "net_avg_R_cost15": -0.028260352918791525,
+        "profit_factor": 1.025087107802471,
+        "t": 0.1491085400397921,
+        "max_drawdown_R": 22.854281434773824,
+        "longest_losing_streak": 15,
+        "exit_reason_counts": {
+          "stop": 132,
+          "target": 51,
+          "time": 1
+        },
+        "trades_per_year": 46.0,
+        "total_R": 3.643828842646969,
+        "longest_losing_streak_days": 3,
+        "winning_days": 0.05220883534136546,
+        "winning_weeks": 0.22488038277511962,
+        "winning_months": 0.4375,
+        "net_avg_R_cost2": -0.07632412346066442,
+        "fill_touch_net_avg_R": 0.019803417623081354
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 184,
+          "win_rate": 0.2826086956521739,
+          "avg_win_R": 2.8205903163340227,
+          "avg_loss_R": -1.150534858988082,
+          "net_avg_R": -0.028260352918791525,
+          "net_avg_R_cost15": -0.10035600873160085,
+          "profit_factor": 0.9657609511677199,
+          "t": -0.212232129041076,
+          "max_drawdown_R": 23.781422152160722,
+          "longest_losing_streak": 15,
+          "exit_reason_counts": {
+            "stop": 132,
+            "target": 51,
+            "time": 1
+          },
+          "trades_per_year": 46.0,
+          "total_R": -5.1999049370576405,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.05220883534136546,
+          "winning_weeks": 0.22488038277511962,
+          "winning_months": 0.4375
+        },
+        "x2": {
+          "trades": 184,
+          "win_rate": 0.2826086956521739,
+          "avg_win_R": 2.7778941627911564,
+          "avg_loss_R": -1.2007131453174422,
+          "net_avg_R": -0.07632412346066442,
+          "net_avg_R_cost15": -0.17245166454441016,
+          "profit_factor": 0.9113933225311809,
+          "t": -0.571564936190569,
+          "max_drawdown_R": 24.708562869547627,
+          "longest_losing_streak": 15,
+          "exit_reason_counts": {
+            "stop": 132,
+            "target": 51,
+            "time": 1
+          },
+          "trades_per_year": 46.0,
+          "total_R": -14.043638716762253,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.05220883534136546,
+          "winning_weeks": 0.22488038277511962,
+          "winning_months": 0.4375
+        },
+        "touch": {
+          "trades": 184,
+          "win_rate": 0.2826086956521739,
+          "avg_win_R": 2.863286469876888,
+          "avg_loss_R": -1.1003565726587212,
+          "net_avg_R": 0.019803417623081354,
+          "net_avg_R_cost15": -0.028260352918791587,
+          "profit_factor": 1.025087107802471,
+          "t": 0.1491085400397921,
+          "max_drawdown_R": 22.854281434773824,
+          "longest_losing_streak": 15,
+          "exit_reason_counts": {
+            "stop": 132,
+            "target": 51,
+            "time": 1
+          },
+          "trades_per_year": 46.0,
+          "total_R": 3.643828842646969,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.05220883534136546,
+          "winning_weeks": 0.22488038277511962,
+          "winning_months": 0.4375
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 132,
+        "target": 51,
+        "time": 1
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.6,
+        "deadline": "10:00",
+        "target_r": 2.0,
+        "stop_mode": "fvg"
+      },
+      "summary": {
+        "trades": 188,
+        "win_rate": 0.3351063829787234,
+        "avg_win_R": 1.9255684083456124,
+        "avg_loss_R": -1.0749560191468162,
+        "net_avg_R": -0.06946113121052351,
+        "net_avg_R_cost15": -0.10955544676941897,
+        "profit_factor": 0.9028150552396144,
+        "t": -0.6692055120192566,
+        "max_drawdown_R": 20.41926228947995,
+        "longest_losing_streak": 12,
+        "exit_reason_counts": {
+          "stop": 124,
+          "target": 63,
+          "time": 1
+        },
+        "trades_per_year": 47.0,
+        "total_R": -13.05869266757842,
+        "longest_losing_streak_days": 3,
+        "winning_days": 0.06325301204819277,
+        "winning_weeks": 0.24880382775119617,
+        "winning_months": 0.4791666666666667,
+        "net_avg_R_cost2": -0.14964976232831442,
+        "fill_touch_net_avg_R": -0.06946113121052351
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 188,
+          "win_rate": 0.3351063829787234,
+          "avg_win_R": 1.8883526125184182,
+          "avg_loss_R": -1.116501108650489,
+          "net_avg_R": -0.10955544676941897,
+          "net_avg_R_cost15": -0.1696969201077621,
+          "profit_factor": 0.8524216495043477,
+          "t": -1.0530269269343067,
+          "max_drawdown_R": 22.518926649210208,
+          "longest_losing_streak": 12,
+          "exit_reason_counts": {
+            "stop": 124,
+            "target": 63,
+            "time": 1
+          },
+          "trades_per_year": 47.0,
+          "total_R": -20.596423992650767,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.06325301204819277,
+          "winning_weeks": 0.24880382775119617,
+          "winning_months": 0.4791666666666667
+        },
+        "x2": {
+          "trades": 188,
+          "win_rate": 0.3351063829787234,
+          "avg_win_R": 1.8511368166912245,
+          "avg_loss_R": -1.158046198154162,
+          "net_avg_R": -0.14964976232831442,
+          "net_avg_R_cost15": -0.2298383934461053,
+          "profit_factor": 0.8056439864829792,
+          "t": -1.434604141892879,
+          "max_drawdown_R": 29.69969237378688,
+          "longest_losing_streak": 12,
+          "exit_reason_counts": {
+            "stop": 124,
+            "target": 63,
+            "time": 1
+          },
+          "trades_per_year": 47.0,
+          "total_R": -28.13415531772311,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.06325301204819277,
+          "winning_weeks": 0.24880382775119617,
+          "winning_months": 0.4791666666666667
+        },
+        "touch": {
+          "trades": 188,
+          "win_rate": 0.3351063829787234,
+          "avg_win_R": 1.9255684083456124,
+          "avg_loss_R": -1.0749560191468162,
+          "net_avg_R": -0.06946113121052351,
+          "net_avg_R_cost15": -0.10955544676941897,
+          "profit_factor": 0.9028150552396144,
+          "t": -0.6692055120192566,
+          "max_drawdown_R": 20.41926228947995,
+          "longest_losing_streak": 12,
+          "exit_reason_counts": {
+            "stop": 124,
+            "target": 63,
+            "time": 1
+          },
+          "trades_per_year": 47.0,
+          "total_R": -13.05869266757842,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.06325301204819277,
+          "winning_weeks": 0.24880382775119617,
+          "winning_months": 0.4791666666666667
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 124,
+        "target": 63,
+        "time": 1
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.6,
+        "deadline": "10:00",
+        "target_r": 3.0,
+        "stop_mode": "fvg"
+      },
+      "summary": {
+        "trades": 188,
+        "win_rate": 0.28191489361702127,
+        "avg_win_R": 2.8740067658368615,
+        "avg_loss_R": -1.0759337868660281,
+        "net_avg_R": 0.037613283842765195,
+        "net_avg_R_cost15": -0.003130744965432181,
+        "profit_factor": 1.0486832750322763,
+        "t": 0.2872824115246774,
+        "max_drawdown_R": 24.966357849458078,
+        "longest_losing_streak": 13,
+        "exit_reason_counts": {
+          "stop": 134,
+          "target": 52,
+          "time": 2
+        },
+        "trades_per_year": 47.0,
+        "total_R": 7.071297362439857,
+        "longest_losing_streak_days": 3,
+        "winning_days": 0.05321285140562249,
+        "winning_weeks": 0.22966507177033493,
+        "winning_months": 0.4791666666666667,
+        "net_avg_R_cost2": -0.04387477377362952,
+        "fill_touch_net_avg_R": 0.037613283842765195
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 188,
+          "win_rate": 0.28191489361702127,
+          "avg_win_R": 2.835781071285898,
+          "avg_loss_R": -1.1176664950492876,
+          "net_avg_R": -0.003130744965432181,
+          "net_avg_R_cost15": -0.0642467881777282,
+          "profit_factor": 0.9960991474044635,
+          "t": -0.023872884384928118,
+          "max_drawdown_R": 25.956055397422446,
+          "longest_losing_streak": 13,
+          "exit_reason_counts": {
+            "stop": 134,
+            "target": 52,
+            "time": 2
+          },
+          "trades_per_year": 47.0,
+          "total_R": -0.58858005350125,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.05321285140562249,
+          "winning_weeks": 0.22966507177033493,
+          "winning_months": 0.4791666666666667
+        },
+        "x2": {
+          "trades": 188,
+          "win_rate": 0.28191489361702127,
+          "avg_win_R": 2.797555376734935,
+          "avg_loss_R": -1.1593992032325473,
+          "net_avg_R": -0.04387477377362952,
+          "net_avg_R_cost15": -0.1253628313900243,
+          "profit_factor": 0.9473005632671829,
+          "t": -0.33394285859716,
+          "max_drawdown_R": 26.945752945386825,
+          "longest_losing_streak": 13,
+          "exit_reason_counts": {
+            "stop": 134,
+            "target": 52,
+            "time": 2
+          },
+          "trades_per_year": 47.0,
+          "total_R": -8.24845746944235,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.05321285140562249,
+          "winning_weeks": 0.22966507177033493,
+          "winning_months": 0.4791666666666667
+        },
+        "touch": {
+          "trades": 188,
+          "win_rate": 0.28191489361702127,
+          "avg_win_R": 2.8740067658368615,
+          "avg_loss_R": -1.0759337868660281,
+          "net_avg_R": 0.037613283842765195,
+          "net_avg_R_cost15": -0.0031307449654321994,
+          "profit_factor": 1.0486832750322763,
+          "t": 0.2872824115246774,
+          "max_drawdown_R": 24.966357849458078,
+          "longest_losing_streak": 13,
+          "exit_reason_counts": {
+            "stop": 134,
+            "target": 52,
+            "time": 2
+          },
+          "trades_per_year": 47.0,
+          "total_R": 7.071297362439857,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.05321285140562249,
+          "winning_weeks": 0.22966507177033493,
+          "winning_months": 0.4791666666666667
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 134,
+        "target": 52,
+        "time": 2
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.6,
+        "deadline": "10:30",
+        "target_r": 2.0,
+        "stop_mode": "engulf"
+      },
+      "summary": {
+        "trades": 377,
+        "win_rate": 0.3421750663129973,
+        "avg_win_R": 1.922226887881845,
+        "avg_loss_R": -1.1083969443050994,
+        "net_avg_R": -0.07139303355678157,
+        "net_avg_R_cost15": -0.12035214980466834,
+        "profit_factor": 0.9020847841837368,
+        "t": -0.9620761199069461,
+        "max_drawdown_R": 44.48403029228945,
+        "longest_losing_streak": 14,
+        "exit_reason_counts": {
+          "stop": 248,
+          "target": 129
+        },
+        "trades_per_year": 94.25,
+        "total_R": -26.915173650906652,
+        "longest_losing_streak_days": 6,
+        "winning_days": 0.12951807228915663,
+        "winning_weeks": 0.37320574162679426,
+        "winning_months": 0.4375,
+        "net_avg_R_cost2": -0.17740026874187909,
+        "fill_touch_net_avg_R": -0.07139303355678157
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 377,
+          "win_rate": 0.3421750663129973,
+          "avg_win_R": 1.883340331822767,
+          "avg_loss_R": -1.1625954164576489,
+          "net_avg_R": -0.12035214980466834,
+          "net_avg_R_cost15": -0.19379082417649854,
+          "profit_factor": 0.8426325471868693,
+          "t": -1.6121879473185483,
+          "max_drawdown_R": 55.2260454384342,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 248,
+            "target": 129
+          },
+          "trades_per_year": 94.25,
+          "total_R": -45.372760476359964,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.12951807228915663,
+          "winning_weeks": 0.37320574162679426,
+          "winning_months": 0.375
+        },
+        "x2": {
+          "trades": 377,
+          "win_rate": 0.3395225464190981,
+          "avg_win_R": 1.8445935634537411,
+          "avg_loss_R": -1.2168187848906316,
+          "net_avg_R": -0.17740026874187909,
+          "net_avg_R_cost15": -0.27538422274146585,
+          "profit_factor": 0.7792654218338312,
+          "t": -2.36576555520243,
+          "max_drawdown_R": 66.8799013156884,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 249,
+            "target": 128
+          },
+          "trades_per_year": 94.25,
+          "total_R": -66.87990131568841,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.1285140562248996,
+          "winning_weeks": 0.3684210526315789,
+          "winning_months": 0.3541666666666667
+        },
+        "touch": {
+          "trades": 377,
+          "win_rate": 0.3421750663129973,
+          "avg_win_R": 1.922226887881845,
+          "avg_loss_R": -1.1083969443050994,
+          "net_avg_R": -0.07139303355678157,
+          "net_avg_R_cost15": -0.12035214980466837,
+          "profit_factor": 0.9020847841837368,
+          "t": -0.9620761199069461,
+          "max_drawdown_R": 44.48403029228945,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 248,
+            "target": 129
+          },
+          "trades_per_year": 94.25,
+          "total_R": -26.915173650906652,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.12951807228915663,
+          "winning_weeks": 0.37320574162679426,
+          "winning_months": 0.4375
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 248,
+        "target": 129
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.6,
+        "deadline": "10:30",
+        "target_r": 3.0,
+        "stop_mode": "engulf"
+      },
+      "summary": {
+        "trades": 377,
+        "win_rate": 0.27320954907161804,
+        "avg_win_R": 2.8940161460251788,
+        "avg_loss_R": -1.106688463103802,
+        "net_avg_R": -0.013657760874929325,
+        "net_avg_R_cost15": -0.0633663447633969,
+        "profit_factor": 0.9830197175716673,
+        "t": -0.14802320845945255,
+        "max_drawdown_R": 37.28838151985363,
+        "longest_losing_streak": 14,
+        "exit_reason_counts": {
+          "stop": 274,
+          "target": 102,
+          "time": 1
+        },
+        "trades_per_year": 94.25,
+        "total_R": -5.148975849848355,
+        "longest_losing_streak_days": 6,
+        "winning_days": 0.10341365461847389,
+        "winning_weeks": 0.3684210526315789,
+        "winning_months": 0.4166666666666667,
+        "net_avg_R_cost2": -0.12388702802136073,
+        "fill_touch_net_avg_R": -0.013657760874929325
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 377,
+          "win_rate": 0.27320954907161804,
+          "avg_win_R": 2.853979090872447,
+          "avg_loss_R": -1.1600326946557034,
+          "net_avg_R": -0.0633663447633969,
+          "net_avg_R_cost15": -0.13792922059609822,
+          "profit_factor": 0.9248413079568042,
+          "t": -0.684028979494862,
+          "max_drawdown_R": 47.59822048080854,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 274,
+            "target": 102,
+            "time": 1
+          },
+          "trades_per_year": 94.25,
+          "total_R": -23.88911197580063,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.10341365461847389,
+          "winning_weeks": 0.3684210526315789,
+          "winning_months": 0.4166666666666667
+        },
+        "x2": {
+          "trades": 377,
+          "win_rate": 0.27055702917771884,
+          "avg_win_R": 2.814731321540991,
+          "avg_loss_R": -1.2138472885863054,
+          "net_avg_R": -0.12388702802136073,
+          "net_avg_R_cost15": -0.22340520569524555,
+          "profit_factor": 0.8600830149252198,
+          "t": -1.3353211494196993,
+          "max_drawdown_R": 60.727722440820926,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 275,
+            "target": 101,
+            "time": 1
+          },
+          "trades_per_year": 94.25,
+          "total_R": -46.70540956405299,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.10240963855421686,
+          "winning_weeks": 0.3492822966507177,
+          "winning_months": 0.3958333333333333
+        },
+        "touch": {
+          "trades": 377,
+          "win_rate": 0.27320954907161804,
+          "avg_win_R": 2.8940161460251788,
+          "avg_loss_R": -1.106688463103802,
+          "net_avg_R": -0.013657760874929325,
+          "net_avg_R_cost15": -0.0633663447633969,
+          "profit_factor": 0.9830197175716673,
+          "t": -0.14802320845945255,
+          "max_drawdown_R": 37.28838151985363,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 274,
+            "target": 102,
+            "time": 1
+          },
+          "trades_per_year": 94.25,
+          "total_R": -5.148975849848355,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.10341365461847389,
+          "winning_weeks": 0.3684210526315789,
+          "winning_months": 0.4166666666666667
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 274,
+        "target": 102,
+        "time": 1
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.6,
+        "deadline": "10:30",
+        "target_r": 2.0,
+        "stop_mode": "fvg"
+      },
+      "summary": {
+        "trades": 390,
+        "win_rate": 0.34102564102564104,
+        "avg_win_R": 1.9291714720518909,
+        "avg_loss_R": -1.08892962356282,
+        "net_avg_R": -0.05967976275062374,
+        "net_avg_R_cost15": -0.1023616569240975,
+        "profit_factor": 0.9168315210121692,
+        "t": -0.8215123827604625,
+        "max_drawdown_R": 37.70210885233423,
+        "longest_losing_streak": 11,
+        "exit_reason_counts": {
+          "stop": 256,
+          "target": 133,
+          "time": 1
+        },
+        "trades_per_year": 97.5,
+        "total_R": -23.275107472743258,
+        "longest_losing_streak_days": 5,
+        "winning_days": 0.13353413654618473,
+        "winning_weeks": 0.37320574162679426,
+        "winning_months": 0.4375,
+        "net_avg_R_cost2": -0.14504355109757125,
+        "fill_touch_net_avg_R": -0.05967976275062374
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 390,
+          "win_rate": 0.34102564102564104,
+          "avg_win_R": 1.893757208077836,
+          "avg_loss_R": -1.1353725870612847,
+          "net_avg_R": -0.1023616569240975,
+          "net_avg_R_cost15": -0.1663844981843081,
+          "profit_factor": 0.8631860484492255,
+          "t": -1.4026237319623882,
+          "max_drawdown_R": 46.95504091271907,
+          "longest_losing_streak": 11,
+          "exit_reason_counts": {
+            "stop": 256,
+            "target": 133,
+            "time": 1
+          },
+          "trades_per_year": 97.5,
+          "total_R": -39.921046200398024,
+          "longest_losing_streak_days": 5,
+          "winning_days": 0.13353413654618473,
+          "winning_weeks": 0.37320574162679426,
+          "winning_months": 0.375
+        },
+        "x2": {
+          "trades": 390,
+          "win_rate": 0.34102564102564104,
+          "avg_win_R": 1.8583429441037813,
+          "avg_loss_R": -1.1818155505597499,
+          "net_avg_R": -0.14504355109757125,
+          "net_avg_R_cost15": -0.23040733944451874,
+          "profit_factor": 0.8137568932683276,
+          "t": -1.9777847159572026,
+          "max_drawdown_R": 58.68255598721249,
+          "longest_losing_streak": 11,
+          "exit_reason_counts": {
+            "stop": 256,
+            "target": 133,
+            "time": 1
+          },
+          "trades_per_year": 97.5,
+          "total_R": -56.56698492805279,
+          "longest_losing_streak_days": 5,
+          "winning_days": 0.13353413654618473,
+          "winning_weeks": 0.37320574162679426,
+          "winning_months": 0.3333333333333333
+        },
+        "touch": {
+          "trades": 390,
+          "win_rate": 0.34102564102564104,
+          "avg_win_R": 1.9291714720518909,
+          "avg_loss_R": -1.08892962356282,
+          "net_avg_R": -0.05967976275062374,
+          "net_avg_R_cost15": -0.1023616569240975,
+          "profit_factor": 0.9168315210121692,
+          "t": -0.8215123827604625,
+          "max_drawdown_R": 37.70210885233423,
+          "longest_losing_streak": 11,
+          "exit_reason_counts": {
+            "stop": 256,
+            "target": 133,
+            "time": 1
+          },
+          "trades_per_year": 97.5,
+          "total_R": -23.275107472743258,
+          "longest_losing_streak_days": 5,
+          "winning_days": 0.13353413654618473,
+          "winning_weeks": 0.37320574162679426,
+          "winning_months": 0.4375
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 256,
+        "target": 133,
+        "time": 1
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.6,
+        "deadline": "10:30",
+        "target_r": 3.0,
+        "stop_mode": "fvg"
+      },
+      "summary": {
+        "trades": 390,
+        "win_rate": 0.24871794871794872,
+        "avg_win_R": 2.879869899154655,
+        "avg_loss_R": -1.0893549578162904,
+        "net_avg_R": -0.10213749339018342,
+        "net_avg_R_cost15": -0.1458449290980251,
+        "profit_factor": 0.8752005222971313,
+        "t": -1.1670392482042233,
+        "max_drawdown_R": 47.95646304152515,
+        "longest_losing_streak": 14,
+        "exit_reason_counts": {
+          "stop": 292,
+          "target": 95,
+          "time": 3
+        },
+        "trades_per_year": 97.5,
+        "total_R": -39.83362242217154,
+        "longest_losing_streak_days": 6,
+        "winning_days": 0.09738955823293173,
+        "winning_weeks": 0.3444976076555024,
+        "winning_months": 0.3958333333333333,
+        "net_avg_R_cost2": -0.18955236480586668,
+        "fill_touch_net_avg_R": -0.10213749339018342
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 390,
+          "win_rate": 0.24871794871794872,
+          "avg_win_R": 2.844333676322815,
+          "avg_loss_R": -1.135767539083764,
+          "net_avg_R": -0.1458449290980251,
+          "net_avg_R_cost15": -0.21140608265978753,
+          "profit_factor": 0.8290776449038594,
+          "t": -1.6607229480241634,
+          "max_drawdown_R": 60.553675140277626,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 292,
+            "target": 95,
+            "time": 3
+          },
+          "trades_per_year": 97.5,
+          "total_R": -56.879522348229784,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.09738955823293173,
+          "winning_weeks": 0.3444976076555024,
+          "winning_months": 0.3958333333333333
+        },
+        "x2": {
+          "trades": 390,
+          "win_rate": 0.24871794871794872,
+          "avg_win_R": 2.8087974534909743,
+          "avg_loss_R": -1.1821801203512374,
+          "net_avg_R": -0.18955236480586668,
+          "net_avg_R_cost15": -0.27696723622154995,
+          "profit_factor": 0.7865763506491519,
+          "t": -2.1504953008168433,
+          "max_drawdown_R": 77.49095933035184,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 292,
+            "target": 95,
+            "time": 3
+          },
+          "trades_per_year": 97.5,
+          "total_R": -73.92542227428801,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.09738955823293173,
+          "winning_weeks": 0.3444976076555024,
+          "winning_months": 0.375
+        },
+        "touch": {
+          "trades": 390,
+          "win_rate": 0.24871794871794872,
+          "avg_win_R": 2.879869899154655,
+          "avg_loss_R": -1.0893549578162904,
+          "net_avg_R": -0.10213749339018342,
+          "net_avg_R_cost15": -0.1458449290980251,
+          "profit_factor": 0.8752005222971313,
+          "t": -1.1670392482042233,
+          "max_drawdown_R": 47.95646304152515,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 292,
+            "target": 95,
+            "time": 3
+          },
+          "trades_per_year": 97.5,
+          "total_R": -39.83362242217154,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.09738955823293173,
+          "winning_weeks": 0.3444976076555024,
+          "winning_months": 0.3958333333333333
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 292,
+        "target": 95,
+        "time": 3
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.6,
+        "deadline": "11:00",
+        "target_r": 2.0,
+        "stop_mode": "engulf"
+      },
+      "summary": {
+        "trades": 521,
+        "win_rate": 0.345489443378119,
+        "avg_win_R": 1.9179827007418206,
+        "avg_loss_R": -1.1108172968171492,
+        "net_avg_R": -0.06439887155685263,
+        "net_avg_R_cost15": -0.11483063391031507,
+        "profit_factor": 0.9114234077224042,
+        "t": -1.0188237271735003,
+        "max_drawdown_R": 56.50768336341836,
+        "longest_losing_streak": 13,
+        "exit_reason_counts": {
+          "stop": 341,
+          "target": 180
+        },
+        "trades_per_year": 130.25,
+        "total_R": -33.55181208112022,
+        "longest_losing_streak_days": 6,
+        "winning_days": 0.18072289156626506,
+        "winning_weeks": 0.3827751196172249,
+        "winning_months": 0.4166666666666667,
+        "net_avg_R_cost2": -0.17107522009667606,
+        "fill_touch_net_avg_R": -0.06439887155685263
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 521,
+          "win_rate": 0.345489443378119,
+          "avg_win_R": 1.876974051112731,
+          "avg_loss_R": -1.1662231362685211,
+          "net_avg_R": -0.11483063391031507,
+          "net_avg_R_cost15": -0.19047827744050877,
+          "profit_factor": 0.8495613409510776,
+          "t": -1.806378086403386,
+          "max_drawdown_R": 67.80051894491216,
+          "longest_losing_streak": 13,
+          "exit_reason_counts": {
+            "stop": 341,
+            "target": 180
+          },
+          "trades_per_year": 130.25,
+          "total_R": -59.82676026727415,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.18072289156626506,
+          "winning_weeks": 0.3827751196172249,
+          "winning_months": 0.3958333333333333
+        },
+        "x2": {
+          "trades": 521,
+          "win_rate": 0.3435700575815739,
+          "avg_win_R": 1.8360179403107166,
+          "avg_loss_R": -1.2215713479122414,
+          "net_avg_R": -0.17107522009667606,
+          "net_avg_R_cost15": -0.27196791651737495,
+          "profit_factor": 0.7866562684816981,
+          "t": -2.6785131467697707,
+          "max_drawdown_R": 90.00022280365214,
+          "longest_losing_streak": 13,
+          "exit_reason_counts": {
+            "stop": 342,
+            "target": 179
+          },
+          "trades_per_year": 130.25,
+          "total_R": -89.13018967036822,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.17971887550200802,
+          "winning_weeks": 0.37799043062200954,
+          "winning_months": 0.375
+        },
+        "touch": {
+          "trades": 521,
+          "win_rate": 0.345489443378119,
+          "avg_win_R": 1.9179827007418206,
+          "avg_loss_R": -1.1108172968171492,
+          "net_avg_R": -0.06439887155685263,
+          "net_avg_R_cost15": -0.1148306339103151,
+          "profit_factor": 0.9114234077224042,
+          "t": -1.0188237271735003,
+          "max_drawdown_R": 56.50768336341836,
+          "longest_losing_streak": 13,
+          "exit_reason_counts": {
+            "stop": 341,
+            "target": 180
+          },
+          "trades_per_year": 130.25,
+          "total_R": -33.55181208112022,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.18072289156626506,
+          "winning_weeks": 0.3827751196172249,
+          "winning_months": 0.4166666666666667
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 341,
+        "target": 180
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.6,
+        "deadline": "11:00",
+        "target_r": 3.0,
+        "stop_mode": "engulf"
+      },
+      "summary": {
+        "trades": 521,
+        "win_rate": 0.2706333973128599,
+        "avg_win_R": 2.898045717356574,
+        "avg_loss_R": -1.1099296067711275,
+        "net_avg_R": -0.025237628456337008,
+        "net_avg_R_cost15": -0.07656026292754176,
+        "profit_factor": 0.9688249446642542,
+        "t": -0.32230473036495916,
+        "max_drawdown_R": 47.750554425376755,
+        "longest_losing_streak": 15,
+        "exit_reason_counts": {
+          "stop": 380,
+          "target": 140,
+          "time": 1
+        },
+        "trades_per_year": 130.25,
+        "total_R": -13.148804425751582,
+        "longest_losing_streak_days": 8,
+        "winning_days": 0.14156626506024098,
+        "winning_weeks": 0.41626794258373206,
+        "winning_months": 0.4583333333333333,
+        "net_avg_R_cost2": -0.13566617698677944,
+        "fill_touch_net_avg_R": -0.01748889143497315
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 521,
+          "win_rate": 0.2706333973128599,
+          "avg_win_R": 2.856532063970832,
+          "avg_loss_R": -1.1648918894872013,
+          "net_avg_R": -0.07656026292754176,
+          "net_avg_R_cost15": -0.15354421463434895,
+          "profit_factor": 0.9098902216519076,
+          "t": -0.9738099037019007,
+          "max_drawdown_R": 59.7914798390932,
+          "longest_losing_streak": 15,
+          "exit_reason_counts": {
+            "stop": 380,
+            "target": 140,
+            "time": 1
+          },
+          "trades_per_year": 130.25,
+          "total_R": -39.887896985249256,
+          "longest_losing_streak_days": 8,
+          "winning_days": 0.14156626506024098,
+          "winning_weeks": 0.41626794258373206,
+          "winning_months": 0.4583333333333333
+        },
+        "x2": {
+          "trades": 521,
+          "win_rate": 0.2687140115163148,
+          "avg_win_R": 2.815601150075342,
+          "avg_loss_R": -1.2201213627838845,
+          "net_avg_R": -0.13566617698677944,
+          "net_avg_R_cost15": -0.2383661526222576,
+          "profit_factor": 0.8479517929101297,
+          "t": -1.7217403783372789,
+          "max_drawdown_R": 76.15548945545054,
+          "longest_losing_streak": 15,
+          "exit_reason_counts": {
+            "stop": 381,
+            "target": 139,
+            "time": 1
+          },
+          "trades_per_year": 130.25,
+          "total_R": -70.68207821011208,
+          "longest_losing_streak_days": 8,
+          "winning_days": 0.14056224899598393,
+          "winning_weeks": 0.3875598086124402,
+          "winning_months": 0.375
+        },
+        "touch": {
+          "trades": 521,
+          "win_rate": 0.272552783109405,
+          "avg_win_R": 2.89784946611845,
+          "avg_loss_R": -1.109779252312509,
+          "net_avg_R": -0.01748889143497315,
+          "net_avg_R_cost15": -0.0687759289885862,
+          "profit_factor": 0.9783367209569324,
+          "t": -0.222874788048965,
+          "max_drawdown_R": 43.7134624372462,
+          "longest_losing_streak": 15,
+          "exit_reason_counts": {
+            "stop": 379,
+            "target": 141,
+            "time": 1
+          },
+          "trades_per_year": 130.25,
+          "total_R": -9.111712437621012,
+          "longest_losing_streak_days": 8,
+          "winning_days": 0.142570281124498,
+          "winning_weeks": 0.42105263157894735,
+          "winning_months": 0.4583333333333333
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 380,
+        "target": 140,
+        "time": 1
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.6,
+        "deadline": "11:00",
+        "target_r": 2.0,
+        "stop_mode": "fvg"
+      },
+      "summary": {
+        "trades": 557,
+        "win_rate": 0.348294434470377,
+        "avg_win_R": 1.9235088178159987,
+        "avg_loss_R": -1.0945292320223607,
+        "net_avg_R": -0.04336337624382987,
+        "net_avg_R_cost15": -0.09934485057813376,
+        "profit_factor": 0.9392082992134434,
+        "t": -0.7101952996237155,
+        "max_drawdown_R": 48.898077216235144,
+        "longest_losing_streak": 12,
+        "exit_reason_counts": {
+          "stop": 362,
+          "target": 194,
+          "time": 1
+        },
+        "trades_per_year": 139.25,
+        "total_R": -24.153400567813236,
+        "longest_losing_streak_days": 6,
+        "winning_days": 0.19477911646586346,
+        "winning_weeks": 0.3875598086124402,
+        "winning_months": 0.4583333333333333,
+        "net_avg_R_cost2": -0.1444387175766896,
+        "fill_touch_net_avg_R": -0.04336337624382987
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 557,
+          "win_rate": 0.34470377019748655,
+          "avg_win_R": 1.8858289152917553,
+          "avg_loss_R": -1.1436006397480478,
+          "net_avg_R": -0.09934485057813376,
+          "net_avg_R_cost15": -0.1669856510759675,
+          "profit_factor": 0.8674336490469606,
+          "t": -1.6232511000654497,
+          "max_drawdown_R": 64.75352792287765,
+          "longest_losing_streak": 12,
+          "exit_reason_counts": {
+            "stop": 364,
+            "target": 192,
+            "time": 1
+          },
+          "trades_per_year": 139.25,
+          "total_R": -55.33508177202051,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.1927710843373494,
+          "winning_weeks": 0.3875598086124402,
+          "winning_months": 0.4375
+        },
+        "x2": {
+          "trades": 557,
+          "win_rate": 0.34470377019748655,
+          "avg_win_R": 1.8477718870556734,
+          "avg_loss_R": -1.1923960767257684,
+          "net_avg_R": -0.1444387175766896,
+          "net_avg_R_cost15": -0.23462645157380121,
+          "profit_factor": 0.8151474627018084,
+          "t": -2.3485250072433597,
+          "max_drawdown_R": 81.05529368301166,
+          "longest_losing_streak": 12,
+          "exit_reason_counts": {
+            "stop": 364,
+            "target": 192,
+            "time": 1
+          },
+          "trades_per_year": 139.25,
+          "total_R": -80.45236569021611,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.1927710843373494,
+          "winning_weeks": 0.3875598086124402,
+          "winning_months": 0.375
+        },
+        "touch": {
+          "trades": 557,
+          "win_rate": 0.348294434470377,
+          "avg_win_R": 1.9235088178159987,
+          "avg_loss_R": -1.0945292320223607,
+          "net_avg_R": -0.04336337624382987,
+          "net_avg_R_cost15": -0.08839943598384739,
+          "profit_factor": 0.9392082992134434,
+          "t": -0.7101952996237155,
+          "max_drawdown_R": 48.898077216235144,
+          "longest_losing_streak": 12,
+          "exit_reason_counts": {
+            "stop": 362,
+            "target": 194,
+            "time": 1
+          },
+          "trades_per_year": 139.25,
+          "total_R": -24.153400567813236,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.19477911646586346,
+          "winning_weeks": 0.3875598086124402,
+          "winning_months": 0.4583333333333333
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 362,
+        "target": 194,
+        "time": 1
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.6,
+        "deadline": "11:00",
+        "target_r": 3.0,
+        "stop_mode": "fvg"
+      },
+      "summary": {
+        "trades": 557,
+        "win_rate": 0.2746858168761221,
+        "avg_win_R": 2.8903369748937666,
+        "avg_loss_R": -1.094102140334724,
+        "net_avg_R": 0.00036677282498707813,
+        "net_avg_R_cost15": -0.05999864622749243,
+        "profit_factor": 1.0004621820906898,
+        "t": 0.004842797035897123,
+        "max_drawdown_R": 54.324486419272915,
+        "longest_losing_streak": 15,
+        "exit_reason_counts": {
+          "stop": 403,
+          "target": 151,
+          "time": 3
+        },
+        "trades_per_year": 139.25,
+        "total_R": 0.2042924635178025,
+        "longest_losing_streak_days": 12,
+        "winning_days": 0.1536144578313253,
+        "winning_weeks": 0.4449760765550239,
+        "winning_months": 0.4583333333333333,
+        "net_avg_R_cost2": -0.11325033806938967,
+        "fill_touch_net_avg_R": 0.00036677282498707813
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 557,
+          "win_rate": 0.2710951526032316,
+          "avg_win_R": 2.851322634211864,
+          "avg_loss_R": -1.1427806988046916,
+          "net_avg_R": -0.05999864622749243,
+          "net_avg_R_cost15": -0.12882936739325385,
+          "profit_factor": 0.9279709451228233,
+          "t": -0.7929713880207983,
+          "max_drawdown_R": 56.993248252144745,
+          "longest_losing_streak": 15,
+          "exit_reason_counts": {
+            "stop": 405,
+            "target": 149,
+            "time": 3
+          },
+          "trades_per_year": 139.25,
+          "total_R": -33.41924594871328,
+          "longest_losing_streak_days": 12,
+          "winning_days": 0.15160642570281124,
+          "winning_weeks": 0.4449760765550239,
+          "winning_months": 0.4166666666666667
+        },
+        "x2": {
+          "trades": 557,
+          "win_rate": 0.26929982046678635,
+          "avg_win_R": 2.813397781174709,
+          "avg_loss_R": -1.191867581034045,
+          "net_avg_R": -0.11325033806938967,
+          "net_avg_R_cost15": -0.20511624088320915,
+          "profit_factor": 0.8699613997648538,
+          "t": -1.4942705123126727,
+          "max_drawdown_R": 68.71896831428394,
+          "longest_losing_streak": 15,
+          "exit_reason_counts": {
+            "stop": 406,
+            "target": 148,
+            "time": 3
+          },
+          "trades_per_year": 139.25,
+          "total_R": -63.080438304650045,
+          "longest_losing_streak_days": 12,
+          "winning_days": 0.15060240963855423,
+          "winning_weeks": 0.4258373205741627,
+          "winning_months": 0.3541666666666667
+        },
+        "touch": {
+          "trades": 557,
+          "win_rate": 0.2746858168761221,
+          "avg_win_R": 2.8903369748937666,
+          "avg_loss_R": -1.094102140334724,
+          "net_avg_R": 0.00036677282498707813,
+          "net_avg_R_cost15": -0.04546256736031556,
+          "profit_factor": 1.0004621820906898,
+          "t": 0.004842797035897123,
+          "max_drawdown_R": 54.324486419272915,
+          "longest_losing_streak": 15,
+          "exit_reason_counts": {
+            "stop": 403,
+            "target": 151,
+            "time": 3
+          },
+          "trades_per_year": 139.25,
+          "total_R": 0.2042924635178025,
+          "longest_losing_streak_days": 12,
+          "winning_days": 0.1536144578313253,
+          "winning_weeks": 0.4449760765550239,
+          "winning_months": 0.4583333333333333
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 403,
+        "target": 151,
+        "time": 3
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.7,
+        "deadline": "10:00",
+        "target_r": 2.0,
+        "stop_mode": "engulf"
+      },
+      "summary": {
+        "trades": 151,
+        "win_rate": 0.3509933774834437,
+        "avg_win_R": 1.9212410912191331,
+        "avg_loss_R": -1.1020630517985301,
+        "net_avg_R": -0.04090331948107203,
+        "net_avg_R_cost15": -0.08784504544677363,
+        "profit_factor": 0.9428122534705435,
+        "t": -0.34693064087539416,
+        "max_drawdown_R": 18.444648889333134,
+        "longest_losing_streak": 11,
+        "exit_reason_counts": {
+          "stop": 98,
+          "target": 53
+        },
+        "trades_per_year": 37.75,
+        "total_R": -6.1764012416418765,
+        "longest_losing_streak_days": 3,
+        "winning_days": 0.05321285140562249,
+        "winning_weeks": 0.20574162679425836,
+        "winning_months": 0.4375,
+        "net_avg_R_cost2": -0.1549824933586681,
+        "fill_touch_net_avg_R": -0.04090331948107203
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 151,
+          "win_rate": 0.3509933774834437,
+          "avg_win_R": 1.8818616368287,
+          "avg_loss_R": -1.1530945776977952,
+          "net_avg_R": -0.08784504544677363,
+          "net_avg_R_cost15": -0.15825763439532603,
+          "profit_factor": 0.8826175381906218,
+          "t": -0.7415741301066181,
+          "max_drawdown_R": 23.6669733339997,
+          "longest_losing_streak": 11,
+          "exit_reason_counts": {
+            "stop": 98,
+            "target": 53
+          },
+          "trades_per_year": 37.75,
+          "total_R": -13.264601862462818,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.05321285140562249,
+          "winning_weeks": 0.20574162679425836,
+          "winning_months": 0.4375
+        },
+        "x2": {
+          "trades": 151,
+          "win_rate": 0.3443708609271523,
+          "avg_win_R": 1.8427883599575212,
+          "avg_loss_R": -1.2043166789388886,
+          "net_avg_R": -0.1549824933586681,
+          "net_avg_R_cost15": -0.24903003142873062,
+          "profit_factor": 0.8037165444112925,
+          "t": -1.3073341966331853,
+          "max_drawdown_R": 28.88929777866625,
+          "longest_losing_streak": 11,
+          "exit_reason_counts": {
+            "stop": 99,
+            "target": 52
+          },
+          "trades_per_year": 37.75,
+          "total_R": -23.40235649715888,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.05220883534136546,
+          "winning_weeks": 0.20095693779904306,
+          "winning_months": 0.4166666666666667
+        },
+        "touch": {
+          "trades": 151,
+          "win_rate": 0.3509933774834437,
+          "avg_win_R": 1.9212410912191331,
+          "avg_loss_R": -1.1020630517985301,
+          "net_avg_R": -0.04090331948107203,
+          "net_avg_R_cost15": -0.08784504544677363,
+          "profit_factor": 0.9428122534705435,
+          "t": -0.34693064087539416,
+          "max_drawdown_R": 18.444648889333134,
+          "longest_losing_streak": 11,
+          "exit_reason_counts": {
+            "stop": 98,
+            "target": 53
+          },
+          "trades_per_year": 37.75,
+          "total_R": -6.1764012416418765,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.05321285140562249,
+          "winning_weeks": 0.20574162679425836,
+          "winning_months": 0.4375
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 98,
+        "target": 53
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.7,
+        "deadline": "10:00",
+        "target_r": 3.0,
+        "stop_mode": "engulf"
+      },
+      "summary": {
+        "trades": 151,
+        "win_rate": 0.2847682119205298,
+        "avg_win_R": 2.852706223403071,
+        "avg_loss_R": -1.0991856982330352,
+        "net_avg_R": 0.026187497994465275,
+        "net_avg_R_cost15": -0.021418409968753018,
+        "profit_factor": 1.033310114828143,
+        "t": 0.1784042385653654,
+        "max_drawdown_R": 21.079419219521647,
+        "longest_losing_streak": 12,
+        "exit_reason_counts": {
+          "stop": 108,
+          "target": 42,
+          "time": 1
+        },
+        "trades_per_year": 37.75,
+        "total_R": 3.9543121971642563,
+        "longest_losing_streak_days": 3,
+        "winning_days": 0.04317269076305221,
+        "winning_weeks": 0.18660287081339713,
+        "winning_months": 0.4166666666666667,
+        "net_avg_R_cost2": -0.06902431793197128,
+        "fill_touch_net_avg_R": 0.026187497994465275
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 151,
+          "win_rate": 0.2847682119205298,
+          "avg_win_R": 2.8100907722900006,
+          "avg_loss_R": -1.148778547349553,
+          "net_avg_R": -0.021418409968753018,
+          "net_avg_R_cost15": -0.09282727191358045,
+          "profit_factor": 0.9739322166981781,
+          "t": -0.14555468342109798,
+          "max_drawdown_R": 22.11912882928247,
+          "longest_losing_streak": 12,
+          "exit_reason_counts": {
+            "stop": 108,
+            "target": 42,
+            "time": 1
+          },
+          "trades_per_year": 37.75,
+          "total_R": -3.2341799052817057,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.04317269076305221,
+          "winning_weeks": 0.18660287081339713,
+          "winning_months": 0.4166666666666667
+        },
+        "x2": {
+          "trades": 151,
+          "win_rate": 0.2847682119205298,
+          "avg_win_R": 2.7674753211769296,
+          "avg_loss_R": -1.1983713964660707,
+          "net_avg_R": -0.06902431793197128,
+          "net_avg_R_cost15": -0.1642361338584079,
+          "profit_factor": 0.919468853663926,
+          "t": -0.46781415089682027,
+          "max_drawdown_R": 23.15883843904329,
+          "longest_losing_streak": 12,
+          "exit_reason_counts": {
+            "stop": 108,
+            "target": 42,
+            "time": 1
+          },
+          "trades_per_year": 37.75,
+          "total_R": -10.422672007727664,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.04317269076305221,
+          "winning_weeks": 0.18660287081339713,
+          "winning_months": 0.4166666666666667
+        },
+        "touch": {
+          "trades": 151,
+          "win_rate": 0.2847682119205298,
+          "avg_win_R": 2.852706223403071,
+          "avg_loss_R": -1.0991856982330352,
+          "net_avg_R": 0.026187497994465275,
+          "net_avg_R_cost15": -0.02141840996875301,
+          "profit_factor": 1.033310114828143,
+          "t": 0.1784042385653654,
+          "max_drawdown_R": 21.079419219521647,
+          "longest_losing_streak": 12,
+          "exit_reason_counts": {
+            "stop": 108,
+            "target": 42,
+            "time": 1
+          },
+          "trades_per_year": 37.75,
+          "total_R": 3.9543121971642563,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.04317269076305221,
+          "winning_weeks": 0.18660287081339713,
+          "winning_months": 0.4166666666666667
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 108,
+        "target": 42,
+        "time": 1
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.7,
+        "deadline": "10:00",
+        "target_r": 2.0,
+        "stop_mode": "fvg"
+      },
+      "summary": {
+        "trades": 156,
+        "win_rate": 0.3269230769230769,
+        "avg_win_R": 1.9226499473319993,
+        "avg_loss_R": -1.0740450356747404,
+        "net_avg_R": -0.09435629123022919,
+        "net_avg_R_cost15": -0.13517793037921008,
+        "profit_factor": 0.8694780151935614,
+        "t": -0.8335471239797068,
+        "max_drawdown_R": 19.93962352322567,
+        "longest_losing_streak": 13,
+        "exit_reason_counts": {
+          "stop": 104,
+          "target": 51,
+          "time": 1
+        },
+        "trades_per_year": 39.0,
+        "total_R": -14.719581431915755,
+        "longest_losing_streak_days": 2,
+        "winning_days": 0.05120481927710843,
+        "winning_weeks": 0.19617224880382775,
+        "winning_months": 0.4166666666666667,
+        "net_avg_R_cost2": -0.1759995695281909,
+        "fill_touch_net_avg_R": -0.09435629123022919
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 156,
+          "win_rate": 0.3269230769230769,
+          "avg_win_R": 1.883974920997999,
+          "avg_loss_R": -1.1159093153338546,
+          "net_avg_R": -0.13517793037921008,
+          "net_avg_R_cost15": -0.19641038910268133,
+          "profit_factor": 0.8200249970871529,
+          "t": -1.191729443602428,
+          "max_drawdown_R": 24.36614114534473,
+          "longest_losing_streak": 13,
+          "exit_reason_counts": {
+            "stop": 104,
+            "target": 51,
+            "time": 1
+          },
+          "trades_per_year": 39.0,
+          "total_R": -21.087757139156775,
+          "longest_losing_streak_days": 2,
+          "winning_days": 0.05120481927710843,
+          "winning_weeks": 0.19617224880382775,
+          "winning_months": 0.4166666666666667
+        },
+        "x2": {
+          "trades": 156,
+          "win_rate": 0.3269230769230769,
+          "avg_win_R": 1.8452998946639987,
+          "avg_loss_R": -1.1577735949929688,
+          "net_avg_R": -0.1759995695281909,
+          "net_avg_R_cost15": -0.2576428478261526,
+          "profit_factor": 0.7741483517516342,
+          "t": -1.5479097763091751,
+          "max_drawdown_R": 29.156099105824822,
+          "longest_losing_streak": 13,
+          "exit_reason_counts": {
+            "stop": 104,
+            "target": 51,
+            "time": 1
+          },
+          "trades_per_year": 39.0,
+          "total_R": -27.455932846397783,
+          "longest_losing_streak_days": 2,
+          "winning_days": 0.05120481927710843,
+          "winning_weeks": 0.19617224880382775,
+          "winning_months": 0.4166666666666667
+        },
+        "touch": {
+          "trades": 156,
+          "win_rate": 0.3269230769230769,
+          "avg_win_R": 1.9226499473319993,
+          "avg_loss_R": -1.0740450356747404,
+          "net_avg_R": -0.09435629123022919,
+          "net_avg_R_cost15": -0.13517793037921008,
+          "profit_factor": 0.8694780151935614,
+          "t": -0.8335471239797068,
+          "max_drawdown_R": 19.93962352322567,
+          "longest_losing_streak": 13,
+          "exit_reason_counts": {
+            "stop": 104,
+            "target": 51,
+            "time": 1
+          },
+          "trades_per_year": 39.0,
+          "total_R": -14.719581431915755,
+          "longest_losing_streak_days": 2,
+          "winning_days": 0.05120481927710843,
+          "winning_weeks": 0.19617224880382775,
+          "winning_months": 0.4166666666666667
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 104,
+        "target": 51,
+        "time": 1
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.7,
+        "deadline": "10:00",
+        "target_r": 3.0,
+        "stop_mode": "fvg"
+      },
+      "summary": {
+        "trades": 156,
+        "win_rate": 0.27564102564102566,
+        "avg_win_R": 2.85866197281841,
+        "avg_loss_R": -1.0749632502389161,
+        "net_avg_R": 0.009305240732013354,
+        "net_avg_R_cost15": -0.03216730619147384,
+        "profit_factor": 1.0119503369469702,
+        "t": 0.06531974536654125,
+        "max_drawdown_R": 21.482276442377785,
+        "longest_losing_streak": 14,
+        "exit_reason_counts": {
+          "stop": 112,
+          "target": 42,
+          "time": 2
+        },
+        "trades_per_year": 39.0,
+        "total_R": 1.4516175541940832,
+        "longest_losing_streak_days": 3,
+        "winning_days": 0.04317269076305221,
+        "winning_weeks": 0.18660287081339713,
+        "winning_months": 0.4166666666666667,
+        "net_avg_R_cost2": -0.07363985311496096,
+        "fill_touch_net_avg_R": 0.009305240732013354
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 156,
+          "win_rate": 0.27564102564102566,
+          "avg_win_R": 2.8185245614165,
+          "avg_loss_R": -1.116943857582119,
+          "net_avg_R": -0.03216730619147384,
+          "net_avg_R_cost15": -0.09437612657670456,
+          "profit_factor": 0.9602415446144682,
+          "t": -0.22550742015748643,
+          "max_drawdown_R": 23.2366448675249,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 112,
+            "target": 42,
+            "time": 2
+          },
+          "trades_per_year": 39.0,
+          "total_R": -5.01809976586992,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.04317269076305221,
+          "winning_weeks": 0.18660287081339713,
+          "winning_months": 0.4166666666666667
+        },
+        "x2": {
+          "trades": 156,
+          "win_rate": 0.27564102564102566,
+          "avg_win_R": 2.778387150014591,
+          "avg_loss_R": -1.158924464925321,
+          "net_avg_R": -0.07363985311496096,
+          "net_avg_R_cost15": -0.15658494696193534,
+          "profit_factor": 0.9122789265544063,
+          "t": -0.5154540602397223,
+          "max_drawdown_R": 25.65010406873171,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 112,
+            "target": 42,
+            "time": 2
+          },
+          "trades_per_year": 39.0,
+          "total_R": -11.48781708593391,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.04317269076305221,
+          "winning_weeks": 0.18660287081339713,
+          "winning_months": 0.4166666666666667
+        },
+        "touch": {
+          "trades": 156,
+          "win_rate": 0.27564102564102566,
+          "avg_win_R": 2.85866197281841,
+          "avg_loss_R": -1.0749632502389161,
+          "net_avg_R": 0.009305240732013354,
+          "net_avg_R_cost15": -0.03216730619147386,
+          "profit_factor": 1.0119503369469702,
+          "t": 0.06531974536654125,
+          "max_drawdown_R": 21.482276442377785,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 112,
+            "target": 42,
+            "time": 2
+          },
+          "trades_per_year": 39.0,
+          "total_R": 1.4516175541940832,
+          "longest_losing_streak_days": 3,
+          "winning_days": 0.04317269076305221,
+          "winning_weeks": 0.18660287081339713,
+          "winning_months": 0.4166666666666667
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 112,
+        "target": 42,
+        "time": 2
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.7,
+        "deadline": "10:30",
+        "target_r": 2.0,
+        "stop_mode": "engulf"
+      },
+      "summary": {
+        "trades": 317,
+        "win_rate": 0.3438485804416404,
+        "avg_win_R": 1.9230089738574754,
+        "avg_loss_R": -1.1095657961243173,
+        "net_avg_R": -0.06681926638294385,
+        "net_avg_R_cost15": -0.11600177023687631,
+        "profit_factor": 0.9082207361698625,
+        "t": -0.8240011019913849,
+        "max_drawdown_R": 50.63501740382239,
+        "longest_losing_streak": 14,
+        "exit_reason_counts": {
+          "stop": 208,
+          "target": 109
+        },
+        "trades_per_year": 79.25,
+        "total_R": -21.1817074433932,
+        "longest_losing_streak_days": 4,
+        "winning_days": 0.10943775100401607,
+        "winning_weeks": 0.3397129186602871,
+        "winning_months": 0.5,
+        "net_avg_R_cost2": -0.17480431829861678,
+        "fill_touch_net_avg_R": -0.06681926638294385
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 317,
+          "win_rate": 0.3438485804416404,
+          "avg_win_R": 1.884513460786213,
+          "avg_loss_R": -1.164348694186476,
+          "net_avg_R": -0.11600177023687631,
+          "net_avg_R_cost15": -0.18977552601777506,
+          "profit_factor": 0.8481630457179582,
+          "t": -1.4215836049999184,
+          "max_drawdown_R": 59.95252610573361,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 208,
+            "target": 109
+          },
+          "trades_per_year": 79.25,
+          "total_R": -36.77256116508979,
+          "longest_losing_streak_days": 4,
+          "winning_days": 0.10943775100401607,
+          "winning_weeks": 0.3397129186602871,
+          "winning_months": 0.4791666666666667
+        },
+        "x2": {
+          "trades": 317,
+          "win_rate": 0.34069400630914826,
+          "avg_win_R": 1.8461981050878935,
+          "avg_loss_R": -1.2191500681825553,
+          "net_avg_R": -0.17480431829861678,
+          "net_avg_R_cost15": -0.2732474869116476,
+          "profit_factor": 0.7825256878454256,
+          "t": -2.132718490084113,
+          "max_drawdown_R": 69.27003480764476,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 209,
+            "target": 108
+          },
+          "trades_per_year": 79.25,
+          "total_R": -55.41296890066152,
+          "longest_losing_streak_days": 4,
+          "winning_days": 0.10843373493975904,
+          "winning_weeks": 0.3349282296650718,
+          "winning_months": 0.4583333333333333
+        },
+        "touch": {
+          "trades": 317,
+          "win_rate": 0.3438485804416404,
+          "avg_win_R": 1.9230089738574754,
+          "avg_loss_R": -1.1095657961243173,
+          "net_avg_R": -0.06681926638294385,
+          "net_avg_R_cost15": -0.11600177023687633,
+          "profit_factor": 0.9082207361698625,
+          "t": -0.8240011019913849,
+          "max_drawdown_R": 50.63501740382239,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 208,
+            "target": 109
+          },
+          "trades_per_year": 79.25,
+          "total_R": -21.1817074433932,
+          "longest_losing_streak_days": 4,
+          "winning_days": 0.10943775100401607,
+          "winning_weeks": 0.3397129186602871,
+          "winning_months": 0.5
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 208,
+        "target": 109
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.7,
+        "deadline": "10:30",
+        "target_r": 3.0,
+        "stop_mode": "engulf"
+      },
+      "summary": {
+        "trades": 317,
+        "win_rate": 0.28391167192429023,
+        "avg_win_R": 2.8917030877310435,
+        "avg_loss_R": -1.108080127910566,
+        "net_avg_R": 0.027505012176957267,
+        "net_avg_R_cost15": -0.022356513914463395,
+        "profit_factor": 1.034663633176554,
+        "t": 0.2700124071986279,
+        "max_drawdown_R": 38.81864564553674,
+        "longest_losing_streak": 14,
+        "exit_reason_counts": {
+          "stop": 227,
+          "target": 89,
+          "time": 1
+        },
+        "trades_per_year": 79.25,
+        "total_R": 8.719088860095454,
+        "longest_losing_streak_days": 4,
+        "winning_days": 0.09036144578313253,
+        "winning_weeks": 0.3444976076555024,
+        "winning_months": 0.4583333333333333,
+        "net_avg_R_cost2": -0.07221804000588407,
+        "fill_touch_net_avg_R": 0.027505012176957267
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 317,
+          "win_rate": 0.28391167192429023,
+          "avg_win_R": 2.8523807626962543,
+          "avg_loss_R": -1.1621201918658493,
+          "net_avg_R": -0.022356513914463395,
+          "net_avg_R_cost15": -0.0971488030515944,
+          "profit_factor": 0.9731350249118621,
+          "t": -0.2185230930150185,
+          "max_drawdown_R": 47.39361666933318,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 227,
+            "target": 89,
+            "time": 1
+          },
+          "trades_per_year": 79.25,
+          "total_R": -7.087014910884896,
+          "longest_losing_streak_days": 4,
+          "winning_days": 0.09036144578313253,
+          "winning_weeks": 0.3444976076555024,
+          "winning_months": 0.3958333333333333
+        },
+        "x2": {
+          "trades": 317,
+          "win_rate": 0.28391167192429023,
+          "avg_win_R": 2.813058437661464,
+          "avg_loss_R": -1.216160255821132,
+          "net_avg_R": -0.07221804000588407,
+          "net_avg_R_cost15": -0.17194109218872541,
+          "profit_factor": 0.9170744623422803,
+          "t": -0.7026957833803796,
+          "max_drawdown_R": 56.26409366383426,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 227,
+            "target": 89,
+            "time": 1
+          },
+          "trades_per_year": 79.25,
+          "total_R": -22.89311868186525,
+          "longest_losing_streak_days": 4,
+          "winning_days": 0.09036144578313253,
+          "winning_weeks": 0.3349282296650718,
+          "winning_months": 0.3958333333333333
+        },
+        "touch": {
+          "trades": 317,
+          "win_rate": 0.28391167192429023,
+          "avg_win_R": 2.8917030877310435,
+          "avg_loss_R": -1.108080127910566,
+          "net_avg_R": 0.027505012176957267,
+          "net_avg_R_cost15": -0.022356513914463395,
+          "profit_factor": 1.034663633176554,
+          "t": 0.2700124071986279,
+          "max_drawdown_R": 38.81864564553674,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 227,
+            "target": 89,
+            "time": 1
+          },
+          "trades_per_year": 79.25,
+          "total_R": 8.719088860095454,
+          "longest_losing_streak_days": 4,
+          "winning_days": 0.09036144578313253,
+          "winning_weeks": 0.3444976076555024,
+          "winning_months": 0.4583333333333333
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 227,
+        "target": 89,
+        "time": 1
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.7,
+        "deadline": "10:30",
+        "target_r": 2.0,
+        "stop_mode": "fvg"
+      },
+      "summary": {
+        "trades": 331,
+        "win_rate": 0.3413897280966767,
+        "avg_win_R": 1.9282550458768613,
+        "avg_loss_R": -1.0876086288817308,
+        "net_avg_R": -0.058023748979250826,
+        "net_avg_R_cost15": -0.10065612193196731,
+        "profit_factor": 0.9189963401595724,
+        "t": -0.7359102619332095,
+        "max_drawdown_R": 36.839347456164106,
+        "longest_losing_streak": 10,
+        "exit_reason_counts": {
+          "stop": 217,
+          "target": 113,
+          "time": 1
+        },
+        "trades_per_year": 82.75,
+        "total_R": -19.205860912132025,
+        "longest_losing_streak_days": 4,
+        "winning_days": 0.11345381526104417,
+        "winning_weeks": 0.3492822966507177,
+        "winning_months": 0.4583333333333333,
+        "net_avg_R_cost2": -0.14328849488468376,
+        "fill_touch_net_avg_R": -0.058023748979250826
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 331,
+          "win_rate": 0.3413897280966767,
+          "avg_win_R": 1.8923825688152918,
+          "avg_loss_R": -1.1337449845670144,
+          "net_avg_R": -0.10065612193196731,
+          "net_avg_R_cost15": -0.164604681361042,
+          "profit_factor": 0.865198006343401,
+          "t": -1.2710884782061365,
+          "max_drawdown_R": 45.961287193205415,
+          "longest_losing_streak": 10,
+          "exit_reason_counts": {
+            "stop": 217,
+            "target": 113,
+            "time": 1
+          },
+          "trades_per_year": 82.75,
+          "total_R": -33.31717635948118,
+          "longest_losing_streak_days": 4,
+          "winning_days": 0.11345381526104417,
+          "winning_weeks": 0.3492822966507177,
+          "winning_months": 0.4375
+        },
+        "x2": {
+          "trades": 331,
+          "win_rate": 0.3413897280966767,
+          "avg_win_R": 1.8565100917537225,
+          "avg_loss_R": -1.1798813402522978,
+          "net_avg_R": -0.14328849488468376,
+          "net_avg_R_cost15": -0.22855324079011669,
+          "profit_factor": 0.8156069753797146,
+          "t": -1.8010256694711118,
+          "max_drawdown_R": 55.94962716963908,
+          "longest_losing_streak": 10,
+          "exit_reason_counts": {
+            "stop": 217,
+            "target": 113,
+            "time": 1
+          },
+          "trades_per_year": 82.75,
+          "total_R": -47.42849180683032,
+          "longest_losing_streak_days": 4,
+          "winning_days": 0.11345381526104417,
+          "winning_weeks": 0.3492822966507177,
+          "winning_months": 0.4166666666666667
+        },
+        "touch": {
+          "trades": 331,
+          "win_rate": 0.3413897280966767,
+          "avg_win_R": 1.9282550458768613,
+          "avg_loss_R": -1.0876086288817308,
+          "net_avg_R": -0.058023748979250826,
+          "net_avg_R_cost15": -0.10065612193196734,
+          "profit_factor": 0.9189963401595724,
+          "t": -0.7359102619332095,
+          "max_drawdown_R": 36.839347456164106,
+          "longest_losing_streak": 10,
+          "exit_reason_counts": {
+            "stop": 217,
+            "target": 113,
+            "time": 1
+          },
+          "trades_per_year": 82.75,
+          "total_R": -19.205860912132025,
+          "longest_losing_streak_days": 4,
+          "winning_days": 0.11345381526104417,
+          "winning_weeks": 0.3492822966507177,
+          "winning_months": 0.4583333333333333
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 217,
+        "target": 113,
+        "time": 1
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.7,
+        "deadline": "10:30",
+        "target_r": 3.0,
+        "stop_mode": "fvg"
+      },
+      "summary": {
+        "trades": 331,
+        "win_rate": 0.2537764350453172,
+        "avg_win_R": 2.8713668977577225,
+        "avg_loss_R": -1.0883650760540138,
+        "net_avg_R": -0.08347841200511381,
+        "net_avg_R_cost15": -0.12711818814353917,
+        "profit_factor": 0.8972147913106243,
+        "t": -0.8739791627176889,
+        "max_drawdown_R": 45.79866709025438,
+        "longest_losing_streak": 17,
+        "exit_reason_counts": {
+          "stop": 246,
+          "target": 82,
+          "time": 3
+        },
+        "trades_per_year": 82.75,
+        "total_R": -27.631354373692673,
+        "longest_losing_streak_days": 5,
+        "winning_days": 0.08433734939759036,
+        "winning_weeks": 0.32057416267942584,
+        "winning_months": 0.4166666666666667,
+        "net_avg_R_cost2": -0.17075796428196457,
+        "fill_touch_net_avg_R": -0.08347841200511381
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 331,
+          "win_rate": 0.2537764350453172,
+          "avg_win_R": 2.8353753023069492,
+          "avg_loss_R": -1.1346058529121263,
+          "net_avg_R": -0.12711818814353917,
+          "net_avg_R_cost15": -0.19257785235117728,
+          "profit_factor": 0.8498609321943664,
+          "t": -1.3264768155720517,
+          "max_drawdown_R": 56.32057072711869,
+          "longest_losing_streak": 17,
+          "exit_reason_counts": {
+            "stop": 246,
+            "target": 82,
+            "time": 3
+          },
+          "trades_per_year": 82.75,
+          "total_R": -42.07612027551147,
+          "longest_losing_streak_days": 5,
+          "winning_days": 0.08433734939759036,
+          "winning_weeks": 0.32057416267942584,
+          "winning_months": 0.375
+        },
+        "x2": {
+          "trades": 331,
+          "win_rate": 0.2537764350453172,
+          "avg_win_R": 2.799383706856176,
+          "avg_loss_R": -1.1808466297702391,
+          "net_avg_R": -0.17075796428196457,
+          "net_avg_R_cost15": -0.25803751655881535,
+          "profit_factor": 0.8062157329117593,
+          "t": -1.775558510887721,
+          "max_drawdown_R": 66.842474363983,
+          "longest_losing_streak": 17,
+          "exit_reason_counts": {
+            "stop": 246,
+            "target": 82,
+            "time": 3
+          },
+          "trades_per_year": 82.75,
+          "total_R": -56.520886177330276,
+          "longest_losing_streak_days": 5,
+          "winning_days": 0.08433734939759036,
+          "winning_weeks": 0.32057416267942584,
+          "winning_months": 0.3541666666666667
+        },
+        "touch": {
+          "trades": 331,
+          "win_rate": 0.2537764350453172,
+          "avg_win_R": 2.8713668977577225,
+          "avg_loss_R": -1.0883650760540138,
+          "net_avg_R": -0.08347841200511381,
+          "net_avg_R_cost15": -0.12711818814353917,
+          "profit_factor": 0.8972147913106243,
+          "t": -0.8739791627176889,
+          "max_drawdown_R": 45.79866709025438,
+          "longest_losing_streak": 17,
+          "exit_reason_counts": {
+            "stop": 246,
+            "target": 82,
+            "time": 3
+          },
+          "trades_per_year": 82.75,
+          "total_R": -27.631354373692673,
+          "longest_losing_streak_days": 5,
+          "winning_days": 0.08433734939759036,
+          "winning_weeks": 0.32057416267942584,
+          "winning_months": 0.4166666666666667
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 246,
+        "target": 82,
+        "time": 3
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.7,
+        "deadline": "11:00",
+        "target_r": 2.0,
+        "stop_mode": "engulf"
+      },
+      "summary": {
+        "trades": 446,
+        "win_rate": 0.3452914798206278,
+        "avg_win_R": 1.9178520343780243,
+        "avg_loss_R": -1.1094702104621237,
+        "net_avg_R": -0.06416163264736412,
+        "net_avg_R_cost15": -0.1141775210463686,
+        "profit_factor": 0.911669280530327,
+        "t": -0.9396068059882511,
+        "max_drawdown_R": 56.42826971257169,
+        "longest_losing_streak": 11,
+        "exit_reason_counts": {
+          "stop": 292,
+          "target": 154
+        },
+        "trades_per_year": 111.5,
+        "total_R": -28.616088160724395,
+        "longest_losing_streak_days": 6,
+        "winning_days": 0.15461847389558234,
+        "winning_weeks": 0.41626794258373206,
+        "winning_months": 0.4375,
+        "net_avg_R_cost2": -0.17098372607528378,
+        "fill_touch_net_avg_R": -0.06416163264736412
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 446,
+          "win_rate": 0.3452914798206278,
+          "avg_win_R": 1.8767780515670365,
+          "avg_loss_R": -1.164202035369877,
+          "net_avg_R": -0.1141775210463686,
+          "net_avg_R_cost15": -0.18920135364487536,
+          "profit_factor": 0.8502026044167748,
+          "t": -1.6629789707168343,
+          "max_drawdown_R": 69.6414467144514,
+          "longest_losing_streak": 11,
+          "exit_reason_counts": {
+            "stop": 292,
+            "target": 154
+          },
+          "trades_per_year": 111.5,
+          "total_R": -50.923174386680394,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.15461847389558234,
+          "winning_weeks": 0.41626794258373206,
+          "winning_months": 0.375
+        },
+        "x2": {
+          "trades": 446,
+          "win_rate": 0.3430493273542601,
+          "avg_win_R": 1.835763827692774,
+          "avg_loss_R": -1.218875793401266,
+          "net_avg_R": -0.17098372607528378,
+          "net_avg_R_cost15": -0.27104958014431585,
+          "profit_factor": 0.7864681989299539,
+          "t": -2.479806124424964,
+          "max_drawdown_R": 82.93061261768874,
+          "longest_losing_streak": 11,
+          "exit_reason_counts": {
+            "stop": 293,
+            "target": 153
+          },
+          "trades_per_year": 111.5,
+          "total_R": -76.25874182957656,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.1536144578313253,
+          "winning_weeks": 0.41148325358851673,
+          "winning_months": 0.2916666666666667
+        },
+        "touch": {
+          "trades": 446,
+          "win_rate": 0.3452914798206278,
+          "avg_win_R": 1.9178520343780243,
+          "avg_loss_R": -1.1094702104621237,
+          "net_avg_R": -0.06416163264736412,
+          "net_avg_R_cost15": -0.11417752104636861,
+          "profit_factor": 0.911669280530327,
+          "t": -0.9396068059882511,
+          "max_drawdown_R": 56.42826971257169,
+          "longest_losing_streak": 11,
+          "exit_reason_counts": {
+            "stop": 292,
+            "target": 154
+          },
+          "trades_per_year": 111.5,
+          "total_R": -28.616088160724395,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.15461847389558234,
+          "winning_weeks": 0.41626794258373206,
+          "winning_months": 0.4375
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 292,
+        "target": 154
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.7,
+        "deadline": "11:00",
+        "target_r": 3.0,
+        "stop_mode": "engulf"
+      },
+      "summary": {
+        "trades": 446,
+        "win_rate": 0.2757847533632287,
+        "avg_win_R": 2.895370934760883,
+        "avg_loss_R": -1.1088870595762306,
+        "net_avg_R": -0.004573756205233064,
+        "net_avg_R_cost15": -0.055436173201620594,
+        "profit_factor": 0.994304681283794,
+        "t": -0.05374892621944706,
+        "max_drawdown_R": 34.920394360981916,
+        "longest_losing_streak": 14,
+        "exit_reason_counts": {
+          "stop": 323,
+          "target": 122,
+          "time": 1
+        },
+        "trades_per_year": 111.5,
+        "total_R": -2.0398952675339466,
+        "longest_losing_streak_days": 6,
+        "winning_days": 0.12349397590361445,
+        "winning_weeks": 0.42105263157894735,
+        "winning_months": 0.4791666666666667,
+        "net_avg_R_cost2": -0.10625134177438723,
+        "fill_touch_net_avg_R": -0.004573756205233064
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 446,
+          "win_rate": 0.2757847533632287,
+          "avg_win_R": 2.8539047907508523,
+          "avg_loss_R": -1.1633276238708286,
+          "net_avg_R": -0.055436173201620594,
+          "net_avg_R_cost15": -0.13172979869620202,
+          "profit_factor": 0.9342003568104663,
+          "t": -0.6489237650112821,
+          "max_drawdown_R": 46.74335033722976,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 323,
+            "target": 122,
+            "time": 1
+          },
+          "trades_per_year": 111.5,
+          "total_R": -24.724533247922786,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.12349397590361445,
+          "winning_weeks": 0.42105263157894735,
+          "winning_months": 0.4166666666666667
+        },
+        "x2": {
+          "trades": 446,
+          "win_rate": 0.2757847533632287,
+          "avg_win_R": 2.812438646740821,
+          "avg_loss_R": -1.2177029473080427,
+          "net_avg_R": -0.10625134177438723,
+          "net_avg_R_cost15": -0.20795469921097115,
+          "profit_factor": 0.8795171027804072,
+          "t": -1.238638182581107,
+          "max_drawdown_R": 60.079854550452595,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 323,
+            "target": 122,
+            "time": 1
+          },
+          "trades_per_year": 111.5,
+          "total_R": -47.388098431376704,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.12349397590361445,
+          "winning_weeks": 0.40669856459330145,
+          "winning_months": 0.3541666666666667
+        },
+        "touch": {
+          "trades": 446,
+          "win_rate": 0.2757847533632287,
+          "avg_win_R": 2.895370934760883,
+          "avg_loss_R": -1.1088870595762306,
+          "net_avg_R": -0.004573756205233064,
+          "net_avg_R_cost15": -0.05543617320162062,
+          "profit_factor": 0.994304681283794,
+          "t": -0.05374892621944706,
+          "max_drawdown_R": 34.920394360981916,
+          "longest_losing_streak": 14,
+          "exit_reason_counts": {
+            "stop": 323,
+            "target": 122,
+            "time": 1
+          },
+          "trades_per_year": 111.5,
+          "total_R": -2.0398952675339466,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.12349397590361445,
+          "winning_weeks": 0.42105263157894735,
+          "winning_months": 0.4791666666666667
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 323,
+        "target": 122,
+        "time": 1
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.7,
+        "deadline": "11:00",
+        "target_r": 2.0,
+        "stop_mode": "fvg"
+      },
+      "summary": {
+        "trades": 479,
+        "win_rate": 0.3465553235908142,
+        "avg_win_R": 1.9231595651521842,
+        "avg_loss_R": -1.0915224156830368,
+        "net_avg_R": -0.046768326291289866,
+        "net_avg_R_cost15": -0.09744979448906313,
+        "profit_factor": 0.934429220737628,
+        "t": -0.7117748273959623,
+        "max_drawdown_R": 45.602000491150896,
+        "longest_losing_streak": 11,
+        "exit_reason_counts": {
+          "stop": 312,
+          "target": 166,
+          "time": 1
+        },
+        "trades_per_year": 119.75,
+        "total_R": -22.402028293527845,
+        "longest_losing_streak_days": 6,
+        "winning_days": 0.16666666666666666,
+        "winning_weeks": 0.41626794258373206,
+        "winning_months": 0.5,
+        "net_avg_R_cost2": -0.14177493126208154,
+        "fill_touch_net_avg_R": -0.046768326291289866
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 479,
+          "win_rate": 0.3444676409185804,
+          "avg_win_R": 1.8854625222624004,
+          "avg_loss_R": -1.1394260118903101,
+          "net_avg_R": -0.09744979448906313,
+          "net_avg_R_cost15": -0.1639374996485908,
+          "profit_factor": 0.8695330039036102,
+          "t": -1.4787396143170788,
+          "max_drawdown_R": 63.471891233460454,
+          "longest_losing_streak": 11,
+          "exit_reason_counts": {
+            "stop": 313,
+            "target": 165,
+            "time": 1
+          },
+          "trades_per_year": 119.75,
+          "total_R": -46.67845156026124,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.16566265060240964,
+          "winning_weeks": 0.41626794258373206,
+          "winning_months": 0.5
+        },
+        "x2": {
+          "trades": 479,
+          "win_rate": 0.3444676409185804,
+          "avg_win_R": 1.8472833630165342,
+          "avg_loss_R": -1.186980722841609,
+          "net_avg_R": -0.14177493126208154,
+          "net_avg_R_cost15": -0.23042520480811846,
+          "profit_factor": 0.8177944317959024,
+          "t": -2.1417962959092067,
+          "max_drawdown_R": 78.29709922331243,
+          "longest_losing_streak": 11,
+          "exit_reason_counts": {
+            "stop": 313,
+            "target": 165,
+            "time": 1
+          },
+          "trades_per_year": 119.75,
+          "total_R": -67.91019207453706,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.16566265060240964,
+          "winning_weeks": 0.41626794258373206,
+          "winning_months": 0.4583333333333333
+        },
+        "touch": {
+          "trades": 479,
+          "win_rate": 0.3465553235908142,
+          "avg_win_R": 1.9231595651521842,
+          "avg_loss_R": -1.0915224156830368,
+          "net_avg_R": -0.046768326291289866,
+          "net_avg_R_cost15": -0.09104682136028165,
+          "profit_factor": 0.934429220737628,
+          "t": -0.7117748273959623,
+          "max_drawdown_R": 45.602000491150896,
+          "longest_losing_streak": 11,
+          "exit_reason_counts": {
+            "stop": 312,
+            "target": 166,
+            "time": 1
+          },
+          "trades_per_year": 119.75,
+          "total_R": -22.402028293527845,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.16666666666666666,
+          "winning_weeks": 0.41626794258373206,
+          "winning_months": 0.5
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 312,
+        "target": 166,
+        "time": 1
+      }
+    },
+    {
+      "params": {
+        "body_ratio": 0.7,
+        "deadline": "11:00",
+        "target_r": 3.0,
+        "stop_mode": "fvg"
+      },
+      "summary": {
+        "trades": 479,
+        "win_rate": 0.2797494780793319,
+        "avg_win_R": 2.885480546513067,
+        "avg_loss_R": -1.0913412908052698,
+        "net_avg_R": 0.021172542599024954,
+        "net_avg_R_cost15": -0.03232492899010307,
+        "profit_factor": 1.0269357359897682,
+        "t": 0.25811001022279,
+        "max_drawdown_R": 45.23771757996149,
+        "longest_losing_streak": 13,
+        "exit_reason_counts": {
+          "stop": 344,
+          "target": 132,
+          "time": 3
+        },
+        "trades_per_year": 119.75,
+        "total_R": 10.141647904932952,
+        "longest_losing_streak_days": 6,
+        "winning_days": 0.13453815261044177,
+        "winning_weeks": 0.44976076555023925,
+        "winning_months": 0.4583333333333333,
+        "net_avg_R_cost2": -0.08594216775513874,
+        "fill_touch_net_avg_R": 0.021172542599024954
+      },
+      "sensitivity": {
+        "x1_5": {
+          "trades": 479,
+          "win_rate": 0.2776617954070981,
+          "avg_win_R": 2.8465824855326267,
+          "avg_loss_R": -1.1389569698326552,
+          "net_avg_R": -0.03232492899010307,
+          "net_avg_R_cost15": -0.09990511522831214,
+          "profit_factor": 0.9607093080247684,
+          "t": -0.3938319810123251,
+          "max_drawdown_R": 51.264846430038034,
+          "longest_losing_streak": 13,
+          "exit_reason_counts": {
+            "stop": 345,
+            "target": 131,
+            "time": 3
+          },
+          "trades_per_year": 119.75,
+          "total_R": -15.48364098625937,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.13353413654618473,
+          "winning_weeks": 0.4449760765550239,
+          "winning_months": 0.4583333333333333
+        },
+        "x2": {
+          "trades": 479,
+          "win_rate": 0.2755741127348643,
+          "avg_win_R": 2.8086161938586125,
+          "avg_loss_R": -1.1870421785131076,
+          "net_avg_R": -0.08594216775513874,
+          "net_avg_R_cost15": -0.17615560803139804,
+          "profit_factor": 0.9000584244410423,
+          "t": -1.0458575111761685,
+          "max_drawdown_R": 66.73335818917299,
+          "longest_losing_streak": 13,
+          "exit_reason_counts": {
+            "stop": 346,
+            "target": 130,
+            "time": 3
+          },
+          "trades_per_year": 119.75,
+          "total_R": -41.16629835471146,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.13253012048192772,
+          "winning_weeks": 0.4258373205741627,
+          "winning_months": 0.375
+        },
+        "touch": {
+          "trades": 479,
+          "win_rate": 0.2797494780793319,
+          "avg_win_R": 2.885480546513067,
+          "avg_loss_R": -1.0913412908052698,
+          "net_avg_R": 0.021172542599024954,
+          "net_avg_R_cost15": -0.023834273189087773,
+          "profit_factor": 1.0269357359897682,
+          "t": 0.25811001022279,
+          "max_drawdown_R": 45.23771757996149,
+          "longest_losing_streak": 13,
+          "exit_reason_counts": {
+            "stop": 344,
+            "target": 132,
+            "time": 3
+          },
+          "trades_per_year": 119.75,
+          "total_R": 10.141647904932952,
+          "longest_losing_streak_days": 6,
+          "winning_days": 0.13453815261044177,
+          "winning_weeks": 0.44976076555023925,
+          "winning_months": 0.4583333333333333
+        }
+      },
+      "exit_reason_counts": {
+        "stop": 344,
+        "target": 132,
+        "time": 3
+      }
+    }
+  ],
+  "runtime_seconds": 11.289736374979839,
+  "cross_market": {
+    "chosen": {
+      "overall": {
+        "trades": 189,
+        "win_rate": 0.24867724867724866,
+        "avg_win_R": 2.787668090904689,
+        "avg_loss_R": -1.2657540922205888,
+        "net_avg_R": -0.2577602159936679,
+        "net_avg_R_cost15": -0.38041989936978254,
+        "profit_factor": 0.7289558697297064,
+        "t": -2.0059804958801064,
+        "max_drawdown_R": 50.131148140268664,
+        "longest_losing_streak": 12,
+        "exit_reason_counts": {
+          "stop": 142,
+          "target": 46,
+          "time": 1
+        },
+        "trades_per_year": 47.25,
+        "total_R": -48.716680822803234,
+        "longest_losing_streak_days": 4,
+        "winning_days": 0.047283702213279676,
+        "winning_weeks": 0.21052631578947367,
+        "winning_months": 0.3125
+      },
+      "by_year": {
+        "2019": {
+          "trades": 48,
+          "win_rate": 0.22916666666666666,
+          "avg_win_R": 2.6016691984926346,
+          "avg_loss_R": -1.4091762154709206,
+          "net_avg_R": -0.49002414143760586,
+          "net_avg_R_cost15": -0.6789920317608239,
+          "profit_factor": 0.5488804116062993,
+          "t": -1.97145817604613,
+          "max_drawdown_R": 23.744921869061468,
+          "longest_losing_streak": 7,
+          "exit_reason_counts": {
+            "stop": 37,
+            "target": 10,
+            "time": 1
+          }
+        },
+        "2020": {
+          "trades": 45,
+          "win_rate": 0.26666666666666666,
+          "avg_win_R": 2.8202595337196956,
+          "avg_loss_R": -1.2312804394422974,
+          "net_avg_R": -0.15086977993243234,
+          "net_avg_R_cost15": -0.2597805564701332,
+          "profit_factor": 0.832912542505048,
+          "t": -0.5574151657659683,
+          "max_drawdown_R": 21.915295193793394,
+          "longest_losing_streak": 12,
+          "exit_reason_counts": {
+            "stop": 33,
+            "target": 12
+          }
+        },
+        "2021": {
+          "trades": 38,
+          "win_rate": 0.2631578947368421,
+          "avg_win_R": 2.8083214556046046,
+          "avg_loss_R": -1.2863640605930626,
+          "net_avg_R": -0.20881524054104514,
+          "net_avg_R_cost15": -0.339538650285252,
+          "profit_factor": 0.7796952504781638,
+          "t": -0.7020088331021508,
+          "max_drawdown_R": 13.699398752746877,
+          "longest_losing_streak": 8,
+          "exit_reason_counts": {
+            "stop": 28,
+            "target": 10
+          }
+        },
+        "2022": {
+          "trades": 58,
+          "win_rate": 0.2413793103448276,
+          "avg_win_R": 2.8911221520299297,
+          "avg_loss_R": -1.1578889301067725,
+          "net_avg_R": -0.18054142752205138,
+          "net_avg_R_cost15": -0.253709477661617,
+          "profit_factor": 0.7944652366905235,
+          "t": -0.7862700934070294,
+          "max_drawdown_R": 16.4856150227822,
+          "longest_losing_streak": 9,
+          "exit_reason_counts": {
+            "stop": 44,
+            "target": 14
+          }
+        }
+      },
+      "long_vs_short": {
+        "long": {
+          "trades": 90,
+          "win_rate": 0.23333333333333334,
+          "avg_win_R": 2.749229757656763,
+          "avg_loss_R": -1.277097264060599,
+          "net_avg_R": -0.33762095899321465,
+          "net_avg_R_cost15": -0.4655013744534747,
+          "profit_factor": 0.6551749218348518,
+          "t": -1.8555017400048175,
+          "max_drawdown_R": 36.3865084557922,
+          "longest_losing_streak": 13,
+          "exit_reason_counts": {
+            "stop": 69,
+            "target": 20,
+            "time": 1
+          }
+        },
+        "short": {
+          "trades": 99,
+          "win_rate": 0.26262626262626265,
+          "avg_win_R": 2.818714436989553,
+          "avg_loss_R": -1.255032464043045,
+          "net_avg_R": -0.18515954053953448,
+          "net_avg_R_cost15": -0.30307310383915337,
+          "profit_factor": 0.7999200966105507,
+          "t": -1.0189248188089626,
+          "max_drawdown_R": 20.232400176520514,
+          "longest_losing_streak": 10,
+          "exit_reason_counts": {
+            "stop": 73,
+            "target": 26
+          }
+        }
+      },
+      "by_entry_hour": {
+        "10": {
+          "trades": 7,
+          "win_rate": 0.5714285714285714,
+          "avg_win_R": 2.8133732345567104,
+          "avg_loss_R": -1.2732868713105392,
+          "net_avg_R": 1.0619474748993176,
+          "net_avg_R_cost15": 0.9500640694918336,
+          "profit_factor": 2.9460480566185128,
+          "t": 1.2859730710421895,
+          "max_drawdown_R": 2.553645705896782,
+          "longest_losing_streak": 2,
+          "exit_reason_counts": {
+            "target": 4,
+            "stop": 3
+          }
+        },
+        "9": {
+          "trades": 182,
+          "win_rate": 0.23626373626373626,
+          "avg_win_R": 2.785276914751013,
+          "avg_loss_R": -1.2655915142546188,
+          "net_avg_R": -0.30851820410493663,
+          "net_avg_R_cost15": -0.43159235971061394,
+          "profit_factor": 0.680814004487765,
+          "t": -2.3977756050775456,
+          "max_drawdown_R": 57.34101738450748,
+          "longest_losing_streak": 11,
+          "exit_reason_counts": {
+            "stop": 139,
+            "target": 42,
+            "time": 1
+          }
+        }
+      },
+      "daily": {
+        "sharpe_annualized": -1.0035415554169769,
+        "max_drawdown_R": 50.131148140268664,
+        "winning_periods": {
+          "day": 0.047283702213279676,
+          "week": 0.21052631578947367,
+          "month": 0.3125
+        },
+        "winning_days": {
+          "wins": 47,
+          "days": 994,
+          "percent": 4.7283702213279675
+        }
+      },
+      "costs": {
+        "x1_net_avg_R": -0.2577602159936679,
+        "x1_5_net_avg_R": -0.38041989936978254,
+        "x2_net_avg_R": -0.5030795827458973,
+        "median_stop_points": 3.837999999999738,
+        "median_cost_R": 0.19494328922495407
+      },
+      "diagnostics": {
+        "minimum_stop_skips": 12,
+        "bad_opening_range": 0,
+        "signals": 189,
+        "unresolved_at_end": 0
+      }
+    },
+    "default": {
+      "overall": {
+        "trades": 168,
+        "win_rate": 0.21428571428571427,
+        "avg_win_R": 2.7946400228090518,
+        "avg_loss_R": -1.3245474303913125,
+        "net_avg_R": -0.4418644047055202,
+        "net_avg_R_cost15": -0.5916752925363404,
+        "profit_factor": 0.5754226192187213,
+        "t": -3.3612066575387964,
+        "max_drawdown_R": 75.22448449977468,
+        "longest_losing_streak": 15,
+        "exit_reason_counts": {
+          "stop": 132,
+          "target": 36
+        },
+        "trades_per_year": 42.0,
+        "total_R": -74.23321999052739,
+        "longest_losing_streak_days": 4,
+        "winning_days": 0.03621730382293763,
+        "winning_weeks": 0.15311004784688995,
+        "winning_months": 0.25
+      },
+      "by_year": {
+        "2019": {
+          "trades": 46,
+          "win_rate": 0.13043478260869565,
+          "avg_win_R": 2.66237991132152,
+          "avg_loss_R": -1.4911635381022912,
+          "net_avg_R": -0.9493970012209244,
+          "net_avg_R_cost15": -1.1858591030794823,
+          "profit_factor": 0.26781568653862353,
+          "t": -4.5253194864670805,
+          "max_drawdown_R": 43.67226205616254,
+          "longest_losing_streak": 11,
+          "exit_reason_counts": {
+            "stop": 40,
+            "target": 6
+          }
+        },
+        "2020": {
+          "trades": 38,
+          "win_rate": 0.2631578947368421,
+          "avg_win_R": 2.7767652221573123,
+          "avg_loss_R": -1.2820392782950751,
+          "net_avg_R": -0.21393283080760472,
+          "net_avg_R_cost15": -0.3472150356850913,
+          "profit_factor": 0.7735346972949233,
+          "t": -0.7262835925397779,
+          "max_drawdown_R": 24.753883463215182,
+          "longest_losing_streak": 13,
+          "exit_reason_counts": {
+            "stop": 28,
+            "target": 10
+          }
+        },
+        "2021": {
+          "trades": 31,
+          "win_rate": 0.25806451612903225,
+          "avg_win_R": 2.790550521502452,
+          "avg_loss_R": -1.344286268008492,
+          "net_avg_R": -0.2772316126508289,
+          "net_avg_R_cost15": -0.432314951327911,
+          "profit_factor": 0.7220383719210524,
+          "t": -0.8361418627588751,
+          "max_drawdown_R": 11.349811101397973,
+          "longest_losing_streak": 6,
+          "exit_reason_counts": {
+            "stop": 23,
+            "target": 8
+          }
+        },
+        "2022": {
+          "trades": 53,
+          "win_rate": 0.22641509433962265,
+          "avg_win_R": 2.878392079967,
+          "avg_loss_R": -1.1799520812464437,
+          "net_avg_R": -0.26108170512264506,
+          "net_avg_R_cost15": -0.3444527463632128,
+          "profit_factor": 0.7139749417933966,
+          "t": -1.1076345031272155,
+          "max_drawdown_R": 20.05692568903306,
+          "longest_losing_streak": 10,
+          "exit_reason_counts": {
+            "stop": 41,
+            "target": 12
+          }
+        }
+      },
+      "long_vs_short": {
+        "long": {
+          "trades": 77,
+          "win_rate": 0.23376623376623376,
+          "avg_win_R": 2.7534671305714356,
+          "avg_loss_R": -1.3391536664441426,
+          "net_avg_R": -0.38243711649244916,
+          "net_avg_R_cost15": -0.541807620238738,
+          "profit_factor": 0.6272923268969813,
+          "t": -1.9159054511273101,
+          "max_drawdown_R": 29.936424352653386,
+          "longest_losing_streak": 9,
+          "exit_reason_counts": {
+            "stop": 59,
+            "target": 18
+          }
+        },
+        "short": {
+          "trades": 91,
+          "win_rate": 0.1978021978021978,
+          "avg_win_R": 2.8358129150466684,
+          "avg_loss_R": -1.3127423902938196,
+          "net_avg_R": -0.4921490331935034,
+          "net_avg_R_cost15": -0.6338710152496961,
+          "profit_factor": 0.5326570893623186,
+          "t": -2.8102420061695046,
+          "max_drawdown_R": 47.16391093332894,
+          "longest_losing_streak": 16,
+          "exit_reason_counts": {
+            "stop": 73,
+            "target": 18
+          }
+        }
+      },
+      "by_entry_hour": {
+        "10": {
+          "trades": 7,
+          "win_rate": 0.14285714285714285,
+          "avg_win_R": 2.8795180722891573,
+          "avg_loss_R": -1.3682704388136895,
+          "net_avg_R": -0.7614435086561401,
+          "net_avg_R_cost15": -0.9278795486984952,
+          "profit_factor": 0.3507491392790426,
+          "t": -1.2504443991195076,
+          "max_drawdown_R": 8.209622632882137,
+          "longest_losing_streak": 6,
+          "exit_reason_counts": {
+            "stop": 6,
+            "target": 1
+          }
+        },
+        "9": {
+          "trades": 161,
+          "win_rate": 0.21739130434782608,
+          "avg_win_R": 2.7922149356810495,
+          "avg_loss_R": -1.3224653823711994,
+          "net_avg_R": -0.42796966105549317,
+          "net_avg_R_cost15": -0.5770577161814641,
+          "profit_factor": 0.5864919189950465,
+          "t": -3.173321366862581,
+          "max_drawdown_R": 69.89437993918169,
+          "longest_losing_streak": 13,
+          "exit_reason_counts": {
+            "stop": 126,
+            "target": 35
+          }
+        }
+      },
+      "daily": {
+        "sharpe_annualized": -1.6508345712311336,
+        "max_drawdown_R": 75.22448449977468,
+        "winning_periods": {
+          "day": 0.03621730382293763,
+          "week": 0.15311004784688995,
+          "month": 0.25
+        },
+        "winning_days": {
+          "wins": 36,
+          "days": 994,
+          "percent": 3.6217303822937628
+        }
+      },
+      "costs": {
+        "x1_net_avg_R": -0.4418644047055202,
+        "x1_5_net_avg_R": -0.5916752925363404,
+        "x2_net_avg_R": -0.7414861803671606,
+        "median_stop_points": 2.971250000000282,
+        "median_cost_R": 0.24581065733145113
+      },
+      "diagnostics": {
+        "minimum_stop_skips": 14,
+        "bad_opening_range": 0,
+        "signals": 168,
+        "unresolved_at_end": 0
+      }
+    }
+  }
+}

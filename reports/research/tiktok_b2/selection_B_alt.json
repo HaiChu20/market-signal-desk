@@ -1,0 +1,11 @@
+{
+  "strategy": "B-alt",
+  "market": "USATECHIDXUSD",
+  "selection_period": "dev",
+  "selection_metric": "highest NQ dev futures net avg R among cells with at least 100 trades",
+  "params": {
+    "target_r": 3.0,
+    "stop_mode": "mid"
+  },
+  "config_hash": "3adf160a2dac2f8b58cc11ed4a1cf017193e877f6f8b1dd1d8839679e6d6fa87"
+}
