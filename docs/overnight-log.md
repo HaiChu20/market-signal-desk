@@ -578,3 +578,6 @@ Append-only notes from the autonomous review loop while the user sleeps.
 - E done (1afb2f6f, 52c7925, merged 19c73c8). Reviewed: hourly ATR causal (bars stamped at close, searchsorted right), E2 reuses swing_stage1 entries/exit/costs.
   E1 dev reproduces the video: path range (high-low over next N h) ~= ATR x sqrt N (XAU N=24 21.3 vs 20.4; NQ N=8 107 vs 109); close-to-close move is only ~0.4x. XAU stop-hit within 24h 74/51/35% (video 73/52/35), return after 1-ATR hit 76% (video 74%).
   E2 dev: sqrt-N stop does not beat the original 2xATR daily stop. Pooled S1 original ~+0.25 R vs best sqrt cell +0.14; S2 ~+0.26 vs +0.22 (NQ S1 0.34 -> 0.11; XAU mixed). Holdout pending (run once at the end).
+- W1 infra + B/B-alt (2f14d55b, 0df1de2) merged b563503; main suite 547 passed. Dev (futures model): B chosen +0.061 R t 0.49, random p69, ES -0.26 R; B-alt chosen +0.027 R t 0.61, ES -0.08 R. Both look like no edge (final verdict after fixes + holdout).
+  Review fixes requested: replay_fixed_entry must honour limit entries (fill-bar SL-only, identical entry cost for the flipped side, mirror around entry mid); skip entries beyond the stop; B picks the earliest signal over all gaps; DSR trials counted over batch 2 only (was 801 incl. batch-1 per-market grids).
+- Assigned: 2f14d55b fixes + strategy A; 1afb2f6f strategies C and D.
