@@ -50,6 +50,11 @@ VIDEO_COMPARISON = {
     "winning_months": {"textbook_5m": 0.43, "textbook_1m": 0.48,
                        "practitioner": 0.62},
 }
+ABLATION_GRIDS = {label: [{**DEFAULT, **override}] for label, override in ABLATION}
+TEXTBOOK_GRID = [
+    {**strategy_c.DEFAULT, "windows": "all", "exit": "window", "timeframe": timeframe}
+    for timeframe in ("1m", "5m")
+]
 
 
 def _inside_session(series, i: int, mode: str) -> bool:
@@ -175,6 +180,7 @@ def simulate(data, params: dict | None = None, *, model: str = "futures", multip
              allow_holdout: bool = False, selection_path: Path | None = None):
     params = dict(DEFAULT if params is None else params)
     diagnostics = {"minimum_stop_skips": 0, "entry_beyond_stop_skips": 0,
+                   "entry_beyond_stop": 0,
                    "missing_target_skips": 0, "signals": 0, "unfilled": 0,
                    "unresolved_at_end": 0}
     orders = _candidate_orders(data, params, diagnostics)
@@ -209,6 +215,7 @@ def simulate(data, params: dict | None = None, *, model: str = "futures", multip
             deadline_i=deadline, entry_type="limit", limit_price=order["limit"],
             expiry_i=fill_i, fill_model=fill_model,
             allow_holdout=allow_holdout, selection_path=selection_path,
+            diagnostics=diagnostics,
         )
         if trade is None:
             diagnostics["unresolved_at_end"] += 1

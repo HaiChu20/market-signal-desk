@@ -149,6 +149,25 @@ def _output_name(strategy: str, market: str, period: str) -> str:
     return f"{strategy.replace('-', '_')}_{market}_{period}"
 
 
+def _append_extras_markdown(markdown_path: Path, extras: dict) -> None:
+    lines = ["", "## Strategy-specific diagnostics", ""]
+    for section, values in extras.items():
+        lines += [f"### {section.replace('_', ' ').title()}", "",
+                  "| Rung | Trades | Net avg R | t | Daily Sharpe | Win rate | Winning months |",
+                  "|---|---:|---:|---:|---:|---:|---:|"]
+        for label, item in values.items():
+            overall = item["summary"]["overall"]
+            daily = item["summary"]["daily"]
+            lines.append(
+                f"| {label} | {overall['trades']} | {overall['net_avg_R']} | "
+                f"{overall['t']} | {daily['sharpe_annualized']} | "
+                f"{overall['win_rate']} | {daily['winning_periods']['month']} |"
+            )
+        lines.append("")
+    with markdown_path.open("a") as handle:
+        handle.write("\n".join(lines))
+
+
 def run_dev(strategy: str, market: str, *, workers: int = 12, trials: int = 0) -> dict:
     module = STRATEGIES[strategy]
     started = time.perf_counter()
@@ -184,15 +203,7 @@ def run_dev(strategy: str, market: str, *, workers: int = 12, trials: int = 0) -
     else:
         selection = None
     project_count = reporting.project_configuration_count()
-    grid_path = REPORTS / f"{_output_name(strategy, market, 'dev')}_grid.csv"
-    current_new = 0 if grid_path.exists() else len(module.GRID)
-    count_paths = dict(project_count["by_dev_grid"])
-    if current_new:
-        count_paths[str(grid_path)] = current_new
-    project_count = {**project_count,
-                     "tried": project_count["tried"] + current_new,
-                     "by_dev_grid": count_paths,
-                     "current_grid_cells": len(module.GRID)}
+    project_count = {**project_count, "current_grid_cells": len(module.GRID)}
     if trials <= 0:
         trials = max(1, project_count["tried"])
     scopes = {"default": default["summary"]}
@@ -272,23 +283,7 @@ def run_dev(strategy: str, market: str, *, workers: int = 12, trials: int = 0) -
     reporting.write_b2_report(REPORTS, output_name, report, clean_grid,
                               chosen_trades or default_trades)
     if extras:
-        markdown_path = REPORTS / f"{output_name}.md"
-        lines = ["", "## Strategy-specific diagnostics", ""]
-        for section, values in extras.items():
-            lines += [f"### {section.replace('_', ' ').title()}", "",
-                      "| Rung | Trades | Net avg R | t | Daily Sharpe | Win rate | Winning months |",
-                      "|---|---:|---:|---:|---:|---:|---:|"]
-            for label, item in values.items():
-                overall = item["summary"]["overall"]
-                daily = item["summary"]["daily"]
-                lines.append(
-                    f"| {label} | {overall['trades']} | {overall['net_avg_R']} | "
-                    f"{overall['t']} | {daily['sharpe_annualized']} | "
-                    f"{overall['hit_rate']} | {daily['winning_periods']['month']} |"
-                )
-            lines.append("")
-        with markdown_path.open("a") as handle:
-            handle.write("\n".join(lines))
+        _append_extras_markdown(REPORTS / f"{output_name}.md", extras)
     print(json.dumps({"strategy": strategy, "market": market,
                       "chosen_params": chosen_params,
                       "chosen": chosen["summary"]["overall"] if chosen else None,

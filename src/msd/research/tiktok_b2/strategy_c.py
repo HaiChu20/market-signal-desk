@@ -280,6 +280,7 @@ def simulate(data, params: dict | None = None, *, model: str = "futures", multip
     params = dict(DEFAULT if params is None else params)
     scan_params = {**params, "signal_delay": signal_delay}
     diagnostics = {"minimum_stop_skips": 0, "entry_beyond_stop_skips": 0,
+                   "entry_beyond_stop": 0,
                    "missing_target_skips": 0, "signals": 0, "unfilled": 0,
                    "unresolved_at_end": 0}
     orders = _orders(data, scan_params, diagnostics)
@@ -298,6 +299,7 @@ def simulate(data, params: dict | None = None, *, model: str = "futures", multip
             deadline_i=order["deadline_i"], entry_type="limit", limit_price=order["limit"],
             expiry_i=order["expiry_i"], fill_model=fill_model,
             allow_holdout=allow_holdout, selection_path=selection_path,
+            diagnostics=diagnostics,
         )
         if trade is None:
             diagnostics["unfilled"] += 1

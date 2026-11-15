@@ -1,0 +1,16 @@
+{
+  "strategy": "C",
+  "market": "USATECHIDXUSD",
+  "selection_period": "dev",
+  "selection_metric": "highest NQ dev futures net avg R among cells with at least 100 trades",
+  "params": {
+    "bias": "B1",
+    "windows": "primary",
+    "entry": "ce",
+    "exit": "16:00",
+    "L": 3,
+    "min_target": 10.0,
+    "timeframe": "1m"
+  },
+  "config_hash": "e10e67f57d18daf2a8f0293e50200ea34f8fa4f0cd7efd4ef722d5f27a354919"
+}
