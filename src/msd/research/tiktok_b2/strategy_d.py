@@ -40,6 +40,16 @@ ABLATION = (
     ("hindsight_Binf", {"require_sweep": True, "displacement": True,
                         "session": "windows", "bias": "B∞"}),
 )
+VIDEO_COMPARISON = {
+    "ablation_sharpe": {
+        "fvg_only": 0.33, "plus_sweep": 0.69, "plus_displacement": 0.59,
+        "plus_windows": 0.56, "plus_B4": 0.16, "hindsight_Binf": 1.02,
+    },
+    "win_rate": {"textbook_5m_NQ": 0.46, "textbook_1m_NQ": 0.37,
+                 "practitioner_NQ": 0.42},
+    "winning_months": {"textbook_5m": 0.43, "textbook_1m": 0.48,
+                       "practitioner": 0.62},
+}
 
 
 def _inside_session(series, i: int, mode: str) -> bool:

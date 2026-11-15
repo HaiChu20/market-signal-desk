@@ -241,6 +241,7 @@ def run_dev(strategy: str, market: str, *, workers: int = 12, trials: int = 0) -
               "scopes": scopes, "random_benchmark": random_rows,
               "lookahead_audit": lookahead, "sensitivity": sensitivity,
               "extras": extras,
+              "video_comparison": getattr(module, "VIDEO_COMPARISON", {}),
               "dsr": reporting.dsr(reporting.daily_returns(chosen_trades, data), trials) if chosen else None,
               "project_configuration_count": project_count,
               "skip_counts": {str(reason): int(count) for reason, count in

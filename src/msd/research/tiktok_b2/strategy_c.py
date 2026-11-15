@@ -189,7 +189,7 @@ def _target(data, series, side: int, signal_i: int, entry: float, risk: float,
     if daily is not None and side * (daily - entry) >= risk:
         candidates.append(float(daily))
     near = min(candidates, key=lambda value: side * (value - entry)) if candidates else None
-    required = min_target * (.25 if data.market == "USA500IDXUSD" else 1.)
+    required = min_target
     return near if near is not None and side * (near - entry) >= required else None
 
 
