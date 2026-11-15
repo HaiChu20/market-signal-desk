@@ -1,0 +1,24 @@
+{
+  "protocol": "docs/research/tiktok_batch2_plan.md section 4 E2",
+  "period": "dev 2019-2022",
+  "selection": {
+    "S1": {
+      "params": {
+        "c": 1.0,
+        "N": 120,
+        "tp_R": 1.0
+      },
+      "pooled_net_avg_R": 0.1406801140613287,
+      "trades": 130
+    },
+    "S2": {
+      "params": {
+        "c": 0.75,
+        "N": 120,
+        "tp_R": 3.0
+      },
+      "pooled_net_avg_R": 0.22445216541471885,
+      "trades": 61
+    }
+  }
+}
