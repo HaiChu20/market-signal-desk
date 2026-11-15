@@ -584,3 +584,4 @@ Append-only notes from the autonomous review loop while the user sleeps.
 - Engine fixes 9d9c0b3 merged (63a5ee1). C/D (1afb2f6f, fbb898e) merged 5dd4770; suite 559 passed. Runtimes C 189 s, D 1041 s (6 procs).
   C chosen (B1, 10-11, CE, 16:00): +0.116 R t 1.18, random p34, 2/4 years, ES -0.126, DSR 0.06, 1-bar delay +0.095. Fails.
   D chosen (2R, 120 m, proximal, RTH-only): -0.086 R t -5.6, 0/4 years, ES -0.264. Ablation all negative (FVG-only -0.146 R, Sharpe -10; +sweep -0.117; +disp -0.115; +windows -0.083; +B4 -0.045); hindsight B-inf +0.148 R Sharpe 2.2. Median cost ~0.04-0.07 R so gross is negative too; touch fills only slightly better (chosen -0.059). Video's Sharpe 0.33-0.69 not reproduced.
+- 01:42: 2f14d55b hit the Codex usage limit mid strategy A (uncommitted strategy_a.py, 1 failing test). Resume scheduled 04:37. All holdouts wait until A's dev selection is frozen.
