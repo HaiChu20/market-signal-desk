@@ -575,3 +575,6 @@ Append-only notes from the autonomous review loop while the user sleeps.
 - User decisions: futures cost model primary (1-tick spread, 1-tick slip, 0.5 pt RT NQ); dev 2019-2022 (Dukascopy NQ/ES has zero spreads 2012-13, partial-day 2015-17); A's bearish FVG may form before or after the sweep; E2 applied to swing S1/S2 on NQ and gold.
 - Worker data access: data/bars in both worktrees symlinked to main's data/bars (2f14d55b's partial copy moved to data/bars.local-20261113, not deleted).
 - 2f14d55b: tiktok_b2 infrastructure + strategy B/B-alt (then A). 1afb2f6f: strategy E (E1 stats, E2 on S1/S2). C and D follow once the infrastructure is merged.
+- E done (1afb2f6f, 52c7925, merged 19c73c8). Reviewed: hourly ATR causal (bars stamped at close, searchsorted right), E2 reuses swing_stage1 entries/exit/costs.
+  E1 dev reproduces the video: path range (high-low over next N h) ~= ATR x sqrt N (XAU N=24 21.3 vs 20.4; NQ N=8 107 vs 109); close-to-close move is only ~0.4x. XAU stop-hit within 24h 74/51/35% (video 73/52/35), return after 1-ATR hit 76% (video 74%).
+  E2 dev: sqrt-N stop does not beat the original 2xATR daily stop. Pooled S1 original ~+0.25 R vs best sqrt cell +0.14; S2 ~+0.26 vs +0.22 (NQ S1 0.34 -> 0.11; XAU mixed). Holdout pending (run once at the end).
