@@ -581,3 +581,6 @@ Append-only notes from the autonomous review loop while the user sleeps.
 - W1 infra + B/B-alt (2f14d55b, 0df1de2) merged b563503; main suite 547 passed. Dev (futures model): B chosen +0.061 R t 0.49, random p69, ES -0.26 R; B-alt chosen +0.027 R t 0.61, ES -0.08 R. Both look like no edge (final verdict after fixes + holdout).
   Review fixes requested: replay_fixed_entry must honour limit entries (fill-bar SL-only, identical entry cost for the flipped side, mirror around entry mid); skip entries beyond the stop; B picks the earliest signal over all gaps; DSR trials counted over batch 2 only (was 801 incl. batch-1 per-market grids).
 - Assigned: 2f14d55b fixes + strategy A; 1afb2f6f strategies C and D.
+- Engine fixes 9d9c0b3 merged (63a5ee1). C/D (1afb2f6f, fbb898e) merged 5dd4770; suite 559 passed. Runtimes C 189 s, D 1041 s (6 procs).
+  C chosen (B1, 10-11, CE, 16:00): +0.116 R t 1.18, random p34, 2/4 years, ES -0.126, DSR 0.06, 1-bar delay +0.095. Fails.
+  D chosen (2R, 120 m, proximal, RTH-only): -0.086 R t -5.6, 0/4 years, ES -0.264. Ablation all negative (FVG-only -0.146 R, Sharpe -10; +sweep -0.117; +disp -0.115; +windows -0.083; +B4 -0.045); hindsight B-inf +0.148 R Sharpe 2.2. Median cost ~0.04-0.07 R so gross is negative too; touch fills only slightly better (chosen -0.059). Video's Sharpe 0.33-0.69 not reproduced.
