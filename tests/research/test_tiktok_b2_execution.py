@@ -123,9 +123,50 @@ def test_one_position_state_and_same_side_random_replay_exactness():
     assert random_direction([trade], bars, seeds=20)["seeds"] == 20
 
 
+@pytest.mark.parametrize("entry_type", ["market", "limit"])
+def test_fixed_entry_replay_preserves_entry_type_fill_cost_and_fill_bar_rule(entry_type):
+    bars = _bars([100., 100., 100.], spread=.25)
+    if entry_type == "limit":
+        bars.ask_l[0] = 99.5  # fills at the limit; its high also crosses target
+        bars.bid_h[0] = 105.
+        trade = _flat_trade(bars, entry_type="limit", limit_price=100., stop=95.,
+                            target_r=.5, risk_points=2., deadline_i=2)
+        assert trade["exit_reason"] == "time"  # limit-fill bar may check stop only
+        assert trade["_entry_cost"] == 0.
+    else:
+        trade = _flat_trade(bars, entry_type="market", stop=95.,
+                            target_r=.5, risk_points=5., deadline_i=2)
+        assert trade["_entry_cost"] == pytest.approx(.375)
+    same = replay_fixed_entry(bars, trade, trade["side"])
+    opposite = replay_fixed_entry(bars, trade, -trade["side"])
+    assert same["exit_ts"] == trade["exit_ts"]
+    assert same["exit_reason"] == trade["exit_reason"]
+    assert same["net_R"] == pytest.approx(trade["net_R"])
+    assert same["entry_cost"] == pytest.approx(trade["_entry_cost"])
+    assert opposite["entry_cost"] == pytest.approx(trade["_entry_cost"])
+
+
+def test_market_entry_beyond_stop_is_skipped_and_counted():
+    bars = _bars([94., 94.])
+    diagnostics = {"entry_beyond_stop": 0}
+    trade = _flat_trade(bars, stop=95., diagnostics=diagnostics)
+    assert trade is None
+    assert diagnostics["entry_beyond_stop"] == 1
+
+
 def test_holdout_guard_requires_an_existing_frozen_dev_selection(tmp_path):
     with pytest.raises(FileNotFoundError, match="selection"):
         require_holdout(True, tmp_path / "missing.json")
     selection = tmp_path / "selection.json"
     selection.write_text("{}")
     require_holdout(True, selection)
+
+
+def test_dsr_configuration_count_uses_batch2_strategy_grids_only():
+    from msd.research.tiktok_b2.reporting import project_configuration_count
+    count = project_configuration_count()
+    assert count["tried"] == sum(count["by_dev_grid"].values())
+    assert set(count["by_dev_grid"]) <= {
+        "strategy_a", "strategy_b", "strategy_b_alt", "strategy_c", "strategy_d", "E2"}
+    assert {"strategy_b", "strategy_b_alt", "E2"} <= set(count["by_dev_grid"])
+    assert count["by_dev_grid"]["E2"] == 36

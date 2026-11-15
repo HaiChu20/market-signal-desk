@@ -22,6 +22,10 @@ def _deadline_index(data, day, clock: str, start_i: int, end_i: int) -> int:
     return int(idx[found[0]]) if len(found) else data.force_flat_index(day)
 
 
+def _earliest_signal(orders: list[dict]) -> dict | None:
+    return min(orders, key=lambda item: item["signal_i"]) if orders else None
+
+
 def _signals_for_day(data, row, params, diagnostics):
     day = row.day
     day_idx = np.arange(int(row.first_i), int(row.last_i))
@@ -78,7 +82,7 @@ def _signals_for_day(data, row, params, diagnostics):
                                  (data.mid_c[current_i] < data.mid_o[current_i]) &
                                  (data.mid_o[current_i] >= data.mid_c[previous_i]) &
                                  (data.mid_c[current_i] <= data.mid_o[previous_i]))
-    order = None
+    orders = []
     for j, side, bottom, top in valid_gaps:
         indices = np.arange(j + 2, stop_exclusive, dtype=int)
         if not len(indices):
@@ -103,53 +107,27 @@ def _signals_for_day(data, row, params, diagnostics):
             anchor = bottom if side > 0 else top
         stop = float(anchor - side * .25)
         risk = abs(float(data.mid_o[entry_i]) - stop)
-        if not admit_stop(data.market, risk, data.atr15_at[entry_i]):
-            diagnostics["minimum_stop_skips"] += 1
-            continue
-        order = {"side": side, "entry_i": entry_i, "stop": stop,
-                 "risk_points": risk, "deadline_i": data.force_flat_index(day),
-                 "signal_i": signal_i, "or_high": or_high, "or_low": or_low}
-        break
-    return order
+        orders.append({"side": side, "entry_i": entry_i, "stop": stop,
+                       "risk_points": risk, "deadline_i": data.force_flat_index(day),
+                       "signal_i": signal_i, "or_high": or_high, "or_low": or_low})
+    return _earliest_signal(orders)
 
 
 def simulate(data, params: dict | None = None, *, model: str = "futures", multiplier: float = 1.,
              fill_model: str = "trade_through", signal_delay: int = 0,
              allow_holdout: bool = False, selection_path: Path | None = None) -> tuple[list[dict], dict]:
     params = dict(DEFAULT if params is None else params)
-    diagnostics = {"minimum_stop_skips": 0, "bad_opening_range": 0, "signals": 0, "unresolved_at_end": 0}
-    exec_bars = execution_bars(data, data.market, model, multiplier)
-    trades = []
-    for row in data.rth_days.itertuples():
-        if not row.complete or row.day.year < 2019:
-            continue
-        order = _signals_for_day(data, row, params, diagnostics)
-        if order is None:
-            continue
-        diagnostics["signals"] += 1
-        entry_i = order["entry_i"] + int(signal_delay)
-        if entry_i >= order["deadline_i"]:
-            diagnostics["unresolved_at_end"] += 1
-            continue
-        risk = abs(float(data.mid_o[entry_i]) - order["stop"])
-        if not admit_stop(data.market, risk, data.atr15_at[entry_i]):
-            diagnostics["minimum_stop_skips"] += 1
-            continue
-        trade = simulate_trade(exec_bars, market=data.market, strategy=NAME, params=params,
-                               side=order["side"], entry_i=entry_i, stop=order["stop"],
-                               target_r=params["target_r"], risk_points=risk,
-                               deadline_i=order["deadline_i"], fill_model=fill_model,
-                               allow_holdout=allow_holdout, selection_path=selection_path)
-        if trade is None:
-            diagnostics["unresolved_at_end"] += 1
-            continue
-        trade.update({"_signal_i": order["signal_i"], "entry_hour": int(data.ny[entry_i].hour)})
-        trades.append(trade)
+    _, trades, diagnostics = simulate_group(
+        data, [params], model=model, multiplier=multiplier, fill_model=fill_model,
+        signal_delay=signal_delay, allow_holdout=allow_holdout,
+        selection_path=selection_path)[0]
     return trades, diagnostics
 
 
 def simulate_group(data, cells: list[dict], *, model: str = "futures", multiplier: float = 1.,
-                   fill_model: str = "trade_through") -> list[tuple[dict, list[dict], dict]]:
+                   fill_model: str = "trade_through", signal_delay: int = 0,
+                   allow_holdout: bool = False, selection_path: Path | None = None
+                   ) -> list[tuple[dict, list[dict], dict]]:
     """Evaluate all four SL/TP cells after sharing one signal scan per SL anchor."""
     if not cells:
         return []
@@ -157,7 +135,8 @@ def simulate_group(data, cells: list[dict], *, model: str = "futures", multiplie
     if any(row["body_ratio"] != body or row["deadline"] != deadline for row in cells):
         raise ValueError("a B worker group must share body ratio and deadline")
     outputs = {tuple(sorted(cell.items())): [dict(cell), [],
-               {"minimum_stop_skips": 0, "bad_opening_range": 0,
+               {"minimum_stop_skips": 0, "entry_beyond_stop": 0,
+                "bad_opening_range": 0,
                 "signals": 0, "unresolved_at_end": 0}] for cell in cells}
     exec_bars = execution_bars(data, data.market, model, multiplier)
     for row in data.rth_days.itertuples():
@@ -177,16 +156,21 @@ def simulate_group(data, cells: list[dict], *, model: str = "futures", multiplie
                 if order is None:
                     continue
                 diag["signals"] += 1
-                entry_i = order["entry_i"]
-                risk = order["risk_points"]
+                entry_i = order["entry_i"] + int(signal_delay)
                 stop = order["stop"]
                 if entry_i >= order["deadline_i"]:
                     diag["unresolved_at_end"] += 1
                     continue
+                risk = abs(float(data.mid_o[entry_i]) - stop)
+                if not admit_stop(data.market, risk, data.atr15_at[entry_i]):
+                    diag["minimum_stop_skips"] += 1
+                    continue
                 trade = simulate_trade(exec_bars, market=data.market, strategy=NAME, params=cell,
                                        side=order["side"], entry_i=entry_i, stop=stop,
                                        target_r=cell["target_r"], risk_points=risk,
-                                       deadline_i=order["deadline_i"], fill_model=fill_model)
+                                       deadline_i=order["deadline_i"], fill_model=fill_model,
+                                       allow_holdout=allow_holdout, selection_path=selection_path,
+                                       diagnostics=diag)
                 if trade is None:
                     diag["unresolved_at_end"] += 1
                     continue

@@ -98,7 +98,7 @@ def simulate_trade(bars: ExecutionBars, *, market: str, strategy: str, params: d
                    trigger: float | None = None, limit_price: float | None = None,
                    expiry_i: int | None = None, fill_model: str = "trade_through",
                    signal_delay: int = 0, allow_holdout: bool = False,
-                   selection_path: Path | None = None) -> dict | None:
+                   selection_path: Path | None = None, diagnostics: dict | None = None) -> dict | None:
     """Replay one order. Entry and exits are causal; ambiguous stop+TP loses."""
     if side not in (-1, 1) or entry_type not in {"market", "limit", "stop"}:
         raise ValueError("invalid side or entry type")
@@ -112,6 +112,10 @@ def simulate_trade(bars: ExecutionBars, *, market: str, strategy: str, params: d
     if entry_i >= n:
         return None
     planned_mid = float(limit_price if entry_type == "limit" else bars.mid_o[entry_i])
+    if entry_type == "market" and side * (planned_mid - stop) <= 0:
+        if diagnostics is not None:
+            diagnostics["entry_beyond_stop"] = diagnostics.get("entry_beyond_stop", 0) + 1
+        return None
     target = planned_mid + side * target_r * risk_points
     slip = bars.slippage
     fill_i = None
@@ -152,6 +156,10 @@ def simulate_trade(bars: ExecutionBars, *, market: str, strategy: str, params: d
                 entry_cost = 0.
                 break
     if fill_i is None:
+        return None
+    if side * (entry_mid - stop) <= 0:
+        if diagnostics is not None:
+            diagnostics["entry_beyond_stop"] = diagnostics.get("entry_beyond_stop", 0) + 1
         return None
     # TP distance is always based on the actual price used to define planned R.
     target = entry_mid + side * target_r * risk_points
@@ -205,7 +213,7 @@ def simulate_trade(bars: ExecutionBars, *, market: str, strategy: str, params: d
         "market": market, "strategy": strategy, "params": dict(params),
         "period": "dev" if entry_ts < pd.Timestamp("2023-01-01", tz="UTC") else "holdout",
         "side": int(side), "entry_ts": entry_ts.isoformat(), "exit_ts": exit_ts.isoformat(),
-        "entry_price": float(entry_price), "exit_price": float(exit_price),
+        "entry_price": float(entry_price), "entry_type": entry_type, "exit_price": float(exit_price),
         "entry_mid": entry_mid, "exit_mid": float(exit_mid), "risk_points": float(risk_points),
         "gross_R": float(gross_r), "net_R": float(net_r),
         "net_R_cost15": float(gross_r - cost_r * 1.5),
@@ -219,18 +227,21 @@ def simulate_trade(bars: ExecutionBars, *, market: str, strategy: str, params: d
 
 
 def replay_fixed_entry(bars: ExecutionBars, trade: dict, side: int, *, fill_model: str = "trade_through") -> dict:
-    """Recompute exits from a fixed real fill/time; same-side must reproduce exactly."""
+    """Replay the actual fill and entry cost with side-mirrored stop/target geometry."""
     entry_i = int(trade["_entry_i"])
     entry_mid = float(trade["entry_mid"])
     risk = float(trade["risk_points"])
-    stop_distance = abs(float(trade["entry_price"]) - float(trade["_stop"]))
+    stop_distance = abs(entry_mid - float(trade["_stop"]))
     target_distance = abs(float(trade["_target"]) - float(trade["entry_mid"]))
-    stop = float(trade["entry_price"]) - side * stop_distance
+    stop = entry_mid - side * stop_distance
     target = float(trade["entry_mid"]) + side * target_distance
-    entry_cost = float(trade["_entry_cost"]) if side == trade["side"] else _entry_cost_for(bars, entry_i, side, float(trade["entry_price"]))
+    entry_cost = float(trade["_entry_cost"])
+    entry_type = trade.get("entry_type", "market")
     for i in range(entry_i, min(len(bars.ts), int(trade["_deadline_i"]) + 1)):
         stop_hit = bars.bid_l[i] <= stop if side > 0 else bars.ask_h[i] >= stop
         tp_hit = bars.bid_h[i] >= target + (bars.tick if fill_model == "trade_through" else 0.) if side > 0 else bars.ask_l[i] <= target - (bars.tick if fill_model == "trade_through" else 0.)
+        if entry_type == "limit" and i == entry_i:
+            tp_hit = False
         if stop_hit:
             gap = bars.bid_o[i] <= stop if side > 0 else bars.ask_o[i] >= stop
             exit_price = (min(stop, bars.bid_o[i]) - bars.slippage if side > 0 else
@@ -252,10 +263,6 @@ def replay_fixed_entry(bars: ExecutionBars, trade: dict, side: int, *, fill_mode
         gross_r = side * (exit_mid - entry_mid) / risk
         net_r = gross_r - (entry_cost + exit_cost + bars.commission) / risk
         return {"net_R": float(net_r), "gross_R": float(gross_r),
-                "exit_ts": pd.Timestamp(bars.ts[i]).isoformat(), "exit_reason": reason}
+                "exit_ts": pd.Timestamp(bars.ts[i]).isoformat(), "exit_reason": reason,
+                "entry_cost": entry_cost}
     return {"net_R": np.nan, "gross_R": np.nan, "exit_ts": None, "exit_reason": "unresolved"}
-
-
-def _entry_cost_for(bars: ExecutionBars, index: int, side: int, entry_price: float) -> float:
-    mid = float(bars.mid_o[index])
-    return abs(entry_price - mid)
