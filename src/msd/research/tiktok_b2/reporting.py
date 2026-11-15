@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import json
+import importlib
+import importlib.util
 from statistics import NormalDist
 from pathlib import Path
 
@@ -152,15 +154,23 @@ def random_direction(trades: list[dict], bars, *, seeds: int = 1000, seed: int =
             "random_p95_R": float(np.percentile(means, 95))}
 
 
-def project_configuration_count(root: Path = Path("reports/research")) -> dict:
-    """Count dev-grid rows only; never opens or reports holdout grid files."""
-    roots = (root / "tiktok", root / "tiktok_b2")
-    files = sorted(path for base in roots if base.exists()
-                   for path in base.glob("*_dev_grid.csv"))
+def project_configuration_count(root: Path | None = None) -> dict:
+    """Count batch-2 configurations from strategy grids only, never batch 1."""
+    package = "msd.research.tiktok_b2"
+    names = ("strategy_a", "strategy_b", "strategy_b_alt", "strategy_c", "strategy_d")
     counts = {}
-    for path in files:
-        with path.open("r", newline="") as handle:
-            counts[str(path)] = max(sum(1 for _ in handle) - 1, 0)
+    for name in names:
+        qualified = f"{package}.{name}"
+        if importlib.util.find_spec(qualified) is None:
+            continue
+        module = importlib.import_module(qualified)
+        size = len(getattr(module, "GRID", ()))
+        size += len(getattr(module, "DIAGNOSTIC_GRID", ()))
+        size += len(getattr(module, "TEXTBOOK_GRID", ()))
+        ablations = getattr(module, "ABLATION_GRIDS", ())
+        size += sum(len(grid) for grid in (ablations.values() if isinstance(ablations, dict) else ablations))
+        counts[name] = int(size)
+    counts["E2"] = 36
     return {"tried": int(sum(counts.values())), "by_dev_grid": counts}
 
 
@@ -197,6 +207,18 @@ def write_b2_report(output_dir: Path, name: str, report: dict, grid: list[dict],
         lines += ["## ES frozen-cell cross-check", "", "```json",
                   json.dumps(report["cross_market"], indent=2, allow_nan=False), "```", ""]
     table = common.grid_table(grid, allow_holdout=allow_holdout)
+    diagnostic_rows = [row for row in grid
+                       if row.get("params", {}).get("bias") == "B∞"]
+    if diagnostic_rows:
+        lines += ["## B-infinity diagnostic (not eligible for selection)", ""]
+        diagnostic_table = common.grid_table(diagnostic_rows, allow_holdout=allow_holdout)
+        diagnostic_columns = list(diagnostic_table.columns)
+        lines += ["| " + " | ".join(diagnostic_columns) + " |",
+                  "|" + "|".join("---" for _ in diagnostic_columns) + "|"]
+        for row in diagnostic_table.itertuples(index=False, name=None):
+            lines.append("| " + " | ".join("" if pd.isna(value) else str(value)
+                                             for value in row) + " |")
+        lines.append("")
     if grid and any(row.get("sensitivity") for row in grid):
         for key, label in (("x1_5", "net_avg_R_x1_5_rerun"),
                            ("x2", "net_avg_R_x2_rerun"),
