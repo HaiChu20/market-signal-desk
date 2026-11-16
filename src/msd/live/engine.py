@@ -248,7 +248,11 @@ class SignalEngine:
             existing = self.bars.get(key)
             if existing is not None and not existing.empty:
                 records.extend(existing.to_dict("records"))
-        records.append(row)
+        # A poll that failed after appending re-delivers the same bar; never store it twice.
+        if records and records[-1]["ts"] == row["ts"]:
+            records[-1] = row
+        else:
+            records.append(row)
         # Bounded memory: strategies read <= 42 days plus an open trade (B's longest
         # dev hold was 13.4 days), so 60 days of completed bars is always enough.
         cutoff = row["ts"] - BAR_RETENTION
@@ -574,7 +578,41 @@ def _history(client, epic, resolution, start, end):
         if not frame.empty:
             frames.append(frame)
         cursor = stop
-    return pd.concat(frames, ignore_index=True).sort_values("ts").drop_duplicates("ts", keep="last").reset_index(drop=True) if frames else pd.DataFrame(columns=COLUMNS)
+    if not frames:
+        return pd.DataFrame(columns=COLUMNS)
+    history = pd.concat(frames, ignore_index=True).sort_values("ts").drop_duplicates("ts", keep="last")
+    return _executable_quotes(history.reset_index(drop=True))
+
+
+def _executable_quotes(frame: pd.DataFrame) -> pd.DataFrame:
+    """Repair zero/crossed broker quotes (e.g. at the weekly reopen) around an unchanged mid.
+
+    Strategies read mid prices; their validators require ask > bid on every field,
+    so one such bar would otherwise fail every poll while it stays in history.
+    """
+    quotes = [f"{side}_{field}" for side in ("bid", "ask") for field in "ohlc"]
+    if frame.empty or not set(quotes) <= set(frame):
+        return frame
+    finite = np.isfinite(frame[quotes].to_numpy(float)).all(axis=1)
+    if not finite.all():
+        print(f"Dropped {int((~finite).sum())} bars with missing quotes", flush=True)
+        frame = frame[finite].reset_index(drop=True)
+    bid = frame[[f"bid_{f}" for f in "ohlc"]].to_numpy(float)
+    ask = frame[[f"ask_{f}" for f in "ohlc"]].to_numpy(float)
+    bad = ~(ask > bid)
+    if not bad.any():
+        return frame
+    mid = (bid + ask) / 2
+    good = ~bad & (mid > 0)
+    relative = float(np.median((ask - bid)[good] / mid[good])) if good.any() else 1e-4
+    half = np.abs(mid) * relative / 2
+    frame = frame.copy()
+    for column, field in enumerate("ohlc"):
+        rows = bad[:, column]
+        frame.loc[rows, f"bid_{field}"] = mid[rows, column] - half[rows, column]
+        frame.loc[rows, f"ask_{field}"] = mid[rows, column] + half[rows, column]
+    print(f"Repaired {int(bad.any(axis=1).sum())} bars with zero or crossed spreads", flush=True)
+    return frame
 
 
 def process_poll_cycle(engine: SignalEngine, client, strategies, instruments, now: datetime):

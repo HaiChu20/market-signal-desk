@@ -329,3 +329,25 @@ def test_engine_bar_memory_is_bounded(tmp_path):
     records = live._bar_records[("USATECHIDXUSD", "MINUTE")]
     assert records[0]["ts"] >= records[-1]["ts"] - engine.BAR_RETENTION
     assert len(records) == 61
+
+
+def test_history_repairs_zero_spread_quotes_around_unchanged_mid():
+    from msd.live import engine as live_engine
+
+    ts = pd.date_range("2026-11-15 23:00", periods=3, freq="min", tz="UTC")
+    frame = pd.DataFrame({"ts": ts, "volume": 1.})
+    for field in "ohlc":
+        frame[f"bid_{field}"] = [100., 101., 102.]
+        frame[f"ask_{field}"] = [102., 101., 104.]  # middle bar has zero spread
+
+    class Client:
+        def prices(self, epic, resolution, start, end, max_bars):
+            return frame
+
+    start = ts[0].to_pydatetime()
+    out = live_engine._history(Client(), "US100", "MINUTE", start, start + pd.Timedelta(hours=1))
+    for field in "ohlc":
+        assert (out[f"ask_{field}"] > out[f"bid_{field}"]).all()
+        mid = (out[f"ask_{field}"] + out[f"bid_{field}"]) / 2
+        assert mid.tolist() == pytest.approx([101., 101., 103.])
+    assert out.loc[0, "bid_o"] == 100. and out.loc[2, "ask_c"] == 104.
